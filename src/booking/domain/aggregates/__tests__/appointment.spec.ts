@@ -2,7 +2,6 @@ import { Appointment } from '../appointment';
 import { UUID } from '@shared/vo/uuid';
 import { DateTime } from '../../vo/date-time';
 import { AppointmentStatus } from '../../vo/appointment-status';
-import { AppointmentCreated } from '../../events/appointment-created';
 
 describe('Appointment Aggregate', () => {
   let appointmentId: UUID;
@@ -16,7 +15,7 @@ describe('Appointment Aggregate', () => {
     businessId = UUID.generate();
     customerId = UUID.generate();
     offeringId = UUID.generate();
-    
+
     // Crear fecha futura (mañana a las 10:00)
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -60,13 +59,7 @@ describe('Appointment Aggregate', () => {
       const pastDateTime = DateTime.fromDate(new Date('2020-01-01'));
 
       expect(() => {
-        Appointment.create(
-          appointmentId,
-          businessId,
-          customerId,
-          offeringId,
-          pastDateTime,
-        );
+        Appointment.create(appointmentId, businessId, customerId, offeringId, pastDateTime);
       }).toThrow('Cannot create appointment in the past');
     });
   });
@@ -135,7 +128,7 @@ describe('Appointment Aggregate', () => {
       );
 
       const initialVersion = appointment.getVersion().getValue();
-      
+
       // Nueva fecha futura
       const newDateTime = new Date();
       newDateTime.setDate(newDateTime.getDate() + 2);
@@ -144,7 +137,9 @@ describe('Appointment Aggregate', () => {
       appointment.modify(newFutureDateTime);
 
       expect(appointment.getVersion().getValue()).toBe(initialVersion + 1);
-      expect(appointment.getDateTime().toDate().getTime()).toBe(newFutureDateTime.toDate().getTime());
+      expect(appointment.getDateTime().toDate().getTime()).toBe(
+        newFutureDateTime.toDate().getTime(),
+      );
     });
 
     it('should throw exception if appointment is cancelled', () => {

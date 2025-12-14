@@ -1,16 +1,14 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
 import { ModifyAppointmentCommand } from './command';
-import { IAppointmentWriteRepository } from '../../../domain/interfaces/repositories/appointment-write.repository';
+import { IAppointmentWriteRepository } from '../../../domain/interfaces/repositories/appointment-write';
 import { UUID } from '../../../../shared/vo/uuid';
 import { DateTime } from '../../../domain/vo/date-time';
 import { AppointmentNotFoundException } from '../../../domain/exceptions/appointment-not-found';
 import { ConcurrencyException } from '../../../../shared/kernel/exceptions/concurrency';
 
 @CommandHandler(ModifyAppointmentCommand)
-export class ModifyAppointmentHandler
-  implements ICommandHandler<ModifyAppointmentCommand>
-{
+export class ModifyAppointmentHandler implements ICommandHandler<ModifyAppointmentCommand> {
   constructor(
     @Inject('IAppointmentWriteRepository')
     private readonly appointmentRepository: IAppointmentWriteRepository,
@@ -38,14 +36,10 @@ export class ModifyAppointmentHandler
         if (error instanceof ConcurrencyException) {
           attempt++;
           if (attempt >= maxRetries) {
-            throw new Error(
-              'Unable to modify appointment after multiple attempts',
-            );
+            throw new Error('Unable to modify appointment after multiple attempts');
           }
           // Exponential backoff
-          await new Promise((resolve) =>
-            setTimeout(resolve, 100 * Math.pow(2, attempt)),
-          );
+          await new Promise((resolve) => setTimeout(resolve, 100 * Math.pow(2, attempt)));
         } else {
           throw error;
         }

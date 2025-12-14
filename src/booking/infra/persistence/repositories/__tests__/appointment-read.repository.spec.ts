@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { AppointmentReadRepository } from '../appointment-read.repository';
+import { AppointmentReadRepository } from '../appointment-read';
 import { AppointmentModel } from '../../models/appointment';
 import { UUID } from '@shared/vo/uuid';
 

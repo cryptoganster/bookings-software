@@ -13,9 +13,5 @@ export interface IUnitOfWork {
 }
 
 export interface TransactionOptions {
-  isolationLevel?:
-    | 'READ UNCOMMITTED'
-    | 'READ COMMITTED'
-    | 'REPEATABLE READ'
-    | 'SERIALIZABLE';
+  isolationLevel?: 'READ UNCOMMITTED' | 'READ COMMITTED' | 'REPEATABLE READ' | 'SERIALIZABLE';
 }

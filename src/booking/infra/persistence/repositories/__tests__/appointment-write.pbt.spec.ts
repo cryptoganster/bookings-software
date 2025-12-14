@@ -2,7 +2,7 @@ import * as fc from 'fast-check';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { AppointmentWriteRepository } from '../appointment-write.repository';
+import { AppointmentWriteRepository } from '../appointment-write';
 import { AppointmentModel } from '../../models/appointment';
 import { Appointment } from '../../../../domain/aggregates/appointment';
 import { UUID } from '../../../../../shared/vo/uuid';
@@ -42,9 +42,7 @@ describe('AppointmentWriteRepository - Property Tests', () => {
       ],
     }).compile();
 
-    repository = module.get<AppointmentWriteRepository>(
-      AppointmentWriteRepository,
-    );
+    repository = module.get<AppointmentWriteRepository>(AppointmentWriteRepository);
   });
 
   // Property 2: Optimistic locking prevents concurrent modifications
@@ -111,9 +109,7 @@ describe('AppointmentWriteRepository - Property Tests', () => {
             .mockReturnValueOnce(mockQueryBuilder2 as any);
 
           // Mock insert to fail (simulating concurrent modification)
-          typeormRepository.insert.mockRejectedValue(
-            new Error('Duplicate key'),
-          );
+          typeormRepository.insert.mockRejectedValue(new Error('Duplicate key'));
 
           // Act - First save should succeed
           await repository.save(appointment1);

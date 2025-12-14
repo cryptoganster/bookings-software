@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { DataSource } from 'typeorm';
+
 import { CreateAppointmentHandler } from '../handler';
 import { CreateAppointmentCommand } from '../command';
-import { IAppointmentWriteRepository } from '../../../../domain/interfaces/repositories/appointment-write.repository';
+import { IAppointmentWriteRepository } from '../../../../domain/interfaces/repositories/appointment-write';
 import { IUnitOfWork } from '../../../../../shared/kernel/uow';
 import { NoAvailableSlotsException } from '../../../../domain/exceptions/no-available-slots';
 
@@ -101,9 +101,7 @@ describe('CreateAppointmentHandler Integration', () => {
     );
 
     // Act & Assert
-    await expect(handler.execute(command)).rejects.toThrow(
-      NoAvailableSlotsException,
-    );
+    await expect(handler.execute(command)).rejects.toThrow(NoAvailableSlotsException);
     expect(mockCapacity.decrementSlot).not.toHaveBeenCalled();
   });
 
@@ -123,8 +121,6 @@ describe('CreateAppointmentHandler Integration', () => {
     );
 
     // Act & Assert
-    await expect(handler.execute(command)).rejects.toThrow(
-      NoAvailableSlotsException,
-    );
+    await expect(handler.execute(command)).rejects.toThrow(NoAvailableSlotsException);
   });
 });
