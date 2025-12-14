@@ -2,8 +2,8 @@ import * as fc from 'fast-check';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateAppointmentHandler } from '../handler';
 import { CreateAppointmentCommand } from '../command';
-import { IAppointmentWriteRepository } from '../../../../domain/interfaces/repositories/appointment-write';
-import { IUnitOfWork } from '../../../../../shared/kernel/uow';
+import { IAppointmentWriteRepository } from '@booking/domain/interfaces/repositories/appointment-write';
+import { IUnitOfWork } from '@shared/kernel/uow';
 
 describe('CreateAppointmentHandler - Property Tests', () => {
   let handler: CreateAppointmentHandler;

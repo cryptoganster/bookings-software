@@ -2,9 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { CreateAppointmentHandler } from '../handler';
 import { CreateAppointmentCommand } from '../command';
-import { IAppointmentWriteRepository } from '../../../../domain/interfaces/repositories/appointment-write';
-import { IUnitOfWork } from '../../../../../shared/kernel/uow';
-import { NoAvailableSlotsException } from '../../../../domain/exceptions/no-available-slots';
+import { IAppointmentWriteRepository } from '@booking/domain/interfaces/repositories/appointment-write';
+import { IUnitOfWork } from '@shared/kernel/uow';
+import { NoAvailableSlotsException } from '@booking/domain/exceptions/no-available-slots';
 
 describe('CreateAppointmentHandler Integration', () => {
   let handler: CreateAppointmentHandler;

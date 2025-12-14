@@ -1,11 +1,11 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
 import { ModifyAppointmentCommand } from './command';
-import { IAppointmentWriteRepository } from '../../../domain/interfaces/repositories/appointment-write';
-import { UUID } from '../../../../shared/vo/uuid';
-import { DateTime } from '../../../domain/vo/date-time';
-import { AppointmentNotFoundException } from '../../../domain/exceptions/appointment-not-found';
-import { ConcurrencyException } from '../../../../shared/kernel/exceptions/concurrency';
+import { IAppointmentWriteRepository } from '@booking/domain/interfaces/repositories/appointment-write';
+import { UUID } from '@shared/vo/uuid';
+import { DateTime } from '@booking/domain/vo/date-time';
+import { AppointmentNotFoundException } from '@booking/domain/exceptions/appointment-not-found';
+import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 
 @CommandHandler(ModifyAppointmentCommand)
 export class ModifyAppointmentHandler implements ICommandHandler<ModifyAppointmentCommand> {

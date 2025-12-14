@@ -2,11 +2,11 @@ import * as fc from 'fast-check';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CancelAppointmentHandler } from '../handler';
 import { CancelAppointmentCommand } from '../command';
-import { IAppointmentWriteRepository } from '../../../../domain/interfaces/repositories/appointment-write';
-import { Appointment } from '../../../../domain/aggregates/appointment';
-import { ConcurrencyException } from '../../../../../shared/kernel/exceptions/concurrency';
-import { UUID } from '../../../../../shared/vo/uuid';
-import { DateTime } from '../../../../domain/vo/date-time';
+import { IAppointmentWriteRepository } from '@booking/domain/interfaces/repositories/appointment-write';
+import { Appointment } from '@booking/domain/aggregates/appointment';
+import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
+import { UUID } from '@shared/vo/uuid';
+import { DateTime } from '@booking/domain/vo/date-time';
 
 describe('CancelAppointmentHandler - Property Tests', () => {
   let handler: CancelAppointmentHandler;

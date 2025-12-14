@@ -1,13 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CancelAppointmentHandler } from '../handler';
 import { CancelAppointmentCommand } from '../command';
-import { IAppointmentWriteRepository } from '../../../../domain/interfaces/repositories/appointment-write';
-import { Appointment } from '../../../../domain/aggregates/appointment';
-import { AppointmentNotFoundException } from '../../../../domain/exceptions/appointment-not-found';
-import { ConcurrencyException } from '../../../../../shared/kernel/exceptions/concurrency';
-import { UUID } from '../../../../../shared/vo/uuid';
+import { IAppointmentWriteRepository } from '@booking/domain/interfaces/repositories/appointment-write';
+import { Appointment } from '@booking/domain/aggregates/appointment';
+import { AppointmentNotFoundException } from '@booking/domain/exceptions/appointment-not-found';
+import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
+import { UUID } from '@shared/vo/uuid';
 
-import { DateTime } from '../../../../domain/vo/date-time';
+import { DateTime } from '@booking/domain/vo/date-time';
 
 describe('CancelAppointmentHandler Integration', () => {
   let handler: CancelAppointmentHandler;

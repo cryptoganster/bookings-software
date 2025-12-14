@@ -1,6 +1,7 @@
 // @ts-check
 import eslint from '@eslint/js';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
+import importPlugin from 'eslint-plugin-import';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
@@ -26,12 +27,27 @@ export default tseslint.config(
     },
   },
   {
+    plugins: {
+      import: importPlugin,
+    },
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-floating-promises': 'warn',
       '@typescript-eslint/no-unsafe-argument': 'warn',
       '@typescript-eslint/no-unsafe-assignment': 'warn',
       '@typescript-eslint/no-unsafe-member-access': 'warn',
+      // Reglas de importación con alias @/
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['**/shared/*', '**/booking/*', '**/auth/*', '**/messaging/*', '**/conversation/*'],
+              message: 'Use path aliases (@shared/, @booking/, @auth/, @messaging/, @conversation/) instead of relative imports for cross-module imports.',
+            },
+          ],
+        },
+      ],
     },
   },
 );
