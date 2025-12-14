@@ -1,12 +1,12 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
 import { CreateAppointmentCommand } from './command';
-import { IAppointmentWriteRepository } from '../../../domain/interfaces/repositories/appointment-write';
-import { IUnitOfWork } from '../../../../shared/kernel/uow';
-import { Appointment } from '../../../domain/aggregates/appointment';
-import { UUID } from '../../../../shared/vo/uuid';
-import { DateTime } from '../../../domain/vo/date-time';
-import { NoAvailableSlotsException } from '../../../domain/exceptions/no-available-slots';
+import { IAppointmentWriteRepository } from '@booking/domain/interfaces/repositories/appointment-write';
+import { IUnitOfWork } from '@shared/kernel/uow';
+import { Appointment } from '@booking/domain/aggregates/appointment';
+import { UUID } from '@shared/vo/uuid';
+import { DateTime } from '@booking/domain/vo/date-time';
+import { NoAvailableSlotsException } from '@booking/domain/exceptions/no-available-slots';
 
 // #TODO Change Later. Placeholder interface for Capacity repository (will be implemented later)
 interface ICapacityWriteRepository {

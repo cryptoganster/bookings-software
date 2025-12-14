@@ -4,12 +4,12 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AppointmentWriteRepository } from '../appointment-write';
 import { AppointmentModel } from '../../models/appointment';
-import { Appointment } from '../../../../domain/aggregates/appointment';
-import { UUID } from '../../../../../shared/vo/uuid';
-import { DateTime } from '../../../../domain/vo/date-time';
-import { AppointmentStatus } from '../../../../domain/vo/appointment-status';
-import { ConcurrencyException } from '../../../../../shared/kernel/exceptions/concurrency';
-import { IUnitOfWork } from '../../../../../shared/kernel/uow';
+import { Appointment } from '@booking/domain/aggregates/appointment';
+import { UUID } from '@shared/vo/uuid';
+import { DateTime } from '@booking/domain/vo/date-time';
+import { AppointmentStatus } from '@booking/domain/vo/appointment-status';
+import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
+import { IUnitOfWork } from '@shared/kernel/uow';
 
 describe('AppointmentWriteRepository - Property Tests', () => {
   let repository: AppointmentWriteRepository;
