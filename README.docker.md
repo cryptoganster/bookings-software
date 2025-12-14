@@ -43,7 +43,7 @@ docker-compose -f docker-compose.dev.yml down -v
 
 **Usando psql:**
 ```bash
-docker exec -it bookings-software psql -U postgres -d bookings-software
+docker exec -it postgres psql -U postgres -d bookings-software
 ```
 
 **Usando un cliente GUI:**
@@ -75,7 +75,7 @@ docker-compose -f docker-compose.dev.yml restart
 docker-compose -f docker-compose.dev.yml logs -f
 
 # Acceder al shell del contenedor
-docker exec -it bookings-software sh
+docker exec -it postgres sh
 ```
 
 ## Troubleshooting
