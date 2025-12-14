@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { IAppointmentWriteRepository } from '@booking/domain/interfaces/repositories/appointment-write.repository';
+import { IAppointmentWriteRepository } from '@booking/domain/interfaces/repositories/appointment-write';
 import { Appointment } from '@booking/domain/aggregates/appointment';
 import { AppointmentModel } from '../models/appointment';
 import { AppointmentWriteMapper } from '../mappers/appointment-write';
@@ -45,7 +45,7 @@ export class AppointmentWriteRepository implements IAppointmentWriteRepository {
             ...model,
             version: currentVersion,
           } as AppointmentModel);
-        } catch (error) {
+        } catch {
           // Si falla el insert, es porque hubo concurrencia
           throw new ConcurrencyException(
             `Appointment ${appointment.getId().getValue()} was modified by another transaction`,

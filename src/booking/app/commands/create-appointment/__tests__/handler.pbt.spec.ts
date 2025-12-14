@@ -2,7 +2,7 @@ import * as fc from 'fast-check';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateAppointmentHandler } from '../handler';
 import { CreateAppointmentCommand } from '../command';
-import { IAppointmentWriteRepository } from '../../../../domain/interfaces/repositories/appointment-write.repository';
+import { IAppointmentWriteRepository } from '../../../../domain/interfaces/repositories/appointment-write';
 import { IUnitOfWork } from '../../../../../shared/kernel/uow';
 
 describe('CreateAppointmentHandler - Property Tests', () => {
@@ -67,9 +67,7 @@ describe('CreateAppointmentHandler - Property Tests', () => {
             }),
           };
 
-          capacityRepository.findByOfferingAndDate.mockResolvedValue(
-            mockCapacity,
-          );
+          capacityRepository.findByOfferingAndDate.mockResolvedValue(mockCapacity);
           appointmentRepository.save.mockResolvedValue();
           capacityRepository.save.mockResolvedValue();
 

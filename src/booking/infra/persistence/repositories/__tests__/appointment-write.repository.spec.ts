@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { AppointmentWriteRepository } from '../appointment-write.repository';
+import { AppointmentWriteRepository } from '../appointment-write';
 import { AppointmentModel } from '../../models/appointment';
 import { Appointment } from '@booking/domain/aggregates/appointment';
 import { UUID } from '@shared/vo/uuid';
@@ -89,10 +89,9 @@ describe('AppointmentWriteRepository Integration Tests', () => {
       await repository.save(appointment);
 
       // Simular que otro proceso modificó el appointment
-      await dataSource.getRepository(AppointmentModel).update(
-        { id: appointment.getId().getValue() },
-        { version: 2 },
-      );
+      await dataSource
+        .getRepository(AppointmentModel)
+        .update({ id: appointment.getId().getValue() }, { version: 2 });
 
       // Act & Assert
       await expect(repository.save(appointment)).rejects.toThrow(ConcurrencyException);

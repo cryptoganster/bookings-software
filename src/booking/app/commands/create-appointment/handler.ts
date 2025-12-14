@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
 import { CreateAppointmentCommand } from './command';
-import { IAppointmentWriteRepository } from '../../../domain/interfaces/repositories/appointment-write.repository';
+import { IAppointmentWriteRepository } from '../../../domain/interfaces/repositories/appointment-write';
 import { IUnitOfWork } from '../../../../shared/kernel/uow';
 import { Appointment } from '../../../domain/aggregates/appointment';
 import { UUID } from '../../../../shared/vo/uuid';
@@ -15,9 +15,7 @@ interface ICapacityWriteRepository {
 }
 
 @CommandHandler(CreateAppointmentCommand)
-export class CreateAppointmentHandler
-  implements ICommandHandler<CreateAppointmentCommand>
-{
+export class CreateAppointmentHandler implements ICommandHandler<CreateAppointmentCommand> {
   constructor(
     @Inject('IAppointmentWriteRepository')
     private readonly appointmentRepository: IAppointmentWriteRepository,
@@ -27,9 +25,7 @@ export class CreateAppointmentHandler
     private readonly uow: IUnitOfWork,
   ) {}
 
-  async execute(
-    command: CreateAppointmentCommand,
-  ): Promise<{ appointmentId: string }> {
+  async execute(command: CreateAppointmentCommand): Promise<{ appointmentId: string }> {
     const appointmentId = UUID.generate();
 
     await this.uow.transaction(async () => {

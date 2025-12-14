@@ -2,7 +2,6 @@ import * as fc from 'fast-check';
 import { Appointment } from '../appointment';
 import { UUID } from '@shared/vo/uuid';
 import { DateTime } from '../../vo/date-time';
-import { AppointmentStatus } from '../../vo/appointment-status';
 
 /**
  * Feature: proyecto-base-mvp, Property 1: Aggregate version increments on state changes
@@ -99,14 +98,7 @@ describe('Appointment Property-Based Tests', () => {
           fc.uuid(),
           fc.integer({ min: 1, max: 365 }),
           fc.integer({ min: 1, max: 365 }),
-          (
-            idStr,
-            businessIdStr,
-            customerIdStr,
-            offeringIdStr,
-            daysInFuture1,
-            daysInFuture2,
-          ) => {
+          (idStr, businessIdStr, customerIdStr, offeringIdStr, daysInFuture1, daysInFuture2) => {
             const id = UUID.fromString(idStr);
             const businessId = UUID.fromString(businessIdStr);
             const customerId = UUID.fromString(customerIdStr);
@@ -298,14 +290,7 @@ describe('Appointment Property-Based Tests', () => {
           fc.uuid(),
           fc.integer({ min: 1, max: 365 }),
           fc.integer({ min: 1, max: 365 }),
-          (
-            idStr,
-            businessIdStr,
-            customerIdStr,
-            offeringIdStr,
-            daysInFuture1,
-            daysInFuture2,
-          ) => {
+          (idStr, businessIdStr, customerIdStr, offeringIdStr, daysInFuture1, daysInFuture2) => {
             const id = UUID.fromString(idStr);
             const businessId = UUID.fromString(businessIdStr);
             const customerId = UUID.fromString(customerIdStr);

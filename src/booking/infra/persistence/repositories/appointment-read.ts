@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { IAppointmentReadRepository } from '@booking/domain/interfaces/repositories/appointment-read.repository';
+import { IAppointmentReadRepository } from '@booking/domain/interfaces/repositories/appointment-read';
 import { AppointmentReadModel } from '@booking/domain/read-models/appointment';
 import { AppointmentModel } from '../models/appointment';
 import { AppointmentReadMapper } from '../mappers/appointment-read';

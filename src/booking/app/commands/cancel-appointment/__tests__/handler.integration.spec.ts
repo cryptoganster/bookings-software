@@ -1,12 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CancelAppointmentHandler } from '../handler';
 import { CancelAppointmentCommand } from '../command';
-import { IAppointmentWriteRepository } from '../../../../domain/interfaces/repositories/appointment-write.repository';
+import { IAppointmentWriteRepository } from '../../../../domain/interfaces/repositories/appointment-write';
 import { Appointment } from '../../../../domain/aggregates/appointment';
 import { AppointmentNotFoundException } from '../../../../domain/exceptions/appointment-not-found';
 import { ConcurrencyException } from '../../../../../shared/kernel/exceptions/concurrency';
 import { UUID } from '../../../../../shared/vo/uuid';
-import { AppointmentStatus } from '../../../../domain/vo/appointment-status';
+
 import { DateTime } from '../../../../domain/vo/date-time';
 
 describe('CancelAppointmentHandler Integration', () => {
@@ -49,10 +49,7 @@ describe('CancelAppointmentHandler Integration', () => {
     appointmentRepository.findById.mockResolvedValue(mockAppointment);
     appointmentRepository.save.mockResolvedValue();
 
-    const command = new CancelAppointmentCommand(
-      appointmentId.getValue(),
-      'user-id',
-    );
+    const command = new CancelAppointmentCommand(appointmentId.getValue(), 'user-id');
 
     // Act
     await handler.execute(command);
@@ -67,15 +64,10 @@ describe('CancelAppointmentHandler Integration', () => {
     // Arrange
     appointmentRepository.findById.mockResolvedValue(null);
 
-    const command = new CancelAppointmentCommand(
-      '550e8400-e29b-41d4-a716-446655440000',
-      'user-id',
-    );
+    const command = new CancelAppointmentCommand('550e8400-e29b-41d4-a716-446655440000', 'user-id');
 
     // Act & Assert
-    await expect(handler.execute(command)).rejects.toThrow(
-      AppointmentNotFoundException,
-    );
+    await expect(handler.execute(command)).rejects.toThrow(AppointmentNotFoundException);
   });
 
   it('should retry on ConcurrencyException', async () => {
@@ -107,15 +99,10 @@ describe('CancelAppointmentHandler Integration', () => {
 
     // First call throws ConcurrencyException, second succeeds
     appointmentRepository.save
-      .mockRejectedValueOnce(
-        new ConcurrencyException('Version conflict'),
-      )
+      .mockRejectedValueOnce(new ConcurrencyException('Version conflict'))
       .mockResolvedValueOnce();
 
-    const command = new CancelAppointmentCommand(
-      appointmentId.getValue(),
-      'user-id',
-    );
+    const command = new CancelAppointmentCommand(appointmentId.getValue(), 'user-id');
 
     // Act
     await handler.execute(command);
@@ -160,14 +147,9 @@ describe('CancelAppointmentHandler Integration', () => {
       .mockResolvedValueOnce(mockAppointment2)
       .mockResolvedValueOnce(mockAppointment3);
 
-    appointmentRepository.save.mockRejectedValue(
-      new ConcurrencyException('Version conflict'),
-    );
+    appointmentRepository.save.mockRejectedValue(new ConcurrencyException('Version conflict'));
 
-    const command = new CancelAppointmentCommand(
-      appointmentId.getValue(),
-      'user-id',
-    );
+    const command = new CancelAppointmentCommand(appointmentId.getValue(), 'user-id');
 
     // Act & Assert
     await expect(handler.execute(command)).rejects.toThrow(
