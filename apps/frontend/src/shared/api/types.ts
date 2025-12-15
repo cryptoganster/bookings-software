@@ -1,17 +1,29 @@
 /**
  * Frontend-Specific API Types
  * 
- * Este archivo SOLO contiene tipos específicos del frontend que NO pertenecen
- * al contrato de API (shared-types).
+ * ⚠️ IMPORTANTE: Este archivo SOLO debe contener tipos específicos del frontend
+ * que NO pertenecen al contrato de API.
  * 
- * PRINCIPIO: Para tipos del contrato de API, importar directamente desde
- * @packages/shared-types en lugar de re-exportarlos aquí.
+ * ✅ USAR ESTE ARCHIVO PARA:
+ * - Tipos de UI state (filtros, preferencias, etc.)
+ * - Agregaciones específicas del frontend (DashboardStats)
+ * - Tipos temporales mientras el backend no los implementa (marcados con TODO)
  * 
- * Ejemplo:
+ * ❌ NO USAR ESTE ARCHIVO PARA:
+ * - DTOs del backend (AppointmentDto, OfferingDto, etc.)
+ * - Tipos del contrato de API
+ * - Re-exportar tipos de @packages/shared-types
+ * 
+ * 📦 PARA TIPOS DEL CONTRATO DE API:
+ * Importar DIRECTAMENTE desde @packages/shared-types:
+ * 
  *   import type { AppointmentDto } from '@packages/shared-types';
  * 
- * NOTA: @packages/* = packages/ del monorepo (compartido entre apps)
- *       @shared/*   = src/shared/ de esta app (interno)
+ * 📚 CONVENCIONES:
+ * - @packages/* = packages/ del monorepo (compartido entre apps)
+ * - @shared/*   = src/shared/ de esta app (interno)
+ * 
+ * Ver: docs/conventions/import-conventions.md
  */
 
 // ============================================================================
@@ -91,3 +103,31 @@ export interface MessageReadModel {
   sentAt: Date;
   isFromAdmin: boolean;
 }
+
+
+// ============================================================================
+// EJEMPLO DE USO CORRECTO
+// ============================================================================
+
+/**
+ * ✅ CORRECTO - Importar DTOs del contrato directamente:
+ * 
+ * import type { 
+ *   AppointmentDto, 
+ *   OfferingDto,
+ *   AppointmentStatus 
+ * } from '@packages/shared-types';
+ * 
+ * import type { 
+ *   DashboardStats,
+ *   AppointmentFilters 
+ * } from '@shared/api/types';
+ * 
+ * ❌ INCORRECTO - No re-exportar ni duplicar:
+ * 
+ * // NO hacer esto:
+ * export type { AppointmentDto } from '@packages/shared-types';
+ * 
+ * // NO hacer esto:
+ * export interface AppointmentDto { ... } // Duplicación
+ */

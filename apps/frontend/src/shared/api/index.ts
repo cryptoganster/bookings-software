@@ -2,18 +2,27 @@
  * Shared API exports
  * Centralized exports for API-related modules
  * 
- * NOTA: Para tipos del contrato de API (DTOs), importar directamente desde:
- *   import type { AppointmentDto } from '@packages/shared-types';
+ * ⚠️ IMPORTANTE: Este módulo NO re-exporta tipos del contrato de API.
  * 
- * Convención de imports:
+ * 📦 Para DTOs del backend, importar DIRECTAMENTE desde:
+ *   import type { AppointmentDto, OfferingDto } from '@packages/shared-types';
+ * 
+ * ✅ Este módulo solo exporta:
+ * - apiClient: Cliente HTTP configurado
+ * - ENDPOINTS: Constantes de URLs
+ * - Tipos específicos del frontend (UI state, agregaciones)
+ * 
+ * 📚 Convención de imports:
  *   @packages/* → packages/ del monorepo (compartido entre apps)
  *   @shared/*   → src/shared/ de esta app (interno)
+ * 
+ * Ver: docs/conventions/import-conventions.md
  */
 
 export { apiClient } from './client';
 export { ENDPOINTS } from './endpoints';
 
-// Solo exportar tipos específicos del frontend
+// Solo tipos específicos del frontend (NO DTOs del backend)
 export type {
   DashboardStats,
   AppointmentFilters,
