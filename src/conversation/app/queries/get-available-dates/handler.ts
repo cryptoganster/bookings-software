@@ -1,7 +1,7 @@
 import { QueryHandler, IQueryHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
 import { GetAvailableDatesQuery } from './query';
-import { ICapacityReadRepository } from '@booking/domain/interfaces/repositories/capacity-read';
+import { ICapacityReadRepository } from '@availability/domain/interfaces/repositories/capacity-read';
 
 @QueryHandler(GetAvailableDatesQuery)
 export class GetAvailableDatesHandler implements IQueryHandler<GetAvailableDatesQuery> {

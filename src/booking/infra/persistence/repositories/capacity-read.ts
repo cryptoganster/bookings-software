@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CapacityModel } from '../models/capacity';
-import { ICapacityReadRepository } from '../../../domain/interfaces/repositories/capacity-read';
+import { CapacityModel } from '@availability/infra/persistence/models/capacity';
+import { ICapacityReadRepository } from '@availability/domain/interfaces/repositories/capacity-read';
 import { CapacityReadModel } from '@availability/domain/read-models/capacity';
 import { CapacityReadMapper } from '../mappers/capacity-read';
 

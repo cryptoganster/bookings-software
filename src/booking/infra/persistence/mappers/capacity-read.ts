@@ -1,4 +1,4 @@
-import { CapacityModel } from '../models/capacity';
+import { CapacityModel } from '@availability/infra/persistence/models/capacity';
 import { CapacityReadModel } from '@availability/domain/read-models/capacity';
 
 export class CapacityReadMapper {
@@ -9,7 +9,7 @@ export class CapacityReadMapper {
       date: model.date,
       totalSlots: model.totalSlots,
       availableSlots: model.availableSlots,
-      bookedSlots: model.bookedSlots,
+      bookedSlots: model.totalSlots - model.availableSlots,
       createdAt: model.createdAt,
       updatedAt: model.updatedAt,
     };

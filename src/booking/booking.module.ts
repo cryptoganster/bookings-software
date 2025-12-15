@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 // Models
 import { AppointmentModel } from './infra/persistence/models/appointment';
-import { CapacityModel } from './infra/persistence/models/capacity';
+import { CapacityModel } from '@availability/infra/persistence/models/capacity';
 
 // Command Handlers
 import { CreateAppointmentHandler } from './app/commands/create-appointment/handler';

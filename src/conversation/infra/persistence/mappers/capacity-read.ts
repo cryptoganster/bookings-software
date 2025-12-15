@@ -1,4 +1,4 @@
-import { CapacityModel } from '@booking/infra/persistence/models/capacity';
+import { CapacityModel } from '@availability/infra/persistence/models/capacity';
 import { CapacityReadModel } from '@availability/domain/read-models/capacity';
 
 export class CapacityReadMapper {

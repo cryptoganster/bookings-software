@@ -9,7 +9,7 @@ import {
   Button,
 } from '../src/conversation/domain/interfaces/external/whatsapp-client';
 import { UUID } from '../src/shared/vo/uuid';
-import { CapacityModel } from '../src/booking/infra/persistence/models/capacity';
+import { CapacityModel } from '../src/availability/infra/persistence/models/capacity';
 import { AppointmentModel } from '../src/booking/infra/persistence/models/appointment';
 
 describe('Conversational Booking Flow (e2e)', () => {
