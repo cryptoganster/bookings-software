@@ -117,7 +117,7 @@ describe('GetCustomerAppointmentsHandler - Property Tests', () => {
             await appointmentRepo.clear();
 
             return countUnchanged && appointmentUnchanged;
-          } catch (error) {
+          } catch {
             // Si hay error al guardar, limpiar y saltar
             await appointmentRepo.clear();
             return true; // Skip this iteration

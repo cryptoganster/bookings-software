@@ -24,47 +24,48 @@ describe('Property 13: JWT tokens contain valid user data', () => {
     userRepository = new Map();
 
     const mockUserWriteRepository: IUserWriteRepository = {
-      save: async (user: User) => {
+      save: (user: User) => {
         userRepository.set(user.getEmail().getValue(), user);
+        return Promise.resolve();
       },
-      findById: async (id: UUID) => {
+      findById: (id: UUID) => {
         for (const user of userRepository.values()) {
           if (user.getId().equals(id)) {
-            return user;
+            return Promise.resolve(user);
           }
         }
-        return null;
+        return Promise.resolve(null);
       },
-      findByEmail: async (email: string) => {
-        return userRepository.get(email.toLowerCase()) || null;
+      findByEmail: (email: string) => {
+        return Promise.resolve(userRepository.get(email.toLowerCase()) || null);
       },
     };
 
     const mockUserReadRepository: IUserReadRepository = {
-      findById: async (id: string) => {
+      findById: (id: string) => {
         for (const user of userRepository.values()) {
           if (user.getId().getValue() === id) {
-            return {
+            return Promise.resolve({
               id: user.getId().getValue(),
               email: user.getEmail().getValue(),
               name: user.getName(),
               businessId: user.getBusinessId()?.getValue() || null,
               createdAt: user.getCreatedAt(),
-            };
+            });
           }
         }
-        return null;
+        return Promise.resolve(null);
       },
-      findByEmail: async (email: string) => {
+      findByEmail: (email: string) => {
         const user = userRepository.get(email.toLowerCase());
-        if (!user) return null;
-        return {
+        if (!user) return Promise.resolve(null);
+        return Promise.resolve({
           id: user.getId().getValue(),
           email: user.getEmail().getValue(),
           name: user.getName(),
           businessId: user.getBusinessId()?.getValue() || null,
           createdAt: user.getCreatedAt(),
-        };
+        });
       },
     };
 

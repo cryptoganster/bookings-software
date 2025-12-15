@@ -1,6 +1,6 @@
 import { DataSource } from 'typeorm';
-import { AppointmentModel } from '../src/booking/infra/persistence/models/appointment';
-import { CapacityModel } from '../src/availability/infra/persistence/models/capacity';
+import { AppointmentModel } from '@booking/infra/persistence/models/appointment';
+import { CapacityModel } from '@availability/infra/persistence/models/capacity';
 
 /**
  * Helper para limpiar la base de datos entre tests

@@ -3,14 +3,11 @@ import { INestApplication } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { AppModule } from '../src/app.module';
 import { CommandBus } from '@nestjs/cqrs';
-import { ProcessIncomingMessageCommand } from '../src/conversation/app/commands/process-incoming-message';
-import {
-  IWhatsAppClient,
-  Button,
-} from '../src/conversation/domain/interfaces/external/whatsapp-client';
-import { UUID } from '../src/shared/vo/uuid';
-import { CapacityModel } from '../src/availability/infra/persistence/models/capacity';
-import { AppointmentModel } from '../src/booking/infra/persistence/models/appointment';
+import { ProcessIncomingMessageCommand } from '@conversation/app/commands/process-incoming-message';
+import { IWhatsAppClient, Button } from '@conversation/domain/interfaces/external/whatsapp-client';
+import { UUID } from '@shared/vo/uuid';
+import { CapacityModel } from '@availability/infra/persistence/models/capacity';
+import { AppointmentModel } from '@booking/infra/persistence/models/appointment';
 
 describe('Conversational Booking Flow (e2e)', () => {
   let app: INestApplication;
@@ -28,13 +25,15 @@ describe('Conversational Booking Flow (e2e)', () => {
   beforeAll(async () => {
     // Crear mock del WhatsApp client
     mockWhatsAppClient = {
-      sendMessage: jest.fn().mockImplementation(async (to: string, message: string) => {
+      sendMessage: jest.fn().mockImplementation((to: string, message: string) => {
         sentMessages.push({ phone: to, message });
+        return Promise.resolve();
       }),
       sendInteractiveButtons: jest
         .fn()
-        .mockImplementation(async (to: string, message: string, buttons: Button[]) => {
+        .mockImplementation((to: string, message: string, buttons: Button[]) => {
           sentMessages.push({ phone: to, message, buttons });
+          return Promise.resolve();
         }),
       sendLocation: jest.fn(),
     };
