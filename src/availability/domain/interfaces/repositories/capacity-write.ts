@@ -1,3 +1,5 @@
+import { Capacity } from '../../aggregates/capacity';
+
 /**
  * Write Repository for Capacity Aggregate
  * 
@@ -19,8 +21,8 @@ export interface ICapacityWriteRepository {
    * @usage Called after modifying an aggregate to persist changes
    * @example
    * const capacity = await factory.loadByOfferingAndDate(offeringId, date);
-   * capacity.decrementSlot(); // Business logic
+   * capacity.bookSlot(); // Business logic
    * await writeRepo.save(capacity); // Persist with optimistic locking
    */
-  save(capacity: any): Promise<void>; // TODO: Replace 'any' with Capacity aggregate when implemented
+  save(capacity: Capacity): Promise<void>;
 }

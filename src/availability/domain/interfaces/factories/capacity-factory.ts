@@ -1,3 +1,5 @@
+import { Capacity } from '../../aggregates/capacity';
+
 /**
  * Factory interface for loading Capacity aggregates from persistence
  * 
@@ -17,15 +19,15 @@ export interface ICapacityFactory {
    * @usage Used in command handlers to load aggregates before modification
    * @example
    * const capacity = await factory.loadByOfferingAndDate(offeringId, date);
-   * capacity.decrementSlot(); // Business logic
+   * capacity.bookSlot(); // Business logic
    * await writeRepo.save(capacity); // Persist
    */
-  loadByOfferingAndDate(offeringId: string, date: Date): Promise<any>; // TODO: Replace 'any' with Capacity aggregate when implemented
+  loadByOfferingAndDate(offeringId: string, date: Date): Promise<Capacity | null>;
   
   /**
    * Loads a Capacity aggregate by ID for modification
    * 
    * @returns Domain aggregate with business logic
    */
-  loadById(id: string): Promise<any>; // TODO: Replace 'any' with Capacity aggregate when implemented
+  loadById(id: string): Promise<Capacity | null>;
 }

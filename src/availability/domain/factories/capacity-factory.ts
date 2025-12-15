@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ICapacityFactory } from '../interfaces/factories/capacity-factory';
 import { CapacityModel } from '@availability/infra/persistence/models/capacity';
+import { Capacity } from '../aggregates/capacity';
+import { UUID } from '@shared/vo/uuid';
 
 /**
  * Factory implementation for loading Capacity aggregates
@@ -17,7 +19,7 @@ export class CapacityFactory implements ICapacityFactory {
     private readonly repository: Repository<CapacityModel>,
   ) {}
 
-  async loadByOfferingAndDate(offeringId: string, date: Date): Promise<any> {
+  async loadByOfferingAndDate(offeringId: string, date: Date): Promise<Capacity | null> {
     const model = await this.repository.findOne({
       where: {
         offeringId,
@@ -29,25 +31,18 @@ export class CapacityFactory implements ICapacityFactory {
       return null;
     }
 
-    // TODO: When Capacity aggregate is implemented, use:
-    // return Capacity.fromPersistence(model.id, model.offeringId, model.date, ...);
-    
-    // Temporary mock object with business logic
-    return {
-      id: model.id,
-      offeringId: model.offeringId,
-      date: model.date,
-      totalSlots: model.totalSlots,
-      availableSlots: model.availableSlots,
-      version: model.version,
-      hasAvailableSlots: () => model.availableSlots > 0,
-      decrementSlot: function() {
-        this.availableSlots--;
-      },
-    };
+    return Capacity.fromPersistence(
+      UUID.fromString(model.id),
+      UUID.fromString(model.offeringId),
+      model.date,
+      model.totalSlots,
+      model.availableSlots,
+      model.totalSlots - model.availableSlots, // bookedSlots
+      model.version,
+    );
   }
 
-  async loadById(id: string): Promise<any> {
+  async loadById(id: string): Promise<Capacity | null> {
     const model = await this.repository.findOne({
       where: { id },
     });
@@ -56,21 +51,14 @@ export class CapacityFactory implements ICapacityFactory {
       return null;
     }
 
-    // TODO: When Capacity aggregate is implemented, use:
-    // return Capacity.fromPersistence(model.id, model.offeringId, model.date, ...);
-    
-    // Temporary mock object with business logic
-    return {
-      id: model.id,
-      offeringId: model.offeringId,
-      date: model.date,
-      totalSlots: model.totalSlots,
-      availableSlots: model.availableSlots,
-      version: model.version,
-      hasAvailableSlots: () => model.availableSlots > 0,
-      decrementSlot: function() {
-        this.availableSlots--;
-      },
-    };
+    return Capacity.fromPersistence(
+      UUID.fromString(model.id),
+      UUID.fromString(model.offeringId),
+      model.date,
+      model.totalSlots,
+      model.availableSlots,
+      model.totalSlots - model.availableSlots, // bookedSlots
+      model.version,
+    );
   }
 }

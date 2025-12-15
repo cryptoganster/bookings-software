@@ -5,6 +5,7 @@ import { CapacityModel } from '@availability/infra/persistence/models/capacity';
 import { ICapacityWriteRepository } from '@availability/domain/interfaces/repositories/capacity-write';
 import { CapacityWriteMapper } from '@availability/infra/persistence/mappers/capacity-write';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
+import { Capacity } from '@availability/domain/aggregates/capacity';
 
 @Injectable()
 export class CapacityWriteRepository implements ICapacityWriteRepository {
@@ -13,7 +14,7 @@ export class CapacityWriteRepository implements ICapacityWriteRepository {
     private readonly repository: Repository<CapacityModel>,
   ) {}
 
-  async save(capacity: any): Promise<void> {
+  async save(capacity: Capacity): Promise<void> {
     const model = CapacityWriteMapper.toModel(capacity);
 
     // Intenta actualizar solo si la versión coincide (Optimistic Locking)
@@ -22,18 +23,18 @@ export class CapacityWriteRepository implements ICapacityWriteRepository {
       .update(CapacityModel)
       .set({
         ...model,
-        version: capacity.version + 1, // Nueva versión
+        version: capacity.getVersion().getValue() + 1, // Nueva versión
       })
-      .where('id = :id', { id: capacity.id })
+      .where('id = :id', { id: capacity.getId().getValue() })
       .andWhere('version = :version', {
-        version: capacity.version, // Versión actual
+        version: capacity.getVersion().getValue(), // Versión actual
       })
       .execute();
 
     // Si no se actualizó ninguna fila, significa que la versión cambió
     if (result.affected === 0) {
       throw new ConcurrencyException(
-        `Capacity ${capacity.id} was modified by another transaction`,
+        `Capacity ${capacity.getId().getValue()} was modified by another transaction`,
       );
     }
   }
