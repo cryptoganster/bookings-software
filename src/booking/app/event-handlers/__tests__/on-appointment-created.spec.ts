@@ -20,9 +20,7 @@ describe('OnAppointmentCreatedHandler', () => {
       ],
     }).compile();
 
-    handler = module.get<OnAppointmentCreatedHandler>(
-      OnAppointmentCreatedHandler,
-    );
+    handler = module.get<OnAppointmentCreatedHandler>(OnAppointmentCreatedHandler);
     commandBus = module.get<CommandBus>(CommandBus);
   });
 

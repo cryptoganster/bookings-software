@@ -5,17 +5,13 @@ import { AppointmentReadModel } from '@booking/domain/read-models/appointment';
 import { IAppointmentReadRepository } from '@booking/domain/interfaces/repositories/appointment-read';
 
 @QueryHandler(GetAppointmentQuery)
-export class GetAppointmentHandler
-  implements IQueryHandler<GetAppointmentQuery>
-{
+export class GetAppointmentHandler implements IQueryHandler<GetAppointmentQuery> {
   constructor(
     @Inject('IAppointmentReadRepository')
     private readonly appointmentReadRepository: IAppointmentReadRepository,
   ) {}
 
-  async execute(
-    query: GetAppointmentQuery,
-  ): Promise<AppointmentReadModel | null> {
+  async execute(query: GetAppointmentQuery): Promise<AppointmentReadModel | null> {
     return this.appointmentReadRepository.findById(query.appointmentId);
   }
 }

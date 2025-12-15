@@ -26,9 +26,7 @@ describe('GetCustomerAppointmentsHandler', () => {
       ],
     }).compile();
 
-    handler = module.get<GetCustomerAppointmentsHandler>(
-      GetCustomerAppointmentsHandler,
-    );
+    handler = module.get<GetCustomerAppointmentsHandler>(GetCustomerAppointmentsHandler);
   });
 
   it('should be defined', () => {
@@ -76,9 +74,7 @@ describe('GetCustomerAppointmentsHandler', () => {
     // Assert
     expect(result).toEqual(mockAppointments);
     expect(result).toHaveLength(2);
-    expect(mockReadRepository.findByCustomerId).toHaveBeenCalledWith(
-      customerId,
-    );
+    expect(mockReadRepository.findByCustomerId).toHaveBeenCalledWith(customerId);
     expect(mockReadRepository.findByCustomerId).toHaveBeenCalledTimes(1);
   });
 
@@ -94,8 +90,6 @@ describe('GetCustomerAppointmentsHandler', () => {
     // Assert
     expect(result).toEqual([]);
     expect(result).toHaveLength(0);
-    expect(mockReadRepository.findByCustomerId).toHaveBeenCalledWith(
-      customerId,
-    );
+    expect(mockReadRepository.findByCustomerId).toHaveBeenCalledWith(customerId);
   });
 });

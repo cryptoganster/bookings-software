@@ -6,24 +6,24 @@ export class CapacityModel {
   @PrimaryColumn('uuid')
   id!: string;
 
-  @Column('uuid')
+  @Column('uuid', { name: 'offering_id' })
   offeringId!: string;
 
   @Column('date')
   date!: Date;
 
-  @Column('int')
+  @Column('int', { name: 'total_slots' })
   totalSlots!: number;
 
-  @Column('int')
+  @Column('int', { name: 'available_slots' })
   availableSlots!: number;
 
   @Column('int', { default: 0 })
   version!: number;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt!: Date;
 }

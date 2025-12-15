@@ -222,9 +222,7 @@ describe('CreateAppointmentHandler Concurrency', () => {
     ];
 
     // Act
-    const results = await Promise.allSettled(
-      commands.map((cmd) => handler.execute(cmd)),
-    );
+    const results = await Promise.allSettled(commands.map((cmd) => handler.execute(cmd)));
 
     // Assert
     const succeeded = results.filter((r) => r.status === 'fulfilled');

@@ -19,9 +19,7 @@ class SendWhatsAppMessageCommand {
 
 @Injectable()
 @EventsHandler(AppointmentCreated)
-export class OnAppointmentCreatedHandler
-  implements IEventHandler<AppointmentCreated>
-{
+export class OnAppointmentCreatedHandler implements IEventHandler<AppointmentCreated> {
   constructor(private readonly commandBus: CommandBus) {}
 
   async handle(event: AppointmentCreated): Promise<void> {

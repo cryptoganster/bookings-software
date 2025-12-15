@@ -63,13 +63,7 @@ describe('Appointment Event Publishing - Property Tests', () => {
           const dateTime = DateTime.fromDate(futureDate);
 
           // Crear appointment - con autoCommit=true, el evento debe publicarse automáticamente
-          const appointment = Appointment.create(
-            id,
-            businessId,
-            customerId,
-            offeringId,
-            dateTime,
-          );
+          const appointment = Appointment.create(id, businessId, customerId, offeringId, dateTime);
 
           // Fusionar el aggregate con el EventBus para que publique eventos
           const mergedAppointment = eventPublisher.mergeObjectContext(appointment);
@@ -122,13 +116,7 @@ describe('Appointment Event Publishing - Property Tests', () => {
           const dateTime = DateTime.fromDate(futureDate);
 
           // Crear appointment
-          const appointment = Appointment.create(
-            id,
-            businessId,
-            customerId,
-            offeringId,
-            dateTime,
-          );
+          const appointment = Appointment.create(id, businessId, customerId, offeringId, dateTime);
 
           // Fusionar con EventBus
           const mergedAppointment = eventPublisher.mergeObjectContext(appointment);
@@ -174,13 +162,7 @@ describe('Appointment Event Publishing - Property Tests', () => {
           const dateTime = DateTime.fromDate(futureDate);
 
           // Crear appointment
-          const appointment = Appointment.create(
-            id,
-            businessId,
-            customerId,
-            offeringId,
-            dateTime,
-          );
+          const appointment = Appointment.create(id, businessId, customerId, offeringId, dateTime);
 
           // Fusionar con EventBus
           const mergedAppointment = eventPublisher.mergeObjectContext(appointment);

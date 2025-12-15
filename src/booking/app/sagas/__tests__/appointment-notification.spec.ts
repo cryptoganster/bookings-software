@@ -12,9 +12,7 @@ describe('AppointmentNotificationSaga', () => {
       providers: [AppointmentNotificationSaga],
     }).compile();
 
-    saga = module.get<AppointmentNotificationSaga>(
-      AppointmentNotificationSaga,
-    );
+    saga = module.get<AppointmentNotificationSaga>(AppointmentNotificationSaga);
   });
 
   it('should be defined', () => {
@@ -56,9 +54,7 @@ describe('AppointmentNotificationSaga', () => {
         new Date('2024-12-20T10:00:00Z'),
       );
 
-      const appointmentCancelledEvent = new AppointmentCancelled(
-        'appointment-id',
-      );
+      const appointmentCancelledEvent = new AppointmentCancelled('appointment-id');
 
       // Emitir múltiples eventos
       const events$ = of(appointmentCreatedEvent, appointmentCancelledEvent);
@@ -73,10 +69,7 @@ describe('AppointmentNotificationSaga', () => {
         complete: () => {
           // Solo debe haber 1 comando (del AppointmentCreated)
           expect(emittedCommands).toHaveLength(1);
-          expect(emittedCommands[0]).toHaveProperty(
-            'appointmentId',
-            'appointment-id',
-          );
+          expect(emittedCommands[0]).toHaveProperty('appointmentId', 'appointment-id');
           done();
         },
       });
@@ -101,10 +94,7 @@ describe('AppointmentNotificationSaga', () => {
           expect(emittedCommands).toHaveLength(2);
 
           // Primer comando: CancelReminderCommand
-          expect(emittedCommands[0]).toHaveProperty(
-            'appointmentId',
-            'appointment-id',
-          );
+          expect(emittedCommands[0]).toHaveProperty('appointmentId', 'appointment-id');
 
           // Segundo comando: SendWhatsAppMessageCommand
           expect(emittedCommands[1]).toHaveProperty('message');
@@ -125,9 +115,7 @@ describe('AppointmentNotificationSaga', () => {
         new Date('2024-12-20T10:00:00Z'),
       );
 
-      const appointmentCancelledEvent = new AppointmentCancelled(
-        'appointment-id',
-      );
+      const appointmentCancelledEvent = new AppointmentCancelled('appointment-id');
 
       // Emitir múltiples eventos
       const events$ = of(appointmentCreatedEvent, appointmentCancelledEvent);

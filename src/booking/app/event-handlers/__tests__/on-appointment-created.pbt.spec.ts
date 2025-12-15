@@ -25,9 +25,7 @@ describe('OnAppointmentCreatedHandler - Property Tests', () => {
       ],
     }).compile();
 
-    handler = module.get<OnAppointmentCreatedHandler>(
-      OnAppointmentCreatedHandler,
-    );
+    handler = module.get<OnAppointmentCreatedHandler>(OnAppointmentCreatedHandler);
     commandBus = module.get<CommandBus>(CommandBus);
   });
 
@@ -45,14 +43,7 @@ describe('OnAppointmentCreatedHandler - Property Tests', () => {
           fc.constant(new Error('Timeout error')),
           fc.constant(new Error('Unknown error')),
         ),
-        async (
-          appointmentId,
-          businessId,
-          customerId,
-          offeringId,
-          dateTime,
-          error,
-        ) => {
+        async (appointmentId, businessId, customerId, offeringId, dateTime, error) => {
           // Arrange - Mock commandBus to throw error
           jest.spyOn(commandBus, 'execute').mockRejectedValue(error);
 
@@ -130,14 +121,7 @@ describe('OnAppointmentCreatedHandler - Property Tests', () => {
         fc.uuid(),
         fc.date({ min: new Date('2000-01-01'), max: new Date('2100-12-31') }),
         fc.integer({ min: 1, max: 2 }), // Qué comando falla (1 o 2)
-        async (
-          appointmentId,
-          businessId,
-          customerId,
-          offeringId,
-          dateTime,
-          failingCommand,
-        ) => {
+        async (appointmentId, businessId, customerId, offeringId, dateTime, failingCommand) => {
           // Arrange - Mock el comando especificado para fallar
           let callCount = 0;
           jest.spyOn(commandBus, 'execute').mockImplementation(() => {

@@ -17,12 +17,7 @@ export class Conversation extends VersionedAggregateRoot {
   private createdAppointmentId?: string;
 
   // Factory method para creación
-  static start(
-    id: UUID,
-    businessId: UUID,
-    customerId: UUID,
-    customerPhone: string,
-  ): Conversation {
+  static start(id: UUID, businessId: UUID, customerId: UUID, customerPhone: string): Conversation {
     const conversation = new Conversation();
     conversation.id = id;
     conversation.businessId = businessId;
@@ -51,11 +46,7 @@ export class Conversation extends VersionedAggregateRoot {
     this.incrementVersion();
 
     this.apply(
-      new ConversationStateChanged(
-        this.id.getValue(),
-        previousState,
-        this.state.getValue(),
-      ),
+      new ConversationStateChanged(this.id.getValue(), previousState, this.state.getValue()),
     );
   }
 
@@ -70,11 +61,7 @@ export class Conversation extends VersionedAggregateRoot {
     this.incrementVersion();
 
     this.apply(
-      new ConversationStateChanged(
-        this.id.getValue(),
-        previousState,
-        this.state.getValue(),
-      ),
+      new ConversationStateChanged(this.id.getValue(), previousState, this.state.getValue()),
     );
   }
 
@@ -89,11 +76,7 @@ export class Conversation extends VersionedAggregateRoot {
     this.incrementVersion();
 
     this.apply(
-      new ConversationStateChanged(
-        this.id.getValue(),
-        previousState,
-        this.state.getValue(),
-      ),
+      new ConversationStateChanged(this.id.getValue(), previousState, this.state.getValue()),
     );
   }
 
@@ -108,11 +91,7 @@ export class Conversation extends VersionedAggregateRoot {
     this.incrementVersion();
 
     this.apply(
-      new ConversationStateChanged(
-        this.id.getValue(),
-        previousState,
-        this.state.getValue(),
-      ),
+      new ConversationStateChanged(this.id.getValue(), previousState, this.state.getValue()),
     );
   }
 

@@ -37,9 +37,7 @@ describe('GetCustomerAppointmentsHandler - Property Tests', () => {
       ],
     }).compile();
 
-    handler = module.get<GetCustomerAppointmentsHandler>(
-      GetCustomerAppointmentsHandler,
-    );
+    handler = module.get<GetCustomerAppointmentsHandler>(GetCustomerAppointmentsHandler);
     dataSource = module.get<DataSource>(DataSource);
   });
 
@@ -104,8 +102,7 @@ describe('GetCustomerAppointmentsHandler - Property Tests', () => {
             appointmentBefore.id === appointmentAfter.id &&
             appointmentBefore.version === appointmentAfter.version &&
             appointmentBefore.status === appointmentAfter.status &&
-            appointmentBefore.dateTime.getTime() ===
-              appointmentAfter.dateTime.getTime();
+            appointmentBefore.dateTime.getTime() === appointmentAfter.dateTime.getTime();
 
           // Limpiar para el siguiente test
           await appointmentRepo.clear();

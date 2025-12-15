@@ -25,6 +25,7 @@ import { AppointmentNotificationSaga } from './app/sagas/appointment-notificatio
 // Repositories
 import { AppointmentWriteRepository } from './infra/persistence/repositories/appointment-write';
 import { AppointmentReadRepository } from './infra/persistence/repositories/appointment-read';
+import { CapacityReadRepository } from './infra/persistence/repositories/capacity-read';
 
 // Placeholder for Capacity repository (will be implemented later)
 class MockCapacityWriteRepository {
@@ -49,18 +50,12 @@ const CommandHandlers = [
 
 const QueryHandlers = [GetAppointmentHandler, GetCustomerAppointmentsHandler];
 
-const EventHandlers = [
-  OnAppointmentCreatedHandler,
-  OnAppointmentCancelledHandler,
-];
+const EventHandlers = [OnAppointmentCreatedHandler, OnAppointmentCancelledHandler];
 
 const Sagas = [AppointmentNotificationSaga];
 
 @Module({
-  imports: [
-    CqrsModule,
-    TypeOrmModule.forFeature([AppointmentModel, CapacityModel]),
-  ],
+  imports: [CqrsModule, TypeOrmModule.forFeature([AppointmentModel, CapacityModel])],
   providers: [
     // Command Handlers
     ...CommandHandlers,
@@ -87,11 +82,16 @@ const Sagas = [AppointmentNotificationSaga];
       provide: 'ICapacityWriteRepository',
       useClass: MockCapacityWriteRepository,
     },
+    {
+      provide: 'ICapacityReadRepository',
+      useClass: CapacityReadRepository,
+    },
   ],
   exports: [
     'IAppointmentWriteRepository',
     'IAppointmentReadRepository',
     'ICapacityWriteRepository',
+    'ICapacityReadRepository',
   ],
 })
 export class BookingModule {}

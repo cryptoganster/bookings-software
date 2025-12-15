@@ -17,9 +17,7 @@ describe('AppointmentNotificationSaga - Property Tests', () => {
       providers: [AppointmentNotificationSaga],
     }).compile();
 
-    saga = module.get<AppointmentNotificationSaga>(
-      AppointmentNotificationSaga,
-    );
+    saga = module.get<AppointmentNotificationSaga>(AppointmentNotificationSaga);
   });
 
   describe('Property 11: Sagas emit commands for matching events', () => {
@@ -59,7 +57,7 @@ describe('AppointmentNotificationSaga - Property Tests', () => {
                 complete: () => {
                   // Verificar que se emitió exactamente 1 comando
                   const hasOneCommand = emittedCommands.length === 1;
-                  
+
                   // Verificar que el comando tiene los datos correctos
                   const hasCorrectData =
                     emittedCommands[0]?.appointmentId === appointmentId &&
@@ -77,39 +75,34 @@ describe('AppointmentNotificationSaga - Property Tests', () => {
 
     it('should always emit exactly 2 commands for any AppointmentCancelled event', async () => {
       await fc.assert(
-        fc.asyncProperty(
-          fc.uuid(),
-          async (appointmentId) => {
-            // Arrange
-            const event = new AppointmentCancelled(appointmentId);
-            const events$ = of(event);
+        fc.asyncProperty(fc.uuid(), async (appointmentId) => {
+          // Arrange
+          const event = new AppointmentCancelled(appointmentId);
+          const events$ = of(event);
 
-            // Act
-            const commands$ = saga.appointmentCancelled(events$);
+          // Act
+          const commands$ = saga.appointmentCancelled(events$);
 
-            // Assert - Debe emitir exactamente 2 comandos
-            return new Promise<boolean>((resolve) => {
-              const emittedCommands: any[] = [];
-              commands$.subscribe({
-                next: (command) => emittedCommands.push(command),
-                complete: () => {
-                  // Verificar que se emitieron exactamente 2 comandos
-                  const hasTwoCommands = emittedCommands.length === 2;
-                  
-                  // Verificar que el primer comando es CancelReminderCommand
-                  const firstCommandCorrect =
-                    emittedCommands[0]?.appointmentId === appointmentId;
-                  
-                  // Verificar que el segundo comando es SendWhatsAppMessageCommand
-                  const secondCommandCorrect =
-                    emittedCommands[1]?.message !== undefined;
+          // Assert - Debe emitir exactamente 2 comandos
+          return new Promise<boolean>((resolve) => {
+            const emittedCommands: any[] = [];
+            commands$.subscribe({
+              next: (command) => emittedCommands.push(command),
+              complete: () => {
+                // Verificar que se emitieron exactamente 2 comandos
+                const hasTwoCommands = emittedCommands.length === 2;
 
-                  resolve(hasTwoCommands && firstCommandCorrect && secondCommandCorrect);
-                },
-              });
+                // Verificar que el primer comando es CancelReminderCommand
+                const firstCommandCorrect = emittedCommands[0]?.appointmentId === appointmentId;
+
+                // Verificar que el segundo comando es SendWhatsAppMessageCommand
+                const secondCommandCorrect = emittedCommands[1]?.message !== undefined;
+
+                resolve(hasTwoCommands && firstCommandCorrect && secondCommandCorrect);
+              },
             });
-          },
-        ),
+          });
+        }),
         { numRuns: 100 },
       );
     });
@@ -123,14 +116,7 @@ describe('AppointmentNotificationSaga - Property Tests', () => {
           fc.uuid(),
           fc.date({ min: new Date('2000-01-01'), max: new Date('2100-12-31') }),
           fc.uuid(),
-          async (
-            appointmentId1,
-            businessId,
-            customerId,
-            offeringId,
-            dateTime,
-            appointmentId2,
-          ) => {
+          async (appointmentId1, businessId, customerId, offeringId, dateTime, appointmentId2) => {
             // Arrange - Crear múltiples eventos de diferentes tipos
             const createdEvent = new AppointmentCreated(
               appointmentId1,
@@ -155,10 +141,9 @@ describe('AppointmentNotificationSaga - Property Tests', () => {
                 complete: () => {
                   // Debe emitir exactamente 1 comando (solo del AppointmentCreated)
                   const hasOneCommand = emittedCommands.length === 1;
-                  
+
                   // El comando debe corresponder al evento AppointmentCreated
-                  const isCorrectEvent =
-                    emittedCommands[0]?.appointmentId === appointmentId1;
+                  const isCorrectEvent = emittedCommands[0]?.appointmentId === appointmentId1;
 
                   resolve(hasOneCommand && isCorrectEvent);
                 },
@@ -185,8 +170,8 @@ describe('AppointmentNotificationSaga - Property Tests', () => {
           ),
           async (eventData) => {
             // Filter out invalid dates
-            const validEventData = eventData.filter(data => !isNaN(data.dateTime.getTime()));
-            
+            const validEventData = eventData.filter((data) => !isNaN(data.dateTime.getTime()));
+
             // Skip if no valid events
             if (validEventData.length === 0) {
               return true;
@@ -217,11 +202,12 @@ describe('AppointmentNotificationSaga - Property Tests', () => {
                 complete: () => {
                   // Debe emitir tantos comandos como eventos
                   const hasCorrectCount = emittedCommands.length === events.length;
-                  
+
                   // Cada comando debe corresponder a un evento
-                  const allCommandsCorrect = emittedCommands.every((command, index) =>
-                    command.appointmentId === validEventData[index].appointmentId &&
-                    command.dateTime.getTime() === validEventData[index].dateTime.getTime()
+                  const allCommandsCorrect = emittedCommands.every(
+                    (command, index) =>
+                      command.appointmentId === validEventData[index].appointmentId &&
+                      command.dateTime.getTime() === validEventData[index].dateTime.getTime(),
                   );
 
                   resolve(hasCorrectCount && allCommandsCorrect);

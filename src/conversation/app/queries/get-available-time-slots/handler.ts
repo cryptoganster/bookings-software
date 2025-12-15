@@ -1,29 +1,22 @@
 import { QueryHandler, IQueryHandler } from '@nestjs/cqrs';
+import { Inject } from '@nestjs/common';
 import { GetAvailableTimeSlotsQuery } from './query';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
-import { CapacityModel } from '@booking/infra/persistence/models/capacity';
-
-export interface TimeSlot {
-  time: Date;
-  availableSlots: number;
-}
+import { ICapacityReadRepository } from '@booking/domain/interfaces/repositories/capacity-read';
+import { TimeSlot } from '@booking/domain/read-models/capacity';
 
 @QueryHandler(GetAvailableTimeSlotsQuery)
 export class GetAvailableTimeSlotsHandler implements IQueryHandler<GetAvailableTimeSlotsQuery> {
   constructor(
-    @InjectRepository(CapacityModel)
-    private readonly capacityRepository: Repository<CapacityModel>,
+    @Inject('ICapacityReadRepository')
+    private readonly capacityReadRepository: ICapacityReadRepository,
   ) {}
 
   async execute(query: GetAvailableTimeSlotsQuery): Promise<TimeSlot[]> {
     // Consultar capacidad para la fecha específica
-    const capacity = await this.capacityRepository.findOne({
-      where: {
-        offeringId: query.offeringId,
-        date: query.date,
-      },
-    });
+    const capacity = await this.capacityReadRepository.findByOfferingAndDate(
+      query.offeringId,
+      query.date,
+    );
 
     if (!capacity || capacity.availableSlots <= 0) {
       return [];

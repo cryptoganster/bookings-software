@@ -42,10 +42,7 @@ export class AppointmentNotificationSaga {
       ofType(AppointmentCancelled),
       mergeMap((event: AppointmentCancelled) => [
         new CancelReminderCommand(event.appointmentId),
-        new SendWhatsAppMessageCommand(
-          'customer-id-placeholder',
-          'Tu cita ha sido cancelada',
-        ),
+        new SendWhatsAppMessageCommand('customer-id-placeholder', 'Tu cita ha sido cancelada'),
       ]),
     );
   };

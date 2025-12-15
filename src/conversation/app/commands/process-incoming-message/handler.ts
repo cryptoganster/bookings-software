@@ -9,9 +9,7 @@ import { CreateAppointmentCommand } from '@booking/app/commands/create-appointme
 import { NoAvailableSlotsException } from '@booking/domain/exceptions/no-available-slots';
 
 @CommandHandler(ProcessIncomingMessageCommand)
-export class ProcessIncomingMessageHandler
-  implements ICommandHandler<ProcessIncomingMessageCommand>
-{
+export class ProcessIncomingMessageHandler implements ICommandHandler<ProcessIncomingMessageCommand> {
   constructor(
     @Inject('IConversationWriteRepository')
     private readonly conversationRepository: IConversationWriteRepository,
@@ -236,8 +234,6 @@ export class ProcessIncomingMessageHandler
       buttons,
     );
   }
-
-
 
   private parseDateFromButtonId(buttonId: string): Date {
     // buttonId format: "date-YYYY-MM-DD"

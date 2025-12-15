@@ -16,26 +16,19 @@ class SendWhatsAppMessageCommand {
 
 @Injectable()
 @EventsHandler(AppointmentCancelled)
-export class OnAppointmentCancelledHandler
-  implements IEventHandler<AppointmentCancelled>
-{
+export class OnAppointmentCancelledHandler implements IEventHandler<AppointmentCancelled> {
   constructor(private readonly commandBus: CommandBus) {}
 
   async handle(event: AppointmentCancelled): Promise<void> {
     try {
       // Cancelar recordatorio
-      await this.commandBus.execute(
-        new CancelReminderCommand(event.appointmentId),
-      );
+      await this.commandBus.execute(new CancelReminderCommand(event.appointmentId));
 
       // Enviar notificación de cancelación por WhatsApp
       // Nota: En un escenario real, necesitaríamos obtener el customerId del appointment
       // Por ahora, esto es un placeholder
       await this.commandBus.execute(
-        new SendWhatsAppMessageCommand(
-          'customer-id-placeholder',
-          'Tu cita ha sido cancelada',
-        ),
+        new SendWhatsAppMessageCommand('customer-id-placeholder', 'Tu cita ha sido cancelada'),
       );
     } catch (error) {
       // Log error pero no propagar - los event handlers no deben propagar errores

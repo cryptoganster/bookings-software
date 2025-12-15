@@ -22,10 +22,9 @@ async function setupTestDatabase() {
 
     // Verificar si la base de datos de pruebas existe
     const dbName = process.env.DB_DATABASE || 'bookings_test';
-    const result = await adminDataSource.query(
-      `SELECT 1 FROM pg_database WHERE datname = $1`,
-      [dbName]
-    );
+    const result = await adminDataSource.query(`SELECT 1 FROM pg_database WHERE datname = $1`, [
+      dbName,
+    ]);
 
     if (result.length === 0) {
       // Crear la base de datos de pruebas
