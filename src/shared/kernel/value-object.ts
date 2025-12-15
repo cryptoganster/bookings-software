@@ -1,5 +1,5 @@
 export abstract class ValueObject {
-  protected abstract getEqualityComponents(): any[];
+  protected abstract getEqualityComponents(): unknown[];
 
   equals(other: ValueObject): boolean {
     if (!other) return false;

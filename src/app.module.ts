@@ -54,7 +54,7 @@ import { ConversationModule } from '@conversation/conversation.module';
 
         // Serializers personalizados
         serializers: {
-          req: (req: any) => ({
+          req: (req: { id: string; method: string; url: string; query: unknown; params: unknown }) => ({
             id: req.id,
             method: req.method,
             url: req.url,
@@ -62,7 +62,7 @@ import { ConversationModule } from '@conversation/conversation.module';
             params: req.params,
           }),
 
-          res: (res: any) => ({
+          res: (res: { statusCode: number }) => ({
             statusCode: res.statusCode,
           }),
         },
@@ -72,7 +72,7 @@ import { ConversationModule } from '@conversation/conversation.module';
 
         // Customizar mensaje de request
 
-        customLogLevel: (req: any, res: any, err: any) => {
+        customLogLevel: (req: unknown, res: { statusCode: number }, err?: Error) => {
           if (res.statusCode >= 400 && res.statusCode < 500) {
             return 'warn';
           } else if (res.statusCode >= 500 || err) {

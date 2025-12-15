@@ -27,7 +27,7 @@ export class UserWriteRepository implements IUserWriteRepository {
         .createQueryBuilder()
         .insert()
         .into(UserModel)
-        .values(model as any)
+        .values(model)
         .orUpdate(['password', 'name', 'businessId', 'version'], ['id'])
         .execute();
 

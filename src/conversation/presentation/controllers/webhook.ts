@@ -54,7 +54,7 @@ export class WebhookController {
    */
   @Get()
   async verifyWebhook(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
-    const challenge = (req as any).webhookChallenge;
+    const challenge = (req as FastifyRequest & { webhookChallenge?: string }).webhookChallenge;
 
     if (challenge) {
       return res.status(HttpStatus.OK).send(challenge);

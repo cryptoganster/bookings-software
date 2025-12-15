@@ -9,7 +9,7 @@ export interface IUnitOfWork {
   /**
    * Obtiene el query runner actual (para uso avanzado)
    */
-  getQueryRunner(): any;
+  getQueryRunner(): unknown;
 }
 
 export interface TransactionOptions {

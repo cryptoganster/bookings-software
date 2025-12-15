@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { CqrsModule } from '@nestjs/cqrs';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import type { StringValue } from 'ms';
 import { SharedModule } from '@shared/shared.module';
 import { JwtStrategy } from './infra/strategies/jwt';
 import { UserModel } from './infra/persistence/models/user';
@@ -22,11 +23,11 @@ import { AuthController } from './presentation/controllers/auth';
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
+      useFactory: (configService: ConfigService): JwtModuleOptions => ({
         secret: configService.get<string>('JWT_SECRET') || 'default-secret-change-in-production',
         signOptions: {
-          expiresIn: configService.get<string>('JWT_EXPIRATION') || '1d',
-        } as any,
+          expiresIn: (configService.get<string>('JWT_EXPIRATION') || '1d') as StringValue,
+        },
       }),
       inject: [ConfigService],
     }),

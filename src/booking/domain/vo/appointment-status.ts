@@ -48,7 +48,7 @@ export class AppointmentStatus extends ValueObject {
   }
 
   // Equality
-  protected getEqualityComponents(): any[] {
+  protected getEqualityComponents(): unknown[] {
     return [this.value];
   }
 }

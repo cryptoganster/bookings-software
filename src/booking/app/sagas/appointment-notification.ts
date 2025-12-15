@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Saga, ofType, ICommand } from '@nestjs/cqrs';
+import { Saga, ofType, ICommand, IEvent } from '@nestjs/cqrs';
 import { Observable, map, mergeMap } from 'rxjs';
 import { AppointmentCreated } from '@booking/domain/events/appointment-created';
 import { AppointmentCancelled } from '@booking/domain/events/appointment-cancelled';
@@ -26,7 +26,7 @@ class SendWhatsAppMessageCommand implements ICommand {
 @Injectable()
 export class AppointmentNotificationSaga {
   @Saga()
-  appointmentCreated = (events$: Observable<any>): Observable<ICommand> => {
+  appointmentCreated = (events$: Observable<IEvent>): Observable<ICommand> => {
     return events$.pipe(
       ofType(AppointmentCreated),
       map(
@@ -37,7 +37,7 @@ export class AppointmentNotificationSaga {
   };
 
   @Saga()
-  appointmentCancelled = (events$: Observable<any>): Observable<ICommand> => {
+  appointmentCancelled = (events$: Observable<IEvent>): Observable<ICommand> => {
     return events$.pipe(
       ofType(AppointmentCancelled),
       mergeMap((event: AppointmentCancelled) => [

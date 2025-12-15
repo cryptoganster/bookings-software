@@ -1,7 +1,21 @@
 import { AppointmentReadModel } from '@booking/domain/read-models/appointment';
 
+interface AppointmentRawModel {
+  id: string;
+  businessId: string;
+  customerId: string;
+  customerName?: string;
+  customerPhone?: string;
+  offeringId: string;
+  offeringName?: string;
+  dateTime: Date;
+  status: string;
+  createdAt: Date;
+  cancelledAt?: Date | null;
+}
+
 export class AppointmentReadMapper {
-  static toReadModel(model: any): AppointmentReadModel {
+  static toReadModel(model: AppointmentRawModel): AppointmentReadModel {
     return {
       id: model.id,
       businessId: model.businessId,

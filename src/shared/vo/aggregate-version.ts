@@ -16,7 +16,7 @@ export class AggregateVersion extends ValueObject {
     return this.value;
   }
 
-  protected getEqualityComponents(): any[] {
+  protected getEqualityComponents(): unknown[] {
     return [this.value];
   }
 }

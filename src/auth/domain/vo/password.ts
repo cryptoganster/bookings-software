@@ -40,7 +40,7 @@ export class Password extends ValueObject {
     return this.hashedValue;
   }
 
-  protected getEqualityComponents(): any[] {
+  protected getEqualityComponents(): unknown[] {
     return [this.hashedValue];
   }
 }

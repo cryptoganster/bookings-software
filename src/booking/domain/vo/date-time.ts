@@ -61,7 +61,7 @@ export class DateTime extends ValueObject {
   }
 
   // Equality
-  protected getEqualityComponents(): any[] {
+  protected getEqualityComponents(): unknown[] {
     return [this.value.getTime()];
   }
 

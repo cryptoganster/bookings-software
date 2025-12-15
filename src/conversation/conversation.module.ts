@@ -25,12 +25,12 @@ import { WhatsAppSignatureGuard } from './presentation/guards/whatsapp-signature
 const conversationsStore = new Map();
 
 class MockConversationWriteRepository {
-  findByCustomerIdAndBusinessId(customerId: any, businessId: any): Promise<any> {
+  findByCustomerIdAndBusinessId(customerId: { getValue: () => string }, businessId: { getValue: () => string }): Promise<unknown> {
     const key = `${customerId.getValue()}-${businessId.getValue()}`;
     return Promise.resolve(conversationsStore.get(key) || null);
   }
 
-  save(conversation: any): Promise<void> {
+  save(conversation: { getCustomerId: () => { getValue: () => string }; getBusinessId: () => { getValue: () => string } }): Promise<void> {
     const key = `${conversation.getCustomerId().getValue()}-${conversation.getBusinessId().getValue()}`;
     conversationsStore.set(key, conversation);
     return Promise.resolve();

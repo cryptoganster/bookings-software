@@ -122,7 +122,7 @@ export class ProcessIncomingMessageHandler implements ICommandHandler<ProcessInc
               `🕐 Hora: ${this.formatTime(conversation.getSelectedTime()!)}\n` +
               `📍 Te esperamos!`,
           );
-        } catch (error: any) {
+        } catch (error: unknown) {
           // Manejar NoAvailableSlotsException específicamente
           if (error instanceof NoAvailableSlotsException) {
             await this.whatsappClient.sendMessage(

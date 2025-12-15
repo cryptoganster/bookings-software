@@ -73,7 +73,7 @@ export class ConversationState extends ValueObject {
     return this.value === 'COMPLETED';
   }
 
-  protected getEqualityComponents(): any[] {
+  protected getEqualityComponents(): unknown[] {
     return [this.value];
   }
 }

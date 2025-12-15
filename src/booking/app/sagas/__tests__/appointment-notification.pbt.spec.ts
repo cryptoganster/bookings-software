@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { of, Subject } from 'rxjs';
+import { IEvent } from '@nestjs/cqrs';
 import { AppointmentNotificationSaga } from '../appointment-notification';
 import { AppointmentCreated } from '@booking/domain/events/appointment-created';
 import { AppointmentCancelled } from '@booking/domain/events/appointment-cancelled';
@@ -266,7 +267,7 @@ describe('AppointmentNotificationSaga - Property Tests', () => {
             );
 
             // Usar Subject para simular eventos asíncronos
-            const events$ = new Subject();
+            const events$ = new Subject<IEvent>();
             const commands$ = saga.appointmentCreated(events$);
 
             // Act & Assert
