@@ -1,3 +1,7 @@
+---
+inclusion: always
+---
+
 # CQRS (Command Query Responsibility Segregation)
 
 Este documento define cómo implementar CQRS en el proyecto usando `@nestjs/cqrs`.

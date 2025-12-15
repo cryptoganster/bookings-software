@@ -1,3 +1,7 @@
+---
+inclusion: always
+---
+
 # NestJS Patterns y Best Practices
 
 Este documento define los patrones y mejores prácticas para usar NestJS en el proyecto.

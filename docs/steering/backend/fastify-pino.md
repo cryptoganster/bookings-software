@@ -1,3 +1,7 @@
+---
+inclusion: always
+---
+
 # Fastify y Pino en NestJS
 
 Este documento define cómo usar Fastify como HTTP adapter y Pino como logger en NestJS.

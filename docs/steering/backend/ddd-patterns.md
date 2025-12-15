@@ -1,3 +1,7 @@
+---
+inclusion: always
+---
+
 # Domain-Driven Design (DDD) Patterns
 
 Este documento define los patrones tácticos de DDD aplicados en el proyecto.

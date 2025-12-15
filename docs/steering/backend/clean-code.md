@@ -1,3 +1,7 @@
+---
+inclusion: always
+---
+
 # Clean Code & SOLID Principles
 
 Este documento define las prácticas de código limpio y principios SOLID aplicados en el proyecto.

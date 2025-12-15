@@ -1,3 +1,7 @@
+---
+inclusion: always
+---
+
 # Git y GitHub Workflow
 
 Este documento define el flujo de trabajo con Git y GitHub para el proyecto.

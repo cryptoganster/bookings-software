@@ -17,17 +17,30 @@ export class CapacityWriteRepository implements ICapacityWriteRepository {
   async save(capacity: Capacity): Promise<void> {
     const model = CapacityWriteMapper.toModel(capacity);
 
+    // Check if capacity already exists
+    const existing = await this.repository.findOne({
+      where: { id: capacity.getId().getValue() },
+    });
+
+    if (!existing) {
+      // Insert new capacity
+      await this.repository.save(model);
+      return;
+    }
+
     // Intenta actualizar solo si la versión coincide (Optimistic Locking)
+    // Note: The aggregate already incremented the version, so we check against version - 1
+    const previousVersion = capacity.getVersion().getValue() - 1;
     const result = await this.repository
       .createQueryBuilder()
       .update(CapacityModel)
       .set({
         ...model,
-        version: capacity.getVersion().getValue() + 1, // Nueva versión
+        version: capacity.getVersion().getValue(), // Use the already incremented version
       })
       .where('id = :id', { id: capacity.getId().getValue() })
       .andWhere('version = :version', {
-        version: capacity.getVersion().getValue(), // Versión actual
+        version: previousVersion, // Check against previous version
       })
       .execute();
 

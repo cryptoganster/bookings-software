@@ -1,3 +1,7 @@
+---
+inclusion: always
+---
+
 # Bounded Contexts
 
 Este documento define los Bounded Contexts del sistema y sus responsabilidades según Domain-Driven Design.

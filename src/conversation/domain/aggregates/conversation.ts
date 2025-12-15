@@ -95,6 +95,16 @@ export class Conversation extends VersionedAggregateRoot {
     );
   }
 
+  transitionToSelectingTime(): void {
+    const previousState = this.state.getValue();
+    this.state = ConversationState.selectingTime();
+    this.incrementVersion();
+
+    this.apply(
+      new ConversationStateChanged(this.id.getValue(), previousState, this.state.getValue()),
+    );
+  }
+
   complete(appointmentId: string | null): void {
     if (!this.state.isConfirming()) {
       throw new Error('Cannot complete conversation in current state');

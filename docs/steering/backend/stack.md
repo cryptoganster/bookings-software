@@ -1,3 +1,7 @@
+---
+inclusion: always
+---
+
 # Stack Tecnológico
 
 Este documento define el stack tecnológico oficial del proyecto Sistema de Reservas Multi-Tenant vía WhatsApp.

@@ -1,3 +1,7 @@
+---
+inclusion: always
+---
+
 # Arquitectura del Sistema
 
 Este documento define los principios arquitectónicos y la estructura de alto nivel del Sistema de Reservas Multi-Tenant.

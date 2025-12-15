@@ -21,20 +21,29 @@ import { WebhookController } from './presentation/controllers/webhook';
 import { WhatsAppSignatureGuard } from './presentation/guards/whatsapp-signature';
 
 // Mock repositories for conversation (will be implemented later)
-class MockConversationWriteRepository {
-  private conversations = new Map();
+// Using a global Map so it can be cleared between tests
+const conversationsStore = new Map();
 
+class MockConversationWriteRepository {
   findByCustomerIdAndBusinessId(customerId: any, businessId: any): Promise<any> {
     const key = `${customerId.getValue()}-${businessId.getValue()}`;
-    return Promise.resolve(this.conversations.get(key) || null);
+    return Promise.resolve(conversationsStore.get(key) || null);
   }
 
   save(conversation: any): Promise<void> {
     const key = `${conversation.getCustomerId().getValue()}-${conversation.getBusinessId().getValue()}`;
-    this.conversations.set(key, conversation);
+    conversationsStore.set(key, conversation);
     return Promise.resolve();
   }
+
+  // Method to clear all conversations (for testing)
+  clear(): void {
+    conversationsStore.clear();
+  }
 }
+
+// Export the store for testing purposes
+export { conversationsStore };
 
 const CommandHandlers = [ProcessIncomingMessageHandler];
 

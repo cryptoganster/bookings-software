@@ -1,3 +1,7 @@
+---
+inclusion: always
+---
+
 # Nomenclatura y Convenciones
 
 Este documento define las convenciones de nomenclatura y estructura de archivos para el proyecto.
