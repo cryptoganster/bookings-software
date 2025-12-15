@@ -118,12 +118,12 @@ describe('GetAvailableSlotsHandler', () => {
 
     // Assert
     expect(result.length).toBeGreaterThan(0);
-    
+
     // Verificar que el primer slot es a las 9 AM
     const firstSlot = result[0];
     expect(firstSlot.time.getHours()).toBe(9);
     expect(firstSlot.time.getMinutes()).toBe(0);
-    
+
     // Verificar que todos los slots tienen la misma cantidad de slots disponibles
     result.forEach((slot) => {
       expect(slot.availableSlots).toBe(5);
