@@ -6,6 +6,7 @@ import { UUID } from '@shared/vo/uuid';
 import { DateTime } from '../../vo/date-time';
 import { AppointmentCreated } from '../../events/appointment-created';
 import { AppointmentCancelled } from '../../events/appointment-cancelled';
+import { uuidV4 } from '@test-utils/generators';
 
 /**
  * Feature: proyecto-base-mvp, Property 5: Events are published automatically
@@ -43,10 +44,10 @@ describe('Appointment Event Publishing - Property Tests', () => {
   it('should automatically publish AppointmentCreated event without explicit commit', () => {
     fc.assert(
       fc.property(
-        fc.uuid(),
-        fc.uuid(),
-        fc.uuid(),
-        fc.uuid(),
+        uuidV4(),
+        uuidV4(),
+        uuidV4(),
+        uuidV4(),
         fc.integer({ min: 1, max: 365 }),
         (idStr, businessIdStr, customerIdStr, offeringIdStr, daysInFuture) => {
           // Limpiar eventos antes de cada iteración
@@ -96,10 +97,10 @@ describe('Appointment Event Publishing - Property Tests', () => {
   it('should automatically publish AppointmentCancelled event without explicit commit', () => {
     fc.assert(
       fc.property(
-        fc.uuid(),
-        fc.uuid(),
-        fc.uuid(),
-        fc.uuid(),
+        uuidV4(),
+        uuidV4(),
+        uuidV4(),
+        uuidV4(),
         fc.integer({ min: 3, max: 365 }),
         (idStr, businessIdStr, customerIdStr, offeringIdStr, daysInFuture) => {
           // Limpiar eventos antes de cada iteración
@@ -142,10 +143,10 @@ describe('Appointment Event Publishing - Property Tests', () => {
   it('should publish events in correct order for multiple state changes', () => {
     fc.assert(
       fc.property(
-        fc.uuid(),
-        fc.uuid(),
-        fc.uuid(),
-        fc.uuid(),
+        uuidV4(),
+        uuidV4(),
+        uuidV4(),
+        uuidV4(),
         fc.integer({ min: 3, max: 10 }),
         (idStr, businessIdStr, customerIdStr, offeringIdStr, daysInFuture) => {
           // Limpiar eventos antes de cada iteración

@@ -20,7 +20,8 @@
       "@booking/*": ["src/booking/*"],
       "@conversation/*": ["src/conversation/*"],
       "@auth/*": ["src/auth/*"],
-      "@availability/*": ["src/availability/*"]
+      "@availability/*": ["src/availability/*"],
+      "@test-utils/*": ["src/test-utils/*"]
     }
   }
 }

@@ -5,6 +5,7 @@ import { CreateAppointmentHandler } from '../handler';
 import { CreateAppointmentCommand } from '../command';
 import { IAppointmentWriteRepository } from '@booking/domain/interfaces/repositories/appointment-write';
 import { IUnitOfWork } from '@shared/kernel/uow';
+import { uuidV4 } from '@test-utils/generators';
 
 describe('CreateAppointmentHandler - Property Tests', () => {
   let handler: CreateAppointmentHandler;
@@ -75,9 +76,9 @@ describe('CreateAppointmentHandler - Property Tests', () => {
   it('should always decrement capacity atomically with appointment creation', async () => {
     await fc.assert(
       fc.asyncProperty(
-        fc.uuid(),
-        fc.uuid(),
-        fc.uuid(),
+        uuidV4(),
+        uuidV4(),
+        uuidV4(),
         fc.integer({ min: 1, max: 100 }),
         async (businessId, customerId, offeringId, initialSlots) => {
           // Arrange

@@ -4,7 +4,7 @@
   "description": "Backend API - Sistema de Reservas Multi-Tenant",
   "author": "",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -13,7 +13,6 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
-
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
@@ -51,7 +50,7 @@
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "typeorm": "^0.3.28",
-    "uuid": "^13.0.0"
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
@@ -113,10 +112,8 @@
       "^@booking/(.*)$": "<rootDir>/booking/$1",
       "^@conversation/(.*)$": "<rootDir>/conversation/$1",
       "^@auth/(.*)$": "<rootDir>/auth/$1",
-      "^@availability/(.*)$": "<rootDir>/availability/$1"
-    },
-    "transformIgnorePatterns": [
-      "node_modules/(?!(uuid)/)"
-    ]
+      "^@availability/(.*)$": "<rootDir>/availability/$1",
+      "^@test-utils/(.*)$": "<rootDir>/test-utils/$1"
+    }
   }
 }

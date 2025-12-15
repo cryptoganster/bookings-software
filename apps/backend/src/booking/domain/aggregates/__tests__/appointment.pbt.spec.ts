@@ -2,6 +2,7 @@ import * as fc from 'fast-check';
 import { Appointment } from '../appointment';
 import { UUID } from '@shared/vo/uuid';
 import { DateTime } from '../../vo/date-time';
+import { uuidV4 } from '@test-utils/generators';
 
 /**
  * Feature: proyecto-base-mvp, Property 1: Aggregate version increments on state changes
@@ -13,10 +14,10 @@ describe('Appointment Property-Based Tests', () => {
       fc.assert(
         fc.property(
           // Generadores de datos aleatorios
-          fc.uuid(),
-          fc.uuid(),
-          fc.uuid(),
-          fc.uuid(),
+          uuidV4(),
+          uuidV4(),
+          uuidV4(),
+          uuidV4(),
           fc.integer({ min: 1, max: 365 }), // días en el futuro
           (idStr, businessIdStr, customerIdStr, offeringIdStr, daysInFuture) => {
             // Crear UUIDs
@@ -51,10 +52,10 @@ describe('Appointment Property-Based Tests', () => {
     it('should increment version on cancel', () => {
       fc.assert(
         fc.property(
-          fc.uuid(),
-          fc.uuid(),
-          fc.uuid(),
-          fc.uuid(),
+          uuidV4(),
+          uuidV4(),
+          uuidV4(),
+          uuidV4(),
           fc.integer({ min: 3, max: 365 }), // días en el futuro (más de 2 horas)
           (idStr, businessIdStr, customerIdStr, offeringIdStr, daysInFuture) => {
             const id = UUID.fromString(idStr);
@@ -92,10 +93,10 @@ describe('Appointment Property-Based Tests', () => {
     it('should increment version on modify', () => {
       fc.assert(
         fc.property(
-          fc.uuid(),
-          fc.uuid(),
-          fc.uuid(),
-          fc.uuid(),
+          uuidV4(),
+          uuidV4(),
+          uuidV4(),
+          uuidV4(),
           fc.integer({ min: 1, max: 365 }),
           fc.integer({ min: 1, max: 365 }),
           (idStr, businessIdStr, customerIdStr, offeringIdStr, daysInFuture1, daysInFuture2) => {
@@ -140,10 +141,10 @@ describe('Appointment Property-Based Tests', () => {
     it('should increment version multiple times with multiple state changes', () => {
       fc.assert(
         fc.property(
-          fc.uuid(),
-          fc.uuid(),
-          fc.uuid(),
-          fc.uuid(),
+          uuidV4(),
+          uuidV4(),
+          uuidV4(),
+          uuidV4(),
           fc.array(fc.integer({ min: 1, max: 365 }), { minLength: 2, maxLength: 5 }),
           (idStr, businessIdStr, customerIdStr, offeringIdStr, daysArray) => {
             const id = UUID.fromString(idStr);
@@ -200,10 +201,10 @@ describe('Appointment Property-Based Tests', () => {
     it('should create appointment with correct initial state (verifies AppointmentCreated event was applied)', () => {
       fc.assert(
         fc.property(
-          fc.uuid(),
-          fc.uuid(),
-          fc.uuid(),
-          fc.uuid(),
+          uuidV4(),
+          uuidV4(),
+          uuidV4(),
+          uuidV4(),
           fc.integer({ min: 1, max: 365 }),
           (idStr, businessIdStr, customerIdStr, offeringIdStr, daysInFuture) => {
             const id = UUID.fromString(idStr);
@@ -241,10 +242,10 @@ describe('Appointment Property-Based Tests', () => {
     it('should cancel appointment with correct state (verifies AppointmentCancelled event was applied)', () => {
       fc.assert(
         fc.property(
-          fc.uuid(),
-          fc.uuid(),
-          fc.uuid(),
-          fc.uuid(),
+          uuidV4(),
+          uuidV4(),
+          uuidV4(),
+          uuidV4(),
           fc.integer({ min: 3, max: 365 }),
           (idStr, businessIdStr, customerIdStr, offeringIdStr, daysInFuture) => {
             const id = UUID.fromString(idStr);
@@ -284,10 +285,10 @@ describe('Appointment Property-Based Tests', () => {
     it('should modify appointment with correct state (verifies AppointmentModified event was applied)', () => {
       fc.assert(
         fc.property(
-          fc.uuid(),
-          fc.uuid(),
-          fc.uuid(),
-          fc.uuid(),
+          uuidV4(),
+          uuidV4(),
+          uuidV4(),
+          uuidV4(),
           fc.integer({ min: 1, max: 365 }),
           fc.integer({ min: 1, max: 365 }),
           (idStr, businessIdStr, customerIdStr, offeringIdStr, daysInFuture1, daysInFuture2) => {
@@ -332,10 +333,10 @@ describe('Appointment Property-Based Tests', () => {
     it('should maintain correct state through multiple modifications (verifies multiple events were applied)', () => {
       fc.assert(
         fc.property(
-          fc.uuid(),
-          fc.uuid(),
-          fc.uuid(),
-          fc.uuid(),
+          uuidV4(),
+          uuidV4(),
+          uuidV4(),
+          uuidV4(),
           fc.integer({ min: 1, max: 10 }),
           (idStr, businessIdStr, customerIdStr, offeringIdStr, numModifications) => {
             const id = UUID.fromString(idStr);

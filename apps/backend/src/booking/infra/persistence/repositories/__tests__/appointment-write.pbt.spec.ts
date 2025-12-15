@@ -10,6 +10,7 @@ import { DateTime } from '@booking/domain/vo/date-time';
 import { AppointmentStatus } from '@booking/domain/vo/appointment-status';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 import { IUnitOfWork } from '@shared/kernel/uow';
+import { uuidV4 } from '@test-utils/generators';
 
 describe('AppointmentWriteRepository - Property Tests', () => {
   let repository: AppointmentWriteRepository;
@@ -50,10 +51,10 @@ describe('AppointmentWriteRepository - Property Tests', () => {
   it('should prevent concurrent modifications with same initial version', async () => {
     await fc.assert(
       fc.asyncProperty(
-        fc.uuid(),
-        fc.uuid(),
-        fc.uuid(),
-        fc.uuid(),
+        uuidV4(),
+        uuidV4(),
+        uuidV4(),
+        uuidV4(),
         fc.integer({ min: 0, max: 10 }),
         async (id, businessId, customerId, offeringId, initialVersion) => {
           // Arrange - Create two appointments with the same ID and version

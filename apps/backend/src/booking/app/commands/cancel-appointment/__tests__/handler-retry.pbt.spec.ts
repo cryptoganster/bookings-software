@@ -8,6 +8,7 @@ import { Appointment } from '@booking/domain/aggregates/appointment';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 import { UUID } from '@shared/vo/uuid';
 import { DateTime } from '@booking/domain/vo/date-time';
+import { uuidV4 } from '@test-utils/generators';
 
 describe('CancelAppointmentHandler - Property Tests', () => {
   let handler: CancelAppointmentHandler;
@@ -49,10 +50,10 @@ describe('CancelAppointmentHandler - Property Tests', () => {
   it('should always retry on ConcurrencyException with exponential backoff', async () => {
     await fc.assert(
       fc.asyncProperty(
-        fc.uuid(),
-        fc.uuid(),
-        fc.uuid(),
-        fc.uuid(),
+        uuidV4(),
+        uuidV4(),
+        uuidV4(),
+        uuidV4(),
         fc.integer({ min: 1, max: 2 }), // Number of failures before success (1 or 2)
         async (id, businessId, customerId, offeringId, failureCount) => {
           // Reset mocks for each iteration
@@ -124,10 +125,10 @@ describe('CancelAppointmentHandler - Property Tests', () => {
   it('should fail after max retries on persistent ConcurrencyException', async () => {
     await fc.assert(
       fc.asyncProperty(
-        fc.uuid(),
-        fc.uuid(),
-        fc.uuid(),
-        fc.uuid(),
+        uuidV4(),
+        uuidV4(),
+        uuidV4(),
+        uuidV4(),
         async (id, businessId, customerId, offeringId) => {
           // Reset mocks for each iteration
           jest.clearAllMocks();
