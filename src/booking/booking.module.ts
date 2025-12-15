@@ -28,6 +28,9 @@ import { AppointmentNotificationSaga } from './app/sagas/appointment-notificatio
 import { AppointmentWriteRepository } from './infra/persistence/repositories/appointment-write';
 import { AppointmentReadRepository } from './infra/persistence/repositories/appointment-read';
 
+// Controllers
+import { AppointmentController } from './presentation/controllers/appointment.controller';
+
 const CommandHandlers = [
   CreateAppointmentHandler,
   CancelAppointmentHandler,
@@ -42,6 +45,7 @@ const Sagas = [AppointmentNotificationSaga];
 
 @Module({
   imports: [CqrsModule, TypeOrmModule.forFeature([AppointmentModel]), AvailabilityModule],
+  controllers: [AppointmentController],
   providers: [
     // Command Handlers
     ...CommandHandlers,
