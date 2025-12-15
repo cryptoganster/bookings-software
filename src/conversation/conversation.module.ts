@@ -24,14 +24,15 @@ import { WhatsAppSignatureGuard } from './presentation/guards/whatsapp-signature
 class MockConversationWriteRepository {
   private conversations = new Map();
 
-  async findByCustomerIdAndBusinessId(customerId: any, businessId: any): Promise<any> {
+  findByCustomerIdAndBusinessId(customerId: any, businessId: any): Promise<any> {
     const key = `${customerId.getValue()}-${businessId.getValue()}`;
-    return this.conversations.get(key) || null;
+    return Promise.resolve(this.conversations.get(key) || null);
   }
 
-  async save(conversation: any): Promise<void> {
+  save(conversation: any): Promise<void> {
     const key = `${conversation.getCustomerId().getValue()}-${conversation.getBusinessId().getValue()}`;
     this.conversations.set(key, conversation);
+    return Promise.resolve();
   }
 }
 

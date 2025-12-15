@@ -39,7 +39,7 @@ export class WhatsAppBusinessApiClient implements IWhatsAppClient {
           text: { body: message },
         });
         return;
-      } catch (error) {
+      } catch {
         attempt++;
         if (attempt >= maxRetries) {
           throw new Error(`Failed to send WhatsApp message after ${maxRetries} attempts`);
@@ -75,7 +75,7 @@ export class WhatsAppBusinessApiClient implements IWhatsAppClient {
           },
         });
         return;
-      } catch (error) {
+      } catch {
         attempt++;
         if (attempt >= maxRetries) {
           throw new Error(
@@ -106,7 +106,7 @@ export class WhatsAppBusinessApiClient implements IWhatsAppClient {
           },
         });
         return;
-      } catch (error) {
+      } catch {
         attempt++;
         if (attempt >= maxRetries) {
           throw new Error(`Failed to send WhatsApp location after ${maxRetries} attempts`);

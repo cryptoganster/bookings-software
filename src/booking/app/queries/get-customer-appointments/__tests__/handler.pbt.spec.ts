@@ -65,7 +65,7 @@ describe('GetCustomerAppointmentsHandler - Property Tests', () => {
         async (id, businessId, customerId, offeringId, dateTime) => {
           // Arrange - Crear un appointment en la BD
           const appointmentRepo = dataSource.getRepository(AppointmentModel);
-          
+
           try {
             await appointmentRepo.save({
               id,

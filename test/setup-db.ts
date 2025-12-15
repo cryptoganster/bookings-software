@@ -51,14 +51,14 @@ export function createTestDataSource(): DataSource {
  */
 export async function setupTestDatabase(): Promise<DataSource> {
   const dataSource = createTestDataSource();
-  
+
   if (!dataSource.isInitialized) {
     await dataSource.initialize();
   }
-  
+
   // Limpiar antes de cada test
   await cleanDatabase(dataSource);
-  
+
   return dataSource;
 }
 
