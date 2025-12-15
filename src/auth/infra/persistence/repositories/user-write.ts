@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { IUserWriteRepository } from '@auth/domain/interfaces/repositories/user-write';
@@ -14,6 +14,7 @@ export class UserWriteRepository implements IUserWriteRepository {
   constructor(
     @InjectRepository(UserModel)
     private readonly repository: Repository<UserModel>,
+    @Inject('IUnitOfWork')
     private readonly uow: IUnitOfWork,
   ) {}
 
