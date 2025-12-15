@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { CapacityModel } from '@availability/infra/persistence/models/capacity';
 import { ICapacityReadRepository } from '@availability/domain/interfaces/repositories/capacity-read';
 import { CapacityReadModel } from '@availability/domain/read-models/capacity';
-import { CapacityReadMapper } from '../mappers/capacity-read';
+import { CapacityReadMapper } from '@availability/infra/persistence/mappers/capacity-read';
 
 @Injectable()
 export class CapacityReadRepository implements ICapacityReadRepository {
