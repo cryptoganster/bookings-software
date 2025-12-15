@@ -1,19 +1,19 @@
 /**
  * @bookings/shared-types
- * 
+ *
  * API CONTRACT LAYER - Siguiendo Clean Architecture y DDD
- * 
+ *
  * Este package define el CONTRATO entre Backend y Frontend.
  * Representa la capa de "Ports" en Hexagonal Architecture.
- * 
+ *
  * PRINCIPIOS:
  * 1. Backend y Frontend dependen de ESTE contrato (Dependency Inversion)
  * 2. Este package NO depende de backend ni frontend
  * 3. Define la forma de los datos que viajan por la API (DTOs)
  * 4. Es la "verdad única" para la comunicación entre capas
- * 
+ *
  * ARQUITECTURA:
- * 
+ *
  *     ┌─────────────────────────────────────────┐
  *     │         @bookings/shared-types          │
  *     │         (API Contract Layer)            │
@@ -29,7 +29,7 @@
  *     │   - Implementa DTOs │  │  - Consume DTOs  │
  *     │   - Mapea a Domain  │  │  - Usa para API  │
  *     └─────────────────────┘  └──────────────────┘
- * 
+ *
  * VENTAJAS:
  * ✅ Sin acoplamiento entre backend y frontend
  * ✅ Backend puede cambiar su dominio interno sin afectar frontend
@@ -102,7 +102,7 @@ export interface AppointmentDto {
 /**
  * Status de una cita
  */
-export type AppointmentStatus = 'CONFIRMED' | 'CANCELLED' | 'COMPLETED';
+export type AppointmentStatus = "CONFIRMED" | "CANCELLED" | "COMPLETED";
 
 /**
  * DTO para crear una cita

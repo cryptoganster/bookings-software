@@ -5,6 +5,7 @@
 ## 🎯 Propósito
 
 Este package define el **contrato de API** entre backend y frontend, siguiendo los principios de:
+
 - **Clean Architecture** - Dependency Inversion Principle
 - **Hexagonal Architecture** - Ports & Adapters
 - **DDD** - Bounded Context boundaries
@@ -42,15 +43,18 @@ Este package define el **contrato de API** entre backend y frontend, siguiendo l
 ## 📦 Qué Contiene
 
 ### DTOs de Request/Response
+
 - Tipos que viajan por la API (HTTP)
 - Formato JSON serializable
 - Fechas como strings ISO 8601
 
 ### Tipos de Dominio Públicos
+
 - Enums y tipos compartidos
 - Status, roles, etc.
 
 ### NO Contiene
+
 - ❌ Lógica de negocio
 - ❌ Validaciones (eso va en backend)
 - ❌ Clases con métodos
@@ -79,10 +83,13 @@ async login(@Body() dto: LoginRequestDto): Promise<LoginResponseDto> {
 
 ```typescript
 // Consumir el contrato
-import { LoginRequestDto, LoginResponseDto } from '@bookings/shared-types';
+import { LoginRequestDto, LoginResponseDto } from "@bookings/shared-types";
 
 async function login(credentials: LoginRequestDto): Promise<LoginResponseDto> {
-  const response = await apiClient.post<LoginResponseDto>('/auth/login', credentials);
+  const response = await apiClient.post<LoginResponseDto>(
+    "/auth/login",
+    credentials,
+  );
   return response.data;
 }
 ```
@@ -90,21 +97,25 @@ async function login(credentials: LoginRequestDto): Promise<LoginResponseDto> {
 ## 📋 Tipos Incluidos
 
 ### Authentication
+
 - `LoginRequestDto`, `LoginResponseDto`
 - `RegisterRequestDto`
 - `UserDto`
 
 ### Appointments
+
 - `AppointmentDto`
 - `CreateAppointmentRequestDto`, `CreateAppointmentResponseDto`
 - `AppointmentFiltersDto`
 - `AppointmentStatus`
 
 ### Offerings
+
 - `OfferingDto`
 - `CreateOfferingRequestDto`
 
 ### Generic
+
 - `PaginatedResponseDto<T>`
 - `ApiErrorDto`
 - `SuccessResponseDto<T>`, `ErrorResponseDto`
@@ -138,10 +149,13 @@ export interface UserDtoV2 { ... }
 ## 🎓 Principios Aplicados
 
 ### Dependency Inversion Principle (SOLID)
+
 Backend y Frontend dependen de la abstracción (este contrato), no entre sí.
 
 ### Ports & Adapters (Hexagonal)
+
 Este package define los "Ports" (interfaces) que ambos lados implementan.
 
 ### Bounded Context (DDD)
+
 Define el límite entre contextos, la "Published Language" del sistema.

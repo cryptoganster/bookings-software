@@ -49,9 +49,7 @@ describe('AppointmentController', () => {
 
       const result = await controller.findAll(user);
 
-      expect(queryBus.execute).toHaveBeenCalledWith(
-        new GetCustomerAppointmentsQuery('user-123'),
-      );
+      expect(queryBus.execute).toHaveBeenCalledWith(new GetCustomerAppointmentsQuery('user-123'));
       expect(result).toEqual(mockAppointments);
     });
   });

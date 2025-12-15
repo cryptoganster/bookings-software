@@ -47,6 +47,7 @@ npm run migration:run
 ```
 
 **Salida esperada:**
+
 ```
 ✅ EnableUuidExtension1702550000000 has been executed successfully
 ✅ CreateAppointmentsTable1702551000000 has been executed successfully
@@ -61,6 +62,7 @@ npm run seed
 ```
 
 **Salida esperada:**
+
 ```
 ✅ Database connection established
 🧹 Cleaning existing data...
@@ -115,12 +117,12 @@ psql -U postgres -d bookings_dev
 SELECT id, email, name FROM users;
 
 -- Ver capacidades
-SELECT offering_id, date, total_slots, available_slots 
-FROM capacities 
+SELECT offering_id, date, total_slots, available_slots
+FROM capacities
 LIMIT 10;
 
 -- Ver citas
-SELECT id, business_id, customer_id, date_time, status 
+SELECT id, business_id, customer_id, date_time, status
 FROM appointments;
 ```
 
@@ -164,6 +166,7 @@ npm test
 ### Error: "relation does not exist"
 
 **Solución:** Ejecutar migraciones
+
 ```bash
 npm run build
 npm run migration:run
@@ -172,6 +175,7 @@ npm run migration:run
 ### Error: "password authentication failed"
 
 **Solución:** Verificar credenciales en `.env`
+
 ```bash
 # Verificar que DB_USERNAME y DB_PASSWORD sean correctos
 cat .env | grep DB_
@@ -180,6 +184,7 @@ cat .env | grep DB_
 ### Error: "database does not exist"
 
 **Solución:** Crear la base de datos
+
 ```bash
 psql -U postgres -c "CREATE DATABASE bookings_dev;"
 ```
@@ -187,6 +192,7 @@ psql -U postgres -c "CREATE DATABASE bookings_dev;"
 ### Error: "Cannot find module"
 
 **Solución:** Compilar el proyecto
+
 ```bash
 npm run build
 ```
@@ -210,17 +216,20 @@ npm run seed
 ## 📊 Estructura de Datos Creada
 
 ### Usuario de Prueba
+
 - **Email:** test@example.com
 - **Password:** Test123!
 - Puedes usar estas credenciales para login en el panel web
 
 ### Capacidades
+
 - 90 registros (3 offerings × 30 días)
 - Offering 1: 8 slots/día
 - Offering 2: 12 slots/día
 - Offering 3: 4 slots/día
 
 ### Citas
+
 - 2 citas de ejemplo para los próximos días
 - Estado: CONFIRMED
 - Las capacidades están actualizadas para reflejar estas citas
@@ -228,11 +237,13 @@ npm run seed
 ## 🎯 Próximos Pasos
 
 1. **Iniciar la aplicación:**
+
    ```bash
    npm run start:dev
    ```
 
 2. **Probar el login:**
+
    ```bash
    curl -X POST http://localhost:3000/api/auth/login \
      -H "Content-Type: application/json" \

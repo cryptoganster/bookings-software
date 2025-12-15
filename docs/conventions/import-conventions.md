@@ -12,18 +12,20 @@ Este documento define las convenciones de imports para el monorepo.
 
 ```typescript
 // ✅ Correcto
-import type { AppointmentDto } from '@packages/shared-types';
-import { validateEmail } from '@packages/shared-utils';
+import type { AppointmentDto } from "@packages/shared-types";
+import { validateEmail } from "@packages/shared-utils";
 
 // ❌ Incorrecto
-import type { AppointmentDto } from '@shared/types'; // Ambiguo
-import type { AppointmentDto } from '../../../packages/shared-types'; // Relativo
+import type { AppointmentDto } from "@shared/types"; // Ambiguo
+import type { AppointmentDto } from "../../../packages/shared-types"; // Relativo
 ```
 
 **Packages actuales:**
+
 - `@packages/shared-types` - Tipos TypeScript compartidos (API Contract Layer)
 
 **Packages futuros:**
+
 - `@packages/shared-utils` - Utilidades compartidas
 - `@packages/shared-config` - Configuración compartida
 
@@ -37,16 +39,17 @@ import type { AppointmentDto } from '../../../packages/shared-types'; // Relativ
 
 ```typescript
 // ✅ Correcto - Frontend
-import { apiClient } from '@shared/api';
-import { formatDate } from '@shared/lib/date';
-import { ENDPOINTS } from '@shared/api/endpoints';
+import { apiClient } from "@shared/api";
+import { formatDate } from "@shared/lib/date";
+import { ENDPOINTS } from "@shared/api/endpoints";
 
 // ✅ Correcto - Backend
-import { IUnitOfWork } from '@shared/kernel/uow';
-import { UUID } from '@shared/vo/uuid';
+import { IUnitOfWork } from "@shared/kernel/uow";
+import { UUID } from "@shared/vo/uuid";
 ```
 
 **Contenido típico:**
+
 - `api/` - Cliente HTTP, endpoints
 - `config/` - Configuración de la app
 - `lib/` - Utilidades específicas de la app
@@ -60,13 +63,13 @@ import { UUID } from '@shared/vo/uuid';
 ### `@app/*` - App Layer (Frontend FSD)
 
 **Ubicación:** `apps/frontend/src/app/`  
-**Propósito:** Inicialización y configuración global del frontend  
+**Propósito:** Inicialización y configuración global del frontend
 
 ```typescript
 // ✅ Correcto
-import { QueryProvider } from '@app/providers';
-import { router } from '@app/router';
-import { useAuthStore } from '@app/store/auth';
+import { QueryProvider } from "@app/providers";
+import { router } from "@app/router";
+import { useAuthStore } from "@app/store/auth";
 ```
 
 ---
@@ -78,8 +81,8 @@ import { useAuthStore } from '@app/store/auth';
 
 ```typescript
 // ✅ Correcto
-import { DashboardPage } from '@pages/DashboardPage';
-import { LoginPage } from '@pages/LoginPage';
+import { DashboardPage } from "@pages/DashboardPage";
+import { LoginPage } from "@pages/LoginPage";
 ```
 
 ---
@@ -91,8 +94,8 @@ import { LoginPage } from '@pages/LoginPage';
 
 ```typescript
 // ✅ Correcto
-import { StatsCards } from '@widgets/StatsCards';
-import { UpcomingAppointments } from '@widgets/UpcomingAppointments';
+import { StatsCards } from "@widgets/StatsCards";
+import { UpcomingAppointments } from "@widgets/UpcomingAppointments";
 ```
 
 ---
@@ -104,8 +107,8 @@ import { UpcomingAppointments } from '@widgets/UpcomingAppointments';
 
 ```typescript
 // ✅ Correcto
-import { LoginForm } from '@features/auth/login';
-import { CancelAppointmentButton } from '@features/appointment/cancel';
+import { LoginForm } from "@features/auth/login";
+import { CancelAppointmentButton } from "@features/appointment/cancel";
 ```
 
 ---
@@ -117,8 +120,8 @@ import { CancelAppointmentButton } from '@features/appointment/cancel';
 
 ```typescript
 // ✅ Correcto
-import { AppointmentCard } from '@entities/appointment';
-import { useAppointments } from '@entities/appointment';
+import { AppointmentCard } from "@entities/appointment";
+import { useAppointments } from "@entities/appointment";
 ```
 
 ---
@@ -129,19 +132,20 @@ import { useAppointments } from '@entities/appointment';
 
 ```typescript
 // ✅ Correcto
-import { apiClient } from '@shared/api';
-import type { AppointmentDto } from '@packages/shared-types';
+import { apiClient } from "@shared/api";
+import type { AppointmentDto } from "@packages/shared-types";
 
 // ❌ Evitar
-import { apiClient } from '../../../shared/api';
-import type { AppointmentDto } from '../../../../packages/shared-types';
+import { apiClient } from "../../../shared/api";
+import type { AppointmentDto } from "../../../../packages/shared-types";
 ```
 
 **Excepción:** Imports dentro del mismo directorio o subdirectorio inmediato:
+
 ```typescript
 // ✅ Aceptable
-import { LoginForm } from './ui/LoginForm';
-import { useLogin } from './model/useLogin';
+import { LoginForm } from "./ui/LoginForm";
+import { useLogin } from "./model/useLogin";
 ```
 
 ---
@@ -151,22 +155,22 @@ import { useLogin } from './model/useLogin';
 ```typescript
 // ✅ Correcto - Agrupados y ordenados
 // 1. Node modules
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 // 2. Packages del monorepo
-import type { AppointmentDto } from '@packages/shared-types';
+import type { AppointmentDto } from "@packages/shared-types";
 
 // 3. Shared de la app
-import { apiClient } from '@shared/api';
-import { formatDate } from '@shared/lib/date';
+import { apiClient } from "@shared/api";
+import { formatDate } from "@shared/lib/date";
 
 // 4. Capas FSD (app, pages, widgets, features, entities)
-import { useAuthStore } from '@app/store/auth';
-import { AppointmentCard } from '@entities/appointment';
+import { useAuthStore } from "@app/store/auth";
+import { AppointmentCard } from "@entities/appointment";
 
 // 5. Relativos (mismo módulo)
-import { LoginForm } from './ui/LoginForm';
+import { LoginForm } from "./ui/LoginForm";
 ```
 
 ---
@@ -175,11 +179,11 @@ import { LoginForm } from './ui/LoginForm';
 
 ```typescript
 // ✅ Correcto - Explícito que es solo tipo
-import type { AppointmentDto } from '@packages/shared-types';
-import type { AppointmentFilters } from '@shared/api/types';
+import type { AppointmentDto } from "@packages/shared-types";
+import type { AppointmentFilters } from "@shared/api/types";
 
 // ❌ Evitar - Ambiguo
-import { AppointmentDto } from '@packages/shared-types';
+import { AppointmentDto } from "@packages/shared-types";
 ```
 
 **Ventaja:** TypeScript puede eliminar estos imports en el bundle (tree-shaking)
@@ -191,11 +195,11 @@ import { AppointmentDto } from '@packages/shared-types';
 ```typescript
 // ❌ Incorrecto - Re-exportar desde shared-types
 // apps/frontend/src/shared/api/types.ts
-export type { AppointmentDto } from '@packages/shared-types';
+export type { AppointmentDto } from "@packages/shared-types";
 
 // ✅ Correcto - Importar directamente
 // apps/frontend/src/features/appointment/list/ui/AppointmentsList.tsx
-import type { AppointmentDto } from '@packages/shared-types';
+import type { AppointmentDto } from "@packages/shared-types";
 ```
 
 **Razón:** Hace explícito el origen del tipo (contrato de API)
@@ -246,19 +250,19 @@ import type { AppointmentDto } from '@packages/shared-types';
 
 ```typescript
 // apps/frontend/vite.config.ts
-import { defineConfig } from 'vite';
-import path from 'path';
+import { defineConfig } from "vite";
+import path from "path";
 
 export default defineConfig({
   resolve: {
     alias: {
-      '@packages': path.resolve(__dirname, '../../packages'),
-      '@shared': path.resolve(__dirname, './src/shared'),
-      '@app': path.resolve(__dirname, './src/app'),
-      '@pages': path.resolve(__dirname, './src/pages'),
-      '@widgets': path.resolve(__dirname, './src/widgets'),
-      '@features': path.resolve(__dirname, './src/features'),
-      '@entities': path.resolve(__dirname, './src/entities'),
+      "@packages": path.resolve(__dirname, "../../packages"),
+      "@shared": path.resolve(__dirname, "./src/shared"),
+      "@app": path.resolve(__dirname, "./src/app"),
+      "@pages": path.resolve(__dirname, "./src/pages"),
+      "@widgets": path.resolve(__dirname, "./src/widgets"),
+      "@features": path.resolve(__dirname, "./src/features"),
+      "@entities": path.resolve(__dirname, "./src/entities"),
     },
   },
 });
@@ -274,22 +278,22 @@ export default defineConfig({
 // apps/frontend/src/features/appointment/list/ui/AppointmentsList.tsx
 
 // 1. Node modules
-import { useState } from 'react';
-import { Table, Badge } from '@mantine/core';
+import { useState } from "react";
+import { Table, Badge } from "@mantine/core";
 
 // 2. Packages del monorepo
-import type { AppointmentDto, AppointmentStatus } from '@packages/shared-types';
+import type { AppointmentDto, AppointmentStatus } from "@packages/shared-types";
 
 // 3. Shared de la app
-import { ENDPOINTS } from '@shared/api/endpoints';
-import { formatDate } from '@shared/lib/date';
-import { APPOINTMENT_STATUS_COLORS } from '@shared/config/constants';
+import { ENDPOINTS } from "@shared/api/endpoints";
+import { formatDate } from "@shared/lib/date";
+import { APPOINTMENT_STATUS_COLORS } from "@shared/config/constants";
 
 // 4. Entities
-import { useAppointments } from '@entities/appointment';
+import { useAppointments } from "@entities/appointment";
 
 // 5. Relativos
-import { AppointmentFilters } from './AppointmentFilters';
+import { AppointmentFilters } from "./AppointmentFilters";
 
 export function AppointmentsList() {
   // Component implementation
@@ -302,25 +306,24 @@ export function AppointmentsList() {
 // apps/backend/src/appointment/app/commands/create-appointment/handler.ts
 
 // 1. Node modules
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 
 // 2. Packages del monorepo
-import type { CreateAppointmentResponseDto } from '@packages/shared-types';
+import type { CreateAppointmentResponseDto } from "@packages/shared-types";
 
 // 3. Shared del backend
-import { IUnitOfWork } from '@shared/kernel/uow';
-import { UUID } from '@shared/vo/uuid';
+import { IUnitOfWork } from "@shared/kernel/uow";
+import { UUID } from "@shared/vo/uuid";
 
 // 4. Domain del mismo BC
-import { Appointment } from '../../domain/aggregates/appointment';
-import { IAppointmentWriteRepository } from '../../domain/interfaces/repositories/appointment-write';
+import { Appointment } from "../../domain/aggregates/appointment";
+import { IAppointmentWriteRepository } from "../../domain/interfaces/repositories/appointment-write";
 
 // 5. Relativos
-import { CreateAppointmentCommand } from './command';
+import { CreateAppointmentCommand } from "./command";
 
 @CommandHandler(CreateAppointmentCommand)
-export class CreateAppointmentHandler 
-  implements ICommandHandler<CreateAppointmentCommand> {
+export class CreateAppointmentHandler implements ICommandHandler<CreateAppointmentCommand> {
   // Handler implementation
 }
 ```

@@ -1,5 +1,5 @@
-import { format, parseISO } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { format, parseISO } from "date-fns";
+import { es } from "date-fns/locale";
 
 /**
  * Formatea una fecha en formato legible
@@ -9,9 +9,9 @@ import { es } from 'date-fns/locale';
  */
 export function formatDate(
   date: Date | string | number,
-  formatStr: string = 'dd/MM/yyyy'
+  formatStr: string = "dd/MM/yyyy",
 ): string {
-  const dateObj = typeof date === 'string' ? parseISO(date) : new Date(date);
+  const dateObj = typeof date === "string" ? parseISO(date) : new Date(date);
   return format(dateObj, formatStr, { locale: es });
 }
 
@@ -23,9 +23,9 @@ export function formatDate(
  */
 export function formatTime(
   date: Date | string | number,
-  formatStr: string = 'HH:mm'
+  formatStr: string = "HH:mm",
 ): string {
-  const dateObj = typeof date === 'string' ? parseISO(date) : new Date(date);
+  const dateObj = typeof date === "string" ? parseISO(date) : new Date(date);
   return format(dateObj, formatStr, { locale: es });
 }
 
@@ -37,9 +37,9 @@ export function formatTime(
  */
 export function formatDateTime(
   date: Date | string | number,
-  formatStr: string = 'dd/MM/yyyy HH:mm'
+  formatStr: string = "dd/MM/yyyy HH:mm",
 ): string {
-  const dateObj = typeof date === 'string' ? parseISO(date) : new Date(date);
+  const dateObj = typeof date === "string" ? parseISO(date) : new Date(date);
   return format(dateObj, formatStr, { locale: es });
 }
 
@@ -49,7 +49,7 @@ export function formatDateTime(
  * @returns Fecha en formato relativo
  */
 export function formatRelativeDate(date: Date | string | number): string {
-  const dateObj = typeof date === 'string' ? parseISO(date) : new Date(date);
+  const dateObj = typeof date === "string" ? parseISO(date) : new Date(date);
   const now = new Date();
   const diffInMs = dateObj.getTime() - now.getTime();
   const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
@@ -57,24 +57,24 @@ export function formatRelativeDate(date: Date | string | number): string {
   const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
 
   if (Math.abs(diffInMinutes) < 1) {
-    return 'ahora';
+    return "ahora";
   }
 
   if (Math.abs(diffInMinutes) < 60) {
     return diffInMinutes > 0
-      ? `en ${diffInMinutes} minuto${diffInMinutes !== 1 ? 's' : ''}`
-      : `hace ${Math.abs(diffInMinutes)} minuto${Math.abs(diffInMinutes) !== 1 ? 's' : ''}`;
+      ? `en ${diffInMinutes} minuto${diffInMinutes !== 1 ? "s" : ""}`
+      : `hace ${Math.abs(diffInMinutes)} minuto${Math.abs(diffInMinutes) !== 1 ? "s" : ""}`;
   }
 
   if (Math.abs(diffInHours) < 24) {
     return diffInHours > 0
-      ? `en ${diffInHours} hora${diffInHours !== 1 ? 's' : ''}`
-      : `hace ${Math.abs(diffInHours)} hora${Math.abs(diffInHours) !== 1 ? 's' : ''}`;
+      ? `en ${diffInHours} hora${diffInHours !== 1 ? "s" : ""}`
+      : `hace ${Math.abs(diffInHours)} hora${Math.abs(diffInHours) !== 1 ? "s" : ""}`;
   }
 
   return diffInDays > 0
-    ? `en ${diffInDays} día${diffInDays !== 1 ? 's' : ''}`
-    : `hace ${Math.abs(diffInDays)} día${Math.abs(diffInDays) !== 1 ? 's' : ''}`;
+    ? `en ${diffInDays} día${diffInDays !== 1 ? "s" : ""}`
+    : `hace ${Math.abs(diffInDays)} día${Math.abs(diffInDays) !== 1 ? "s" : ""}`;
 }
 
 /**
@@ -83,8 +83,8 @@ export function formatRelativeDate(date: Date | string | number): string {
  * @returns Día de la semana (ej: "Lunes", "Martes")
  */
 export function formatDayOfWeek(date: Date | string | number): string {
-  const dateObj = typeof date === 'string' ? parseISO(date) : new Date(date);
-  return format(dateObj, 'EEEE', { locale: es });
+  const dateObj = typeof date === "string" ? parseISO(date) : new Date(date);
+  return format(dateObj, "EEEE", { locale: es });
 }
 
 /**
@@ -93,6 +93,6 @@ export function formatDayOfWeek(date: Date | string | number): string {
  * @returns Mes y año (ej: "Diciembre 2024")
  */
 export function formatMonthYear(date: Date | string | number): string {
-  const dateObj = typeof date === 'string' ? parseISO(date) : new Date(date);
-  return format(dateObj, 'MMMM yyyy', { locale: es });
+  const dateObj = typeof date === "string" ? parseISO(date) : new Date(date);
+  return format(dateObj, "MMMM yyyy", { locale: es });
 }

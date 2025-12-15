@@ -99,29 +99,29 @@
 
 ### Backend
 
-| Capa | Responsabilidad | Conoce |
-|------|----------------|--------|
-| **Domain** | Lógica de negocio | Solo sí mismo |
-| **Application** | Casos de uso | Domain |
-| **Presentation** | API HTTP, Mappers | Application + **shared-types** |
-| **Infrastructure** | BD, APIs externas | Domain interfaces |
+| Capa               | Responsabilidad   | Conoce                         |
+| ------------------ | ----------------- | ------------------------------ |
+| **Domain**         | Lógica de negocio | Solo sí mismo                  |
+| **Application**    | Casos de uso      | Domain                         |
+| **Presentation**   | API HTTP, Mappers | Application + **shared-types** |
+| **Infrastructure** | BD, APIs externas | Domain interfaces              |
 
 ### Frontend
 
-| Capa | Responsabilidad | Conoce |
-|------|----------------|--------|
-| **UI** | Componentes React | API Layer |
-| **API** | HTTP Client | **shared-types** |
-| **State** | Zustand, TanStack Query | API Layer |
-| **Utils** | Helpers, formatters | Nada específico |
+| Capa      | Responsabilidad         | Conoce           |
+| --------- | ----------------------- | ---------------- |
+| **UI**    | Componentes React       | API Layer        |
+| **API**   | HTTP Client             | **shared-types** |
+| **State** | Zustand, TanStack Query | API Layer        |
+| **Utils** | Helpers, formatters     | Nada específico  |
 
 ### Shared Types
 
-| Responsabilidad | NO Conoce |
-|----------------|-----------|
-| Definir contratos | Backend Domain |
-| DTOs de API | Frontend UI |
-| Tipos públicos | Implementaciones |
+| Responsabilidad   | NO Conoce        |
+| ----------------- | ---------------- |
+| Definir contratos | Backend Domain   |
+| DTOs de API       | Frontend UI      |
+| Tipos públicos    | Implementaciones |
 
 ## 🎨 Patrones Aplicados
 
@@ -170,7 +170,7 @@ Todos los Bounded Contexts lo entienden
 
 ```typescript
 // Frontend importa del backend - ACOPLAMIENTO
-import { UserReadModel } from '../../../apps/backend/src/auth/domain/read-models/user';
+import { UserReadModel } from "../../../apps/backend/src/auth/domain/read-models/user";
 
 // Problemas:
 // - Frontend conoce estructura interna del backend
@@ -183,7 +183,7 @@ import { UserReadModel } from '../../../apps/backend/src/auth/domain/read-models
 
 ```typescript
 // Ambos usan el contrato - SIN ACOPLAMIENTO
-import { UserDto } from '@bookings/shared-types';
+import { UserDto } from "@bookings/shared-types";
 
 // Ventajas:
 // - Frontend solo conoce el contrato
@@ -274,6 +274,7 @@ Agregar nuevos endpoints no modifica contratos existentes
 ## 📝 Checklist de Implementación
 
 ### Backend
+
 - [ ] Crear Mappers (Domain → DTO)
 - [ ] Controllers usan DTOs de shared-types
 - [ ] Validación con class-validator en DTOs internos
@@ -281,6 +282,7 @@ Agregar nuevos endpoints no modifica contratos existentes
 - [ ] Tests de controllers con DTOs
 
 ### Frontend
+
 - [ ] API Client usa DTOs de shared-types
 - [ ] Hooks tipados con DTOs
 - [ ] Components usan hooks tipados
@@ -288,6 +290,7 @@ Agregar nuevos endpoints no modifica contratos existentes
 - [ ] Error handling con ApiErrorDto
 
 ### Shared Types
+
 - [x] DTOs definidos
 - [x] Tipos públicos definidos
 - [x] Documentación completa
@@ -297,6 +300,7 @@ Agregar nuevos endpoints no modifica contratos existentes
 ## ✨ Resultado Final
 
 Una arquitectura:
+
 - ✅ **Desacoplada**: Backend y Frontend independientes
 - ✅ **Escalable**: Soporta crecimiento sin refactoring
 - ✅ **Mantenible**: Cambios localizados

@@ -1,5 +1,5 @@
-import { toZonedTime, fromZonedTime, format } from 'date-fns-tz';
-import { parseISO } from 'date-fns';
+import { toZonedTime, fromZonedTime, format } from "date-fns-tz";
+import { parseISO } from "date-fns";
 
 /**
  * Convierte una fecha UTC a una zona horaria específica
@@ -9,9 +9,9 @@ import { parseISO } from 'date-fns';
  */
 export function convertToTimezone(
   date: Date | string | number,
-  timezone: string
+  timezone: string,
 ): Date {
-  const dateObj = typeof date === 'string' ? parseISO(date) : new Date(date);
+  const dateObj = typeof date === "string" ? parseISO(date) : new Date(date);
   return toZonedTime(dateObj, timezone);
 }
 
@@ -23,9 +23,9 @@ export function convertToTimezone(
  */
 export function convertFromTimezone(
   date: Date | string | number,
-  timezone: string
+  timezone: string,
 ): Date {
-  const dateObj = typeof date === 'string' ? parseISO(date) : new Date(date);
+  const dateObj = typeof date === "string" ? parseISO(date) : new Date(date);
   return fromZonedTime(dateObj, timezone);
 }
 
@@ -39,9 +39,9 @@ export function convertFromTimezone(
 export function formatInTimezone(
   date: Date | string | number,
   timezone: string,
-  formatStr: string = 'yyyy-MM-dd HH:mm:ss zzz'
+  formatStr: string = "yyyy-MM-dd HH:mm:ss zzz",
 ): string {
-  const dateObj = typeof date === 'string' ? parseISO(date) : new Date(date);
+  const dateObj = typeof date === "string" ? parseISO(date) : new Date(date);
   return format(dateObj, formatStr, { timeZone: timezone });
 }
 
@@ -61,10 +61,10 @@ export function getUserTimezone(): string {
  */
 export function getTimezoneOffset(
   timezone: string,
-  date: Date = new Date()
+  date: Date = new Date(),
 ): number {
-  const utcDate = new Date(date.toLocaleString('en-US', { timeZone: 'UTC' }));
-  const tzDate = new Date(date.toLocaleString('en-US', { timeZone: timezone }));
+  const utcDate = new Date(date.toLocaleString("en-US", { timeZone: "UTC" }));
+  const tzDate = new Date(date.toLocaleString("en-US", { timeZone: timezone }));
   return (tzDate.getTime() - utcDate.getTime()) / (1000 * 60);
 }
 
@@ -76,18 +76,18 @@ export function getTimezoneOffset(
  */
 export function isDaylightSavingTime(
   date: Date | string | number,
-  timezone: string
+  timezone: string,
 ): boolean {
-  const dateObj = typeof date === 'string' ? parseISO(date) : new Date(date);
-  
+  const dateObj = typeof date === "string" ? parseISO(date) : new Date(date);
+
   // Obtener offset en enero (invierno) y julio (verano)
   const january = new Date(dateObj.getFullYear(), 0, 1);
   const july = new Date(dateObj.getFullYear(), 6, 1);
-  
+
   const janOffset = getTimezoneOffset(timezone, january);
   const julOffset = getTimezoneOffset(timezone, july);
   const currentOffset = getTimezoneOffset(timezone, dateObj);
-  
+
   // Si el offset actual es diferente al de invierno, está en DST
   return Math.max(janOffset, julOffset) === currentOffset;
 }
@@ -97,9 +97,7 @@ export function isDaylightSavingTime(
  * @param serverDate - Fecha del servidor en UTC (Date, string ISO, o timestamp)
  * @returns Fecha en la zona horaria del usuario
  */
-export function serverToUserTimezone(
-  serverDate: Date | string | number
-): Date {
+export function serverToUserTimezone(serverDate: Date | string | number): Date {
   const userTimezone = getUserTimezone();
   return convertToTimezone(serverDate, userTimezone);
 }
@@ -109,9 +107,7 @@ export function serverToUserTimezone(
  * @param userDate - Fecha en zona horaria del usuario (Date, string ISO, o timestamp)
  * @returns Fecha en UTC
  */
-export function userToServerTimezone(
-  userDate: Date | string | number
-): Date {
+export function userToServerTimezone(userDate: Date | string | number): Date {
   const userTimezone = getUserTimezone();
   return convertFromTimezone(userDate, userTimezone);
 }

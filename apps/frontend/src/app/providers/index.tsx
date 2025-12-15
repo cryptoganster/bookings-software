@@ -1,6 +1,6 @@
-import type { ReactNode } from 'react';
-import { QueryProvider } from './QueryProvider';
-import { MantineProvider } from './MantineProvider';
+import type { ReactNode } from "react";
+import { QueryProvider } from "./QueryProvider";
+import { MantineProvider } from "./MantineProvider";
 
 interface AppProvidersProps {
   children: ReactNode;
@@ -9,9 +9,7 @@ interface AppProvidersProps {
 export function AppProviders({ children }: AppProvidersProps) {
   return (
     <QueryProvider>
-      <MantineProvider>
-        {children}
-      </MantineProvider>
+      <MantineProvider>{children}</MantineProvider>
     </QueryProvider>
   );
 }

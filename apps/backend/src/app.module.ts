@@ -54,7 +54,13 @@ import { ConversationModule } from '@conversation/conversation.module';
 
         // Serializers personalizados
         serializers: {
-          req: (req: { id: string; method: string; url: string; query: unknown; params: unknown }) => ({
+          req: (req: {
+            id: string;
+            method: string;
+            url: string;
+            query: unknown;
+            params: unknown;
+          }) => ({
             id: req.id,
             method: req.method,
             url: req.url,

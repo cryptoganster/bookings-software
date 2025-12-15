@@ -15,8 +15,8 @@
 
 ```typescript
 // apps/backend/src/auth/presentation/mappers/user.mapper.ts
-import { UserDto } from '@bookings/shared-types';
-import { UserReadModel } from '../../domain/read-models/user';
+import { UserDto } from "@bookings/shared-types";
+import { UserReadModel } from "../../domain/read-models/user";
 
 export class UserMapper {
   /**
@@ -31,7 +31,7 @@ export class UserMapper {
       createdAt: user.createdAt.toISOString(), // Date → ISO string
     };
   }
-  
+
   /**
    * Convierte múltiples Read Models a DTOs
    */
@@ -45,72 +45,70 @@ export class UserMapper {
 
 ```typescript
 // apps/backend/src/auth/presentation/controllers/auth.controller.ts
-import { Controller, Post, Body, Get, UseGuards } from '@nestjs/common';
-import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { 
-  LoginRequestDto, 
+import { Controller, Post, Body, Get, UseGuards } from "@nestjs/common";
+import { CommandBus, QueryBus } from "@nestjs/cqrs";
+import {
+  LoginRequestDto,
   LoginResponseDto,
   RegisterRequestDto,
-  UserDto 
-} from '@bookings/shared-types';
-import { UserMapper } from '../mappers/user.mapper';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { CurrentUser } from '../decorators/current-user.decorator';
+  UserDto,
+} from "@bookings/shared-types";
+import { UserMapper } from "../mappers/user.mapper";
+import { JwtAuthGuard } from "../guards/jwt-auth.guard";
+import { CurrentUser } from "../decorators/current-user.decorator";
 
-@Controller('auth')
+@Controller("auth")
 export class AuthController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
   ) {}
-  
+
   /**
    * POST /auth/login
    * Request: LoginRequestDto
    * Response: LoginResponseDto
    */
-  @Post('login')
+  @Post("login")
   async login(@Body() dto: LoginRequestDto): Promise<LoginResponseDto> {
     // 1. Ejecutar comando de dominio
     const result = await this.commandBus.execute(
-      new LoginCommand(dto.email, dto.password)
+      new LoginCommand(dto.email, dto.password),
     );
-    
+
     // 2. Mapear resultado a DTO
     return {
       user: UserMapper.toDto(result.user),
-      token: result.token
+      token: result.token,
     };
   }
-  
+
   /**
    * POST /auth/register
    * Request: RegisterRequestDto
    * Response: LoginResponseDto
    */
-  @Post('register')
+  @Post("register")
   async register(@Body() dto: RegisterRequestDto): Promise<LoginResponseDto> {
     const result = await this.commandBus.execute(
-      new RegisterCommand(dto.email, dto.password, dto.name)
+      new RegisterCommand(dto.email, dto.password, dto.name),
     );
-    
+
     return {
       user: UserMapper.toDto(result.user),
-      token: result.token
+      token: result.token,
     };
   }
-  
+
   /**
    * GET /auth/me
    * Response: UserDto
    */
-  @Get('me')
+  @Get("me")
   @UseGuards(JwtAuthGuard)
   async getMe(@CurrentUser() userId: string): Promise<UserDto> {
-    const user = await this.queryBus.execute(
-      new GetUserQuery(userId)
-    );
-    
+    const user = await this.queryBus.execute(new GetUserQuery(userId));
+
     return UserMapper.toDto(user);
   }
 }
@@ -120,8 +118,8 @@ export class AuthController {
 
 ```typescript
 // apps/backend/src/auth/presentation/dtos/login.dto.ts
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
-import { LoginRequestDto } from '@bookings/shared-types';
+import { IsEmail, IsNotEmpty, IsString, MinLength } from "class-validator";
+import { LoginRequestDto } from "@bookings/shared-types";
 
 /**
  * DTO interno del backend con validaciones
@@ -147,13 +145,13 @@ export class LoginDto implements LoginRequestDto {
 
 ```typescript
 // apps/frontend/src/shared/api/auth.api.ts
-import { 
-  LoginRequestDto, 
+import {
+  LoginRequestDto,
   LoginResponseDto,
   RegisterRequestDto,
-  UserDto 
-} from '@bookings/shared-types';
-import { apiClient } from './client';
+  UserDto,
+} from "@bookings/shared-types";
+import { apiClient } from "./client";
 
 export const authApi = {
   /**
@@ -161,30 +159,30 @@ export const authApi = {
    */
   login: async (credentials: LoginRequestDto): Promise<LoginResponseDto> => {
     const response = await apiClient.post<LoginResponseDto>(
-      '/auth/login',
-      credentials
+      "/auth/login",
+      credentials,
     );
     return response.data;
   },
-  
+
   /**
    * POST /auth/register
    */
   register: async (data: RegisterRequestDto): Promise<LoginResponseDto> => {
     const response = await apiClient.post<LoginResponseDto>(
-      '/auth/register',
-      data
+      "/auth/register",
+      data,
     );
     return response.data;
   },
-  
+
   /**
    * GET /auth/me
    */
   getMe: async (): Promise<UserDto> => {
-    const response = await apiClient.get<UserDto>('/auth/me');
+    const response = await apiClient.get<UserDto>("/auth/me");
     return response.data;
-  }
+  },
 };
 ```
 
@@ -192,10 +190,10 @@ export const authApi = {
 
 ```typescript
 // apps/frontend/src/features/auth/login/model/useLogin.ts
-import { useMutation } from '@tanstack/react-query';
-import { LoginRequestDto, LoginResponseDto } from '@bookings/shared-types';
-import { authApi } from '@shared/api/auth.api';
-import { useAuthStore } from '@app/store/auth.store';
+import { useMutation } from "@tanstack/react-query";
+import { LoginRequestDto, LoginResponseDto } from "@bookings/shared-types";
+import { authApi } from "@shared/api/auth.api";
+import { useAuthStore } from "@app/store/auth.store";
 
 export function useLogin() {
   return useMutation<LoginResponseDto, Error, LoginRequestDto>({
@@ -206,8 +204,8 @@ export function useLogin() {
       useAuthStore.getState().login(data.user, data.token);
     },
     onError: (error) => {
-      console.error('Login failed:', error);
-    }
+      console.error("Login failed:", error);
+    },
   });
 }
 ```
@@ -230,15 +228,15 @@ const loginSchema = z.object({
 
 export function LoginForm() {
   const { mutate: login, isPending } = useLogin();
-  
+
   const { register, handleSubmit, formState: { errors } } = useForm<LoginRequestDto>({
     resolver: zodResolver(loginSchema)
   });
-  
+
   const onSubmit = (data: LoginRequestDto) => {
     login(data);
   };
-  
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <input
@@ -247,14 +245,14 @@ export function LoginForm() {
         {...register('email')}
       />
       {errors.email && <span>{errors.email.message}</span>}
-      
+
       <input
         type="password"
         placeholder="Password"
         {...register('password')}
       />
       {errors.password && <span>{errors.password.message}</span>}
-      
+
       <button type="submit" disabled={isPending}>
         {isPending ? 'Logging in...' : 'Login'}
       </button>
@@ -280,10 +278,10 @@ const onSubmit = (data: LoginRequestDto) => {
 
 ```typescript
 // Frontend: auth.api.ts
-const response = await apiClient.post<LoginResponseDto>(
-  '/auth/login',
-  { email: 'user@example.com', password: 'password123' }
-);
+const response = await apiClient.post<LoginResponseDto>("/auth/login", {
+  email: "user@example.com",
+  password: "password123",
+});
 ```
 
 ### 3. Backend recibe y valida
@@ -311,7 +309,7 @@ if (!isValid) throw new UnauthorizedException();
 // Backend: auth.controller.ts
 return {
   user: UserMapper.toDto(user), // Domain → DTO
-  token: this.jwtService.sign({ userId: user.id })
+  token: this.jwtService.sign({ userId: user.id }),
 };
 ```
 
@@ -323,8 +321,8 @@ onSuccess: (data: LoginResponseDto) => {
   // data.user: UserDto
   // data.token: string
   useAuthStore.getState().login(data.user, data.token);
-  navigate('/dashboard');
-}
+  navigate("/dashboard");
+};
 ```
 
 ---
@@ -348,42 +346,42 @@ export class AppointmentMapper {
       dateTime: appointment.dateTime.toISOString(),
       status: appointment.status,
       createdAt: appointment.createdAt.toISOString(),
-      cancelledAt: appointment.cancelledAt?.toISOString() ?? null
+      cancelledAt: appointment.cancelledAt?.toISOString() ?? null,
     };
   }
 }
 
 // 2. Controller
-@Controller('appointments')
+@Controller("appointments")
 export class AppointmentController {
   @Post()
   @UseGuards(JwtAuthGuard)
   async create(
     @Body() dto: CreateAppointmentRequestDto,
-    @CurrentUser() userId: string
+    @CurrentUser() userId: string,
   ): Promise<CreateAppointmentResponseDto> {
     const result = await this.commandBus.execute(
       new CreateAppointmentCommand(
         userId,
         dto.customerId,
         dto.offeringId,
-        new Date(dto.dateTime) // ISO string → Date
-      )
+        new Date(dto.dateTime), // ISO string → Date
+      ),
     );
-    
+
     return { appointmentId: result.appointmentId };
   }
-  
+
   @Get()
   @UseGuards(JwtAuthGuard)
   async findAll(
     @Query() filters: AppointmentFiltersDto,
-    @CurrentUser() userId: string
+    @CurrentUser() userId: string,
   ): Promise<AppointmentDto[]> {
     const appointments = await this.queryBus.execute(
-      new GetAppointmentsQuery(userId, filters)
+      new GetAppointmentsQuery(userId, filters),
     );
-    
+
     return appointments.map(AppointmentMapper.toDto);
   }
 }
@@ -395,30 +393,29 @@ export class AppointmentController {
 // 1. API
 export const appointmentsApi = {
   create: async (
-    data: CreateAppointmentRequestDto
+    data: CreateAppointmentRequestDto,
   ): Promise<CreateAppointmentResponseDto> => {
     const response = await apiClient.post<CreateAppointmentResponseDto>(
-      '/appointments',
-      data
+      "/appointments",
+      data,
     );
     return response.data;
   },
-  
+
   getAll: async (
-    filters?: AppointmentFiltersDto
+    filters?: AppointmentFiltersDto,
   ): Promise<AppointmentDto[]> => {
-    const response = await apiClient.get<AppointmentDto[]>(
-      '/appointments',
-      { params: filters }
-    );
+    const response = await apiClient.get<AppointmentDto[]>("/appointments", {
+      params: filters,
+    });
     return response.data;
-  }
+  },
 };
 
 // 2. Hooks
 export function useCreateAppointment() {
   const queryClient = useQueryClient();
-  
+
   return useMutation<
     CreateAppointmentResponseDto,
     Error,
@@ -427,30 +424,30 @@ export function useCreateAppointment() {
     mutationFn: appointmentsApi.create,
     onSuccess: () => {
       // Invalidar queries para refetch
-      queryClient.invalidateQueries({ queryKey: ['appointments'] });
-    }
+      queryClient.invalidateQueries({ queryKey: ["appointments"] });
+    },
   });
 }
 
 export function useAppointments(filters?: AppointmentFiltersDto) {
   return useQuery<AppointmentDto[], Error>({
-    queryKey: ['appointments', filters],
-    queryFn: () => appointmentsApi.getAll(filters)
+    queryKey: ["appointments", filters],
+    queryFn: () => appointmentsApi.getAll(filters),
   });
 }
 
 // 3. Component
 export function CreateAppointmentForm() {
   const { mutate: createAppointment } = useCreateAppointment();
-  
+
   const onSubmit = (data: CreateAppointmentRequestDto) => {
     createAppointment(data, {
       onSuccess: (response) => {
-        console.log('Created:', response.appointmentId);
-      }
+        console.log("Created:", response.appointmentId);
+      },
     });
   };
-  
+
   // ... form UI
 }
 ```

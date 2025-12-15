@@ -1,5 +1,5 @@
-import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
-import { env } from '@shared/config/env';
+import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
+import { env } from "@shared/config/env";
 
 /**
  * Axios instance configured for the backend API
@@ -9,7 +9,7 @@ export const apiClient = axios.create({
   baseURL: env.apiUrl,
   timeout: 10000,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
@@ -19,26 +19,26 @@ export const apiClient = axios.create({
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     // Get token from localStorage (will be managed by auth store)
-    const authStorage = localStorage.getItem('auth-storage');
-    
+    const authStorage = localStorage.getItem("auth-storage");
+
     if (authStorage) {
       try {
         const { state } = JSON.parse(authStorage);
         const token = state?.token;
-        
+
         if (token && config.headers) {
           config.headers.Authorization = `Bearer ${token}`;
         }
       } catch (error) {
-        console.error('Error parsing auth storage:', error);
+        console.error("Error parsing auth storage:", error);
       }
     }
-    
+
     return config;
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 /**
@@ -50,22 +50,22 @@ apiClient.interceptors.response.use(
     // Handle 401 Unauthorized - token expired or invalid
     if (error.response?.status === 401) {
       // Clear auth storage
-      localStorage.removeItem('auth-storage');
-      
+      localStorage.removeItem("auth-storage");
+
       // Redirect to login page
-      window.location.href = '/login';
+      window.location.href = "/login";
     }
-    
+
     // Handle 404 Not Found
     if (error.response?.status === 404) {
-      console.error('Resource not found:', error.config?.url);
+      console.error("Resource not found:", error.config?.url);
     }
-    
+
     // Handle 500 Server Error
     if (error.response?.status && error.response.status >= 500) {
-      console.error('Server error:', error.message);
+      console.error("Server error:", error.message);
     }
-    
+
     return Promise.reject(error);
-  }
+  },
 );

@@ -1,28 +1,28 @@
 /**
  * Frontend-Specific API Types
- * 
+ *
  * ⚠️ IMPORTANTE: Este archivo SOLO debe contener tipos específicos del frontend
  * que NO pertenecen al contrato de API.
- * 
+ *
  * ✅ USAR ESTE ARCHIVO PARA:
  * - Tipos de UI state (filtros, preferencias, etc.)
  * - Agregaciones específicas del frontend (DashboardStats)
  * - Tipos temporales mientras el backend no los implementa (marcados con TODO)
- * 
+ *
  * ❌ NO USAR ESTE ARCHIVO PARA:
  * - DTOs del backend (AppointmentDto, OfferingDto, etc.)
  * - Tipos del contrato de API
  * - Re-exportar tipos de @packages/shared-types
- * 
+ *
  * 📦 PARA TIPOS DEL CONTRATO DE API:
  * Importar DIRECTAMENTE desde @packages/shared-types:
- * 
+ *
  *   import type { AppointmentDto } from '@packages/shared-types';
- * 
+ *
  * 📚 CONVENCIONES:
  * - @packages/* = packages/ del monorepo (compartido entre apps)
  * - @shared/*   = src/shared/ de esta app (interno)
- * 
+ *
  * Ver: docs/conventions/import-conventions.md
  */
 
@@ -45,7 +45,7 @@ export interface DashboardStats {
  * Extends the API filters with UI-specific fields
  */
 export interface AppointmentFilters {
-  status?: import('@packages/shared-types').AppointmentStatus;
+  status?: import("@packages/shared-types").AppointmentStatus;
   dateRange?: [Date, Date]; // UI uses Date objects, API uses ISO strings
   offeringId?: string;
 }
@@ -85,7 +85,7 @@ export interface ConversationReadModel {
   customerId: string;
   customerPhone: string;
   customerName: string | null;
-  status: 'ACTIVE' | 'AWAITING_ADMIN' | 'RESOLVED';
+  status: "ACTIVE" | "AWAITING_ADMIN" | "RESOLVED";
   lastMessageAt: Date;
   unreadCount: number;
 }
@@ -97,13 +97,12 @@ export interface ConversationReadModel {
 export interface MessageReadModel {
   id: string;
   conversationId: string;
-  direction: 'INBOUND' | 'OUTBOUND';
+  direction: "INBOUND" | "OUTBOUND";
   content: string;
-  messageType: 'TEXT' | 'BUTTON' | 'LOCATION';
+  messageType: "TEXT" | "BUTTON" | "LOCATION";
   sentAt: Date;
   isFromAdmin: boolean;
 }
-
 
 // ============================================================================
 // EJEMPLO DE USO CORRECTO
@@ -111,23 +110,23 @@ export interface MessageReadModel {
 
 /**
  * ✅ CORRECTO - Importar DTOs del contrato directamente:
- * 
- * import type { 
- *   AppointmentDto, 
+ *
+ * import type {
+ *   AppointmentDto,
  *   OfferingDto,
- *   AppointmentStatus 
+ *   AppointmentStatus
  * } from '@packages/shared-types';
- * 
- * import type { 
+ *
+ * import type {
  *   DashboardStats,
- *   AppointmentFilters 
+ *   AppointmentFilters
  * } from '@shared/api/types';
- * 
+ *
  * ❌ INCORRECTO - No re-exportar ni duplicar:
- * 
+ *
  * // NO hacer esto:
  * export type { AppointmentDto } from '@packages/shared-types';
- * 
+ *
  * // NO hacer esto:
  * export interface AppointmentDto { ... } // Duplicación
  */

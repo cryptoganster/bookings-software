@@ -275,12 +275,12 @@ mkdir -p src/nuevo-bc/presentation/controllers
 
 ```typescript
 // src/nuevo-bc/domain/aggregates/mi-aggregate.ts
-import { VersionedAggregateRoot } from '@shared/kernel/versioned-aggregate-root';
-import { UUID } from '@shared/vo/uuid';
+import { VersionedAggregateRoot } from "@shared/kernel/versioned-aggregate-root";
+import { UUID } from "@shared/vo/uuid";
 
 export class MiAggregate extends VersionedAggregateRoot {
   private id: UUID;
-  
+
   static create(id: UUID, ...params): MiAggregate {
     const aggregate = new MiAggregate();
     aggregate.id = id;
@@ -288,7 +288,7 @@ export class MiAggregate extends VersionedAggregateRoot {
     aggregate.apply(new MiAggregateCreated(id.getValue()));
     return aggregate;
   }
-  
+
   // Métodos de negocio...
 }
 ```
@@ -297,7 +297,7 @@ export class MiAggregate extends VersionedAggregateRoot {
 
 ```typescript
 // src/nuevo-bc/app/commands/mi-command/command.ts
-import { Command } from '@nestjs/cqrs';
+import { Command } from "@nestjs/cqrs";
 
 export class MiCommand extends Command<{ id: string }> {
   constructor(public readonly param: string) {
@@ -306,7 +306,7 @@ export class MiCommand extends Command<{ id: string }> {
 }
 
 // src/nuevo-bc/app/commands/mi-command/handler.ts
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 
 @CommandHandler(MiCommand)
 export class MiCommandHandler implements ICommandHandler<MiCommand> {
@@ -320,8 +320,8 @@ export class MiCommandHandler implements ICommandHandler<MiCommand> {
 
 ```typescript
 // src/nuevo-bc/nuevo-bc.module.ts
-import { Module } from '@nestjs/common';
-import { CqrsModule } from '@nestjs/cqrs';
+import { Module } from "@nestjs/common";
+import { CqrsModule } from "@nestjs/cqrs";
 
 @Module({
   imports: [CqrsModule],
@@ -341,7 +341,7 @@ export class NuevoBcModule {}
 
 ```typescript
 // src/app.module.ts
-import { NuevoBcModule } from './nuevo-bc/nuevo-bc.module';
+import { NuevoBcModule } from "./nuevo-bc/nuevo-bc.module";
 
 @Module({
   imports: [
@@ -407,7 +407,7 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para
 
 ## 👥 Autores
 
-- **Bryan Stevens** - *Desarrollo Inicial* - [cryptoganster](https://github.com/cryptoganster)
+- **Bryan Stevens** - _Desarrollo Inicial_ - [cryptoganster](https://github.com/cryptoganster)
 
 ## 🙏 Agradecimientos
 

@@ -33,41 +33,41 @@ export const PAGINATION = {
  * Appointment status labels
  */
 export const APPOINTMENT_STATUS_LABELS = {
-  CONFIRMED: 'Confirmada',
-  CANCELLED: 'Cancelada',
-  COMPLETED: 'Completada',
+  CONFIRMED: "Confirmada",
+  CANCELLED: "Cancelada",
+  COMPLETED: "Completada",
 } as const;
 
 /**
  * Appointment status colors (for Mantine)
  */
 export const APPOINTMENT_STATUS_COLORS = {
-  CONFIRMED: 'green',
-  CANCELLED: 'red',
-  COMPLETED: 'gray',
+  CONFIRMED: "green",
+  CANCELLED: "red",
+  COMPLETED: "gray",
 } as const;
 
 /**
  * Days of week
  */
 export const DAYS_OF_WEEK = [
-  'Domingo',
-  'Lunes',
-  'Martes',
-  'Miércoles',
-  'Jueves',
-  'Viernes',
-  'Sábado',
+  "Domingo",
+  "Lunes",
+  "Martes",
+  "Miércoles",
+  "Jueves",
+  "Viernes",
+  "Sábado",
 ] as const;
 
 /**
  * Date format patterns
  */
 export const DATE_FORMATS = {
-  SHORT: 'dd/MM/yyyy',
-  LONG: 'EEEE, dd MMMM yyyy',
-  TIME: 'HH:mm',
-  DATETIME: 'dd/MM/yyyy HH:mm',
+  SHORT: "dd/MM/yyyy",
+  LONG: "EEEE, dd MMMM yyyy",
+  TIME: "HH:mm",
+  DATETIME: "dd/MM/yyyy HH:mm",
 } as const;
 
 /**
@@ -83,9 +83,9 @@ export const NOTIFICATION_DURATION = {
  * Local storage keys
  */
 export const STORAGE_KEYS = {
-  AUTH: 'auth-storage',
-  THEME: 'theme-preference',
-  LANGUAGE: 'language-preference',
+  AUTH: "auth-storage",
+  THEME: "theme-preference",
+  LANGUAGE: "language-preference",
 } as const;
 
 /**

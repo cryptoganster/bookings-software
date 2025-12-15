@@ -76,7 +76,7 @@ describe('Conversational Booking Flow (e2e)', () => {
     // Limpiar base de datos
     await dataSource.query('DELETE FROM appointments');
     await dataSource.query('DELETE FROM capacities');
-    
+
     // Limpiar conversaciones en memoria
     conversationsStore.clear();
   });
@@ -86,7 +86,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       // Crear capacidad disponible para pruebas
       // Usamos un UUID real para el offering
       const offeringId = testOfferingId;
-      
+
       // Create tomorrow's date in UTC to avoid timezone issues
       const tomorrow = new Date();
       tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
@@ -123,7 +123,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       // Usar el UUID del offering directamente como buttonId
       sentMessages = [];
       mockWhatsAppClient.sendInteractiveButtons.mockClear();
-      
+
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
@@ -219,7 +219,7 @@ describe('Conversational Booking Flow (e2e)', () => {
     it('debe permitir cambiar la selección antes de confirmar', async () => {
       // Crear capacidad disponible
       const offeringId = testOfferingId;
-      
+
       // Create tomorrow's date in UTC to avoid timezone issues
       const tomorrow = new Date();
       tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
@@ -314,7 +314,7 @@ describe('Conversational Booking Flow (e2e)', () => {
     it('debe manejar cuando el slot ya no está disponible al confirmar', async () => {
       // Crear capacidad con solo 1 slot disponible
       const offeringId = testOfferingId;
-      
+
       // Create tomorrow's date in UTC to avoid timezone issues
       const tomorrow = new Date();
       tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
@@ -419,7 +419,7 @@ describe('Conversational Booking Flow (e2e)', () => {
     it('debe permitir seleccionar otro horario después de que uno no esté disponible', async () => {
       // Crear capacidad con 2 slots disponibles
       const offeringId = testOfferingId;
-      
+
       // Create tomorrow's date in UTC to avoid timezone issues
       const tomorrow = new Date();
       tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);

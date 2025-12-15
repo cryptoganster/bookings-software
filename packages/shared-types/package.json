@@ -8,7 +8,11 @@
     "build": "tsc",
     "clean": "rm -rf dist"
   },
-  "keywords": ["types", "typescript", "shared"],
+  "keywords": [
+    "types",
+    "typescript",
+    "shared"
+  ],
   "author": "",
   "license": "MIT",
   "devDependencies": {

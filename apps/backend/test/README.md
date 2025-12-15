@@ -34,6 +34,7 @@ Las bases de datos se crean **una sola vez** usando el script:
 ```
 
 Este script:
+
 - ✅ Crea 10 bases de datos (bookings_test_1 a bookings_test_10)
 - ✅ Es idempotente (puede ejecutarse múltiples veces sin problemas)
 - ✅ Solo crea las DBs que no existen
@@ -52,11 +53,11 @@ beforeEach(async () => {
 
 #### ¿Por qué limpiar tablas en lugar de eliminar DBs?
 
-| Operación | Tiempo | Impacto |
-|-----------|--------|---------|
-| Crear/Eliminar DB | ~500ms | ❌ Muy lento |
-| Limpiar tablas (TRUNCATE) | ~10ms | ✅ Rápido |
-| clear() de TypeORM | ~50ms | ⚠️ Medio |
+| Operación                 | Tiempo | Impacto      |
+| ------------------------- | ------ | ------------ |
+| Crear/Eliminar DB         | ~500ms | ❌ Muy lento |
+| Limpiar tablas (TRUNCATE) | ~10ms  | ✅ Rápido    |
+| clear() de TypeORM        | ~50ms  | ⚠️ Medio     |
 
 **Resultado**: Los tests son **50x más rápidos** limpiando tablas que creando/eliminando DBs.
 
@@ -75,7 +76,7 @@ describe('MyRepository Integration Tests', () => {
     module = await Test.createTestingModule({
       imports: [TypeOrmModule.forRoot({ ... })],
     }).compile();
-    
+
     dataSource = module.get<DataSource>(DataSource);
   });
 
@@ -109,7 +110,7 @@ describe('MyService Unit Tests', () => {
       save: jest.fn(),
       findById: jest.fn(),
     } as any;
-    
+
     service = new MyService(mockRepository);
   });
 
@@ -123,11 +124,13 @@ describe('MyService Unit Tests', () => {
 ## Recursos del Sistema
 
 ### Antes (Crear/Eliminar DBs)
+
 - 🐌 Tests lentos: ~2 minutos
 - 💾 Uso de disco: Alto (crear/eliminar constantemente)
 - 🔄 Conexiones: Muchas (crear/destruir conexiones)
 
 ### Después (Limpiar Tablas)
+
 - ⚡ Tests rápidos: ~35 segundos
 - 💾 Uso de disco: Bajo (DBs permanentes, solo datos temporales)
 - 🔄 Conexiones: Pocas (reusar conexiones)
@@ -135,6 +138,7 @@ describe('MyService Unit Tests', () => {
 ### Uso de Memoria
 
 Las 10 bases de datos vacías ocupan **~50MB** en total (5MB cada una). Esto es insignificante comparado con:
+
 - Node.js runtime: ~100MB
 - Jest workers: ~200MB
 - Dependencias en memoria: ~300MB
@@ -170,8 +174,8 @@ docker exec <container_id> psql -U postgres -c "\l" | grep bookings_test
 
 # Ver tamaño de las bases de datos
 docker exec <container_id> psql -U postgres -c "
-  SELECT datname, pg_size_pretty(pg_database_size(datname)) 
-  FROM pg_database 
+  SELECT datname, pg_size_pretty(pg_database_size(datname))
+  FROM pg_database
   WHERE datname LIKE 'bookings_test%';"
 ```
 

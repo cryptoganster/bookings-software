@@ -70,31 +70,28 @@ describe('Validation Property Tests', () => {
 
     it('should reject empty required fields with detailed errors', async () => {
       await fc.assert(
-        fc.asyncProperty(
-          fc.constantFrom('email', 'password', 'name'),
-          async (fieldToOmit) => {
-            const validData = {
-              email: 'test@example.com',
-              password: 'password123',
-              name: 'Test User',
-            };
+        fc.asyncProperty(fc.constantFrom('email', 'password', 'name'), async (fieldToOmit) => {
+          const validData = {
+            email: 'test@example.com',
+            password: 'password123',
+            name: 'Test User',
+          };
 
-            // Omit one field
-            const invalidData = { ...validData };
-            delete invalidData[fieldToOmit as keyof typeof invalidData];
+          // Omit one field
+          const invalidData = { ...validData };
+          delete invalidData[fieldToOmit as keyof typeof invalidData];
 
-            const dto = plainToInstance(RegisterDto, invalidData);
-            const errors = await validate(dto);
+          const dto = plainToInstance(RegisterDto, invalidData);
+          const errors = await validate(dto);
 
-            // Should have validation errors
-            expect(errors.length).toBeGreaterThan(0);
+          // Should have validation errors
+          expect(errors.length).toBeGreaterThan(0);
 
-            // Should have error for the omitted field
-            const fieldError = errors.find((e) => e.property === fieldToOmit);
-            expect(fieldError).toBeDefined();
-            expect(fieldError?.constraints).toBeDefined();
-          },
-        ),
+          // Should have error for the omitted field
+          const fieldError = errors.find((e) => e.property === fieldToOmit);
+          expect(fieldError).toBeDefined();
+          expect(fieldError?.constraints).toBeDefined();
+        }),
         { numRuns: 100 },
       );
     });

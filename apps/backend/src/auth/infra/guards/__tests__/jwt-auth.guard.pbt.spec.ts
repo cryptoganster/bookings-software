@@ -53,10 +53,10 @@ describe('Property 14: Protected endpoints reject invalid tokens', () => {
         getResponse: () => ({}),
         getNext: () => ({}),
       }),
-      getClass: () => ({} as any),
-      getHandler: () => ({} as any),
+      getClass: () => ({}) as any,
+      getHandler: () => ({}) as any,
       getArgs: () => [],
-      getArgByIndex: () => ({} as any),
+      getArgByIndex: () => ({}) as any,
       switchToRpc: () => ({
         getData: () => ({}),
         getContext: () => ({}),

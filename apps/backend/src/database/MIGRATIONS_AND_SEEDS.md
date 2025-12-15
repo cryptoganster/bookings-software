@@ -7,6 +7,7 @@ Este documento describe las migraciones de base de datos y los seeders implement
 ## 🗄️ Migraciones Implementadas
 
 ### 1. EnableUuidExtension (1702550000000)
+
 **Archivo:** `src/database/migrations/1702550000000-EnableUuidExtension.ts`
 
 Habilita la extensión `uuid-ossp` de PostgreSQL para generar UUIDs automáticamente.
@@ -16,64 +17,70 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp"
 ```
 
 ### 2. CreateAppointmentsTable (1702551000000)
+
 **Archivo:** `src/database/migrations/1702551000000-CreateAppointmentsTable.ts`
 
 Crea la tabla `appointments` con los siguientes campos:
 
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| id | uuid | Primary key, generado automáticamente |
-| business_id | uuid | ID del negocio |
-| customer_id | uuid | ID del cliente |
-| offering_id | uuid | ID del servicio |
-| date_time | timestamp | Fecha y hora de la cita |
-| status | varchar(50) | Estado (CONFIRMED, CANCELLED, COMPLETED) |
-| version | int | Campo para Optimistic Locking (default: 0) |
-| created_at | timestamp | Fecha de creación |
-| updated_at | timestamp | Fecha de última actualización |
-| cancelled_at | timestamp | Fecha de cancelación (nullable) |
+| Campo        | Tipo        | Descripción                                |
+| ------------ | ----------- | ------------------------------------------ |
+| id           | uuid        | Primary key, generado automáticamente      |
+| business_id  | uuid        | ID del negocio                             |
+| customer_id  | uuid        | ID del cliente                             |
+| offering_id  | uuid        | ID del servicio                            |
+| date_time    | timestamp   | Fecha y hora de la cita                    |
+| status       | varchar(50) | Estado (CONFIRMED, CANCELLED, COMPLETED)   |
+| version      | int         | Campo para Optimistic Locking (default: 0) |
+| created_at   | timestamp   | Fecha de creación                          |
+| updated_at   | timestamp   | Fecha de última actualización              |
+| cancelled_at | timestamp   | Fecha de cancelación (nullable)            |
 
 **Índices:**
+
 - `IDX_APPOINTMENTS_BUSINESS_ID` en `business_id`
 - `IDX_APPOINTMENTS_CUSTOMER_ID` en `customer_id`
 
 ### 3. CreateCapacitiesTable (1702551100000)
+
 **Archivo:** `src/database/migrations/1702551100000-CreateCapacitiesTable.ts`
 
 Crea la tabla `capacities` con los siguientes campos:
 
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| id | uuid | Primary key, generado automáticamente |
-| offering_id | uuid | ID del servicio |
-| date | date | Fecha de la capacidad |
-| total_slots | int | Total de slots disponibles |
-| available_slots | int | Slots disponibles actualmente |
-| version | int | Campo para Optimistic Locking (default: 0) |
-| created_at | timestamp | Fecha de creación |
-| updated_at | timestamp | Fecha de última actualización |
+| Campo           | Tipo      | Descripción                                |
+| --------------- | --------- | ------------------------------------------ |
+| id              | uuid      | Primary key, generado automáticamente      |
+| offering_id     | uuid      | ID del servicio                            |
+| date            | date      | Fecha de la capacidad                      |
+| total_slots     | int       | Total de slots disponibles                 |
+| available_slots | int       | Slots disponibles actualmente              |
+| version         | int       | Campo para Optimistic Locking (default: 0) |
+| created_at      | timestamp | Fecha de creación                          |
+| updated_at      | timestamp | Fecha de última actualización              |
 
 **Índices:**
+
 - `IDX_CAPACITIES_OFFERING_DATE_UNIQUE` en `(offering_id, date)` - UNIQUE
 
 Este índice único garantiza que no haya duplicados de capacidad para el mismo servicio y fecha.
 
 ### 4. CreateUsersTable (1702552000000)
+
 **Archivo:** `src/database/migrations/1702552000000-CreateUsersTable.ts`
 
 Crea la tabla `users` con los siguientes campos:
 
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| id | uuid | Primary key |
-| email | varchar | Email del usuario (unique) |
-| password | varchar | Password hasheado |
-| name | varchar | Nombre del usuario |
-| businessId | uuid | ID del negocio (nullable) |
-| version | int | Campo para versioning (default: 0) |
-| createdAt | timestamp | Fecha de creación |
+| Campo      | Tipo      | Descripción                        |
+| ---------- | --------- | ---------------------------------- |
+| id         | uuid      | Primary key                        |
+| email      | varchar   | Email del usuario (unique)         |
+| password   | varchar   | Password hasheado                  |
+| name       | varchar   | Nombre del usuario                 |
+| businessId | uuid      | ID del negocio (nullable)          |
+| version    | int       | Campo para versioning (default: 0) |
+| createdAt  | timestamp | Fecha de creación                  |
 
 **Índices:**
+
 - `IDX_users_email` en `email`
 
 ## 🌱 Seeder Implementado
@@ -83,13 +90,16 @@ Crea la tabla `users` con los siguientes campos:
 El seeder crea datos de prueba para desarrollo y testing:
 
 #### 1. Usuario de Prueba
+
 - **Email:** test@example.com
 - **Password:** Test123!
 - **Nombre:** Test Business Owner
 - **Business ID:** Generado automáticamente
 
 #### 2. Offerings (IDs generados)
+
 Se generan 3 IDs de offerings ficticios:
+
 - Offering 1: Simulando "Corte de pelo" (8 slots/día)
 - Offering 2: Simulando "Lavado" (12 slots/día)
 - Offering 3: Simulando "Tinte" (4 slots/día)
@@ -97,14 +107,18 @@ Se generan 3 IDs de offerings ficticios:
 **Nota:** En una implementación completa, estos se insertarían en una tabla `offerings`.
 
 #### 3. Capacidades (30 días)
+
 Se crean capacidades para los próximos 30 días:
+
 - **Total de registros:** 90 (3 offerings × 30 días)
 - **Offering 1:** 8 slots por día
 - **Offering 2:** 12 slots por día
 - **Offering 3:** 4 slots por día
 
 #### 4. Citas de Ejemplo
+
 Se crean 2 citas de ejemplo:
+
 - **Cita 1:** Mañana a las 10:00 AM (Offering 1)
 - **Cita 2:** Pasado mañana a las 2:00 PM (Offering 2)
 
@@ -188,13 +202,13 @@ Las tablas `appointments` y `capacities` incluyen el campo `version` para implem
 ### Ejemplo de Query con Optimistic Locking
 
 ```sql
-UPDATE appointments 
-SET 
+UPDATE appointments
+SET
   status = 'CANCELLED',
   version = version + 1,
   updated_at = NOW()
-WHERE 
-  id = 'uuid-here' 
+WHERE
+  id = 'uuid-here'
   AND version = 5;  -- Verifica que la versión sea la esperada
 ```
 
@@ -210,6 +224,7 @@ npm run test:setup-db
 ```
 
 Este comando:
+
 1. Crea la base de datos de test si no existe
 2. Ejecuta todas las migraciones
 3. Ejecuta el seeder
@@ -239,26 +254,29 @@ Este comando:
 ## 🔄 Flujo de Creación de Cita
 
 1. **Verificar Capacidad:**
+
    ```sql
-   SELECT * FROM capacities 
-   WHERE offering_id = ? AND date = ? 
+   SELECT * FROM capacities
+   WHERE offering_id = ? AND date = ?
    FOR UPDATE;  -- Lock para evitar race conditions
    ```
 
 2. **Crear Cita:**
+
    ```sql
    INSERT INTO appointments (...) VALUES (...);
    ```
 
 3. **Decrementar Capacidad:**
+
    ```sql
-   UPDATE capacities 
-   SET 
+   UPDATE capacities
+   SET
      available_slots = available_slots - 1,
      version = version + 1
-   WHERE 
-     offering_id = ? 
-     AND date = ? 
+   WHERE
+     offering_id = ?
+     AND date = ?
      AND version = ?;
    ```
 

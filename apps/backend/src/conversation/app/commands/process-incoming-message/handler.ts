@@ -101,7 +101,7 @@ export class ProcessIncomingMessageHandler implements ICommandHandler<ProcessInc
           const appointmentDateTime = new Date(conversation.getSelectedDate()!);
           const selectedTime = conversation.getSelectedTime()!;
           appointmentDateTime.setHours(selectedTime.getHours(), selectedTime.getMinutes(), 0, 0);
-          
+
           const result = await this.commandBus.execute(
             new CreateAppointmentCommand(
               businessId.getValue(),
@@ -133,7 +133,7 @@ export class ProcessIncomingMessageHandler implements ICommandHandler<ProcessInc
             // Volver a selección de horario cambiando el estado
             conversation.transitionToSelectingTime();
             await this.conversationRepository.save(conversation);
-            
+
             await this.sendTimeSelectionButtons(
               command.customerPhone,
               businessId.getValue(),
@@ -284,7 +284,7 @@ export class ProcessIncomingMessageHandler implements ICommandHandler<ProcessInc
     if (buttonId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
       return buttonId;
     }
-    
+
     // TODO: En producción, esto debería consultar la BD para obtener el UUID real del offering
     // Por ahora, retornamos el buttonId tal cual para simplificar
     // Esto significa que los tests deben usar UUIDs reales como button IDs

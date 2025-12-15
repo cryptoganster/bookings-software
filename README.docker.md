@@ -35,6 +35,7 @@ docker-compose -f docker-compose.dev.yml down -v
 ### Conectarse a la Base de Datos
 
 **Credenciales por defecto:**
+
 - Host: `localhost`
 - Puerto: `5432`
 - Database: `bookings-software`
@@ -42,11 +43,13 @@ docker-compose -f docker-compose.dev.yml down -v
 - Password: `postgres`
 
 **Usando psql:**
+
 ```bash
 docker exec -it postgres psql -U postgres -d bookings-software
 ```
 
 **Usando un cliente GUI:**
+
 - DBeaver
 - pgAdmin
 - TablePlus

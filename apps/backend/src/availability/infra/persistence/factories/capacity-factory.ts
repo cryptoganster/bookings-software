@@ -25,10 +25,10 @@ export class CapacityFactory implements ICapacityFactory {
     // Normalize date to midnight UTC for comparison (only date part, no time)
     const normalizedDate = new Date(date);
     normalizedDate.setUTCHours(0, 0, 0, 0);
-    
+
     // Format date as YYYY-MM-DD for comparison
     const dateStr = normalizedDate.toISOString().split('T')[0];
-    
+
     // Use query builder to compare dates properly
     const model = await this.repository
       .createQueryBuilder('capacity')

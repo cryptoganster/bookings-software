@@ -18,9 +18,7 @@ export class AppointmentController {
   @Get()
   async findAll(@CurrentUser() user: UserPayload) {
     // Obtener citas del cliente actual
-    const appointments = await this.queryBus.execute(
-      new GetCustomerAppointmentsQuery(user.userId),
-    );
+    const appointments = await this.queryBus.execute(new GetCustomerAppointmentsQuery(user.userId));
     return appointments;
   }
 
