@@ -1,6 +1,7 @@
 import * as fc from 'fast-check';
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
+import { PinoLogger } from 'nestjs-pino';
 import { LoginHandler } from '../handler';
 import { LoginCommand } from '../command';
 import { RegisterHandler } from '../../register/handler';
@@ -69,6 +70,14 @@ describe('Property 13: JWT tokens contain valid user data', () => {
       },
     };
 
+    const mockLogger = {
+      setContext: jest.fn(),
+      info: jest.fn(),
+      error: jest.fn(),
+      warn: jest.fn(),
+      debug: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         RegisterHandler,
@@ -87,6 +96,10 @@ describe('Property 13: JWT tokens contain valid user data', () => {
             secret: 'test-secret',
             signOptions: { expiresIn: '1d' },
           }),
+        },
+        {
+          provide: PinoLogger,
+          useValue: mockLogger,
         },
       ],
     }).compile();

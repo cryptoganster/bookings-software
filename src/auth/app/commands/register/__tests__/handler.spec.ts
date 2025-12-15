@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
 import { ConflictException } from '@nestjs/common';
+import { PinoLogger } from 'nestjs-pino';
 import { RegisterHandler } from '../handler';
 import { RegisterCommand } from '../command';
 import { IUserWriteRepository } from '@auth/domain/interfaces/repositories/user-write';
@@ -29,6 +30,14 @@ describe('RegisterHandler', () => {
       sign: jest.fn(),
     };
 
+    const mockLogger = {
+      setContext: jest.fn(),
+      info: jest.fn(),
+      error: jest.fn(),
+      warn: jest.fn(),
+      debug: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         RegisterHandler,
@@ -43,6 +52,10 @@ describe('RegisterHandler', () => {
         {
           provide: JwtService,
           useValue: mockJwtService,
+        },
+        {
+          provide: PinoLogger,
+          useValue: mockLogger,
         },
       ],
     }).compile();
