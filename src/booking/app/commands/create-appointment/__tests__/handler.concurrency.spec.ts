@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { PinoLogger } from 'nestjs-pino';
 import { CreateAppointmentHandler } from '../handler';
 import { CreateAppointmentCommand } from '../command';
 import { IAppointmentWriteRepository } from '@booking/domain/interfaces/repositories/appointment-write';
@@ -33,6 +34,14 @@ describe('CreateAppointmentHandler Concurrency', () => {
       getQueryRunner: jest.fn(),
     } as any;
 
+    const mockLogger = {
+      info: jest.fn(),
+      error: jest.fn(),
+      warn: jest.fn(),
+      debug: jest.fn(),
+      setContext: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CreateAppointmentHandler,
@@ -47,6 +56,10 @@ describe('CreateAppointmentHandler Concurrency', () => {
         {
           provide: 'ICapacityWriteRepository',
           useValue: capacityWriteRepository,
+        },
+        {
+          provide: PinoLogger,
+          useValue: mockLogger,
         },
         {
           provide: 'IUnitOfWork',

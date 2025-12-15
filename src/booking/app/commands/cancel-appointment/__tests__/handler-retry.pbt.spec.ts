@@ -1,5 +1,6 @@
 import * as fc from 'fast-check';
 import { Test, TestingModule } from '@nestjs/testing';
+import { PinoLogger } from 'nestjs-pino';
 import { CancelAppointmentHandler } from '../handler';
 import { CancelAppointmentCommand } from '../command';
 import { IAppointmentWriteRepository } from '@booking/domain/interfaces/repositories/appointment-write';
@@ -18,12 +19,24 @@ describe('CancelAppointmentHandler - Property Tests', () => {
       findById: jest.fn(),
     } as any;
 
+    const mockLogger = {
+      info: jest.fn(),
+      error: jest.fn(),
+      warn: jest.fn(),
+      debug: jest.fn(),
+      setContext: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CancelAppointmentHandler,
         {
           provide: 'IAppointmentWriteRepository',
           useValue: appointmentRepository,
+        },
+        {
+          provide: PinoLogger,
+          useValue: mockLogger,
         },
       ],
     }).compile();
