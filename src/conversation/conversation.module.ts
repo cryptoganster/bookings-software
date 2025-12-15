@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 
-// Import BookingModule to access ICapacityReadRepository
-import { BookingModule } from '@booking/booking.module';
+// Import AvailabilityModule to access ICapacityReadRepository
+import { AvailabilityModule } from '@availability/availability.module';
 
 // Command Handlers
 import { ProcessIncomingMessageHandler } from './app/commands/process-incoming-message/handler';
@@ -42,7 +42,7 @@ const QueryHandlers = [GetAvailableDatesHandler, GetAvailableTimeSlotsHandler];
 @Module({
   imports: [
     CqrsModule,
-    BookingModule, // Import BookingModule to access ICapacityReadRepository
+    AvailabilityModule, // Import AvailabilityModule to access ICapacityReadRepository
   ],
   controllers: [WebhookController],
   providers: [
@@ -60,7 +60,7 @@ const QueryHandlers = [GetAvailableDatesHandler, GetAvailableTimeSlotsHandler];
       provide: 'IConversationWriteRepository',
       useClass: MockConversationWriteRepository,
     },
-    // ICapacityReadRepository is provided by BookingModule
+    // ICapacityReadRepository is provided by AvailabilityModule
 
     // External clients
     {
