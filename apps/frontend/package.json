@@ -1,5 +1,5 @@
 {
-  "name": "frontend",
+  "name": "@bookings/frontend",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -13,26 +13,30 @@
     "test:coverage": "vitest --coverage"
   },
   "dependencies": {
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "@tanstack/react-query": "^5.0.0",
-    "zustand": "^4.4.0",
-    "react-router-dom": "^6.20.0",
-    "@mantine/core": "^7.3.0",
-    "@mantine/hooks": "^7.3.0",
-    "@mantine/dates": "^7.3.0",
-    "@mantine/notifications": "^7.3.0",
-    "@mantine/modals": "^7.3.0",
-    "@tabler/icons-react": "^2.44.0",
-    "react-hook-form": "^7.49.0",
-    "zod": "^3.22.0",
+    "@bookings/shared-types": "workspace:*",
     "@hookform/resolvers": "^3.3.0",
+    "@mantine/core": "^7.3.0",
+    "@mantine/dates": "^7.3.0",
+    "@mantine/hooks": "^7.3.0",
+    "@mantine/modals": "^7.3.0",
+    "@mantine/notifications": "^7.3.0",
+    "@tabler/icons-react": "^2.44.0",
+    "@tanstack/react-query": "^5.0.0",
+    "@tanstack/react-query-devtools": "^5.91.1",
     "axios": "^1.6.0",
     "date-fns": "^3.0.0",
-    "dayjs": "^1.11.0"
+    "dayjs": "^1.11.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-hook-form": "^7.49.0",
+    "react-router-dom": "^6.20.0",
+    "zod": "^3.22.0",
+    "zustand": "^4.4.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
+    "@testing-library/react": "^14.1.0",
+    "@testing-library/user-event": "^14.5.0",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
@@ -41,12 +45,11 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
+    "jsdom": "^27.3.0",
+    "msw": "^2.0.0",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
     "vite": "^7.2.4",
-    "vitest": "^1.0.0",
-    "@testing-library/react": "^14.1.0",
-    "@testing-library/user-event": "^14.5.0",
-    "msw": "^2.0.0"
+    "vitest": "^1.0.0"
   }
 }
