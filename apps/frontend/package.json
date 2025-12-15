@@ -13,7 +13,7 @@
     "test:coverage": "vitest --coverage"
   },
   "dependencies": {
-    "@shared/types": "workspace:*",
+    "@packages/shared-types": "workspace:*",
     "@hookform/resolvers": "^3.3.0",
     "@mantine/core": "^7.3.0",
     "@mantine/dates": "^7.3.0",

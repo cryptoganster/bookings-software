@@ -1,5 +1,5 @@
 {
-  "name": "@shared/types",
+  "name": "@packages/shared-types",
   "version": "1.0.0",
   "description": "Shared TypeScript types between backend and frontend (API Contract Layer)",
   "main": "dist/index.js",

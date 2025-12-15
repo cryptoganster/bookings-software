@@ -5,10 +5,13 @@
  * al contrato de API (shared-types).
  * 
  * PRINCIPIO: Para tipos del contrato de API, importar directamente desde
- * @shared/types en lugar de re-exportarlos aquí.
+ * @packages/shared-types en lugar de re-exportarlos aquí.
  * 
  * Ejemplo:
- *   import type { AppointmentDto } from '@shared/types';
+ *   import type { AppointmentDto } from '@packages/shared-types';
+ * 
+ * NOTA: @packages/* = packages/ del monorepo (compartido entre apps)
+ *       @shared/*   = src/shared/ de esta app (interno)
  */
 
 // ============================================================================
@@ -30,7 +33,7 @@ export interface DashboardStats {
  * Extends the API filters with UI-specific fields
  */
 export interface AppointmentFilters {
-  status?: import('@shared/types').AppointmentStatus;
+  status?: import('@packages/shared-types').AppointmentStatus;
   dateRange?: [Date, Date]; // UI uses Date objects, API uses ISO strings
   offeringId?: string;
 }
