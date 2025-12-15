@@ -25,7 +25,6 @@ import { AppointmentNotificationSaga } from './app/sagas/appointment-notificatio
 // Repositories
 import { AppointmentWriteRepository } from './infra/persistence/repositories/appointment-write';
 import { AppointmentReadRepository } from './infra/persistence/repositories/appointment-read';
-import { CapacityReadRepository } from './infra/persistence/repositories/capacity-read';
 
 // Mock implementations for Capacity (will be replaced by AvailabilityModule)
 class MockCapacityFactory {
@@ -95,17 +94,12 @@ const Sagas = [AppointmentNotificationSaga];
       provide: 'ICapacityWriteRepository',
       useClass: MockCapacityWriteRepository,
     },
-    {
-      provide: 'ICapacityReadRepository',
-      useClass: CapacityReadRepository,
-    },
   ],
   exports: [
     'IAppointmentWriteRepository',
     'IAppointmentReadRepository',
     'ICapacityFactory',
     'ICapacityWriteRepository',
-    'ICapacityReadRepository',
   ],
 })
 export class BookingModule {}
