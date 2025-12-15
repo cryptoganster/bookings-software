@@ -32,6 +32,7 @@ export default defineConfig({
   plugins: [react(), serverReadyPlugin()],
   resolve: {
     alias: {
+      "@packages": path.resolve(__dirname, "../../packages"),
       "@": path.resolve(__dirname, "./src"),
       "@app": path.resolve(__dirname, "./src/app"),
       "@pages": path.resolve(__dirname, "./src/pages"),
@@ -52,5 +53,6 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "jsdom",
+    setupFiles: ["./src/test/setup.ts"],
   },
 });
