@@ -1,4 +1,4 @@
-import { CapacityReadModel } from '../../read-models/capacity';
+import { CapacityReadModel } from '@availability/domain/read-models/capacity';
 
 export interface ICapacityReadRepository {
   findByOfferingAndDateRange(

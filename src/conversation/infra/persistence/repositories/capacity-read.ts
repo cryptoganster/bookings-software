@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
 import { CapacityModel } from '@booking/infra/persistence/models/capacity';
 import { ICapacityReadRepository } from '../../../domain/interfaces/repositories/capacity-read';
-import { CapacityReadModel } from '../../../domain/read-models/capacity';
+import { CapacityReadModel } from '@availability/domain/read-models/capacity';
 import { CapacityReadMapper } from '../mappers/capacity-read';
 
 @Injectable()

@@ -2,7 +2,7 @@ import { QueryHandler, IQueryHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
 import { GetAvailableTimeSlotsQuery } from './query';
 import { ICapacityReadRepository } from '@booking/domain/interfaces/repositories/capacity-read';
-import { TimeSlot } from '@booking/domain/read-models/capacity';
+import { TimeSlot } from '@availability/domain/read-models/capacity';
 
 @QueryHandler(GetAvailableTimeSlotsQuery)
 export class GetAvailableTimeSlotsHandler implements IQueryHandler<GetAvailableTimeSlotsQuery> {

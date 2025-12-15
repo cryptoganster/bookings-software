@@ -1,5 +1,5 @@
 import { CapacityModel } from '@booking/infra/persistence/models/capacity';
-import { CapacityReadModel } from '../../../domain/read-models/capacity';
+import { CapacityReadModel } from '@availability/domain/read-models/capacity';
 
 export class CapacityReadMapper {
   static toReadModel(model: CapacityModel): CapacityReadModel {
