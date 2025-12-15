@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
+import { ValidationPipe } from '@nestjs/common';
 import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
 
@@ -14,6 +15,18 @@ async function bootstrap() {
 
   // Usar Pino como logger
   app.useLogger(app.get(Logger));
+
+  // Configurar ValidationPipe global
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+    }),
+  );
 
   // Escuchar en todas las interfaces
   await app.listen(process.env.PORT ?? 3000, '0.0.0.0');

@@ -12,9 +12,13 @@ import { CapacityWriteRepository } from './infra/persistence/repositories/capaci
 // Factories
 import { CapacityFactory } from './infra/persistence/factories/capacity-factory';
 
+// Command Handlers
+import { SetCapacityHandler } from './app/commands/set-capacity/handler';
+
 // Query Handlers
 import { GetAvailableSlotsHandler } from './app/queries/get-available-slots/handler';
 
+const CommandHandlers = [SetCapacityHandler];
 const QueryHandlers = [GetAvailableSlotsHandler];
 
 @Module({
@@ -34,6 +38,8 @@ const QueryHandlers = [GetAvailableSlotsHandler];
       provide: 'ICapacityFactory',
       useClass: CapacityFactory,
     },
+    // Command Handlers
+    ...CommandHandlers,
     // Query Handlers
     ...QueryHandlers,
   ],

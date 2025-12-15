@@ -1,6 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { UnauthorizedException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { PinoLogger } from 'nestjs-pino';
 import { LoginCommand } from './command';
 import { IUserWriteRepository } from '@auth/domain/interfaces/repositories/user-write';
 
@@ -10,29 +11,91 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     @Inject('IUserWriteRepository')
     private readonly userWriteRepository: IUserWriteRepository,
     private readonly jwtService: JwtService,
-  ) {}
+    private readonly logger: PinoLogger,
+  ) {
+    this.logger.setContext(LoginHandler.name);
+  }
 
   async execute(command: LoginCommand): Promise<{ accessToken: string }> {
-    // Buscar usuario por email (usando WRITE repository porque necesitamos el aggregate completo para validar password)
-    const user = await this.userWriteRepository.findByEmail(command.email);
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+    const startTime = Date.now();
+
+    this.logger.info(
+      {
+        commandName: 'LoginCommand',
+        email: command.email,
+        timestamp: new Date().toISOString(),
+      },
+      'Executing LoginCommand',
+    );
+
+    try {
+      // Buscar usuario por email (usando WRITE repository porque necesitamos el aggregate completo para validar password)
+      const user = await this.userWriteRepository.findByEmail(command.email);
+      if (!user) {
+        this.logger.warn(
+          {
+            commandName: 'LoginCommand',
+            email: command.email,
+            timestamp: new Date().toISOString(),
+          },
+          'User not found',
+        );
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      // Validar password (requiere el aggregate completo con el método validatePassword)
+      const isPasswordValid = await user.validatePassword(command.password);
+      if (!isPasswordValid) {
+        this.logger.warn(
+          {
+            commandName: 'LoginCommand',
+            email: command.email,
+            userId: user.getId().getValue(),
+            timestamp: new Date().toISOString(),
+          },
+          'Invalid password',
+        );
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      // Generar JWT token
+      const payload = {
+        sub: user.getId().getValue(),
+        email: user.getEmail().getValue(),
+        businessId: user.getBusinessId()?.getValue(),
+      };
+      const accessToken = this.jwtService.sign(payload);
+
+      const duration = Date.now() - startTime;
+      this.logger.info(
+        {
+          commandName: 'LoginCommand',
+          userId: user.getId().getValue(),
+          email: user.getEmail().getValue(),
+          duration,
+          timestamp: new Date().toISOString(),
+        },
+        'LoginCommand executed successfully',
+      );
+
+      return { accessToken };
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      this.logger.error(
+        {
+          commandName: 'LoginCommand',
+          error: {
+            message: error instanceof Error ? error.message : 'Unknown error',
+            stack: error instanceof Error ? error.stack : undefined,
+            name: error instanceof Error ? error.name : 'Error',
+          },
+          email: command.email,
+          duration,
+          timestamp: new Date().toISOString(),
+        },
+        'LoginCommand failed',
+      );
+      throw error;
     }
-
-    // Validar password (requiere el aggregate completo con el método validatePassword)
-    const isPasswordValid = await user.validatePassword(command.password);
-    if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    // Generar JWT token
-    const payload = {
-      sub: user.getId().getValue(),
-      email: user.getEmail().getValue(),
-      businessId: user.getBusinessId()?.getValue(),
-    };
-    const accessToken = this.jwtService.sign(payload);
-
-    return { accessToken };
   }
 }

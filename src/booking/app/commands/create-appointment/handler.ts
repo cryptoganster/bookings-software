@@ -1,5 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
+import { PinoLogger } from 'nestjs-pino';
 import { CreateAppointmentCommand } from './command';
 import { IAppointmentWriteRepository } from '@booking/domain/interfaces/repositories/appointment-write';
 import { ICapacityFactory } from '@availability/domain/interfaces/factories/capacity-factory';
@@ -21,40 +22,88 @@ export class CreateAppointmentHandler implements ICommandHandler<CreateAppointme
     private readonly capacityWriteRepository: ICapacityWriteRepository,
     @Inject('IUnitOfWork')
     private readonly uow: IUnitOfWork,
-  ) {}
+    private readonly logger: PinoLogger,
+  ) {
+    this.logger.setContext(CreateAppointmentHandler.name);
+  }
 
   async execute(command: CreateAppointmentCommand): Promise<{ appointmentId: string }> {
+    const startTime = Date.now();
     const appointmentId = UUID.generate();
 
-    await this.uow.transaction(async () => {
-      // Load capacity aggregate using factory (not repository)
-      const capacity = await this.capacityFactory.loadByOfferingAndDate(
-        command.offeringId,
-        command.dateTime,
+    this.logger.info(
+      {
+        commandName: 'CreateAppointmentCommand',
+        businessId: command.businessId,
+        customerId: command.customerId,
+        offeringId: command.offeringId,
+        dateTime: command.dateTime,
+        timestamp: new Date().toISOString(),
+      },
+      'Executing CreateAppointmentCommand',
+    );
+
+    try {
+      await this.uow.transaction(async () => {
+        // Load capacity aggregate using factory (not repository)
+        const capacity = await this.capacityFactory.loadByOfferingAndDate(
+          command.offeringId,
+          command.dateTime,
+        );
+
+        if (!capacity || !capacity.hasAvailableSlots()) {
+          throw new NoAvailableSlotsException();
+        }
+
+        // Apply business logic
+        capacity.bookSlot();
+
+        // Persist using write repository (only save)
+        await this.capacityWriteRepository.save(capacity);
+
+        // Create appointment
+        const appointment = Appointment.create(
+          appointmentId,
+          UUID.fromString(command.businessId),
+          UUID.fromString(command.customerId),
+          UUID.fromString(command.offeringId),
+          DateTime.fromDate(command.dateTime),
+        );
+
+        await this.appointmentRepository.save(appointment);
+      });
+
+      const duration = Date.now() - startTime;
+      this.logger.info(
+        {
+          commandName: 'CreateAppointmentCommand',
+          appointmentId: appointmentId.getValue(),
+          duration,
+          timestamp: new Date().toISOString(),
+        },
+        'CreateAppointmentCommand executed successfully',
       );
 
-      if (!capacity || !capacity.hasAvailableSlots()) {
-        throw new NoAvailableSlotsException();
-      }
-
-      // Apply business logic
-      capacity.bookSlot();
-
-      // Persist using write repository (only save)
-      await this.capacityWriteRepository.save(capacity);
-
-      // Create appointment
-      const appointment = Appointment.create(
-        appointmentId,
-        UUID.fromString(command.businessId),
-        UUID.fromString(command.customerId),
-        UUID.fromString(command.offeringId),
-        DateTime.fromDate(command.dateTime),
+      return { appointmentId: appointmentId.getValue() };
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      this.logger.error(
+        {
+          commandName: 'CreateAppointmentCommand',
+          error: {
+            message: error instanceof Error ? error.message : 'Unknown error',
+            stack: error instanceof Error ? error.stack : undefined,
+            name: error instanceof Error ? error.name : 'Error',
+          },
+          businessId: command.businessId,
+          customerId: command.customerId,
+          offeringId: command.offeringId,
+          duration,
+          timestamp: new Date().toISOString(),
+        },
+        'CreateAppointmentCommand failed',
       );
-
-      await this.appointmentRepository.save(appointment);
-    });
-
-    return { appointmentId: appointmentId.getValue() };
+      throw error;
+    }
   }
 }
