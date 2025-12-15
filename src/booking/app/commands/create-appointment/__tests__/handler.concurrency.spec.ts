@@ -8,7 +8,8 @@ import { NoAvailableSlotsException } from '@booking/domain/exceptions/no-availab
 describe('CreateAppointmentHandler Concurrency', () => {
   let handler: CreateAppointmentHandler;
   let appointmentRepository: jest.Mocked<IAppointmentWriteRepository>;
-  let capacityRepository: any;
+  let capacityFactory: any;
+  let capacityWriteRepository: any;
   let uow: jest.Mocked<IUnitOfWork>;
 
   beforeEach(async () => {
@@ -18,8 +19,12 @@ describe('CreateAppointmentHandler Concurrency', () => {
       findById: jest.fn(),
     } as any;
 
-    capacityRepository = {
-      findByOfferingAndDate: jest.fn(),
+    capacityFactory = {
+      loadByOfferingAndDate: jest.fn(),
+      loadById: jest.fn(),
+    };
+
+    capacityWriteRepository = {
       save: jest.fn(),
     };
 
@@ -36,8 +41,12 @@ describe('CreateAppointmentHandler Concurrency', () => {
           useValue: appointmentRepository,
         },
         {
+          provide: 'ICapacityFactory',
+          useValue: capacityFactory,
+        },
+        {
           provide: 'ICapacityWriteRepository',
-          useValue: capacityRepository,
+          useValue: capacityWriteRepository,
         },
         {
           provide: 'IUnitOfWork',
@@ -60,7 +69,7 @@ describe('CreateAppointmentHandler Concurrency', () => {
         // Both requests see 1 available slot initially
         return availableSlots > 0;
       }),
-      decrementSlot: jest.fn(() => {
+      bookSlot: jest.fn(() => {
         // Simulate decrement
         availableSlots--;
         callCount++;
@@ -69,11 +78,11 @@ describe('CreateAppointmentHandler Concurrency', () => {
 
     // First call sees capacity available
     // Second call also sees capacity available (race condition)
-    capacityRepository.findByOfferingAndDate.mockResolvedValue(mockCapacity);
+    capacityFactory.loadByOfferingAndDate.mockResolvedValue(mockCapacity);
 
     // However, we need to simulate that the second save fails
     // In real scenario, optimistic locking would catch this
-    capacityRepository.save.mockImplementation(() => {
+    capacityWriteRepository.save.mockImplementation(() => {
       if (callCount > 1) {
         // Second save should fail due to optimistic locking
         throw new Error('Concurrency conflict detected');
@@ -123,10 +132,10 @@ describe('CreateAppointmentHandler Concurrency', () => {
     // Arrange
     const mockCapacity = {
       hasAvailableSlots: jest.fn().mockReturnValue(false),
-      decrementSlot: jest.fn(),
+      bookSlot: jest.fn(),
     };
 
-    capacityRepository.findByOfferingAndDate.mockResolvedValue(mockCapacity);
+    capacityFactory.loadByOfferingAndDate.mockResolvedValue(mockCapacity);
 
     // Use a future date
     const futureDate = new Date();
@@ -171,7 +180,7 @@ describe('CreateAppointmentHandler Concurrency', () => {
 
     const mockCapacity = {
       hasAvailableSlots: jest.fn(() => availableSlots > 0),
-      decrementSlot: jest.fn(() => {
+      bookSlot: jest.fn(() => {
         if (availableSlots > 0) {
           availableSlots--;
           successfulBookings++;
@@ -179,10 +188,10 @@ describe('CreateAppointmentHandler Concurrency', () => {
       }),
     };
 
-    capacityRepository.findByOfferingAndDate.mockResolvedValue(mockCapacity);
+    capacityFactory.loadByOfferingAndDate.mockResolvedValue(mockCapacity);
 
     // Simulate that saves succeed only for first 2 requests
-    capacityRepository.save.mockImplementation(() => {
+    capacityWriteRepository.save.mockImplementation(() => {
       if (successfulBookings > 2) {
         throw new Error('Concurrency conflict - capacity exhausted');
       }

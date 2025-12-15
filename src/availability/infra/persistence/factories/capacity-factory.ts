@@ -1,16 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ICapacityFactory } from '../interfaces/factories/capacity-factory';
-import { CapacityModel } from '@availability/infra/persistence/models/capacity';
-import { Capacity } from '../aggregates/capacity';
+import { ICapacityFactory } from '@availability/domain/interfaces/factories/capacity-factory';
+import { CapacityModel } from '../models/capacity';
+import { Capacity } from '@availability/domain/aggregates/capacity';
 import { UUID } from '@shared/vo/uuid';
 
 /**
- * Factory implementation for loading Capacity aggregates
+ * Infrastructure implementation of ICapacityFactory
  *
  * This factory loads domain aggregates from the database for modification.
  * It reconstructs the aggregate with all its business logic.
+ *
+ * Located in infrastructure because it depends on TypeORM and database models.
  */
 @Injectable()
 export class CapacityFactory implements ICapacityFactory {

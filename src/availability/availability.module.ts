@@ -10,7 +10,7 @@ import { CapacityReadRepository } from './infra/persistence/repositories/capacit
 import { CapacityWriteRepository } from './infra/persistence/repositories/capacity-write';
 
 // Factories
-import { CapacityFactory } from './domain/factories/capacity-factory';
+import { CapacityFactory } from './infra/persistence/factories/capacity-factory';
 
 @Module({
   imports: [CqrsModule, TypeOrmModule.forFeature([CapacityModel])],

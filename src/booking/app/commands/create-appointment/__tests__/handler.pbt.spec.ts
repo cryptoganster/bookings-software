@@ -8,7 +8,8 @@ import { IUnitOfWork } from '@shared/kernel/uow';
 describe('CreateAppointmentHandler - Property Tests', () => {
   let handler: CreateAppointmentHandler;
   let appointmentRepository: jest.Mocked<IAppointmentWriteRepository>;
-  let capacityRepository: any;
+  let capacityFactory: any;
+  let capacityWriteRepository: any;
   let uow: jest.Mocked<IUnitOfWork>;
 
   beforeEach(async () => {
@@ -17,8 +18,12 @@ describe('CreateAppointmentHandler - Property Tests', () => {
       findById: jest.fn(),
     } as any;
 
-    capacityRepository = {
-      findByOfferingAndDate: jest.fn(),
+    capacityFactory = {
+      loadByOfferingAndDate: jest.fn(),
+      loadById: jest.fn(),
+    };
+
+    capacityWriteRepository = {
       save: jest.fn(),
     };
 
@@ -35,8 +40,12 @@ describe('CreateAppointmentHandler - Property Tests', () => {
           useValue: appointmentRepository,
         },
         {
+          provide: 'ICapacityFactory',
+          useValue: capacityFactory,
+        },
+        {
           provide: 'ICapacityWriteRepository',
-          useValue: capacityRepository,
+          useValue: capacityWriteRepository,
         },
         {
           provide: 'IUnitOfWork',
@@ -62,14 +71,14 @@ describe('CreateAppointmentHandler - Property Tests', () => {
           let capacitySlots = initialSlots;
           const mockCapacity = {
             hasAvailableSlots: jest.fn(() => capacitySlots > 0),
-            decrementSlot: jest.fn(() => {
+            bookSlot: jest.fn(() => {
               capacitySlots--;
             }),
           };
 
-          capacityRepository.findByOfferingAndDate.mockResolvedValue(mockCapacity);
+          capacityFactory.loadByOfferingAndDate.mockResolvedValue(mockCapacity);
           appointmentRepository.save.mockResolvedValue();
-          capacityRepository.save.mockResolvedValue();
+          capacityWriteRepository.save.mockResolvedValue();
 
           // Use a future date
           const futureDate = new Date();
@@ -87,8 +96,8 @@ describe('CreateAppointmentHandler - Property Tests', () => {
 
           // Assert - Both operations should have been called within the same transaction
           expect(uow.transaction).toHaveBeenCalled();
-          expect(mockCapacity.decrementSlot).toHaveBeenCalled();
-          expect(capacityRepository.save).toHaveBeenCalledWith(mockCapacity);
+          expect(mockCapacity.bookSlot).toHaveBeenCalled();
+          expect(capacityWriteRepository.save).toHaveBeenCalledWith(mockCapacity);
           expect(appointmentRepository.save).toHaveBeenCalled();
 
           // Verify capacity was decremented by exactly 1
