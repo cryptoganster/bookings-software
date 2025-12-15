@@ -8,6 +8,7 @@ import { UUID } from '@shared/vo/uuid';
 import { DateTime } from '@booking/domain/vo/date-time';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
+import { cleanDatabase } from '../../../../../../test/setup-db';
 
 describe('AppointmentWriteRepository Integration Tests', () => {
   let module: TestingModule;
@@ -49,12 +50,8 @@ describe('AppointmentWriteRepository Integration Tests', () => {
   });
 
   beforeEach(async () => {
-    // Limpiar antes de cada test para evitar interferencia
-    await dataSource.getRepository(AppointmentModel).clear();
-  });
-
-  afterEach(async () => {
-    await dataSource.getRepository(AppointmentModel).clear();
+    // Usar helper optimizado para limpiar tablas (más rápido que clear())
+    await cleanDatabase(dataSource);
   });
 
   describe('save', () => {
