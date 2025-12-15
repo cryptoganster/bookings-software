@@ -1,0 +1,29 @@
+{
+  "name": "@bookings/monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sistema de Reservas Multi-Tenant - Monorepo",
+  "scripts": {
+    "dev": "pnpm --parallel --stream run dev",
+    "dev:backend": "pnpm --filter @bookings/backend run start:dev",
+    "dev:frontend": "pnpm --filter @bookings/frontend run dev",
+    "build": "pnpm --recursive run build",
+    "build:backend": "pnpm --filter @bookings/backend run build",
+    "build:frontend": "pnpm --filter @bookings/frontend run build",
+    "test": "pnpm --recursive run test",
+    "test:backend": "pnpm --filter @bookings/backend run test",
+    "test:frontend": "pnpm --filter @bookings/frontend run test",
+    "test:e2e": "pnpm --filter @bookings/backend run test:e2e",
+    "lint": "pnpm --recursive run lint",
+    "lint:fix": "pnpm --recursive run lint:fix",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
+    "clean": "pnpm --recursive run clean && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "prettier": "^3.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}

@@ -3,11 +3,19 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+
+# pnpm
+.pnpm-store/
+.pnpm-debug.log
+pnpm-lock.yaml
 
 # Build
 dist/
 build/
 *.tsbuildinfo
+.next/
+out/
 
 # Environment
 .env

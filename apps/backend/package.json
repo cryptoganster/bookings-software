@@ -1,7 +1,7 @@
 {
-  "name": "bookings-software",
+  "name": "@bookings/backend",
   "version": "0.0.1",
-  "description": "",
+  "description": "Backend API - Sistema de Reservas Multi-Tenant",
   "author": "",
   "private": true,
   "license": "UNLICENSED",
