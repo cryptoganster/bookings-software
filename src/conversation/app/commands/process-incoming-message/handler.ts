@@ -49,7 +49,7 @@ export class ProcessIncomingMessageHandler implements ICommandHandler<ProcessInc
       await this.conversationRepository.save(conversation);
 
       // Enviar botones de servicios disponibles
-      await this.sendServiceSelectionButtons(command.customerPhone, businessId.getValue());
+      await this.sendServiceSelectionButtons(command.customerPhone);
     } else if (state.isSelectingService()) {
       // Cliente seleccionó un servicio
       if (command.buttonId) {
@@ -57,11 +57,7 @@ export class ProcessIncomingMessageHandler implements ICommandHandler<ProcessInc
         await this.conversationRepository.save(conversation);
 
         // Enviar fechas disponibles
-        await this.sendDateSelectionButtons(
-          command.customerPhone,
-          businessId.getValue(),
-          command.buttonId,
-        );
+        await this.sendDateSelectionButtons(command.customerPhone);
       }
     } else if (state.isSelectingDate()) {
       // Cliente seleccionó una fecha
@@ -145,15 +141,12 @@ export class ProcessIncomingMessageHandler implements ICommandHandler<ProcessInc
         conversation.transitionToSelectingService();
         await this.conversationRepository.save(conversation);
 
-        await this.sendServiceSelectionButtons(command.customerPhone, businessId.getValue());
+        await this.sendServiceSelectionButtons(command.customerPhone);
       }
     }
   }
 
-  private async sendServiceSelectionButtons(
-    customerPhone: string,
-    businessId: string,
-  ): Promise<void> {
+  private async sendServiceSelectionButtons(customerPhone: string): Promise<void> {
     // TODO: Obtener servicios reales desde GetActiveOfferingsQuery
     const buttons: Button[] = [
       { id: 'service-1', title: 'Corte de Pelo' },
@@ -168,11 +161,7 @@ export class ProcessIncomingMessageHandler implements ICommandHandler<ProcessInc
     );
   }
 
-  private async sendDateSelectionButtons(
-    customerPhone: string,
-    businessId: string,
-    offeringId: string,
-  ): Promise<void> {
+  private async sendDateSelectionButtons(customerPhone: string): Promise<void> {
     // TODO: Obtener fechas disponibles desde GetAvailableDatesQuery
     const today = new Date();
     const buttons: Button[] = [];

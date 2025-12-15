@@ -8,7 +8,7 @@ import { UUID } from '@shared/vo/uuid';
 
 /**
  * Factory implementation for loading Capacity aggregates
- * 
+ *
  * This factory loads domain aggregates from the database for modification.
  * It reconstructs the aggregate with all its business logic.
  */

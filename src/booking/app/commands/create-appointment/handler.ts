@@ -39,7 +39,7 @@ export class CreateAppointmentHandler implements ICommandHandler<CreateAppointme
 
       // Apply business logic
       capacity.bookSlot();
-      
+
       // Persist using write repository (only save)
       await this.capacityWriteRepository.save(capacity);
 

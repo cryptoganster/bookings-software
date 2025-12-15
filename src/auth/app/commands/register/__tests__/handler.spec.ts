@@ -5,7 +5,6 @@ import { RegisterHandler } from '../handler';
 import { RegisterCommand } from '../command';
 import { IUserWriteRepository } from '@auth/domain/interfaces/repositories/user-write';
 import { IUserReadRepository } from '@auth/domain/interfaces/repositories/user-read';
-import { User } from '@auth/domain/aggregates/user';
 import { UUID } from '@shared/vo/uuid';
 
 describe('RegisterHandler', () => {

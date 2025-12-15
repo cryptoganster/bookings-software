@@ -33,7 +33,7 @@ export class OnAppointmentCreatedHandler implements IEventHandler<AppointmentCre
       await this.commandBus.execute(
         new SendWhatsAppMessageCommand(
           event.customerId,
-          `Tu cita ha sido confirmada para ${event.dateTime}`,
+          `Tu cita ha sido confirmada para ${event.dateTime.toISOString()}`,
         ),
       );
     } catch (error) {

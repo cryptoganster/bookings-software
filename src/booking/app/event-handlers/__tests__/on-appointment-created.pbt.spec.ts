@@ -60,7 +60,7 @@ describe('OnAppointmentCreatedHandler - Property Tests', () => {
             await handler.handle(event);
             // Si llegamos aquí, el handler manejó el error correctamente
             return true;
-          } catch (thrownError) {
+          } catch {
             // Si se lanza un error, el handler no lo manejó correctamente
             return false;
           }
@@ -102,7 +102,7 @@ describe('OnAppointmentCreatedHandler - Property Tests', () => {
             await handler.handle(event);
             // El handler debe completar sin lanzar error
             return true;
-          } catch (error) {
+          } catch {
             // No debe propagar el error
             return false;
           }
@@ -144,7 +144,7 @@ describe('OnAppointmentCreatedHandler - Property Tests', () => {
           try {
             await handler.handle(event);
             return true;
-          } catch (error) {
+          } catch {
             return false;
           }
         },

@@ -14,12 +14,7 @@ export class Capacity extends VersionedAggregateRoot {
   private bookedSlots!: number;
 
   // Factory method para creación
-  static create(
-    id: UUID,
-    offeringId: UUID,
-    date: Date,
-    totalSlots: number,
-  ): Capacity {
+  static create(id: UUID, offeringId: UUID, date: Date, totalSlots: number): Capacity {
     // Validaciones
     if (totalSlots < 0) {
       throw new Error('Total slots cannot be negative');
@@ -39,13 +34,7 @@ export class Capacity extends VersionedAggregateRoot {
 
     // Publicar evento
     capacity.apply(
-      new CapacityCreated(
-        id.getValue(),
-        offeringId.getValue(),
-        date,
-        totalSlots,
-        totalSlots,
-      ),
+      new CapacityCreated(id.getValue(), offeringId.getValue(), date, totalSlots, totalSlots),
     );
     capacity.incrementVersion();
 
