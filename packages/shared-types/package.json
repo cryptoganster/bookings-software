@@ -1,0 +1,17 @@
+{
+  "name": "@bookings/shared-types",
+  "version": "1.0.0",
+  "description": "Shared TypeScript types between backend and frontend",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist"
+  },
+  "keywords": ["types", "typescript", "shared"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  }
+}
