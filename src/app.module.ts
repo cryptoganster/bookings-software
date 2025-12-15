@@ -7,6 +7,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { SharedModule } from '@shared/shared.module';
 import { AuthModule } from '@auth/auth.module';
+import { AvailabilityModule } from '@availability/availability.module';
 import { BookingModule } from '@booking/booking.module';
 import { ConversationModule } from '@conversation/conversation.module';
 
@@ -29,6 +30,7 @@ import { ConversationModule } from '@conversation/conversation.module';
     CqrsModule.forRoot(),
     SharedModule,
     AuthModule,
+    AvailabilityModule,
     BookingModule,
     ConversationModule,
     LoggerModule.forRoot({
