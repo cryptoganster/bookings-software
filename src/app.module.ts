@@ -6,6 +6,9 @@ import { LoggerModule } from 'nestjs-pino';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { SharedModule } from '@shared/shared.module';
+import { AuthModule } from '@auth/auth.module';
+import { BookingModule } from '@booking/booking.module';
+import { ConversationModule } from '@conversation/conversation.module';
 
 @Module({
   imports: [
@@ -25,6 +28,9 @@ import { SharedModule } from '@shared/shared.module';
     }),
     CqrsModule.forRoot(),
     SharedModule,
+    AuthModule,
+    BookingModule,
+    ConversationModule,
     LoggerModule.forRoot({
       pinoHttp: {
         // Configuración de transporte

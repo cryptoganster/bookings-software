@@ -19,7 +19,8 @@
       "@shared/*": ["src/shared/*"],
       "@booking/*": ["src/booking/*"],
       "@conversation/*": ["src/conversation/*"],
-      "@auth/*": ["src/auth/*"]
+      "@auth/*": ["src/auth/*"],
+      "@availability/*": ["src/availability/*"]
     }
   }
 }

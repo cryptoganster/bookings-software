@@ -5,5 +5,15 @@
   "testRegex": ".e2e-spec.ts$",
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "transformIgnorePatterns": [
+    "node_modules/(?!(uuid)/)"
+  ],
+  "moduleNameMapper": {
+    "^@shared/(.*)$": "<rootDir>/../src/shared/$1",
+    "^@booking/(.*)$": "<rootDir>/../src/booking/$1",
+    "^@conversation/(.*)$": "<rootDir>/../src/conversation/$1",
+    "^@auth/(.*)$": "<rootDir>/../src/auth/$1",
+    "^uuid$": "<rootDir>/../node_modules/uuid/dist/index.js"
   }
 }

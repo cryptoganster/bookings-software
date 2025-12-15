@@ -8,6 +8,7 @@ import { UUID } from '@shared/vo/uuid';
 import { DateTime } from '@booking/domain/vo/date-time';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
+import { cleanDatabase } from '../../../../../../test/setup-db';
 
 describe('AppointmentWriteRepository Integration Tests', () => {
   let module: TestingModule;
@@ -26,7 +27,7 @@ describe('AppointmentWriteRepository Integration Tests', () => {
           database: process.env.DB_DATABASE || 'bookings_test',
           entities: [AppointmentModel],
           synchronize: true, // Solo para tests
-          dropSchema: true, // Limpiar antes de cada ejecución
+          dropSchema: false, // No eliminar el schema en cada test
         }),
         TypeOrmModule.forFeature([AppointmentModel]),
       ],
@@ -41,15 +42,16 @@ describe('AppointmentWriteRepository Integration Tests', () => {
 
     repository = module.get<AppointmentWriteRepository>(AppointmentWriteRepository);
     dataSource = module.get<DataSource>(DataSource);
-  });
+  }, 30000); // Aumentar timeout a 30 segundos
 
   afterAll(async () => {
     await dataSource.destroy();
     await module.close();
   });
 
-  afterEach(async () => {
-    await dataSource.getRepository(AppointmentModel).clear();
+  beforeEach(async () => {
+    // Usar helper optimizado para limpiar tablas (más rápido que clear())
+    await cleanDatabase(dataSource);
   });
 
   describe('save', () => {

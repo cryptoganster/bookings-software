@@ -2,25 +2,23 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
 import { CreateAppointmentCommand } from './command';
 import { IAppointmentWriteRepository } from '@booking/domain/interfaces/repositories/appointment-write';
+import { ICapacityFactory } from '@availability/domain/interfaces/factories/capacity-factory';
+import { ICapacityWriteRepository } from '@availability/domain/interfaces/repositories/capacity-write';
 import { IUnitOfWork } from '@shared/kernel/uow';
 import { Appointment } from '@booking/domain/aggregates/appointment';
 import { UUID } from '@shared/vo/uuid';
 import { DateTime } from '@booking/domain/vo/date-time';
 import { NoAvailableSlotsException } from '@booking/domain/exceptions/no-available-slots';
 
-// #TODO Change Later. Placeholder interface for Capacity repository (will be implemented later)
-interface ICapacityWriteRepository {
-  findByOfferingAndDate(offeringId: string, date: Date): Promise<any>;
-  save(capacity: any): Promise<void>;
-}
-
 @CommandHandler(CreateAppointmentCommand)
 export class CreateAppointmentHandler implements ICommandHandler<CreateAppointmentCommand> {
   constructor(
     @Inject('IAppointmentWriteRepository')
     private readonly appointmentRepository: IAppointmentWriteRepository,
+    @Inject('ICapacityFactory')
+    private readonly capacityFactory: ICapacityFactory,
     @Inject('ICapacityWriteRepository')
-    private readonly capacityRepository: ICapacityWriteRepository,
+    private readonly capacityWriteRepository: ICapacityWriteRepository,
     @Inject('IUnitOfWork')
     private readonly uow: IUnitOfWork,
   ) {}
@@ -29,8 +27,8 @@ export class CreateAppointmentHandler implements ICommandHandler<CreateAppointme
     const appointmentId = UUID.generate();
 
     await this.uow.transaction(async () => {
-      // Verificar y decrementar capacidad
-      const capacity = await this.capacityRepository.findByOfferingAndDate(
+      // Load capacity aggregate using factory (not repository)
+      const capacity = await this.capacityFactory.loadByOfferingAndDate(
         command.offeringId,
         command.dateTime,
       );
@@ -39,10 +37,13 @@ export class CreateAppointmentHandler implements ICommandHandler<CreateAppointme
         throw new NoAvailableSlotsException();
       }
 
-      capacity.decrementSlot();
-      await this.capacityRepository.save(capacity);
+      // Apply business logic
+      capacity.bookSlot();
 
-      // Crear cita
+      // Persist using write repository (only save)
+      await this.capacityWriteRepository.save(capacity);
+
+      // Create appointment
       const appointment = Appointment.create(
         appointmentId,
         UUID.fromString(command.businessId),

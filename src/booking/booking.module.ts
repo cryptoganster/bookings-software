@@ -4,7 +4,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 // Models
 import { AppointmentModel } from './infra/persistence/models/appointment';
-import { CapacityModel } from './infra/persistence/models/capacity';
+
+// Modules
+import { AvailabilityModule } from '@availability/availability.module';
 
 // Command Handlers
 import { CreateAppointmentHandler } from './app/commands/create-appointment/handler';
@@ -26,21 +28,6 @@ import { AppointmentNotificationSaga } from './app/sagas/appointment-notificatio
 import { AppointmentWriteRepository } from './infra/persistence/repositories/appointment-write';
 import { AppointmentReadRepository } from './infra/persistence/repositories/appointment-read';
 
-// Placeholder for Capacity repository (will be implemented later)
-class MockCapacityWriteRepository {
-  async findByOfferingAndDate(offeringId: string, date: Date): Promise<any> {
-    // Mock implementation - returns a capacity with available slots
-    return {
-      hasAvailableSlots: () => true,
-      decrementSlot: () => {},
-    };
-  }
-
-  async save(capacity: any): Promise<void> {
-    // Mock implementation - does nothing
-  }
-}
-
 const CommandHandlers = [
   CreateAppointmentHandler,
   CancelAppointmentHandler,
@@ -49,18 +36,12 @@ const CommandHandlers = [
 
 const QueryHandlers = [GetAppointmentHandler, GetCustomerAppointmentsHandler];
 
-const EventHandlers = [
-  OnAppointmentCreatedHandler,
-  OnAppointmentCancelledHandler,
-];
+const EventHandlers = [OnAppointmentCreatedHandler, OnAppointmentCancelledHandler];
 
 const Sagas = [AppointmentNotificationSaga];
 
 @Module({
-  imports: [
-    CqrsModule,
-    TypeOrmModule.forFeature([AppointmentModel, CapacityModel]),
-  ],
+  imports: [CqrsModule, TypeOrmModule.forFeature([AppointmentModel]), AvailabilityModule],
   providers: [
     // Command Handlers
     ...CommandHandlers,
@@ -83,15 +64,7 @@ const Sagas = [AppointmentNotificationSaga];
       provide: 'IAppointmentReadRepository',
       useClass: AppointmentReadRepository,
     },
-    {
-      provide: 'ICapacityWriteRepository',
-      useClass: MockCapacityWriteRepository,
-    },
   ],
-  exports: [
-    'IAppointmentWriteRepository',
-    'IAppointmentReadRepository',
-    'ICapacityWriteRepository',
-  ],
+  exports: ['IAppointmentWriteRepository', 'IAppointmentReadRepository'],
 })
 export class BookingModule {}

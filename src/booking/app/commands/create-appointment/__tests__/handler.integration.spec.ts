@@ -9,7 +9,8 @@ import { NoAvailableSlotsException } from '@booking/domain/exceptions/no-availab
 describe('CreateAppointmentHandler Integration', () => {
   let handler: CreateAppointmentHandler;
   let appointmentRepository: jest.Mocked<IAppointmentWriteRepository>;
-  let capacityRepository: any;
+  let capacityFactory: any;
+  let capacityWriteRepository: any;
   let uow: jest.Mocked<IUnitOfWork>;
 
   beforeEach(async () => {
@@ -19,8 +20,12 @@ describe('CreateAppointmentHandler Integration', () => {
       findById: jest.fn(),
     } as any;
 
-    capacityRepository = {
-      findByOfferingAndDate: jest.fn(),
+    capacityFactory = {
+      loadByOfferingAndDate: jest.fn(),
+      loadById: jest.fn(),
+    };
+
+    capacityWriteRepository = {
       save: jest.fn(),
     };
 
@@ -37,8 +42,12 @@ describe('CreateAppointmentHandler Integration', () => {
           useValue: appointmentRepository,
         },
         {
+          provide: 'ICapacityFactory',
+          useValue: capacityFactory,
+        },
+        {
           provide: 'ICapacityWriteRepository',
-          useValue: capacityRepository,
+          useValue: capacityWriteRepository,
         },
         {
           provide: 'IUnitOfWork',
@@ -54,10 +63,10 @@ describe('CreateAppointmentHandler Integration', () => {
     // Arrange
     const mockCapacity = {
       hasAvailableSlots: jest.fn().mockReturnValue(true),
-      decrementSlot: jest.fn(),
+      bookSlot: jest.fn(),
     };
 
-    capacityRepository.findByOfferingAndDate.mockResolvedValue(mockCapacity);
+    capacityFactory.loadByOfferingAndDate.mockResolvedValue(mockCapacity);
 
     // Use a future date
     const futureDate = new Date();
@@ -75,8 +84,8 @@ describe('CreateAppointmentHandler Integration', () => {
 
     // Assert
     expect(result.appointmentId).toBeDefined();
-    expect(mockCapacity.decrementSlot).toHaveBeenCalled();
-    expect(capacityRepository.save).toHaveBeenCalledWith(mockCapacity);
+    expect(mockCapacity.bookSlot).toHaveBeenCalled();
+    expect(capacityWriteRepository.save).toHaveBeenCalledWith(mockCapacity);
     expect(appointmentRepository.save).toHaveBeenCalled();
   });
 
@@ -84,10 +93,10 @@ describe('CreateAppointmentHandler Integration', () => {
     // Arrange
     const mockCapacity = {
       hasAvailableSlots: jest.fn().mockReturnValue(false),
-      decrementSlot: jest.fn(),
+      bookSlot: jest.fn(),
     };
 
-    capacityRepository.findByOfferingAndDate.mockResolvedValue(mockCapacity);
+    capacityFactory.loadByOfferingAndDate.mockResolvedValue(mockCapacity);
 
     // Use a future date
     const futureDate = new Date();
@@ -102,12 +111,12 @@ describe('CreateAppointmentHandler Integration', () => {
 
     // Act & Assert
     await expect(handler.execute(command)).rejects.toThrow(NoAvailableSlotsException);
-    expect(mockCapacity.decrementSlot).not.toHaveBeenCalled();
+    expect(mockCapacity.bookSlot).not.toHaveBeenCalled();
   });
 
   it('should throw NoAvailableSlotsException if capacity is null', async () => {
     // Arrange
-    capacityRepository.findByOfferingAndDate.mockResolvedValue(null);
+    capacityFactory.loadByOfferingAndDate.mockResolvedValue(null);
 
     // Use a future date
     const futureDate = new Date();
