@@ -12,6 +12,11 @@ import { CapacityWriteRepository } from './infra/persistence/repositories/capaci
 // Factories
 import { CapacityFactory } from './infra/persistence/factories/capacity-factory';
 
+// Query Handlers
+import { GetAvailableSlotsHandler } from './app/queries/get-available-slots/handler';
+
+const QueryHandlers = [GetAvailableSlotsHandler];
+
 @Module({
   imports: [CqrsModule, TypeOrmModule.forFeature([CapacityModel])],
   providers: [
@@ -29,6 +34,8 @@ import { CapacityFactory } from './infra/persistence/factories/capacity-factory'
       provide: 'ICapacityFactory',
       useClass: CapacityFactory,
     },
+    // Query Handlers
+    ...QueryHandlers,
   ],
   exports: ['ICapacityReadRepository', 'ICapacityWriteRepository', 'ICapacityFactory'],
 })
