@@ -27,16 +27,25 @@ import { AppointmentWriteRepository } from './infra/persistence/repositories/app
 import { AppointmentReadRepository } from './infra/persistence/repositories/appointment-read';
 import { CapacityReadRepository } from './infra/persistence/repositories/capacity-read';
 
-// Placeholder for Capacity repository (will be implemented later)
-class MockCapacityWriteRepository {
-  async findByOfferingAndDate(offeringId: string, date: Date): Promise<any> {
-    // Mock implementation - returns a capacity with available slots
+// Mock implementations for Capacity (will be replaced by AvailabilityModule)
+class MockCapacityFactory {
+  async loadByOfferingAndDate(offeringId: string, date: Date): Promise<any> {
+    // Mock implementation - returns a capacity aggregate with available slots
     return {
       hasAvailableSlots: () => true,
       decrementSlot: () => {},
     };
   }
 
+  async loadById(id: string): Promise<any> {
+    return {
+      hasAvailableSlots: () => true,
+      decrementSlot: () => {},
+    };
+  }
+}
+
+class MockCapacityWriteRepository {
   async save(capacity: any): Promise<void> {
     // Mock implementation - does nothing
   }
@@ -79,6 +88,10 @@ const Sagas = [AppointmentNotificationSaga];
       useClass: AppointmentReadRepository,
     },
     {
+      provide: 'ICapacityFactory',
+      useClass: MockCapacityFactory,
+    },
+    {
       provide: 'ICapacityWriteRepository',
       useClass: MockCapacityWriteRepository,
     },
@@ -90,6 +103,7 @@ const Sagas = [AppointmentNotificationSaga];
   exports: [
     'IAppointmentWriteRepository',
     'IAppointmentReadRepository',
+    'ICapacityFactory',
     'ICapacityWriteRepository',
     'ICapacityReadRepository',
   ],
