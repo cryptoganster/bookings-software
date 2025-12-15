@@ -1,7 +1,7 @@
 {
-  "name": "@bookings/shared-types",
+  "name": "@shared/types",
   "version": "1.0.0",
-  "description": "Shared TypeScript types between backend and frontend",
+  "description": "Shared TypeScript types between backend and frontend (API Contract Layer)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {

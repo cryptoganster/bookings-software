@@ -1,46 +1,15 @@
 /**
- * Common API Types
+ * Frontend-Specific API Types
  * 
- * Este archivo re-exporta tipos desde @bookings/shared-types y define
- * tipos específicos del frontend que no pertenecen al contrato de API.
+ * Este archivo SOLO contiene tipos específicos del frontend que NO pertenecen
+ * al contrato de API (shared-types).
  * 
- * PRINCIPIO: Importar desde shared-types, no duplicar.
+ * PRINCIPIO: Para tipos del contrato de API, importar directamente desde
+ * @shared/types en lugar de re-exportarlos aquí.
+ * 
+ * Ejemplo:
+ *   import type { AppointmentDto } from '@shared/types';
  */
-
-// ============================================================================
-// RE-EXPORTS FROM @bookings/shared-types
-// ============================================================================
-
-export type {
-  // Authentication
-  LoginRequestDto,
-  LoginResponseDto,
-  RegisterRequestDto,
-  UserDto,
-  
-  // Appointments
-  AppointmentDto,
-  AppointmentStatus,
-  CreateAppointmentRequestDto,
-  CreateAppointmentResponseDto,
-  AppointmentFiltersDto,
-  
-  // Offerings
-  OfferingDto,
-  CreateOfferingRequestDto,
-  
-  // Customers
-  CustomerDto,
-  
-  // Business
-  BusinessDto,
-  
-  // Generic responses
-  PaginatedResponseDto,
-  ApiErrorDto,
-  SuccessResponseDto,
-  ErrorResponseDto,
-} from '@bookings/shared-types';
 
 // ============================================================================
 // FRONTEND-SPECIFIC TYPES
@@ -61,7 +30,7 @@ export interface DashboardStats {
  * Extends the API filters with UI-specific fields
  */
 export interface AppointmentFilters {
-  status?: import('@bookings/shared-types').AppointmentStatus;
+  status?: import('@shared/types').AppointmentStatus;
   dateRange?: [Date, Date]; // UI uses Date objects, API uses ISO strings
   offeringId?: string;
 }
