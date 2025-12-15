@@ -6,8 +6,12 @@ import { AppointmentCancelled } from '@booking/domain/events/appointment-cancell
 describe('OnAppointmentCancelledHandler', () => {
   let handler: OnAppointmentCancelledHandler;
   let commandBus: CommandBus;
+  let consoleErrorSpy: jest.SpyInstance;
 
   beforeEach(async () => {
+    // Silenciar console.error durante los tests
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         OnAppointmentCancelledHandler,
@@ -22,6 +26,11 @@ describe('OnAppointmentCancelledHandler', () => {
 
     handler = module.get<OnAppointmentCancelledHandler>(OnAppointmentCancelledHandler);
     commandBus = module.get<CommandBus>(CommandBus);
+  });
+
+  afterEach(() => {
+    // Restaurar console.error
+    consoleErrorSpy.mockRestore();
   });
 
   it('should be defined', () => {

@@ -22,33 +22,42 @@ export class AppointmentWriteRepository implements IAppointmentWriteRepository {
     await this.uow.transaction(async () => {
       const model = AppointmentWriteMapper.toModel(appointment);
       const currentVersion = appointment.getVersion().getValue();
+      const appointmentId = appointment.getId().getValue();
 
-      // Intenta actualizar solo si la versión coincide
-      const result = await this.repository
-        .createQueryBuilder()
-        .update(AppointmentModel)
-        .set({
+      // Verificar si el appointment ya existe
+      const existing = await this.repository.findOne({
+        where: { id: appointmentId },
+      });
+
+      if (!existing) {
+        // Es un nuevo appointment, hacer INSERT
+        await this.repository.insert({
           ...model,
-          version: currentVersion + 1, // Nueva versión
-        })
-        .where('id = :id', { id: appointment.getId().getValue() })
-        .andWhere('version = :version', {
-          version: currentVersion, // Versión actual
-        })
-        .execute();
-
-      // Si no se actualizó ninguna fila, significa que la versión cambió
-      if (result.affected === 0) {
-        // Intentar insertar si no existe
-        try {
-          await this.repository.insert({
+          version: currentVersion,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          cancelledAt: null,
+        } as AppointmentModel);
+      } else {
+        // Es un appointment existente, hacer UPDATE con optimistic locking
+        const result = await this.repository
+          .createQueryBuilder()
+          .update(AppointmentModel)
+          .set({
             ...model,
-            version: currentVersion,
-          } as AppointmentModel);
-        } catch {
-          // Si falla el insert, es porque hubo concurrencia
+            version: currentVersion + 1, // Nueva versión
+            updatedAt: new Date(),
+          })
+          .where('id = :id', { id: appointmentId })
+          .andWhere('version = :version', {
+            version: currentVersion, // Versión actual
+          })
+          .execute();
+
+        // Si no se actualizó ninguna fila, significa que hubo concurrencia
+        if (result.affected === 0) {
           throw new ConcurrencyException(
-            `Appointment ${appointment.getId().getValue()} was modified by another transaction`,
+            `Appointment ${appointmentId} was modified by another transaction`,
           );
         }
       }

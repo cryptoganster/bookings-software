@@ -86,6 +86,20 @@ describe('AppointmentWriteRepository - Property Tests', () => {
           appointment1.modify(DateTime.fromDate(newDate));
           appointment2.modify(DateTime.fromDate(newDate));
 
+          // Mock findOne to return existing appointment (simulating it already exists)
+          typeormRepository.findOne.mockResolvedValue({
+            id,
+            businessId,
+            customerId,
+            offeringId,
+            dateTime: futureDate,
+            status: 'CONFIRMED',
+            version: initialVersion,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            cancelledAt: null,
+          } as AppointmentModel);
+
           // Mock the query builder for the first save (succeeds)
           const mockQueryBuilder1 = {
             update: jest.fn().mockReturnThis(),
@@ -107,9 +121,6 @@ describe('AppointmentWriteRepository - Property Tests', () => {
           typeormRepository.createQueryBuilder
             .mockReturnValueOnce(mockQueryBuilder1 as any)
             .mockReturnValueOnce(mockQueryBuilder2 as any);
-
-          // Mock insert to fail (simulating concurrent modification)
-          typeormRepository.insert.mockRejectedValue(new Error('Duplicate key'));
 
           // Act - First save should succeed
           await repository.save(appointment1);

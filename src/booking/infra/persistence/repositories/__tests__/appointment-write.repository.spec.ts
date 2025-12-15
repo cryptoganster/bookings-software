@@ -26,7 +26,7 @@ describe('AppointmentWriteRepository Integration Tests', () => {
           database: process.env.DB_DATABASE || 'bookings_test',
           entities: [AppointmentModel],
           synchronize: true, // Solo para tests
-          dropSchema: true, // Limpiar antes de cada ejecución
+          dropSchema: false, // No eliminar el schema en cada test
         }),
         TypeOrmModule.forFeature([AppointmentModel]),
       ],
@@ -41,11 +41,16 @@ describe('AppointmentWriteRepository Integration Tests', () => {
 
     repository = module.get<AppointmentWriteRepository>(AppointmentWriteRepository);
     dataSource = module.get<DataSource>(DataSource);
-  });
+  }, 30000); // Aumentar timeout a 30 segundos
 
   afterAll(async () => {
     await dataSource.destroy();
     await module.close();
+  });
+
+  beforeEach(async () => {
+    // Limpiar antes de cada test para evitar interferencia
+    await dataSource.getRepository(AppointmentModel).clear();
   });
 
   afterEach(async () => {

@@ -11,8 +11,12 @@ import * as fc from 'fast-check';
 describe('OnAppointmentCreatedHandler - Property Tests', () => {
   let handler: OnAppointmentCreatedHandler;
   let commandBus: CommandBus;
+  let consoleErrorSpy: jest.SpyInstance;
 
   beforeEach(async () => {
+    // Silenciar console.error durante los tests
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         OnAppointmentCreatedHandler,
@@ -27,6 +31,11 @@ describe('OnAppointmentCreatedHandler - Property Tests', () => {
 
     handler = module.get<OnAppointmentCreatedHandler>(OnAppointmentCreatedHandler);
     commandBus = module.get<CommandBus>(CommandBus);
+  });
+
+  afterEach(() => {
+    // Restaurar console.error
+    consoleErrorSpy.mockRestore();
   });
 
   it('should not propagate errors when command execution fails', async () => {

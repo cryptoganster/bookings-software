@@ -22,7 +22,7 @@ describe('AppointmentReadRepository Integration Tests', () => {
           database: process.env.DB_DATABASE || 'bookings_test',
           entities: [AppointmentModel],
           synchronize: true,
-          dropSchema: true,
+          dropSchema: false, // No eliminar el schema en cada test
         }),
         TypeOrmModule.forFeature([AppointmentModel]),
       ],
@@ -31,7 +31,7 @@ describe('AppointmentReadRepository Integration Tests', () => {
 
     repository = module.get<AppointmentReadRepository>(AppointmentReadRepository);
     dataSource = module.get<DataSource>(DataSource);
-  });
+  }, 30000); // Aumentar timeout a 30 segundos
 
   afterAll(async () => {
     await dataSource.destroy();

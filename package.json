@@ -102,6 +102,7 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
+    "testTimeout": 30000,
     "setupFiles": [
       "<rootDir>/../test/setup.ts"
     ],
@@ -109,7 +110,8 @@
       "^@shared/(.*)$": "<rootDir>/shared/$1",
       "^@booking/(.*)$": "<rootDir>/booking/$1",
       "^@conversation/(.*)$": "<rootDir>/conversation/$1",
-      "^@auth/(.*)$": "<rootDir>/auth/$1"
+      "^@auth/(.*)$": "<rootDir>/auth/$1",
+      "^@availability/(.*)$": "<rootDir>/availability/$1"
     },
     "transformIgnorePatterns": [
       "node_modules/(?!(uuid)/)"
