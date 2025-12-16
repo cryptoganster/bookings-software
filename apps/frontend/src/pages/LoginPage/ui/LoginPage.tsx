@@ -56,9 +56,20 @@ export function LoginPage() {
         width: '100vw',
         height: '100vh',
         overflow: 'hidden',
+        display: 'flex',
       }}
     >
-      <Grid h="100%" m={0} gutter={0}>
+      <Grid 
+        h="100%" 
+        w="100%"
+        m={0} 
+        gutter={0}
+        style={{ 
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'row',
+        }}
+      >
         {/* Columna izquierda: Formulario (50%) */}
         <Grid.Col 
           span={{ base: 12, md: 6 }} 
@@ -67,7 +78,7 @@ export function LoginPage() {
             alignItems: 'center', 
             justifyContent: 'center',
             padding: '2rem',
-            height: '100%',
+            minHeight: '100vh',
           }}
         >
           <Box w="100%" style={{ maxWidth: 420 }}>
@@ -80,15 +91,19 @@ export function LoginPage() {
           span={{ base: 0, md: 6 }} 
           visibleFrom="md"
           p={0}
-          style={{ height: '100%' }}
+          style={{ 
+            minHeight: '100vh',
+            display: 'flex',
+          }}
         >
           <BackgroundImage
             src={loginBackgroundImage}
+            w="100%"
             h="100%"
             style={{
               backgroundSize: 'cover',
               backgroundPosition: 'center',
-              height: '100%',
+              flex: 1,
             }}
           />
         </Grid.Col>
