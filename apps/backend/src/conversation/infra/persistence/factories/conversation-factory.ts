@@ -16,10 +16,11 @@ import { UUID } from '@shared/vo/uuid';
  */
 @Injectable()
 export class ConversationFactory implements IConversationFactory {
-  constructor() // When real persistence is implemented, inject:
-  // @InjectRepository(ConversationModel)
-  // private readonly repository: Repository<ConversationModel>,
-  {}
+  constructor() {
+    // When real persistence is implemented, inject:
+    // @InjectRepository(ConversationModel)
+    // private readonly repository: Repository<ConversationModel>,
+  }
 
   async loadById(_id: UUID): Promise<Conversation | null> {
     // TODO: Implement when real persistence layer exists
