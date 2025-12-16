@@ -1,0 +1,54 @@
+.root {
+  font-family: "Fredoka", sans-serif;
+  font-optical-sizing: auto;
+}
+
+.navbar {
+  position: absolute; /* No need in actual implementation */
+  bottom: 0;
+  z-index: var(--app-header-z-index) - 1; /* No need in actual implementation */
+  height: calc(100% - rem(60));
+  border: 0;
+  padding: var(--mantine-spacing-lg) calc(var(--mantine-spacing-sm) * 2);
+
+  @media (max-width: $mantine-breakpoint-md) {
+    z-index: 4; /* No need in actual implementation */
+  }
+}
+
+.header {
+  position: absolute; /* No need in actual implementation */
+  z-index: var(--app-header-z-index) - 1; /* No need in actual implementation */
+  border: 0;
+  width: 100%;
+  margin: 0;
+  padding-left: calc(var(--mantine-spacing-sm) * 2);
+  padding-right: calc(var(--mantine-spacing-sm) * 2);
+}
+
+.main {
+  background-color: light-dark(
+    var(--dashVista-background),
+    var(--mantine-color-dark-8)
+  );
+}
+
+.main::before {
+  content: "";
+  width: 20px;
+  height: 20px;
+  background-color: transparent;
+
+  position: absolute;
+
+  left: var(--app-shell-navbar-width);
+  top: var(--app-header-height);
+
+  transform: rotate(90deg);
+  background-image: radial-gradient(
+    circle at 100% 0,
+    transparent 0%,
+    transparent rem(20),
+    light-dark(var(--mantine-color-white), var(--mantine-color-dark-7)) rem(10)
+  );
+}

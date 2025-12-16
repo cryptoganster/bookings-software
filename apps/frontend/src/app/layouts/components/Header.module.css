@@ -1,0 +1,34 @@
+/**
+ * Header Styles
+ * 
+ * Adapted from templates-mantine-ui/dashvista/Header.module.css
+ * Changes:
+ * - Removed searchInput styles (SearchInput removed from MVP)
+ * - Adapted actionControl to use brandGreen
+ * - Applied radius="xl" to all interactive elements
+ * - Simplified media queries
+ */
+
+.root {
+  display: flex;
+  align-items: center;
+}
+
+.toolSection {
+  /* Adjust spacing for desktop */
+}
+
+.actionControl {
+  background-color: light-dark(
+    var(--mantine-color-gray-0),
+    var(--mantine-color-dark-6)
+  );
+  border-radius: var(--mantine-radius-xl);
+}
+
+.actionControl:hover {
+  background-color: light-dark(
+    var(--mantine-color-brandGreen-1),
+    var(--mantine-color-dark-5)
+  );
+}

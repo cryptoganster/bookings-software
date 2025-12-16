@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2023",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "paths": {
+      "@packages/shared-types": ["../../packages/shared-types/src/index.ts"],
+      "@shared/*": ["src/shared/*"],
+      "@booking/*": ["src/booking/*"],
+      "@conversation/*": ["src/conversation/*"],
+      "@auth/*": ["src/auth/*"],
+      "@availability/*": ["src/availability/*"],
+      "@offering/*": ["src/offering/*"],
+      "@test-utils/*": ["src/test-utils/*"]
+    }
+  }
+}

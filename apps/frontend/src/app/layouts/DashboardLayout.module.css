@@ -1,0 +1,29 @@
+/**
+ * DashboardLayout Styles
+ * 
+ * Adapted from templates-mantine-ui/dashvista/App.module.css
+ * Changes:
+ * - Removed font-family Fredoka (using default)
+ * - Removed custom variables
+ * - Removed decorative ::before pseudo-element
+ * - Kept essential navbar, header, main styles
+ * - Adapted background colors to use Mantine palette
+ */
+
+.navbar {
+  border: 0;
+  padding: var(--mantine-spacing-lg) calc(var(--mantine-spacing-sm) * 2);
+}
+
+.header {
+  border: 0;
+  padding-left: calc(var(--mantine-spacing-sm) * 2);
+  padding-right: calc(var(--mantine-spacing-sm) * 2);
+}
+
+.main {
+  background-color: light-dark(
+    var(--mantine-color-gray-0),
+    var(--mantine-color-dark-8)
+  );
+}
