@@ -100,45 +100,6 @@ describe('AppointmentWriteRepository Integration Tests', () => {
     });
   });
 
-  describe('findById', () => {
-    it('should return appointment correctly hydrated', async () => {
-      // Arrange
-      const id = UUID.generate();
-      const businessId = UUID.generate();
-      const customerId = UUID.generate();
-      const offeringId = UUID.generate();
-      const dateTime = new Date(Date.now() + 86400000);
-
-      await dataSource.getRepository(AppointmentModel).insert({
-        id: id.getValue(),
-        businessId: businessId.getValue(),
-        customerId: customerId.getValue(),
-        offeringId: offeringId.getValue(),
-        dateTime,
-        status: 'CONFIRMED',
-        version: 1,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        cancelledAt: null,
-      });
-
-      // Act
-      const appointment = await repository.findById(id);
-
-      // Assert
-      expect(appointment).toBeDefined();
-      expect(appointment!.getId().getValue()).toBe(id.getValue());
-      expect(appointment!.getBusinessId().getValue()).toBe(businessId.getValue());
-      expect(appointment!.getVersion().getValue()).toBe(1);
-      expect(appointment!.getStatus().getValue()).toBe('CONFIRMED');
-    });
-
-    it('should return null when appointment does not exist', async () => {
-      // Act
-      const appointment = await repository.findById(UUID.generate());
-
-      // Assert
-      expect(appointment).toBeNull();
-    });
-  });
+  // Note: findById() tests removed - this method is now in AppointmentFactory
+  // Write repository only handles save() operations for CQRS strict compliance
 });

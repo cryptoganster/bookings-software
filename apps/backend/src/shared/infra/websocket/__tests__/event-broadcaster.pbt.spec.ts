@@ -242,24 +242,20 @@ describe('WebSocketEventBroadcaster (Property-Based Tests)', () => {
 
     it('should preserve dateTime precision', () => {
       fc.assert(
-        fc.property(
-          fc.uuid(),
-          fc.date(),
-          (appointmentId, newDateTime) => {
-            // Arrange
-            mockEventsGateway.broadcastToAllClients.mockClear();
-            const event = new AppointmentModified(appointmentId, newDateTime);
+        fc.property(fc.uuid(), fc.date(), (appointmentId, newDateTime) => {
+          // Arrange
+          mockEventsGateway.broadcastToAllClients.mockClear();
+          const event = new AppointmentModified(appointmentId, newDateTime);
 
-            // Act
-            eventBusSubject.next(event);
+          // Act
+          eventBusSubject.next(event);
 
-            // Assert
-            const callArgs = mockEventsGateway.broadcastToAllClients.mock.calls[0];
-            const data = callArgs[1] as any;
-            expect(data.newDateTime).toBe(newDateTime);
-            expect(data.newDateTime.getTime()).toBe(newDateTime.getTime());
-          },
-        ),
+          // Assert
+          const callArgs = mockEventsGateway.broadcastToAllClients.mock.calls[0];
+          const data = callArgs[1] as any;
+          expect(data.newDateTime).toBe(newDateTime);
+          expect(data.newDateTime.getTime()).toBe(newDateTime.getTime());
+        }),
         { numRuns: 100 },
       );
     });

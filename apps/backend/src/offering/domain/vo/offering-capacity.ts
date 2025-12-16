@@ -2,7 +2,7 @@ import { ValueObject } from '@shared/kernel/value-object';
 
 /**
  * Value Object representing the capacity constraints of an offering.
- * 
+ *
  * Business Rules:
  * - maxPerSlot must be at least 1
  * - maxDaily (if defined) must be >= maxPerSlot
@@ -59,7 +59,7 @@ export class OfferingCapacity extends ValueObject {
 
     if (maxPerSlot < OfferingCapacity.MIN_CAPACITY_PER_SLOT) {
       throw new Error(
-        `Max capacity per slot must be at least ${OfferingCapacity.MIN_CAPACITY_PER_SLOT}`
+        `Max capacity per slot must be at least ${OfferingCapacity.MIN_CAPACITY_PER_SLOT}`,
       );
     }
 
@@ -70,7 +70,7 @@ export class OfferingCapacity extends ValueObject {
 
       if (maxDaily < maxPerSlot) {
         throw new Error(
-          'Max daily capacity must be greater than or equal to max capacity per slot'
+          'Max daily capacity must be greater than or equal to max capacity per slot',
         );
       }
     }

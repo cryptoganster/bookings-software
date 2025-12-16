@@ -2,6 +2,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { CreateOfferingCommand } from './command';
+import { IOfferingFactory } from '@offering/domain/interfaces/factories/offering-factory';
 import { IOfferingWriteRepository } from '@offering/domain/interfaces/repositories/offering-write';
 import { Offering } from '@offering/domain/aggregates/offering';
 import { UUID } from '@shared/vo/uuid';
@@ -9,10 +10,10 @@ import { OfferingDuration } from '@offering/domain/vo/offering-duration';
 import { DuplicateOfferingNameException } from '@offering/domain/exceptions/duplicate-offering-name';
 
 @CommandHandler(CreateOfferingCommand)
-export class CreateOfferingHandler
-  implements ICommandHandler<CreateOfferingCommand>
-{
+export class CreateOfferingHandler implements ICommandHandler<CreateOfferingCommand> {
   constructor(
+    @Inject('IOfferingFactory')
+    private readonly offeringFactory: IOfferingFactory,
     @Inject('IOfferingWriteRepository')
     private readonly offeringRepository: IOfferingWriteRepository,
     private readonly logger: PinoLogger,
@@ -20,9 +21,7 @@ export class CreateOfferingHandler
     this.logger.setContext(CreateOfferingHandler.name);
   }
 
-  async execute(
-    command: CreateOfferingCommand,
-  ): Promise<{ offeringId: string }> {
+  async execute(command: CreateOfferingCommand): Promise<{ offeringId: string }> {
     const startTime = Date.now();
     const offeringId = UUID.generate();
 
@@ -42,18 +41,14 @@ export class CreateOfferingHandler
     try {
       const businessIdUuid = UUID.fromString(command.businessId);
 
-      // Validate name uniqueness
-      const existingOffering =
-        await this.offeringRepository.findByBusinessIdAndName(
-          businessIdUuid,
-          command.name,
-        );
+      // Validate name uniqueness using factory
+      const existingOffering = await this.offeringFactory.loadByBusinessIdAndName(
+        command.businessId,
+        command.name,
+      );
 
       if (existingOffering) {
-        throw new DuplicateOfferingNameException(
-          command.name,
-          command.businessId,
-        );
+        throw new DuplicateOfferingNameException(command.name, command.businessId);
       }
 
       // Create offering aggregate

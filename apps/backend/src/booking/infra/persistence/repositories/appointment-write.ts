@@ -7,7 +7,6 @@ import { AppointmentModel } from '../models/appointment';
 import { AppointmentWriteMapper } from '../mappers/appointment-write';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 import { IUnitOfWork } from '@shared/kernel/uow';
-import { UUID } from '@shared/vo/uuid';
 
 @Injectable()
 export class AppointmentWriteRepository implements IAppointmentWriteRepository {
@@ -64,13 +63,7 @@ export class AppointmentWriteRepository implements IAppointmentWriteRepository {
     });
   }
 
-  async findById(id: UUID): Promise<Appointment | null> {
-    const model = await this.repository.findOne({
-      where: { id: id.getValue() },
-    });
-
-    if (!model) return null;
-
-    return AppointmentWriteMapper.toDomain(model);
-  }
+  // ❌ NO implementar métodos de lectura
+  // Write repository solo debe persistir aggregates
+  // Para cargar aggregates, usar IAppointmentFactory
 }

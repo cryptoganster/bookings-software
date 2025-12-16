@@ -27,15 +27,10 @@ export class Offering extends VersionedAggregateRoot {
   ): Offering {
     // Validar capacidad
     if (maxCapacityPerSlot < 1) {
-      throw new InvalidOfferingCapacityException(
-        'maxCapacityPerSlot must be at least 1',
-      );
+      throw new InvalidOfferingCapacityException('maxCapacityPerSlot must be at least 1');
     }
 
-    if (
-      maxDailyCapacity !== null &&
-      maxDailyCapacity < maxCapacityPerSlot
-    ) {
+    if (maxDailyCapacity !== null && maxDailyCapacity < maxCapacityPerSlot) {
       throw new InvalidOfferingCapacityException(
         'maxDailyCapacity must be greater than or equal to maxCapacityPerSlot',
       );
@@ -75,15 +70,10 @@ export class Offering extends VersionedAggregateRoot {
   ): void {
     // Validar capacidad
     if (maxCapacityPerSlot < 1) {
-      throw new InvalidOfferingCapacityException(
-        'maxCapacityPerSlot must be at least 1',
-      );
+      throw new InvalidOfferingCapacityException('maxCapacityPerSlot must be at least 1');
     }
 
-    if (
-      maxDailyCapacity !== null &&
-      maxDailyCapacity < maxCapacityPerSlot
-    ) {
+    if (maxDailyCapacity !== null && maxDailyCapacity < maxCapacityPerSlot) {
       throw new InvalidOfferingCapacityException(
         'maxDailyCapacity must be greater than or equal to maxCapacityPerSlot',
       );
@@ -115,12 +105,7 @@ export class Offering extends VersionedAggregateRoot {
     this.incrementVersion();
 
     // Publicar evento
-    this.apply(
-      new OfferingDeactivated(
-        this.id.getValue(),
-        this.businessId.getValue(),
-      ),
-    );
+    this.apply(new OfferingDeactivated(this.id.getValue(), this.businessId.getValue()));
   }
 
   // Método de negocio: activar offering
@@ -129,12 +114,7 @@ export class Offering extends VersionedAggregateRoot {
     this.incrementVersion();
 
     // Publicar evento
-    this.apply(
-      new OfferingActivated(
-        this.id.getValue(),
-        this.businessId.getValue(),
-      ),
-    );
+    this.apply(new OfferingActivated(this.id.getValue(), this.businessId.getValue()));
   }
 
   // Factory method para reconstrucción desde persistencia
