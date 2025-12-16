@@ -1,25 +1,37 @@
 /**
  * DashboardPage Component
  *
- * Temporary placeholder for the Dashboard page.
- * Will be replaced with actual dashboard implementation in later phases.
+ * Main dashboard page that displays:
+ * - StatsCards widget with metrics (appointments today, this week)
+ * - UpcomingAppointments widget with next 5 appointments
  *
- * Requirements: 6.1, 6.4
+ * Uses Mantine Grid for responsive layout.
+ * Handles loading and error states through child widgets.
+ *
+ * Requirements: 3.1, 3.2, 3.3
  */
 
-import { Container, Title, Text, Paper } from "@mantine/core";
+import { Container, Grid, Stack } from "@mantine/core";
+import { StatsCards } from "@widgets/StatsCards";
+import { UpcomingAppointments } from "@widgets/UpcomingAppointments";
+import { PageHeader } from "@shared/ui/PageHeader/PageHeader";
 
 export function DashboardPage() {
   return (
-    <Container size="lg" py="xl">
-      <Paper shadow="sm" p="xl" radius="md" withBorder>
-        <Title order={1} mb="md">
-          Dashboard
-        </Title>
-        <Text c="dimmed">
-          Coming Soon - Dashboard with metrics and upcoming appointments
-        </Text>
-      </Paper>
+    <Container size="xl" py="md">
+      <Stack gap="lg">
+        <PageHeader title="Dashboard" />
+
+        {/* Stats Cards Section */}
+        <StatsCards />
+
+        {/* Upcoming Appointments Section */}
+        <Grid gutter="lg">
+          <Grid.Col span={12}>
+            <UpcomingAppointments />
+          </Grid.Col>
+        </Grid>
+      </Stack>
     </Container>
   );
 }
