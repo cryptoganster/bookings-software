@@ -7,6 +7,10 @@ import { EventsGateway } from '../events.gateway';
 import { AppointmentCreated } from '@booking/domain/events/appointment-created';
 import { AppointmentCancelled } from '@booking/domain/events/appointment-cancelled';
 import { AppointmentModified } from '@booking/domain/events/appointment-modified';
+import { OfferingCreated } from '@offering/domain/events/offering-created';
+import { OfferingUpdated } from '@offering/domain/events/offering-updated';
+import { OfferingDeactivated } from '@offering/domain/events/offering-deactivated';
+import { OfferingActivated } from '@offering/domain/events/offering-activated';
 
 describe('WebSocketEventBroadcaster', () => {
   let broadcaster: WebSocketEventBroadcaster;
@@ -348,6 +352,270 @@ describe('WebSocketEventBroadcaster', () => {
       // Assert
       expect(destroySpy).toHaveBeenCalled();
       expect(completeSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('OfferingCreated event', () => {
+    beforeEach(() => {
+      broadcaster.onModuleInit();
+    });
+
+    it('should broadcast offering:created to business room', () => {
+      // Arrange
+      const event = new OfferingCreated(
+        'offering-123',
+        'business-456',
+        'Corte de Pelo',
+        30,
+        4,
+        20,
+      );
+
+      // Act
+      eventBusSubject.next(event);
+
+      // Assert
+      expect(mockEventsGateway.broadcastToBusinessRoom).toHaveBeenCalledWith(
+        'business-456',
+        'offering:created',
+        expect.objectContaining({
+          offeringId: 'offering-123',
+          name: 'Corte de Pelo',
+          durationMinutes: 30,
+          maxCapacityPerSlot: 4,
+          maxDailyCapacity: 20,
+          timestamp: expect.any(String),
+        }),
+      );
+    });
+
+    it('should include timestamp in broadcast data', () => {
+      // Arrange
+      const event = new OfferingCreated('offering-123', 'business-456', 'Corte', 30, 4, null);
+
+      // Act
+      eventBusSubject.next(event);
+
+      // Assert
+      const callArgs = mockEventsGateway.broadcastToBusinessRoom.mock.calls[0];
+      const data = callArgs[2] as any;
+      expect(data.timestamp).toBeDefined();
+      expect(new Date(data.timestamp)).toBeInstanceOf(Date);
+    });
+
+    it('should log debug message after broadcasting', () => {
+      // Arrange
+      const debugSpy = jest.spyOn(Logger.prototype, 'debug');
+      const event = new OfferingCreated('offering-123', 'business-456', 'Corte', 30, 4, null);
+
+      // Act
+      eventBusSubject.next(event);
+
+      // Assert
+      expect(debugSpy).toHaveBeenCalledWith(
+        'Broadcasted offering:created to business business-456',
+      );
+    });
+
+    it('should handle null maxDailyCapacity', () => {
+      // Arrange
+      const event = new OfferingCreated('offering-123', 'business-456', 'Corte', 30, 4, null);
+
+      // Act
+      eventBusSubject.next(event);
+
+      // Assert
+      expect(mockEventsGateway.broadcastToBusinessRoom).toHaveBeenCalledWith(
+        'business-456',
+        'offering:created',
+        expect.objectContaining({
+          maxDailyCapacity: null,
+        }),
+      );
+    });
+  });
+
+  describe('OfferingUpdated event', () => {
+    beforeEach(() => {
+      broadcaster.onModuleInit();
+    });
+
+    it('should broadcast offering:updated to business room', () => {
+      // Arrange
+      const event = new OfferingUpdated(
+        'offering-123',
+        'business-456',
+        'Corte Premium',
+        45,
+        2,
+        10,
+      );
+
+      // Act
+      eventBusSubject.next(event);
+
+      // Assert
+      expect(mockEventsGateway.broadcastToBusinessRoom).toHaveBeenCalledWith(
+        'business-456',
+        'offering:updated',
+        expect.objectContaining({
+          offeringId: 'offering-123',
+          name: 'Corte Premium',
+          durationMinutes: 45,
+          maxCapacityPerSlot: 2,
+          maxDailyCapacity: 10,
+          timestamp: expect.any(String),
+        }),
+      );
+    });
+
+    it('should log debug message after broadcasting', () => {
+      // Arrange
+      const debugSpy = jest.spyOn(Logger.prototype, 'debug');
+      const event = new OfferingUpdated('offering-123', 'business-456', 'Corte', 30, 4, null);
+
+      // Act
+      eventBusSubject.next(event);
+
+      // Assert
+      expect(debugSpy).toHaveBeenCalledWith(
+        'Broadcasted offering:updated to business business-456',
+      );
+    });
+  });
+
+  describe('OfferingDeactivated event', () => {
+    beforeEach(() => {
+      broadcaster.onModuleInit();
+    });
+
+    it('should broadcast offering:deactivated to business room', () => {
+      // Arrange
+      const event = new OfferingDeactivated('offering-123', 'business-456');
+
+      // Act
+      eventBusSubject.next(event);
+
+      // Assert
+      expect(mockEventsGateway.broadcastToBusinessRoom).toHaveBeenCalledWith(
+        'business-456',
+        'offering:deactivated',
+        expect.objectContaining({
+          offeringId: 'offering-123',
+          timestamp: expect.any(String),
+        }),
+      );
+    });
+
+    it('should log debug message after broadcasting', () => {
+      // Arrange
+      const debugSpy = jest.spyOn(Logger.prototype, 'debug');
+      const event = new OfferingDeactivated('offering-123', 'business-456');
+
+      // Act
+      eventBusSubject.next(event);
+
+      // Assert
+      expect(debugSpy).toHaveBeenCalledWith(
+        'Broadcasted offering:deactivated to business business-456',
+      );
+    });
+  });
+
+  describe('OfferingActivated event', () => {
+    beforeEach(() => {
+      broadcaster.onModuleInit();
+    });
+
+    it('should broadcast offering:activated to business room', () => {
+      // Arrange
+      const event = new OfferingActivated('offering-123', 'business-456');
+
+      // Act
+      eventBusSubject.next(event);
+
+      // Assert
+      expect(mockEventsGateway.broadcastToBusinessRoom).toHaveBeenCalledWith(
+        'business-456',
+        'offering:activated',
+        expect.objectContaining({
+          offeringId: 'offering-123',
+          timestamp: expect.any(String),
+        }),
+      );
+    });
+
+    it('should log debug message after broadcasting', () => {
+      // Arrange
+      const debugSpy = jest.spyOn(Logger.prototype, 'debug');
+      const event = new OfferingActivated('offering-123', 'business-456');
+
+      // Act
+      eventBusSubject.next(event);
+
+      // Assert
+      expect(debugSpy).toHaveBeenCalledWith(
+        'Broadcasted offering:activated to business business-456',
+      );
+    });
+  });
+
+  describe('Mixed Booking and Offering events', () => {
+    beforeEach(() => {
+      broadcaster.onModuleInit();
+    });
+
+    it('should handle both Booking and Offering events in sequence', () => {
+      // Arrange
+      const appointmentEvent = new AppointmentCreated(
+        'appt-1',
+        'business-1',
+        'customer-1',
+        'offering-1',
+        new Date(),
+      );
+      const offeringCreatedEvent = new OfferingCreated(
+        'offering-2',
+        'business-1',
+        'Corte',
+        30,
+        4,
+        null,
+      );
+      const offeringUpdatedEvent = new OfferingUpdated(
+        'offering-2',
+        'business-1',
+        'Corte Premium',
+        45,
+        2,
+        10,
+      );
+
+      // Act
+      eventBusSubject.next(appointmentEvent);
+      eventBusSubject.next(offeringCreatedEvent);
+      eventBusSubject.next(offeringUpdatedEvent);
+
+      // Assert
+      expect(mockEventsGateway.broadcastToBusinessRoom).toHaveBeenCalledTimes(3);
+      expect(mockEventsGateway.broadcastToBusinessRoom).toHaveBeenNthCalledWith(
+        1,
+        'business-1',
+        'appointment:created',
+        expect.any(Object),
+      );
+      expect(mockEventsGateway.broadcastToBusinessRoom).toHaveBeenNthCalledWith(
+        2,
+        'business-1',
+        'offering:created',
+        expect.any(Object),
+      );
+      expect(mockEventsGateway.broadcastToBusinessRoom).toHaveBeenNthCalledWith(
+        3,
+        'business-1',
+        'offering:updated',
+        expect.any(Object),
+      );
     });
   });
 });
