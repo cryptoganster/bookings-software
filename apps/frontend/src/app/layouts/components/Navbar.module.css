@@ -38,11 +38,18 @@
   font-weight: 500;
 }
 
-.navlink:hover {
+/* Hover state for inactive links */
+.navlink:hover:not([data-active="true"]) {
   background-color: light-dark(
     var(--mantine-color-brandGreen-1),
     var(--mantine-color-dark-6)
   );
+}
+
+/* Hover state for active link - keep white text and green background */
+.navlink[data-active="true"]:hover {
+  color: white;
+  background-color: var(--mantine-color-brandGreen-6);
 }
 
 .navlinkContainer {
