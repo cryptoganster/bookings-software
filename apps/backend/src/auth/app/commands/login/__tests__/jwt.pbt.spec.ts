@@ -8,8 +8,8 @@ import { RegisterHandler } from '../../register/handler';
 import { RegisterCommand } from '../../register/command';
 import { IUserWriteRepository } from '@auth/domain/interfaces/repositories/user-write';
 import { IUserReadRepository } from '@auth/domain/interfaces/repositories/user-read';
+import { IUserFactory } from '@auth/domain/interfaces/factories/user-factory';
 import { User } from '@auth/domain/aggregates/user';
-import { UUID } from '@shared/vo/uuid';
 
 /**
  * Feature: proyecto-base-mvp, Property 13: JWT tokens contain valid user data
@@ -29,15 +29,18 @@ describe('Property 13: JWT tokens contain valid user data', () => {
         userRepository.set(user.getEmail().getValue(), user);
         return Promise.resolve();
       },
-      findById: (id: UUID) => {
+    };
+
+    const mockUserFactory: IUserFactory = {
+      loadById: (id: string) => {
         for (const user of userRepository.values()) {
-          if (user.getId().equals(id)) {
+          if (user.getId().getValue() === id) {
             return Promise.resolve(user);
           }
         }
         return Promise.resolve(null);
       },
-      findByEmail: (email: string) => {
+      loadByEmail: (email: string) => {
         return Promise.resolve(userRepository.get(email.toLowerCase()) || null);
       },
     };
@@ -89,6 +92,10 @@ describe('Property 13: JWT tokens contain valid user data', () => {
         {
           provide: 'IUserReadRepository',
           useValue: mockUserReadRepository,
+        },
+        {
+          provide: 'IUserFactory',
+          useValue: mockUserFactory,
         },
         {
           provide: JwtService,

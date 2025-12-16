@@ -5,7 +5,6 @@ import { IUserWriteRepository } from '@auth/domain/interfaces/repositories/user-
 import { User } from '@auth/domain/aggregates/user';
 import { UserModel } from '../models/user';
 import { UserWriteMapper } from '../mappers/user-write';
-import { UUID } from '@shared/vo/uuid';
 import { IUnitOfWork } from '@shared/kernel/uow';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 
@@ -40,23 +39,6 @@ export class UserWriteRepository implements IUserWriteRepository {
     });
   }
 
-  async findById(id: UUID): Promise<User | null> {
-    const model = await this.repository.findOne({
-      where: { id: id.getValue() },
-    });
-
-    if (!model) return null;
-
-    return UserWriteMapper.toDomain(model);
-  }
-
-  async findByEmail(email: string): Promise<User | null> {
-    const model = await this.repository.findOne({
-      where: { email: email.toLowerCase() },
-    });
-
-    if (!model) return null;
-
-    return UserWriteMapper.toDomain(model);
-  }
+  // ❌ Read methods removed - use IUserFactory to load aggregates for modification
+  // ✅ This repository now only handles WRITE operations (save)
 }

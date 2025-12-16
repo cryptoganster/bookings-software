@@ -10,6 +10,7 @@ import { JwtStrategy } from './infra/strategies/jwt';
 import { UserModel } from './infra/persistence/models/user';
 import { UserWriteRepository } from './infra/persistence/repositories/user-write';
 import { UserReadRepository } from './infra/persistence/repositories/user-read';
+import { UserFactory } from './infra/persistence/factories/user-factory';
 import { RegisterHandler } from './app/commands/register';
 import { LoginHandler } from './app/commands/login';
 import { AuthController } from './presentation/controllers/auth';
@@ -44,6 +45,10 @@ import { AuthController } from './presentation/controllers/auth';
     {
       provide: 'IUserReadRepository',
       useClass: UserReadRepository,
+    },
+    {
+      provide: 'IUserFactory',
+      useClass: UserFactory,
     },
   ],
   exports: [JwtModule, PassportModule, JwtStrategy],
