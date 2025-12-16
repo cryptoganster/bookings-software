@@ -7,7 +7,7 @@
 
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Grid, Center, Box, BackgroundImage } from '@mantine/core';
+import { Grid, Box, BackgroundImage } from '@mantine/core';
 
 import { LoginForm } from '@features/auth/login';
 import { useAuthStore } from '@app/store/auth.store';
