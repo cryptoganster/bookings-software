@@ -1,5 +1,6 @@
 import * as fc from 'fast-check';
 import { OfferingDuration } from '../offering-duration';
+import { InvalidOfferingDurationException } from '../../exceptions/invalid-offering-duration';
 
 describe('OfferingDuration - Property-Based Tests', () => {
   /**
@@ -24,9 +25,9 @@ describe('OfferingDuration - Property-Based Tests', () => {
     it('should reject durations less than 15 minutes', () => {
       fc.assert(
         fc.property(fc.integer({ min: -1000, max: 14 }), (minutes: number) => {
-          // Should throw error
+          // Should throw InvalidOfferingDurationException
           expect(() => OfferingDuration.fromMinutes(minutes)).toThrow(
-            'Duration must be at least 15 minutes',
+            InvalidOfferingDurationException,
           );
         }),
       );
@@ -35,9 +36,9 @@ describe('OfferingDuration - Property-Based Tests', () => {
     it('should reject durations greater than 480 minutes', () => {
       fc.assert(
         fc.property(fc.integer({ min: 481, max: 10000 }), (minutes: number) => {
-          // Should throw error
+          // Should throw InvalidOfferingDurationException
           expect(() => OfferingDuration.fromMinutes(minutes)).toThrow(
-            'Duration cannot exceed 480 minutes',
+            InvalidOfferingDurationException,
           );
         }),
       );
@@ -65,9 +66,9 @@ describe('OfferingDuration - Property-Based Tests', () => {
           // Pre-condition: ensure it's not an integer
           fc.pre(!Number.isInteger(minutes));
 
-          // Should throw error
+          // Should throw InvalidOfferingDurationException
           expect(() => OfferingDuration.fromMinutes(minutes)).toThrow(
-            'Duration must be an integer',
+            InvalidOfferingDurationException,
           );
         }),
       );

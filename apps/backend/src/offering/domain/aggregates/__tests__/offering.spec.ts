@@ -93,15 +93,15 @@ describe('Offering Aggregate', () => {
     it('should throw error when duration is invalid', () => {
       expect(() => {
         OfferingDuration.fromMinutes(20); // Not multiple of 15
-      }).toThrow('Duration must be a multiple of 15 minutes');
+      }).toThrow(InvalidOfferingDurationException);
 
       expect(() => {
         OfferingDuration.fromMinutes(500); // Exceeds max (480)
-      }).toThrow('Duration cannot exceed 480 minutes');
+      }).toThrow(InvalidOfferingDurationException);
 
       expect(() => {
         OfferingDuration.fromMinutes(10); // Below minimum
-      }).toThrow('Duration must be at least 15 minutes');
+      }).toThrow(InvalidOfferingDurationException);
     });
   });
 

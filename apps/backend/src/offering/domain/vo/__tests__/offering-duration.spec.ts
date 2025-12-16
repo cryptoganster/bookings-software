@@ -1,4 +1,5 @@
 import { OfferingDuration } from '../offering-duration';
+import { InvalidOfferingDurationException } from '../../exceptions/invalid-offering-duration';
 
 describe('OfferingDuration', () => {
   describe('fromMinutes', () => {
@@ -18,23 +19,19 @@ describe('OfferingDuration', () => {
     });
 
     it('should throw error if duration is not an integer', () => {
-      expect(() => OfferingDuration.fromMinutes(30.5)).toThrow('Duration must be an integer');
+      expect(() => OfferingDuration.fromMinutes(30.5)).toThrow(InvalidOfferingDurationException);
     });
 
     it('should throw error if duration is less than 15 minutes', () => {
-      expect(() => OfferingDuration.fromMinutes(10)).toThrow(
-        'Duration must be at least 15 minutes',
-      );
+      expect(() => OfferingDuration.fromMinutes(10)).toThrow(InvalidOfferingDurationException);
     });
 
     it('should throw error if duration exceeds 480 minutes', () => {
-      expect(() => OfferingDuration.fromMinutes(500)).toThrow('Duration cannot exceed 480 minutes');
+      expect(() => OfferingDuration.fromMinutes(500)).toThrow(InvalidOfferingDurationException);
     });
 
     it('should throw error if duration is not a multiple of 15', () => {
-      expect(() => OfferingDuration.fromMinutes(20)).toThrow(
-        'Duration must be a multiple of 15 minutes',
-      );
+      expect(() => OfferingDuration.fromMinutes(20)).toThrow(InvalidOfferingDurationException);
     });
 
     it('should accept valid multiples of 15', () => {
