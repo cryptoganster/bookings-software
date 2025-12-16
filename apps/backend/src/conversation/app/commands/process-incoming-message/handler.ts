@@ -6,6 +6,8 @@ import { Conversation } from '../../../domain/aggregates/conversation';
 import { UUID } from '@shared/vo/uuid';
 import { CreateAppointmentCommand } from '@booking/app/commands/create-appointment';
 import { NoAvailableSlotsException } from '@booking/domain/exceptions/no-available-slots';
+import { GetActiveOfferingsQuery } from '@offering/app/queries/get-active-offerings';
+import { OfferingReadModel } from '@offering/domain/read-models/offering';
 
 /**
  * TEMPORARY: This handler still uses the mock repository directly
@@ -62,14 +64,12 @@ export class ProcessIncomingMessageHandler implements ICommandHandler<ProcessInc
       await this.conversationRepository.save(conversation);
 
       // Enviar botones de servicios disponibles
-      await this.sendServiceSelectionButtons(command.customerPhone);
+      await this.sendServiceSelectionButtons(command.customerPhone, businessId.getValue());
     } else if (state.isSelectingService()) {
       // Cliente seleccionó un servicio
       if (command.buttonId) {
-        // El buttonId puede ser un ID de botón (service-1) o un UUID real de offering
-        // Mapear a UUID real si es necesario
-        const offeringId = this.mapButtonIdToOfferingId(command.buttonId);
-        conversation.selectService(offeringId);
+        // El buttonId es el UUID real del offering
+        conversation.selectService(command.buttonId);
         await this.conversationRepository.save(conversation);
 
         // Enviar fechas disponibles
@@ -162,20 +162,41 @@ export class ProcessIncomingMessageHandler implements ICommandHandler<ProcessInc
         conversation.transitionToSelectingService();
         await this.conversationRepository.save(conversation);
 
-        await this.sendServiceSelectionButtons(command.customerPhone);
+        await this.sendServiceSelectionButtons(command.customerPhone, businessId.getValue());
       }
     }
   }
 
-  private async sendServiceSelectionButtons(customerPhone: string): Promise<void> {
-    // TODO: Obtener servicios reales desde GetActiveOfferingsQuery
-    // Por ahora, usar IDs de ejemplo
-    // En producción, estos serían UUIDs reales de offerings
-    const buttons: Button[] = [
-      { id: 'service-1', title: 'Corte de Pelo' },
-      { id: 'service-2', title: 'Lavado' },
-      { id: 'service-3', title: 'Tinte' },
-    ];
+  private async sendServiceSelectionButtons(
+    customerPhone: string,
+    businessId?: string,
+  ): Promise<void> {
+    // Si no se proporciona businessId, extraerlo del customerPhone o contexto
+    // Por ahora, asumimos que se pasa como parámetro
+    if (!businessId) {
+      throw new Error('businessId is required to fetch offerings');
+    }
+
+    // Obtener servicios activos desde la BD
+    const offerings: OfferingReadModel[] = await this.queryBus.execute(
+      new GetActiveOfferingsQuery(businessId),
+    );
+
+    // Si no hay offerings activos, enviar mensaje informativo
+    if (offerings.length === 0) {
+      await this.whatsappClient.sendMessage(
+        customerPhone,
+        'Lo sentimos, actualmente no tenemos servicios disponibles. Por favor intenta más tarde.',
+      );
+      return;
+    }
+
+    // Mapear offerings a botones interactivos
+    // Usar el UUID real del offering como button ID
+    const buttons: Button[] = offerings.map((offering) => ({
+      id: offering.id, // UUID real del offering
+      title: offering.name,
+    }));
 
     await this.whatsappClient.sendInteractiveButtons(
       customerPhone,
@@ -292,15 +313,4 @@ export class ProcessIncomingMessageHandler implements ICommandHandler<ProcessInc
     return `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
   }
 
-  private mapButtonIdToOfferingId(buttonId: string): string {
-    // Si el buttonId ya es un UUID válido, lo retornamos tal cual
-    if (buttonId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
-      return buttonId;
-    }
-
-    // TODO: En producción, esto debería consultar la BD para obtener el UUID real del offering
-    // Por ahora, retornamos el buttonId tal cual para simplificar
-    // Esto significa que los tests deben usar UUIDs reales como button IDs
-    return buttonId;
-  }
 }

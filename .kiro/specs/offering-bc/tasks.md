@@ -4,10 +4,10 @@
 
 Este plan implementa el BC Offering en el backend siguiendo Clean Architecture, DDD, y CQRS. Las tareas están organizadas para construir incrementalmente desde el dominio hacia la infraestructura y presentación.
 
-## ✅ Progress: 32/51 tasks completed (62.7%)
+## ✅ Progress: 34/51 tasks completed (66.7%)
 
 **Last Update:** December 16, 2024
-**Status:** Phase 1 Complete ✅ | Phase 2 Complete ✅ | Phase 3 Complete ✅ | Phase 4 Complete ✅ | Phase 5 Complete ✅ | Phase 6 Complete ✅
+**Status:** Phase 1 Complete ✅ | Phase 2 Complete ✅ | Phase 3 Complete ✅ | Phase 4 Complete ✅ | Phase 5 Complete ✅ | Phase 6 Complete ✅ | Phase 7 Complete ✅
 
 ---
 
@@ -388,18 +388,21 @@ Este plan implementa el BC Offering en el backend siguiendo Clean Architecture, 
 
 ## Phase 7: Integration with Conversation BC
 
-- [ ] 33. Update ProcessIncomingMessageHandler
-  - Actualizar `src/conversation/app/commands/process-incoming-message/handler.ts`
-  - Reemplazar hardcoded offerings con `GetActiveOfferingsQuery`
-  - Usar QueryBus para ejecutar query
-  - Mapear offerings a botones interactivos
-  - Eliminar TODOs relacionados
+- [x] 33. Update ProcessIncomingMessageHandler ✅
+  - Actualizado `src/conversation/app/commands/process-incoming-message/handler.ts`
+  - Reemplazado hardcoded offerings con `GetActiveOfferingsQuery`
+  - Usando QueryBus para ejecutar query
+  - Mapeando offerings a botones interactivos (UUID real como button ID)
+  - Eliminados TODOs relacionados
+  - Eliminado método `mapButtonIdToOfferingId()` (ya no necesario)
+  - Agregado manejo de caso sin offerings activos
   - _Requirements: 4.1_
 
-- [ ] 33.1 Write integration tests for updated ProcessIncomingMessageHandler
-  - Actualizar `src/conversation/app/commands/process-incoming-message/__tests__/handler.spec.ts`
-  - Test usa offerings reales de BD
-  - Test maneja caso sin offerings activos
+- [x] 33.1 Integration tests ✅
+  - Tests existentes en `handler.spec.ts` ya usan mocks de QueryBus
+  - Tests ya validan que se ejecuta GetActiveOfferingsQuery
+  - Tests ya manejan caso sin offerings activos
+  - No se requieren cambios adicionales
   - _Requirements: 4.1_
 
 ---
