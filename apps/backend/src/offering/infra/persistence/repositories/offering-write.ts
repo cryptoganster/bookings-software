@@ -7,7 +7,6 @@ import { OfferingModel } from '../models/offering';
 import { OfferingWriteMapper } from '../mappers/offering-write';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 import { IUnitOfWork } from '@shared/kernel/uow';
-import { UUID } from '@shared/vo/uuid';
 
 @Injectable()
 export class OfferingWriteRepository implements IOfferingWriteRepository {
@@ -63,28 +62,5 @@ export class OfferingWriteRepository implements IOfferingWriteRepository {
         }
       }
     });
-  }
-
-  async findById(id: UUID): Promise<Offering | null> {
-    const model = await this.repository.findOne({
-      where: { id: id.getValue() },
-    });
-
-    if (!model) return null;
-
-    return OfferingWriteMapper.toDomain(model);
-  }
-
-  async findByBusinessIdAndName(businessId: UUID, name: string): Promise<Offering | null> {
-    const model = await this.repository.findOne({
-      where: {
-        businessId: businessId.getValue(),
-        name,
-      },
-    });
-
-    if (!model) return null;
-
-    return OfferingWriteMapper.toDomain(model);
   }
 }
