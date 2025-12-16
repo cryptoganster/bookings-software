@@ -303,7 +303,7 @@ describe('EventsGateway', () => {
         } as any,
         join: jest.fn(),
         disconnect: jest.fn(),
-      } as Socket;
+      } as unknown as Socket;
 
       const socket2 = {
         id: 'socket-2',
@@ -312,7 +312,7 @@ describe('EventsGateway', () => {
         } as any,
         join: jest.fn(),
         disconnect: jest.fn(),
-      } as Socket;
+      } as unknown as Socket;
 
       // Act
       gateway.handleConnection(socket1);

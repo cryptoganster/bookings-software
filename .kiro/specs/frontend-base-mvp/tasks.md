@@ -336,7 +336,7 @@
   - _Requirements: 3.1, 3.2_
   - **Commit:** `feat: create stats cards widget`
 
-- [ ] 29. Crear widget de upcoming appointments
+- [x] 29. Crear widget de upcoming appointments
   - Crear `widgets/UpcomingAppointments/model/useUpcomingAppointments.ts`
   - Crear `widgets/UpcomingAppointments/ui/UpcomingAppointments.tsx`
   - Mostrar lista de próximas 5 citas

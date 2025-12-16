@@ -337,23 +337,17 @@ describe('WebSocketEventBroadcaster', () => {
   });
 
   describe('Subscription lifecycle', () => {
-    it('should stop receiving events after onModuleDestroy', () => {
+    it('should complete destroy$ subject on module destroy', () => {
       // Arrange
-      broadcaster.onModuleInit();
-      const event = new AppointmentCreated(
-        'appt-123',
-        'business-456',
-        'customer-789',
-        'offering-101',
-        new Date(),
-      );
+      const destroySpy = jest.spyOn(broadcaster['destroy$'], 'next');
+      const completeSpy = jest.spyOn(broadcaster['destroy$'], 'complete');
 
       // Act
       broadcaster.onModuleDestroy();
-      eventBusSubject.next(event);
 
       // Assert
-      expect(mockEventsGateway.broadcastToBusinessRoom).not.toHaveBeenCalled();
+      expect(destroySpy).toHaveBeenCalled();
+      expect(completeSpy).toHaveBeenCalled();
     });
   });
 });

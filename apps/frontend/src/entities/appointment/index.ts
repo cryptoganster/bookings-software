@@ -15,7 +15,12 @@ export type {
   AppointmentStatus,
 } from "./model/types";
 export { appointmentKeys } from "./model/queries";
-export { useAppointments, useAppointment } from "./model/queries";
+export {
+  useAppointments,
+  useAppointment,
+  useUpcomingAppointments,
+  useTodayAppointments,
+} from "./model/queries";
 export { appointmentsApi } from "./model/api";
 
 // Utilities

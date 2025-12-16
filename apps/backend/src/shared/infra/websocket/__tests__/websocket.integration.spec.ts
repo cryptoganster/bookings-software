@@ -1,7 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { EventBus } from '@nestjs/cqrs';
-import { io, Socket as ClientSocket } from 'socket.io-client';
+import { io } from 'socket.io-client';
+import type { Socket as ClientSocket } from 'socket.io-client';
 import { WebSocketModule } from '../websocket.module';
 import { EventsGateway } from '../events.gateway';
 import { WebSocketEventBroadcaster } from '../event-broadcaster';
@@ -93,7 +94,7 @@ describe('WebSocket Integration Tests', () => {
         done();
       });
 
-      client1.on('connect_error', (error) => {
+      client1.on('connect_error', (error: Error) => {
         done(error);
       });
     });
@@ -152,14 +153,14 @@ describe('WebSocket Integration Tests', () => {
       });
 
       client1.on('connect', () => {
-        client1.on('appointment:created', (data) => {
+        client1.on('appointment:created', (data: any) => {
           business1Received = true;
           expect(data.appointmentId).toBe('appt-123');
         });
       });
 
       client2.on('connect', () => {
-        client2.on('appointment:created', (data) => {
+        client2.on('appointment:created', (data: any) => {
           business2Received = true;
           done(new Error('Business 2 should not receive events for Business 1'));
         });
@@ -206,7 +207,7 @@ describe('WebSocket Integration Tests', () => {
       };
 
       client1.on('connect', () => {
-        client1.on('appointment:created', (data) => {
+        client1.on('appointment:created', (data: any) => {
           client1Received = true;
           expect(data.appointmentId).toBe('appt-456');
           checkBothReceived();
@@ -214,7 +215,7 @@ describe('WebSocket Integration Tests', () => {
       });
 
       client2.on('connect', () => {
-        client2.on('appointment:created', (data) => {
+        client2.on('appointment:created', (data: any) => {
           client2Received = true;
           expect(data.appointmentId).toBe('appt-456');
           checkBothReceived();
@@ -244,7 +245,7 @@ describe('WebSocket Integration Tests', () => {
       });
 
       client1.on('connect', () => {
-        client1.on('appointment:created', (data) => {
+        client1.on('appointment:created', (data: any) => {
           expect(data).toMatchObject({
             appointmentId: 'appt-123',
             customerId: 'customer-456',
@@ -290,14 +291,14 @@ describe('WebSocket Integration Tests', () => {
       });
 
       client1.on('connect', () => {
-        client1.on('appointment:cancelled', (data) => {
+        client1.on('appointment:cancelled', (data: any) => {
           expect(data.appointmentId).toBe('appt-999');
           checkAllReceived();
         });
       });
 
       client2.on('connect', () => {
-        client2.on('appointment:cancelled', (data) => {
+        client2.on('appointment:cancelled', (data: any) => {
           expect(data.appointmentId).toBe('appt-999');
           checkAllReceived();
         });
@@ -318,7 +319,7 @@ describe('WebSocket Integration Tests', () => {
       });
 
       client1.on('connect', () => {
-        client1.on('appointment:modified', (data) => {
+        client1.on('appointment:modified', (data: any) => {
           expect(data.appointmentId).toBe('appt-555');
           expect(data.newDateTime).toBeDefined();
           expect(data.timestamp).toBeDefined();
@@ -408,7 +409,7 @@ describe('WebSocket Integration Tests', () => {
       const originalDate = new Date('2024-12-20T10:30:00Z');
 
       client1.on('connect', () => {
-        client1.on('appointment:created', (data) => {
+        client1.on('appointment:created', (data: any) => {
           expect(data.dateTime).toBeDefined();
           // Socket.IO serializa Dates como strings
           const receivedDate = new Date(data.dateTime);
@@ -437,7 +438,7 @@ describe('WebSocket Integration Tests', () => {
       });
 
       client1.on('connect', () => {
-        client1.on('appointment:created', (data) => {
+        client1.on('appointment:created', (data: any) => {
           expect(data.appointmentId).toBe('appt-complex');
           expect(data.customerId).toBe('customer-456');
           expect(data.offeringId).toBe('offering-789');
