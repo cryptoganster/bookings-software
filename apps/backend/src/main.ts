@@ -16,6 +16,14 @@ async function bootstrap() {
   // Usar Pino como logger
   app.useLogger(app.get(Logger));
 
+  // Configurar CORS
+  app.enableCors({
+    origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
+
   // Configurar prefijo global para todas las rutas
   app.setGlobalPrefix('api');
 
