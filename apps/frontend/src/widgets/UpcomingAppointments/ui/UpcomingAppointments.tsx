@@ -15,7 +15,12 @@ import { EmptyState } from "@shared/ui/EmptyState/EmptyState";
 
 export function UpcomingAppointments() {
   const navigate = useNavigate();
-  const { data: appointments, isLoading, isError, error } = useUpcomingAppointments();
+  const {
+    data: appointments,
+    isLoading,
+    isError,
+    error,
+  } = useUpcomingAppointments();
 
   const handleViewAll = () => {
     navigate("/appointments");

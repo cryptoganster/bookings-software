@@ -344,7 +344,7 @@
   - _Requirements: 3.4, 3.5_
   - **Commit:** `feat: create upcoming appointments widget`
 
-- [ ] 30. Crear página de dashboard
+- [x] 30. Crear página de dashboard
   - Crear `pages/DashboardPage/ui/DashboardPage.tsx`
   - Componer StatsCards y UpcomingAppointments
   - Usar Grid de Mantine para layout
@@ -352,20 +352,22 @@
   - _Requirements: 3.1, 3.2, 3.3_
   - **Commit:** `feat: create dashboard page`
 
-- [ ] 31. Checkpoint - Verificar dashboard
+- [x] 31. Checkpoint - Verificar dashboard
   - Verificar que stats cards cargan datos
   - Verificar que upcoming appointments muestra citas
   - Verificar loading states
   - Verificar error handling
   - Verificar empty state cuando no hay citas
+  - **NOTA:** Stats actualmente usa mock data. Backend endpoint `/appointments/stats` pendiente de implementación (ver Task 22 en proyecto-base-mvp/tasks.md)
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
 
 ## Fase 8: Gestión de Citas
 
-- [ ] 32. Crear feature de filtros
+- [x] 32. Crear feature de filtros
   - Crear `features/appointment/filter/model/useAppointmentFilters.ts` (Zustand)
   - Implementar state: status, dateRange, offeringId
   - Implementar actions: setStatus, setDateRange, reset
+  - Tests: 10 tests pasando
   - _Requirements: 5.1, 5.2, 5.3, 5.4_
   - **Commit:** `feat: create appointment filters store`
 
