@@ -16,6 +16,9 @@ async function bootstrap() {
   // Usar Pino como logger
   app.useLogger(app.get(Logger));
 
+  // Configurar prefijo global para todas las rutas
+  app.setGlobalPrefix('api');
+
   // Configurar ValidationPipe global
   app.useGlobalPipes(
     new ValidationPipe({
