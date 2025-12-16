@@ -409,6 +409,234 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para
 
 - **Bryan Stevens** - _Desarrollo Inicial_ - [cryptoganster](https://github.com/cryptoganster)
 
+## 📡 WebSocket Events API
+
+El sistema emite eventos en tiempo real vía WebSocket para notificar cambios a los clientes conectados.
+
+### Conexión
+
+```javascript
+import { io } from 'socket.io-client';
+
+const socket = io('http://localhost:3000', {
+  auth: {
+    token: 'your-jwt-token'
+  }
+});
+
+// El servidor automáticamente une al cliente a la room de su negocio
+// Room: business:{businessId}
+```
+
+### Eventos de Offering
+
+#### `offering:created`
+
+Emitido cuando se crea un nuevo servicio.
+
+**Payload:**
+```typescript
+{
+  offeringId: string;        // UUID del offering
+  name: string;              // Nombre del servicio
+  durationMinutes: number;   // Duración en minutos
+  maxCapacityPerSlot: number; // Capacidad máxima por slot
+  maxDailyCapacity: number | null; // Límite diario (opcional)
+  timestamp: string;         // ISO 8601 timestamp
+}
+```
+
+**Ejemplo:**
+```javascript
+socket.on('offering:created', (data) => {
+  console.log('Nuevo servicio creado:', data);
+  // Actualizar UI, invalidar cache, etc.
+});
+```
+
+#### `offering:updated`
+
+Emitido cuando se actualiza un servicio existente.
+
+**Payload:**
+```typescript
+{
+  offeringId: string;        // UUID del offering
+  name: string;              // Nombre actualizado
+  durationMinutes: number;   // Duración actualizada
+  maxCapacityPerSlot: number; // Capacidad actualizada
+  maxDailyCapacity: number | null; // Límite diario actualizado
+  timestamp: string;         // ISO 8601 timestamp
+}
+```
+
+**Ejemplo:**
+```javascript
+socket.on('offering:updated', (data) => {
+  console.log('Servicio actualizado:', data);
+  // Actualizar servicio en UI
+});
+```
+
+#### `offering:deactivated`
+
+Emitido cuando se desactiva un servicio.
+
+**Payload:**
+```typescript
+{
+  offeringId: string;  // UUID del offering desactivado
+  timestamp: string;   // ISO 8601 timestamp
+}
+```
+
+**Ejemplo:**
+```javascript
+socket.on('offering:deactivated', (data) => {
+  console.log('Servicio desactivado:', data);
+  // Marcar servicio como inactivo en UI
+});
+```
+
+#### `offering:activated`
+
+Emitido cuando se reactiva un servicio previamente desactivado.
+
+**Payload:**
+```typescript
+{
+  offeringId: string;  // UUID del offering activado
+  timestamp: string;   // ISO 8601 timestamp
+}
+```
+
+**Ejemplo:**
+```javascript
+socket.on('offering:activated', (data) => {
+  console.log('Servicio activado:', data);
+  // Marcar servicio como activo en UI
+});
+```
+
+### Eventos de Appointment
+
+#### `appointment:created`
+
+Emitido cuando se crea una nueva cita.
+
+**Payload:**
+```typescript
+{
+  appointmentId: string;  // UUID de la cita
+  customerId: string;     // UUID del cliente
+  offeringId: string;     // UUID del servicio
+  dateTime: string;       // ISO 8601 timestamp de la cita
+  timestamp: string;      // ISO 8601 timestamp del evento
+}
+```
+
+#### `appointment:cancelled`
+
+Emitido cuando se cancela una cita.
+
+**Payload:**
+```typescript
+{
+  appointmentId: string;  // UUID de la cita cancelada
+  timestamp: string;      // ISO 8601 timestamp
+}
+```
+
+**Nota:** Este evento se broadcast a todos los clientes conectados (no solo al negocio) debido a limitaciones del evento de dominio. Los clientes deben filtrar por `appointmentId`.
+
+#### `appointment:modified`
+
+Emitido cuando se modifica una cita existente.
+
+**Payload:**
+```typescript
+{
+  appointmentId: string;  // UUID de la cita
+  newDateTime: string;    // Nueva fecha/hora (ISO 8601)
+  timestamp: string;      // ISO 8601 timestamp
+}
+```
+
+**Nota:** Este evento se broadcast a todos los clientes conectados (no solo al negocio) debido a limitaciones del evento de dominio. Los clientes deben filtrar por `appointmentId`.
+
+### Multi-Tenancy
+
+Los eventos de Offering se emiten **solo a los clientes del mismo negocio** (room `business:{businessId}`), garantizando aislamiento de datos entre tenants.
+
+Los eventos de Appointment actualmente se emiten a todos los clientes debido a limitaciones en los eventos de dominio (no incluyen `businessId`). Esto será mejorado en versiones futuras.
+
+### Manejo de Errores
+
+```javascript
+socket.on('connect_error', (error) => {
+  console.error('Error de conexión:', error);
+});
+
+socket.on('error', (error) => {
+  console.error('Error de WebSocket:', error);
+});
+```
+
+### Ejemplo Completo
+
+```javascript
+import { io } from 'socket.io-client';
+
+const socket = io('http://localhost:3000', {
+  auth: {
+    token: localStorage.getItem('jwt-token')
+  }
+});
+
+// Escuchar eventos de offerings
+socket.on('offering:created', (data) => {
+  // Agregar nuevo offering a la lista
+  addOfferingToUI(data);
+});
+
+socket.on('offering:updated', (data) => {
+  // Actualizar offering en la lista
+  updateOfferingInUI(data);
+});
+
+socket.on('offering:deactivated', (data) => {
+  // Marcar como inactivo
+  markOfferingAsInactive(data.offeringId);
+});
+
+socket.on('offering:activated', (data) => {
+  // Marcar como activo
+  markOfferingAsActive(data.offeringId);
+});
+
+// Escuchar eventos de appointments
+socket.on('appointment:created', (data) => {
+  // Agregar nueva cita al calendario
+  addAppointmentToCalendar(data);
+});
+
+socket.on('appointment:cancelled', (data) => {
+  // Remover cita del calendario
+  removeAppointmentFromCalendar(data.appointmentId);
+});
+
+socket.on('appointment:modified', (data) => {
+  // Actualizar cita en el calendario
+  updateAppointmentInCalendar(data);
+});
+
+// Manejo de errores
+socket.on('connect_error', (error) => {
+  console.error('Error de conexión:', error);
+  showErrorNotification('No se pudo conectar al servidor');
+});
+```
+
 ## 🙏 Agradecimientos
 
 - NestJS por el excelente framework
