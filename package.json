@@ -18,7 +18,7 @@
     "test:backend:coverage": "pnpm --filter backend run test:cov",
     "test:frontend:coverage": "pnpm --filter frontend run test:coverage",
     "test:frontend:ui": "pnpm --filter frontend run test:ui",
-    "test:e2e": "pnpm --filter backend run test:e2e",
+    "test:backend:e2e": "pnpm --filter backend run test:e2e",
     "typecheck": "pnpm --recursive run typecheck",
     "typecheck:backend": "pnpm --filter backend run typecheck",
     "typecheck:frontend": "pnpm --filter frontend run typecheck",

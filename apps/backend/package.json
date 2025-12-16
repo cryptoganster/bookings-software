@@ -124,6 +124,7 @@
       "^@conversation/(.*)$": "<rootDir>/conversation/$1",
       "^@auth/(.*)$": "<rootDir>/auth/$1",
       "^@availability/(.*)$": "<rootDir>/availability/$1",
+      "^@offering/(.*)$": "<rootDir>/offering/$1",
       "^@test-utils/(.*)$": "<rootDir>/test-utils/$1"
     }
   }
