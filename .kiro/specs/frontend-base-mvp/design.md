@@ -115,13 +115,60 @@ interface AuthState {
 #### 2. Pages
 
 **LoginPage**
+- Layout de dos columnas: formulario a la izquierda (50%), imagen a la derecha (50%)
 - Formulario de login con validación
 - Manejo de errores de autenticación
 - Redirección al dashboard después de login exitoso
-- Diseño profesional con Paper, sombras y espaciado apropiado
-- Layout centrado vertical y horizontalmente
-- Tamaños de input consistentes (md)
-- Botón full-width con loading state
+- Diseño profesional con Paper (withBorder, shadow="xl", padding={30}, radius="xl")
+- Inputs con size="md" y radius="xl" (TextInput y PasswordInput)
+- Botón full-width con loading state, radius="xl" y color="brandGreen" (paleta verde personalizada)
+- Imagen de fondo a la derecha: `src/assets/login-background.png` (importada desde assets)
+- Responsive: en mobile, solo mostrar formulario (ocultar imagen)
+
+**Paleta de Colores Personalizada:**
+
+El sistema usa una paleta verde personalizada `brandGreen` extraída de la imagen de fondo, definida en el tema de Mantine:
+
+```typescript
+// app/providers/MantineProvider.tsx
+import { createTheme, MantineProvider } from '@mantine/core';
+
+const theme = createTheme({
+  colors: {
+    brandGreen: [
+      '#e6f4ed',  // 0 - Más claro (tinte muy suave para backgrounds)
+      '#c2e6d3',  // 1 - Claro (para hovers y estados sutiles)
+      '#9dd8b9',  // 2 - Claro medio
+      '#78ca9f',  // 3 - Medio claro
+      '#53bc85',  // 4 - Medio
+      '#19874e',  // 5 - Base (tu color #4 - HSL: hsl(149, 69, 31))
+      '#138147',  // 6 - Medio oscuro (tu color #3 - HSL: hsl(148, 74, 29))
+      '#107c42',  // 7 - Oscuro (tu color #2 - HSL: hsl(148, 77, 27))
+      '#086b38',  // 8 - Más oscuro (tu color #1 - HSL: hsl(149, 86, 23))
+      '#065529',  // 9 - Muy oscuro (para textos en fondos claros)
+    ],
+  },
+  primaryColor: 'brandGreen',
+  primaryShade: { light: 6, dark: 7 },
+});
+```
+
+**Uso de la paleta:**
+- Color primario: `brandGreen` (definido en `primaryColor`)
+- Botones de acción: `color="brandGreen"` (usa automáticamente shade 6 en light mode, 7 en dark mode)
+- Estados de éxito: `color="brandGreen"`
+- Shades específicos: `brandGreen.5`, `brandGreen.8`, etc.
+- El sistema selecciona automáticamente el shade apropiado según el tema (light/dark) y el variant del componente
+
+**Mapeo de colores originales:**
+- Shade 5: `#19874e` (tu color más claro - HSL: hsl(149, 69, 31))
+- Shade 6: `#138147` (tu tercer color - HSL: hsl(148, 74, 29)) ← **Primary en light mode**
+- Shade 7: `#107c42` (tu segundo color - HSL: hsl(148, 77, 27)) ← **Primary en dark mode**
+- Shade 8: `#086b38` (tu color más oscuro - HSL: hsl(149, 86, 23))
+
+**Shades generados:**
+- Shades 0-4: Tonos más claros generados para backgrounds, hovers y estados sutiles
+- Shade 9: Tono más oscuro generado para textos en fondos claros
 
 **DashboardPage**
 - Composición de widgets (StatsCards, UpcomingAppointments)

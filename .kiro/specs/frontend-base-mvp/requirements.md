@@ -56,7 +56,14 @@ Este documento define los requisitos para el MVP del frontend del Sistema de Res
 3. WHEN un usuario está autenticado THEN el sistema SHALL incluir el token en todas las peticiones API
 4. WHEN el token expira o es inválido THEN el sistema SHALL cerrar sesión automáticamente y redirigir a login
 5. WHEN un usuario cierra sesión THEN el sistema SHALL limpiar el token y redirigir a login
-6. WHEN se muestra el formulario de login THEN el sistema SHALL presentar una interfaz profesional y centrada con Paper de Mantine
+6. WHEN se muestra el formulario de login THEN el sistema SHALL presentar una interfaz profesional con Paper de Mantine usando shadow="xl", padding={30}, radius="xl"
+7. WHEN se muestra la página de login THEN el sistema SHALL usar un layout de dos columnas con el formulario a la izquierda y una imagen de fondo a la derecha
+8. WHEN se renderizan los inputs del formulario THEN el sistema SHALL usar size="md" y radius="xl" para todos los campos
+9. WHEN se usa PasswordInput THEN el sistema SHALL aplicar size="md" y radius="xl" consistente con los demás inputs
+10. WHEN se carga la imagen de fondo THEN el sistema SHALL importarla desde `src/assets/login-background.png`
+11. WHEN se configura el tema de Mantine THEN el sistema SHALL definir una paleta personalizada "brandGreen" con 10 shades basados en los colores de la imagen
+12. WHEN se renderiza el botón de login THEN el sistema SHALL usar color="brandGreen" para aplicar la paleta verde personalizada
+13. WHEN se configura el tema THEN el sistema SHALL establecer primaryColor="brandGreen" para usar la paleta verde como color principal de la aplicación
 
 ### Requirement 3: Dashboard Principal
 

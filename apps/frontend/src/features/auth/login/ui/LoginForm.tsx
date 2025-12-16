@@ -2,6 +2,7 @@
  * LoginForm Component
  * 
  * Formulario de login con validación y manejo de errores
+ * Diseño profesional con Paper, inputs redondeados y paleta brandGreen
  */
 
 import { useForm } from 'react-hook-form';
@@ -19,6 +20,15 @@ import { useLogin } from '../model/useLogin';
  * - Manejo de errores por campo
  * - Loading state durante el login
  * - Integración con TanStack Query
+ * - Diseño profesional con Paper (shadow="xl", padding={30}, radius="xl")
+ * - Inputs con size="md" y radius="xl"
+ * - Botón con color="brandGreen" (paleta verde personalizada)
+ * 
+ * Requirements:
+ * - 2.6: Formulario con Paper profesional
+ * - 2.8: Inputs con size="md" y radius="xl"
+ * - 2.9: PasswordInput con size="md" y radius="xl"
+ * - 2.12: Botón con color="brandGreen"
  * 
  * @example
  * ```tsx
@@ -45,7 +55,13 @@ export function LoginForm() {
   };
 
   return (
-    <Paper withBorder shadow="md" p={30} radius="md" style={{ maxWidth: 420, margin: '0 auto' }}>
+    <Paper 
+      withBorder 
+      shadow="xl" 
+      p={30} 
+      radius="xl" 
+      style={{ maxWidth: 420, width: '100%' }}
+    >
       <Title order={2} ta="center" mb="md">
         Iniciar Sesión
       </Title>
@@ -59,6 +75,8 @@ export function LoginForm() {
           <TextInput
             label="Email"
             placeholder="tu@email.com"
+            size="md"
+            radius="xl"
             {...register('email')}
             error={errors.email?.message}
             disabled={isPending}
@@ -68,6 +86,8 @@ export function LoginForm() {
           <PasswordInput
             label="Contraseña"
             placeholder="Tu contraseña"
+            size="md"
+            radius="xl"
             {...register('password')}
             error={errors.password?.message}
             disabled={isPending}
@@ -79,6 +99,8 @@ export function LoginForm() {
             fullWidth 
             loading={isPending}
             mt="md"
+            radius="xl"
+            color="brandGreen"
           >
             Iniciar Sesión
           </Button>

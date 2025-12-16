@@ -68,11 +68,13 @@
 
 - [x] 9. Configurar providers globales
   - Crear `app/providers/QueryProvider.tsx` con TanStack Query
-  - Crear `app/providers/MantineProvider.tsx` con tema
+  - Crear `app/providers/MantineProvider.tsx` con tema personalizado brandGreen
+  - Definir paleta brandGreen con 10 shades usando colores de la imagen (#086b38, #107c42, #138147, #19874e)
+  - Configurar primaryColor="brandGreen" y primaryShade={ light: 6, dark: 7 }
   - Crear `app/providers/index.tsx` que compone todos los providers
   - Actualizar `app/index.tsx` para usar providers
-  - _Requirements: 8.1_
-  - **Commit:** `feat: setup global providers (Query, Mantine)`
+  - _Requirements: 8.1, 2.11_
+  - **Commit:** `feat: setup global providers (Query, Mantine with brandGreen theme)`
 
 - [x] 10. Checkpoint - Verificar setup básico
   - Ejecutar `pnpm dev` y verificar que backend y frontend inician
@@ -169,25 +171,37 @@
   - _Requirements: 2.1, 2.4_
   - **Commit:** `feat: setup router with protected routes`
 
-- [ ] 22. Mejorar diseño visual del LoginForm
+- [-] 22. Mejorar diseño visual del LoginPage con layout de dos columnas
+  - Mover imagen `login-background.png` a `apps/frontend/src/assets/`
+  - Actualizar `pages/LoginPage/ui/LoginPage.tsx` con layout de dos columnas
+  - Columna izquierda (50%): Formulario de login centrado verticalmente
+  - Columna derecha (50%): Imagen de fondo que cubre toda la altura
+  - Usar Grid de Mantine para el layout responsive
+  - En mobile: ocultar imagen, mostrar solo formulario
   - Actualizar `features/auth/login/ui/LoginForm.tsx` con diseño profesional
-  - Usar Paper con withBorder, shadow="md", padding=30, radius="md"
+  - Usar Paper con withBorder, shadow="xl", padding={30}, radius="xl"
   - Agregar Title centrado con order={2}
   - Agregar Text descriptivo con color dimmed
-  - Configurar inputs con size="md" y radius="md"
-  - Asegurar botón fullWidth con mt="md"
+  - Configurar TextInput con size="md" y radius="xl"
+  - Configurar PasswordInput con size="md" y radius="xl"
+  - Asegurar botón fullWidth con mt="md", radius="xl" y color="brandGreen" (paleta verde personalizada)
   - Mantener toda la funcionalidad existente (validación, loading, errores)
-  - _Requirements: 2.2, 2.6_
-  - **Commit:** `style: improve LoginForm visual design with Mantine components`
+  - _Requirements: 2.6, 2.7, 2.8, 2.9, 2.10, 2.11, 2.12, 2.13_
+  - **Commit:** `style: improve LoginPage with two-column layout and professional design`
 
-- [ ] 22.1 Checkpoint - Verificar autenticación
+- [ ] 22.1 Checkpoint - Verificar autenticación y diseño
   - Probar login con credenciales válidas
   - Verificar redirección a dashboard
   - Verificar que token se guarda en localStorage
   - Probar logout y verificar limpieza
   - Probar acceso a ruta protegida sin auth
-  - Verificar que el LoginForm se ve profesional y centrado
-  - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6_
+  - Verificar layout de dos columnas (formulario izquierda, imagen derecha)
+  - Verificar que Paper tiene shadow="xl", padding={30}, radius="xl"
+  - Verificar que inputs tienen size="md" y radius="xl"
+  - Verificar que botón tiene color="brandGreen" (paleta verde personalizada)
+  - Verificar que el tema tiene primaryColor="brandGreen" configurado
+  - Verificar responsive en mobile (solo formulario visible)
+  - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 2.10, 2.11, 2.12, 2.13_
 
 ## Fase 5: Layout y Navegación
 
