@@ -11,6 +11,49 @@ El frontend del Sistema de Reservas Multi-Tenant será una aplicación React mod
 - Experiencia de usuario fluida con optimistic updates
 - Type safety end-to-end con TypeScript
 
+## Template Adaptation
+
+### Template dashvista → DashboardLayout
+
+El layout principal está basado en el template `templates-mantine-ui/dashvista` con las siguientes adaptaciones:
+
+**Cambios de estructura:**
+- ❌ Remix Router → ✅ React Router DOM (`useLocation` en lugar de Remix)
+- ❌ `iconsax-react` → ✅ `@tabler/icons-react` (IconHome2, IconCalendar)
+- ❌ Componentes del template (UsersChat, ThemeSwitch, MantineLogoRounded) → ✅ Componentes propios del proyecto
+
+**Cambios de estilo:**
+- ❌ Colores del template (negro para activo) → ✅ Paleta brandGreen
+- ❌ `color: black` para navlink activo → ✅ `background-color: var(--mantine-color-brandGreen-6)`
+- ❌ Hover genérico → ✅ `background-color: var(--mantine-color-brandGreen-1)`
+- ✅ Mantener: `radius="xl"` en todos los elementos interactivos
+- ✅ Mantener: Transiciones suaves `cubic-bezier(0.075, 0.82, 0.165, 1)`
+- ✅ Mantener: Estructura responsive con Burger menu
+
+**Archivos del template a adaptar:**
+```
+templates-mantine-ui/dashvista/
+├── App.tsx → apps/frontend/src/app/layouts/DashboardLayout.tsx
+├── Header.tsx → apps/frontend/src/app/layouts/components/Header.tsx
+├── Navbar.tsx → apps/frontend/src/app/layouts/components/Navbar.tsx
+├── App.module.css → apps/frontend/src/app/layouts/DashboardLayout.module.css
+├── Header.module.css → apps/frontend/src/app/layouts/components/Header.module.css
+└── Navbar.module.css → apps/frontend/src/app/layouts/components/Navbar.module.css
+```
+
+**Configuración de AppShell:**
+```typescript
+<AppShell
+  header={{ height: 60 }}
+  navbar={{ 
+    width: 280, 
+    breakpoint: "md", 
+    collapsed: { mobile: !opened } 
+  }}
+  padding="md"
+>
+```
+
 ## Architecture
 
 ### High-Level Architecture
@@ -74,6 +117,79 @@ El frontend del Sistema de Reservas Multi-Tenant será una aplicación React mod
 ## Components and Interfaces
 
 ### Core Components
+
+#### 0. Layout Components (basado en template dashvista)
+
+**DashboardLayout**
+```typescript
+// Estructura principal del layout
+- AppShell con Header y Navbar
+- Header height: 60px
+- Navbar width: 280px, breakpoint: "md"
+- Padding: "md"
+- Responsive: Navbar colapsable en mobile
+```
+
+**Header Component**
+```typescript
+// apps/frontend/src/app/layouts/components/Header.tsx
+- Logo/nombre del negocio (izquierda)
+- Burger menu para mobile (hiddenFrom="md")
+- Avatar con Popover para user menu (derecha)
+- LogoutButton integrado en Popover
+- ActionIcons con radius="xl"
+- Color brandGreen para elementos interactivos
+```
+
+**Navbar Component**
+```typescript
+// apps/frontend/src/app/layouts/components/Navbar.tsx
+- Título de bienvenida en la parte superior
+- ScrollArea para navegación
+- NavLinks: Dashboard (IconHome2), Appointments (IconCalendar)
+- Highlight con data-active usando useLocation
+- Color brandGreen.6 para item activo
+- Hover con brandGreen.1
+- Radius="xl" en todos los navlinks
+```
+
+**Estilos CSS adaptados del template:**
+```css
+/* DashboardLayout.module.css */
+.navbar {
+  border: 0;
+  padding: var(--mantine-spacing-lg) calc(var(--mantine-spacing-sm) * 2);
+}
+
+.header {
+  border: 0;
+  padding-left: calc(var(--mantine-spacing-sm) * 2);
+  padding-right: calc(var(--mantine-spacing-sm) * 2);
+}
+
+.main {
+  background-color: light-dark(
+    var(--mantine-color-gray-0),
+    var(--mantine-color-dark-8)
+  );
+}
+
+/* Navbar.module.css */
+.navlink {
+  border-radius: var(--mantine-radius-xl);
+  padding: 8px var(--mantine-spacing-xs);
+  transition: all 0.2s cubic-bezier(0.075, 0.82, 0.165, 1);
+}
+
+.navlink[data-active="true"] {
+  color: white;
+  background-color: var(--mantine-color-brandGreen-6);
+}
+
+.navlink:hover {
+  background-color: var(--mantine-color-brandGreen-1);
+}
+```
 
 #### 1. App Layer
 
@@ -170,14 +286,26 @@ const theme = createTheme({
 - Shades 0-4: Tonos más claros generados para backgrounds, hovers y estados sutiles
 - Shade 9: Tono más oscuro generado para textos en fondos claros
 
+**DashboardLayout**
+- Layout principal basado en template dashvista adaptado
+- AppShell de Mantine con Header (height: 60) y Navbar (width: 280, breakpoint: "md")
+- Header con logo, Burger menu (mobile), y user menu con Avatar + Popover
+- Navbar con título de bienvenida y links de navegación (Dashboard, Appointments)
+- Todos los elementos interactivos usan radius="xl"
+- Elementos activos usan color brandGreen.6
+- Hover states usan brandGreen.1
+- Responsive: Navbar colapsable en mobile con Burger menu
+
 **DashboardPage**
 - Composición de widgets (StatsCards, UpcomingAppointments)
 - Layout en grid responsive
+- Renderizada dentro de DashboardLayout
 
 **AppointmentsPage**
 - Tabla de citas con paginación
 - Filtros de estado y fecha
 - Acciones: Ver detalles, Cancelar
+- Renderizada dentro de DashboardLayout
 
 #### 3. Widgets
 

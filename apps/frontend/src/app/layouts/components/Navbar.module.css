@@ -1,0 +1,53 @@
+/**
+ * Navbar Styles
+ * 
+ * Adapted from templates-mantine-ui/dashvista/Navbar.module.css
+ * Changes:
+ * - Active navlink uses brandGreen.6 instead of black
+ * - Hover state uses brandGreen.1
+ * - Maintained radius="xl" on navlinks
+ * - Maintained smooth transition with cubic-bezier
+ */
+
+.title {
+  color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
+}
+
+.navlink {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.2s cubic-bezier(0.075, 0.82, 0.165, 1);
+  border-radius: var(--mantine-radius-xl);
+  padding: 8px var(--mantine-spacing-xs);
+  color: light-dark(var(--mantine-color-gray-8), var(--mantine-color-gray-4));
+  text-decoration: none;
+}
+
+.navlink[data-active="true"] {
+  color: white;
+  background-color: var(--mantine-color-brandGreen-6);
+}
+
+.navlink[data-active="true"] svg {
+  color: white;
+}
+
+.navlink[data-active="true"] p {
+  font-weight: 500;
+}
+
+.navlink:hover {
+  background-color: light-dark(
+    var(--mantine-color-brandGreen-1),
+    var(--mantine-color-dark-6)
+  );
+}
+
+.navlinkContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}

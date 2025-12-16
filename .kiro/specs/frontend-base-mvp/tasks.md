@@ -171,7 +171,7 @@
   - _Requirements: 2.1, 2.4_
   - **Commit:** `feat: setup router with protected routes`
 
-- [-] 22. Mejorar diseño visual del LoginPage con layout de dos columnas
+- [x] 22. Mejorar diseño visual del LoginPage con layout de dos columnas
   - Mover imagen `login-background.png` a `apps/frontend/src/assets/`
   - Actualizar `pages/LoginPage/ui/LoginPage.tsx` con layout de dos columnas
   - Columna izquierda (50%): Formulario de login centrado verticalmente
@@ -189,7 +189,7 @@
   - _Requirements: 2.6, 2.7, 2.8, 2.9, 2.10, 2.11, 2.12, 2.13_
   - **Commit:** `style: improve LoginPage with two-column layout and professional design`
 
-- [ ] 22.1 Checkpoint - Verificar autenticación y diseño
+- [x] 22.1 Checkpoint - Verificar autenticación y diseño
   - Probar login con credenciales válidas
   - Verificar redirección a dashboard
   - Verificar que token se guarda en localStorage
@@ -205,28 +205,82 @@
 
 ## Fase 5: Layout y Navegación
 
-- [ ] 23.1 Crear layout principal
-  - Crear `app/layouts/DashboardLayout.tsx` con AppShell de Mantine
-  - Agregar Navbar con links de navegación
-  - Agregar Header con logo y user menu
-  - Integrar LogoutButton en user menu
+- [x] 23. Crear layout principal adaptando template dashvista
+  - Copiar estructura de `templates-mantine-ui/dashvista/App.tsx` a `app/layouts/DashboardLayout.tsx`
+  - Adaptar a React Router DOM (eliminar dependencias de Remix)
+  - Configurar AppShell: header={{ height: 60 }}, navbar={{ width: 280, breakpoint: "md" }}
+  - Usar useDisclosure de @mantine/hooks para controlar Navbar mobile
+  - Aplicar radius="xl" a todos los componentes interactivos
+  - Preparar estructura para Header y Navbar components
   - _Requirements: 6.1, 6.2_
-  - **Commit:** `feat: create dashboard layout with navigation`
+  - **Commit:** `feat: create DashboardLayout based on dashvista template`
 
-- [ ] 23.2 Configurar navegación
-  - Agregar NavLinks para Dashboard, Appointments
-  - Implementar highlight de item activo
-  - Hacer layout responsive
-  - Agregar iconos con @tabler/icons-react
-  - _Requirements: 6.2, 6.3, 6.5_
-  - **Commit:** `feat: implement navigation with active states`
+- [x] 23.1 Implementar Header component adaptando template
+  - Copiar estructura de `templates-mantine-ui/dashvista/Header.tsx` a `app/layouts/components/Header.tsx`
+  - Copiar estilos de `templates-mantine-ui/dashvista/Header.module.css` a `app/layouts/components/Header.module.css`
+  - Reemplazar logo del template con nombre del negocio (texto simple por ahora)
+  - Mantener Burger menu para mobile (hiddenFrom="md")
+  - Eliminar SearchInput, ActionIcons de notificaciones y settings (fuera del MVP)
+  - Mantener Avatar con Popover para user menu
+  - Integrar LogoutButton existente en el Popover
+  - Adaptar estilos: usar brandGreen en lugar de colores del template
+  - Aplicar radius="xl" a ActionIcons y Popover
+  - _Requirements: 6.2, 6.6, 6.7, 6.8_
+  - **Commit:** `feat: create Header component adapted from dashvista`
 
-- [ ] 23.3 Checkpoint - Verificar navegación
-  - Probar navegación entre páginas
-  - Verificar highlight de item activo
-  - Probar en mobile y desktop
-  - Verificar que logout funciona desde layout
-  - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_
+- [x] 23.2 Implementar Navbar component adaptando template
+  - Copiar estructura de `templates-mantine-ui/dashvista/Navbar.tsx` a `app/layouts/components/Navbar.tsx`
+  - Copiar estilos de `templates-mantine-ui/dashvista/Navbar.module.css` a `app/layouts/components/Navbar.module.css`
+  - Reemplazar título del template con "Bienvenido al Sistema de Reservas"
+  - Eliminar componente UsersChat (fuera del MVP)
+  - Crear array de navlinks: Dashboard (IconHome2), Appointments (IconCalendar)
+  - Reemplazar iconos de iconsax-react con @tabler/icons-react
+  - Cambiar de Link de Remix a Link de react-router-dom
+  - Implementar highlight con data-active usando useLocation de react-router-dom
+  - Adaptar estilos CSS: navlink activo usa brandGreen.6, hover usa brandGreen.1
+  - Mantener radius="xl" en navlinks
+  - Mantener ScrollArea para navegación responsive
+  - Mantener transición suave: transition: all 0.2s cubic-bezier(0.075, 0.82, 0.165, 1)
+  - _Requirements: 6.3, 6.4, 6.5, 6.6, 6.7, 6.10, 6.11, 6.12_
+  - **Commit:** `feat: create Navbar component adapted from dashvista`
+
+- [x] 23.3 Adaptar estilos CSS del template
+  - Copiar `templates-mantine-ui/dashvista/App.module.css` a `app/layouts/DashboardLayout.module.css`
+  - Eliminar estilos específicos del template (font-family Fredoka, variables custom)
+  - Mantener estilos de navbar, header, main
+  - Adaptar background colors para usar paleta de Mantine
+  - Eliminar pseudo-elemento ::before del main (decorativo del template)
+  - Actualizar Header.module.css: adaptar actionControl para usar brandGreen
+  - Actualizar Navbar.module.css: navlink activo con brandGreen.6, hover con brandGreen.1
+  - Asegurar que todos los radius usan "xl"
+  - _Requirements: 6.5, 6.6, 6.7, 6.12_
+  - **Commit:** `style: adapt dashvista CSS with brandGreen palette`
+
+- [x] 23.4 Integrar layout en router
+  - Actualizar `app/router/routes.tsx` para usar DashboardLayout
+  - Envolver rutas protegidas con DashboardLayout usando Outlet
+  - Crear página temporal `pages/DashboardPage/ui/DashboardPage.tsx` con mensaje "Dashboard - Coming Soon"
+  - Crear página temporal `pages/AppointmentsPage/ui/AppointmentsPage.tsx` con mensaje "Appointments - Coming Soon"
+  - Configurar rutas: "/" → DashboardPage, "/appointments" → AppointmentsPage
+  - Verificar que navegación funciona entre Login y Dashboard
+  - _Requirements: 6.1, 6.4_
+  - **Commit:** `feat: integrate DashboardLayout in router with temp pages`
+
+- [x] 23.5 Checkpoint - Verificar layout y navegación
+  - Probar login y redirección a dashboard
+  - Verificar que Header muestra correctamente con nombre del negocio y Burger menu
+  - Verificar que Avatar en Header abre Popover con LogoutButton
+  - Verificar que Navbar muestra título de bienvenida y links de navegación
+  - Probar navegación: click en Dashboard y Appointments
+  - Verificar highlight de item activo (brandGreen.6) al navegar
+  - Verificar hover states (brandGreen.1) en navlinks
+  - Probar logout desde Popover en Header
+  - Verificar responsive en mobile: Burger menu funciona, Navbar se colapsa
+  - Verificar responsive en desktop: Navbar permanentemente visible
+  - Verificar que todos los elementos usan radius="xl" (ActionIcons, Popover, navlinks)
+  - Verificar transiciones suaves en navlinks
+  - Verificar que estilos adaptados del template se ven correctamente
+  - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8, 6.9, 6.10, 6.11, 6.12_
 
 ## Fase 6: Entity de Appointment
 

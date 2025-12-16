@@ -107,11 +107,18 @@ Este documento define los requisitos para el MVP del frontend del Sistema de Res
 
 #### Acceptance Criteria
 
-1. WHEN un usuario está autenticado THEN el sistema SHALL mostrar un layout con sidebar de navegación
-2. WHEN un usuario hace click en un item del menú THEN el sistema SHALL navegar a la página correspondiente
-3. WHEN un usuario está en una página THEN el sistema SHALL resaltar el item del menú activo
-4. WHEN un usuario hace click en logout THEN el sistema SHALL cerrar sesión y redirigir a login
-5. WHEN el layout se renderiza THEN el sistema SHALL ser responsive y funcionar en mobile y desktop
+1. WHEN un usuario está autenticado THEN el sistema SHALL mostrar un layout basado en template dashvista con AppShell de Mantine (Header height: 60, Navbar width: 280, breakpoint: "md")
+2. WHEN se renderiza el Header THEN el sistema SHALL mostrar logo/nombre del negocio a la izquierda, Burger menu para mobile (hiddenFrom="md"), y Avatar con Popover para user menu a la derecha
+3. WHEN se renderiza el Navbar THEN el sistema SHALL mostrar título de bienvenida y links de navegación (Dashboard con IconHome2, Appointments con IconCalendar) usando @tabler/icons-react
+4. WHEN un usuario hace click en un item del menú THEN el sistema SHALL navegar a la página correspondiente usando react-router-dom
+5. WHEN un usuario está en una página THEN el sistema SHALL resaltar el item del menú activo usando data-active con color brandGreen.6
+6. WHEN un usuario hace hover sobre un navlink THEN el sistema SHALL mostrar background color brandGreen.1
+7. WHEN se renderizan elementos interactivos del layout THEN el sistema SHALL aplicar radius="xl" consistentemente (ActionIcons, Popover, navlinks)
+8. WHEN un usuario hace click en el Avatar en el Header THEN el sistema SHALL mostrar un Popover con opciones incluyendo LogoutButton
+9. WHEN un usuario hace click en logout desde el Popover THEN el sistema SHALL cerrar sesión y redirigir a login
+10. WHEN el layout se renderiza en mobile THEN el sistema SHALL colapsar el Navbar y mostrar Burger menu para abrir/cerrar navegación
+11. WHEN el layout se renderiza en desktop THEN el sistema SHALL mostrar Navbar permanentemente visible
+12. WHEN se aplican estilos del layout THEN el sistema SHALL usar transiciones suaves (transition: all 0.2s cubic-bezier(0.075, 0.82, 0.165, 1)) para navlinks
 
 ### Requirement 7: Manejo de Errores Global
 
