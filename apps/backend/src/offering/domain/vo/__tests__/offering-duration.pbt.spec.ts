@@ -17,7 +17,7 @@ describe('OfferingDuration - Property-Based Tests', () => {
 
           // Should throw error
           expect(() => OfferingDuration.fromMinutes(minutes)).toThrow();
-        })
+        }),
       );
     });
 
@@ -26,9 +26,9 @@ describe('OfferingDuration - Property-Based Tests', () => {
         fc.property(fc.integer({ min: -1000, max: 14 }), (minutes: number) => {
           // Should throw error
           expect(() => OfferingDuration.fromMinutes(minutes)).toThrow(
-            'Duration must be at least 15 minutes'
+            'Duration must be at least 15 minutes',
           );
-        })
+        }),
       );
     });
 
@@ -37,9 +37,9 @@ describe('OfferingDuration - Property-Based Tests', () => {
         fc.property(fc.integer({ min: 481, max: 10000 }), (minutes: number) => {
           // Should throw error
           expect(() => OfferingDuration.fromMinutes(minutes)).toThrow(
-            'Duration cannot exceed 480 minutes'
+            'Duration cannot exceed 480 minutes',
           );
-        })
+        }),
       );
     });
 
@@ -54,8 +54,8 @@ describe('OfferingDuration - Property-Based Tests', () => {
             // Should not throw
             const duration = OfferingDuration.fromMinutes(minutes);
             expect(duration.getMinutes()).toBe(minutes);
-          }
-        )
+          },
+        ),
       );
     });
 
@@ -67,9 +67,9 @@ describe('OfferingDuration - Property-Based Tests', () => {
 
           // Should throw error
           expect(() => OfferingDuration.fromMinutes(minutes)).toThrow(
-            'Duration must be an integer'
+            'Duration must be an integer',
           );
-        })
+        }),
       );
     });
   });
@@ -87,8 +87,8 @@ describe('OfferingDuration - Property-Based Tests', () => {
 
             expect(duration1.equals(duration2)).toBe(true);
             expect(duration1.getMinutes()).toBe(duration2.getMinutes());
-          }
-        )
+          },
+        ),
       );
     });
 
@@ -109,8 +109,8 @@ describe('OfferingDuration - Property-Based Tests', () => {
 
             // Value should remain the same
             expect(duration.getMinutes()).toBe(originalMinutes);
-          }
-        )
+          },
+        ),
       );
     });
   });
@@ -125,8 +125,8 @@ describe('OfferingDuration - Property-Based Tests', () => {
 
             const duration = OfferingDuration.fromMinutes(minutes);
             expect(duration.equals(duration)).toBe(true);
-          }
-        )
+          },
+        ),
       );
     });
 
@@ -143,8 +143,8 @@ describe('OfferingDuration - Property-Based Tests', () => {
             const duration2 = OfferingDuration.fromMinutes(minutes2);
 
             expect(duration1.equals(duration2)).toBe(duration2.equals(duration1));
-          }
-        )
+          },
+        ),
       );
     });
 
@@ -166,8 +166,8 @@ describe('OfferingDuration - Property-Based Tests', () => {
             if (duration1.equals(duration2) && duration2.equals(duration3)) {
               expect(duration1.equals(duration3)).toBe(true);
             }
-          }
-        )
+          },
+        ),
       );
     });
   });
@@ -185,8 +185,8 @@ describe('OfferingDuration - Property-Based Tests', () => {
 
             expect(typeof str).toBe('string');
             expect(str.length).toBeGreaterThan(0);
-          }
-        )
+          },
+        ),
       );
     });
 
@@ -202,8 +202,8 @@ describe('OfferingDuration - Property-Based Tests', () => {
             const str2 = duration.toString();
 
             expect(str1).toBe(str2);
-          }
-        )
+          },
+        ),
       );
     });
   });

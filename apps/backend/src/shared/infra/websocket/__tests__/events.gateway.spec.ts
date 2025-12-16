@@ -77,9 +77,7 @@ describe('EventsGateway', () => {
       gateway.handleConnection(mockSocket as Socket);
 
       // Assert
-      expect(warnSpy).toHaveBeenCalledWith(
-        `Client ${mockSocket.id} connected without businessId`,
-      );
+      expect(warnSpy).toHaveBeenCalledWith(`Client ${mockSocket.id} connected without businessId`);
     });
 
     it('should log successful connection', () => {
@@ -183,9 +181,7 @@ describe('EventsGateway', () => {
       gateway.broadcastToBusinessRoom(businessId, eventName, {});
 
       // Assert
-      expect(debugSpy).toHaveBeenCalledWith(
-        `Broadcasted ${eventName} to business ${businessId}`,
-      );
+      expect(debugSpy).toHaveBeenCalledWith(`Broadcasted ${eventName} to business ${businessId}`);
     });
 
     it('should handle complex data objects', () => {

@@ -2,7 +2,7 @@ import { ValueObject } from '@shared/kernel/value-object';
 
 /**
  * Value Object representing the duration of an offering in minutes.
- * 
+ *
  * Business Rules:
  * - Must be a multiple of 15 minutes
  * - Minimum: 15 minutes
@@ -43,21 +43,15 @@ export class OfferingDuration extends ValueObject {
     }
 
     if (minutes < OfferingDuration.MIN_MINUTES) {
-      throw new Error(
-        `Duration must be at least ${OfferingDuration.MIN_MINUTES} minutes`
-      );
+      throw new Error(`Duration must be at least ${OfferingDuration.MIN_MINUTES} minutes`);
     }
 
     if (minutes > OfferingDuration.MAX_MINUTES) {
-      throw new Error(
-        `Duration cannot exceed ${OfferingDuration.MAX_MINUTES} minutes`
-      );
+      throw new Error(`Duration cannot exceed ${OfferingDuration.MAX_MINUTES} minutes`);
     }
 
     if (minutes % OfferingDuration.SLOT_INTERVAL !== 0) {
-      throw new Error(
-        `Duration must be a multiple of ${OfferingDuration.SLOT_INTERVAL} minutes`
-      );
+      throw new Error(`Duration must be a multiple of ${OfferingDuration.SLOT_INTERVAL} minutes`);
     }
   }
 

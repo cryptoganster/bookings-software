@@ -1,8 +1,8 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
 import { ModifyAppointmentCommand } from './command';
+import { IAppointmentFactory } from '@booking/domain/interfaces/factories/appointment-factory';
 import { IAppointmentWriteRepository } from '@booking/domain/interfaces/repositories/appointment-write';
-import { UUID } from '@shared/vo/uuid';
 import { DateTime } from '@booking/domain/vo/date-time';
 import { AppointmentNotFoundException } from '@booking/domain/exceptions/appointment-not-found';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
@@ -10,6 +10,8 @@ import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 @CommandHandler(ModifyAppointmentCommand)
 export class ModifyAppointmentHandler implements ICommandHandler<ModifyAppointmentCommand> {
   constructor(
+    @Inject('IAppointmentFactory')
+    private readonly appointmentFactory: IAppointmentFactory,
     @Inject('IAppointmentWriteRepository')
     private readonly appointmentRepository: IAppointmentWriteRepository,
   ) {}
@@ -20,15 +22,17 @@ export class ModifyAppointmentHandler implements ICommandHandler<ModifyAppointme
 
     while (attempt < maxRetries) {
       try {
-        const appointment = await this.appointmentRepository.findById(
-          UUID.fromString(command.appointmentId),
-        );
+        // Load aggregate using factory (CQRS strict compliance)
+        const appointment = await this.appointmentFactory.loadById(command.appointmentId);
 
         if (!appointment) {
           throw new AppointmentNotFoundException(command.appointmentId);
         }
 
+        // Execute business logic
         appointment.modify(DateTime.fromDate(command.newDateTime));
+
+        // Persist using write repository
         await this.appointmentRepository.save(appointment);
 
         return;

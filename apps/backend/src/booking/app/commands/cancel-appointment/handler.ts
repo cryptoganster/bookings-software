@@ -2,14 +2,16 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { CancelAppointmentCommand } from './command';
+import { IAppointmentFactory } from '@booking/domain/interfaces/factories/appointment-factory';
 import { IAppointmentWriteRepository } from '@booking/domain/interfaces/repositories/appointment-write';
-import { UUID } from '@shared/vo/uuid';
 import { AppointmentNotFoundException } from '@booking/domain/exceptions/appointment-not-found';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 
 @CommandHandler(CancelAppointmentCommand)
 export class CancelAppointmentHandler implements ICommandHandler<CancelAppointmentCommand> {
   constructor(
+    @Inject('IAppointmentFactory')
+    private readonly appointmentFactory: IAppointmentFactory,
     @Inject('IAppointmentWriteRepository')
     private readonly appointmentRepository: IAppointmentWriteRepository,
     private readonly logger: PinoLogger,
@@ -34,15 +36,17 @@ export class CancelAppointmentHandler implements ICommandHandler<CancelAppointme
 
     while (attempt < maxRetries) {
       try {
-        const appointment = await this.appointmentRepository.findById(
-          UUID.fromString(command.appointmentId),
-        );
+        // Load aggregate using factory (CQRS strict compliance)
+        const appointment = await this.appointmentFactory.loadById(command.appointmentId);
 
         if (!appointment) {
           throw new AppointmentNotFoundException(command.appointmentId);
         }
 
+        // Execute business logic
         appointment.cancel();
+
+        // Persist using write repository
         await this.appointmentRepository.save(appointment);
 
         const duration = Date.now() - startTime;

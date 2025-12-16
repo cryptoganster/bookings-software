@@ -65,25 +65,11 @@ describe('Offering Aggregate', () => {
 
     it('should throw InvalidOfferingCapacityException when maxCapacityPerSlot < 1', () => {
       expect(() => {
-        Offering.create(
-          offeringId,
-          businessId,
-          'Corte de Pelo',
-          validDuration,
-          0,
-          20,
-        );
+        Offering.create(offeringId, businessId, 'Corte de Pelo', validDuration, 0, 20);
       }).toThrow(InvalidOfferingCapacityException);
 
       expect(() => {
-        Offering.create(
-          offeringId,
-          businessId,
-          'Corte de Pelo',
-          validDuration,
-          0,
-          20,
-        );
+        Offering.create(offeringId, businessId, 'Corte de Pelo', validDuration, 0, 20);
       }).toThrow('maxCapacityPerSlot must be at least 1');
     });
 
@@ -100,14 +86,7 @@ describe('Offering Aggregate', () => {
       }).toThrow(InvalidOfferingCapacityException);
 
       expect(() => {
-        Offering.create(
-          offeringId,
-          businessId,
-          'Corte de Pelo',
-          validDuration,
-          10,
-          5,
-        );
+        Offering.create(offeringId, businessId, 'Corte de Pelo', validDuration, 10, 5);
       }).toThrow('maxDailyCapacity must be greater than or equal to maxCapacityPerSlot');
     });
 
