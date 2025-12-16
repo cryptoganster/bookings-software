@@ -9,9 +9,7 @@ import { OfferingDuration } from '@offering/domain/vo/offering-duration';
 import { DuplicateOfferingNameException } from '@offering/domain/exceptions/duplicate-offering-name';
 
 @CommandHandler(CreateOfferingCommand)
-export class CreateOfferingHandler
-  implements ICommandHandler<CreateOfferingCommand>
-{
+export class CreateOfferingHandler implements ICommandHandler<CreateOfferingCommand> {
   constructor(
     @Inject('IOfferingWriteRepository')
     private readonly offeringRepository: IOfferingWriteRepository,
@@ -20,9 +18,7 @@ export class CreateOfferingHandler
     this.logger.setContext(CreateOfferingHandler.name);
   }
 
-  async execute(
-    command: CreateOfferingCommand,
-  ): Promise<{ offeringId: string }> {
+  async execute(command: CreateOfferingCommand): Promise<{ offeringId: string }> {
     const startTime = Date.now();
     const offeringId = UUID.generate();
 
@@ -43,17 +39,13 @@ export class CreateOfferingHandler
       const businessIdUuid = UUID.fromString(command.businessId);
 
       // Validate name uniqueness
-      const existingOffering =
-        await this.offeringRepository.findByBusinessIdAndName(
-          businessIdUuid,
-          command.name,
-        );
+      const existingOffering = await this.offeringRepository.findByBusinessIdAndName(
+        businessIdUuid,
+        command.name,
+      );
 
       if (existingOffering) {
-        throw new DuplicateOfferingNameException(
-          command.name,
-          command.businessId,
-        );
+        throw new DuplicateOfferingNameException(command.name, command.businessId);
       }
 
       // Create offering aggregate

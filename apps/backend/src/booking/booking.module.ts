@@ -28,6 +28,9 @@ import { AppointmentNotificationSaga } from './app/sagas/appointment-notificatio
 import { AppointmentWriteRepository } from './infra/persistence/repositories/appointment-write';
 import { AppointmentReadRepository } from './infra/persistence/repositories/appointment-read';
 
+// Factories
+import { AppointmentFactory } from './infra/persistence/factories/appointment-factory';
+
 // Controllers
 import { AppointmentController } from './presentation/controllers/appointment.controller';
 
@@ -68,7 +71,13 @@ const Sagas = [AppointmentNotificationSaga];
       provide: 'IAppointmentReadRepository',
       useClass: AppointmentReadRepository,
     },
+
+    // Factories
+    {
+      provide: 'IAppointmentFactory',
+      useClass: AppointmentFactory,
+    },
   ],
-  exports: ['IAppointmentWriteRepository', 'IAppointmentReadRepository'],
+  exports: ['IAppointmentWriteRepository', 'IAppointmentReadRepository', 'IAppointmentFactory'],
 })
 export class BookingModule {}

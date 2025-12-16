@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PinoLogger } from 'nestjs-pino';
 import { CancelAppointmentHandler } from '../handler';
 import { CancelAppointmentCommand } from '../command';
+import { IAppointmentFactory } from '@booking/domain/interfaces/factories/appointment-factory';
 import { IAppointmentWriteRepository } from '@booking/domain/interfaces/repositories/appointment-write';
 import { Appointment } from '@booking/domain/aggregates/appointment';
 import { AppointmentNotFoundException } from '@booking/domain/exceptions/appointment-not-found';
@@ -12,12 +13,16 @@ import { DateTime } from '@booking/domain/vo/date-time';
 
 describe('CancelAppointmentHandler Integration', () => {
   let handler: CancelAppointmentHandler;
+  let appointmentFactory: jest.Mocked<IAppointmentFactory>;
   let appointmentRepository: jest.Mocked<IAppointmentWriteRepository>;
 
   beforeEach(async () => {
+    appointmentFactory = {
+      loadById: jest.fn(),
+    } as any;
+
     appointmentRepository = {
       save: jest.fn(),
-      findById: jest.fn(),
     } as any;
 
     const mockLogger = {
@@ -31,6 +36,10 @@ describe('CancelAppointmentHandler Integration', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CancelAppointmentHandler,
+        {
+          provide: 'IAppointmentFactory',
+          useValue: appointmentFactory,
+        },
         {
           provide: 'IAppointmentWriteRepository',
           useValue: appointmentRepository,
@@ -59,7 +68,7 @@ describe('CancelAppointmentHandler Integration', () => {
       DateTime.fromDate(futureDate),
     );
 
-    appointmentRepository.findById.mockResolvedValue(mockAppointment);
+    appointmentFactory.loadById.mockResolvedValue(mockAppointment);
     appointmentRepository.save.mockResolvedValue();
 
     const command = new CancelAppointmentCommand(appointmentId.getValue(), 'user-id');
@@ -68,14 +77,14 @@ describe('CancelAppointmentHandler Integration', () => {
     await handler.execute(command);
 
     // Assert
-    expect(appointmentRepository.findById).toHaveBeenCalledWith(appointmentId);
+    expect(appointmentFactory.loadById).toHaveBeenCalledWith(appointmentId.getValue());
     expect(appointmentRepository.save).toHaveBeenCalledWith(mockAppointment);
     expect(mockAppointment.getStatus().getValue()).toBe('CANCELLED');
   });
 
   it('should throw AppointmentNotFoundException if appointment not found', async () => {
     // Arrange
-    appointmentRepository.findById.mockResolvedValue(null);
+    appointmentFactory.loadById.mockResolvedValue(null);
 
     const command = new CancelAppointmentCommand('550e8400-e29b-41d4-a716-446655440000', 'user-id');
 
@@ -106,7 +115,7 @@ describe('CancelAppointmentHandler Integration', () => {
       DateTime.fromDate(futureDate),
     );
 
-    appointmentRepository.findById
+    appointmentFactory.loadById
       .mockResolvedValueOnce(mockAppointment1)
       .mockResolvedValueOnce(mockAppointment2);
 
@@ -155,7 +164,7 @@ describe('CancelAppointmentHandler Integration', () => {
       DateTime.fromDate(futureDate),
     );
 
-    appointmentRepository.findById
+    appointmentFactory.loadById
       .mockResolvedValueOnce(mockAppointment1)
       .mockResolvedValueOnce(mockAppointment2)
       .mockResolvedValueOnce(mockAppointment3);

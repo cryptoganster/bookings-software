@@ -34,8 +34,8 @@ describe('Offering Aggregate - Property-Based Tests', () => {
 
             // Verify event was published (version incremented)
             expect(offering.getVersion().getValue()).toBe(1);
-          }
-        )
+          },
+        ),
       );
     });
 
@@ -71,17 +71,12 @@ describe('Offering Aggregate - Property-Based Tests', () => {
 
             const versionBeforeUpdate = offering.getVersion().getValue();
 
-            offering.update(
-              name2,
-              OfferingDuration.fromMinutes(duration2),
-              capacity2,
-              null,
-            );
+            offering.update(name2, OfferingDuration.fromMinutes(duration2), capacity2, null);
 
             // Version should increment
             expect(offering.getVersion().getValue()).toBe(versionBeforeUpdate + 1);
-          }
-        )
+          },
+        ),
       );
     });
 
@@ -107,8 +102,8 @@ describe('Offering Aggregate - Property-Based Tests', () => {
             offering.deactivate();
 
             expect(offering.getVersion().getValue()).toBe(versionBeforeDeactivate + 1);
-          }
-        )
+          },
+        ),
       );
     });
 
@@ -135,8 +130,8 @@ describe('Offering Aggregate - Property-Based Tests', () => {
             offering.activate();
 
             expect(offering.getVersion().getValue()).toBe(versionBeforeActivate + 1);
-          }
-        )
+          },
+        ),
       );
     });
   });
@@ -187,8 +182,8 @@ describe('Offering Aggregate - Property-Based Tests', () => {
             expect(offering.getMaxCapacityPerSlot()).toBe(originalMaxPerSlot);
             expect(offering.getMaxDailyCapacity()).toBe(originalMaxDaily);
             expect(offering.isActiveOffering()).toBe(false);
-          }
-        )
+          },
+        ),
       );
     });
 
@@ -222,8 +217,8 @@ describe('Offering Aggregate - Property-Based Tests', () => {
             expect(offering.getName()).toBe(originalName);
             expect(offering.getDuration().getMinutes()).toBe(originalDuration);
             expect(offering.isActiveOffering()).toBe(true);
-          }
-        )
+          },
+        ),
       );
     });
   });
@@ -267,18 +262,13 @@ describe('Offering Aggregate - Property-Based Tests', () => {
             const originalBusinessId = offering.getBusinessId().getValue();
 
             // Update with different values
-            offering.update(
-              name2,
-              OfferingDuration.fromMinutes(duration2),
-              capacity2,
-              null,
-            );
+            offering.update(name2, OfferingDuration.fromMinutes(duration2), capacity2, null);
 
             // Identity should remain unchanged
             expect(offering.getId().getValue()).toBe(originalId);
             expect(offering.getBusinessId().getValue()).toBe(originalBusinessId);
-          }
-        )
+          },
+        ),
       );
     });
 
@@ -292,9 +282,12 @@ describe('Offering Aggregate - Property-Based Tests', () => {
               duration: fc.integer({ min: 1, max: 32 }).map((n: number) => n * 15),
               capacity: fc.integer({ min: 1, max: 20 }),
             }),
-            { minLength: 1, maxLength: 10 }
+            { minLength: 1, maxLength: 10 },
           ),
-          (initialName: string, updates: Array<{ name: string; duration: number; capacity: number }>) => {
+          (
+            initialName: string,
+            updates: Array<{ name: string; duration: number; capacity: number }>,
+          ) => {
             const offering = Offering.create(
               UUID.generate(),
               UUID.generate(),
@@ -321,8 +314,8 @@ describe('Offering Aggregate - Property-Based Tests', () => {
             // Identity should still be unchanged
             expect(offering.getId().getValue()).toBe(originalId);
             expect(offering.getBusinessId().getValue()).toBe(originalBusinessId);
-          }
-        )
+          },
+        ),
       );
     });
   });
@@ -336,21 +329,18 @@ describe('Offering Aggregate - Property-Based Tests', () => {
   describe('Property: Capacity validation', () => {
     it('should reject maxCapacityPerSlot < 1', () => {
       fc.assert(
-        fc.property(
-          fc.integer({ min: -100, max: 0 }),
-          (maxPerSlot: number) => {
-            expect(() => {
-              Offering.create(
-                UUID.generate(),
-                UUID.generate(),
-                'Test Service',
-                OfferingDuration.fromMinutes(30),
-                maxPerSlot,
-                null,
-              );
-            }).toThrow('maxCapacityPerSlot must be at least 1');
-          }
-        )
+        fc.property(fc.integer({ min: -100, max: 0 }), (maxPerSlot: number) => {
+          expect(() => {
+            Offering.create(
+              UUID.generate(),
+              UUID.generate(),
+              'Test Service',
+              OfferingDuration.fromMinutes(30),
+              maxPerSlot,
+              null,
+            );
+          }).toThrow('maxCapacityPerSlot must be at least 1');
+        }),
       );
     });
 
@@ -372,8 +362,8 @@ describe('Offering Aggregate - Property-Based Tests', () => {
                 maxDaily,
               );
             }).toThrow('maxDailyCapacity must be greater than or equal to maxCapacityPerSlot');
-          }
-        )
+          },
+        ),
       );
     });
 
@@ -396,8 +386,8 @@ describe('Offering Aggregate - Property-Based Tests', () => {
 
             expect(offering.getMaxCapacityPerSlot()).toBe(maxPerSlot);
             expect(offering.getMaxDailyCapacity()).toBe(maxDaily);
-          }
-        )
+          },
+        ),
       );
     });
   });
@@ -450,8 +440,8 @@ describe('Offering Aggregate - Property-Based Tests', () => {
             expect(offering.getMaxDailyCapacity()).toBe(maxDaily);
             expect(offering.isActiveOffering()).toBe(isActive);
             expect(offering.getVersion().getValue()).toBe(version);
-          }
-        )
+          },
+        ),
       );
     });
   });

@@ -97,12 +97,7 @@ describe('OfferingWriteRepository Integration Tests', () => {
       await repository.save(offering);
 
       // Modificar el offering
-      offering.update(
-        'Corte Premium',
-        OfferingDuration.fromMinutes(45),
-        2,
-        10,
-      );
+      offering.update('Corte Premium', OfferingDuration.fromMinutes(45), 2, 10);
 
       // Act
       await repository.save(offering);
@@ -139,12 +134,7 @@ describe('OfferingWriteRepository Integration Tests', () => {
         .update({ id: offering.getId().getValue() }, { version: 5 });
 
       // Intentar actualizar con versión desactualizada
-      offering.update(
-        'Corte Premium',
-        OfferingDuration.fromMinutes(45),
-        2,
-        10,
-      );
+      offering.update('Corte Premium', OfferingDuration.fromMinutes(45), 2, 10);
 
       // Act & Assert
       await expect(repository.save(offering)).rejects.toThrow(ConcurrencyException);

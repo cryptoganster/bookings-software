@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PinoLogger } from 'nestjs-pino';
 import { CancelAppointmentHandler } from '../handler';
 import { CancelAppointmentCommand } from '../command';
+import { IAppointmentFactory } from '@booking/domain/interfaces/factories/appointment-factory';
 import { IAppointmentWriteRepository } from '@booking/domain/interfaces/repositories/appointment-write';
 import { Appointment } from '@booking/domain/aggregates/appointment';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
@@ -12,12 +13,16 @@ import { uuidV4 } from '@test-utils/generators';
 
 describe('CancelAppointmentHandler - Property Tests', () => {
   let handler: CancelAppointmentHandler;
+  let appointmentFactory: jest.Mocked<IAppointmentFactory>;
   let appointmentRepository: jest.Mocked<IAppointmentWriteRepository>;
 
   beforeEach(async () => {
+    appointmentFactory = {
+      loadById: jest.fn(),
+    } as any;
+
     appointmentRepository = {
       save: jest.fn(),
-      findById: jest.fn(),
     } as any;
 
     const mockLogger = {
@@ -31,6 +36,10 @@ describe('CancelAppointmentHandler - Property Tests', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CancelAppointmentHandler,
+        {
+          provide: 'IAppointmentFactory',
+          useValue: appointmentFactory,
+        },
         {
           provide: 'IAppointmentWriteRepository',
           useValue: appointmentRepository,
@@ -77,9 +86,9 @@ describe('CancelAppointmentHandler - Property Tests', () => {
             );
           }
 
-          // Mock findById to return fresh appointments
+          // Mock loadById to return fresh appointments
           for (const appointment of appointments) {
-            appointmentRepository.findById.mockResolvedValueOnce(appointment);
+            appointmentFactory.loadById.mockResolvedValueOnce(appointment);
           }
 
           // Mock save to fail N times, then succeed
@@ -102,8 +111,8 @@ describe('CancelAppointmentHandler - Property Tests', () => {
           // Should have called save failureCount + 1 times (failures + success)
           expect(appointmentRepository.save).toHaveBeenCalledTimes(failureCount + 1);
 
-          // Should have called findById failureCount + 1 times
-          expect(appointmentRepository.findById).toHaveBeenCalledTimes(failureCount + 1);
+          // Should have called loadById failureCount + 1 times
+          expect(appointmentFactory.loadById).toHaveBeenCalledTimes(failureCount + 1);
 
           // Verify exponential backoff was applied
           // With exponential backoff: 100ms * 2^1 = 200ms for first retry
@@ -146,7 +155,7 @@ describe('CancelAppointmentHandler - Property Tests', () => {
               UUID.fromString(offeringId),
               DateTime.fromDate(futureDate),
             );
-            appointmentRepository.findById.mockResolvedValueOnce(appointment);
+            appointmentFactory.loadById.mockResolvedValueOnce(appointment);
           }
 
           // Mock save to always fail
