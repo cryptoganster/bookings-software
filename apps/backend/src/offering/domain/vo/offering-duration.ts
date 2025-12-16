@@ -1,4 +1,5 @@
 import { ValueObject } from '@shared/kernel/value-object';
+import { InvalidOfferingDurationException } from '../exceptions/invalid-offering-duration';
 
 /**
  * Value Object representing the duration of an offering in minutes.
@@ -21,7 +22,7 @@ export class OfferingDuration extends ValueObject {
   /**
    * Creates a new OfferingDuration from minutes
    * @param minutes Duration in minutes
-   * @throws Error if duration is invalid
+   * @throws InvalidOfferingDurationException if duration is invalid
    */
   static fromMinutes(minutes: number): OfferingDuration {
     return new OfferingDuration(minutes);
@@ -39,19 +40,19 @@ export class OfferingDuration extends ValueObject {
    */
   private validate(minutes: number): void {
     if (!Number.isInteger(minutes)) {
-      throw new Error('Duration must be an integer');
+      throw new InvalidOfferingDurationException(minutes);
     }
 
     if (minutes < OfferingDuration.MIN_MINUTES) {
-      throw new Error(`Duration must be at least ${OfferingDuration.MIN_MINUTES} minutes`);
+      throw new InvalidOfferingDurationException(minutes);
     }
 
     if (minutes > OfferingDuration.MAX_MINUTES) {
-      throw new Error(`Duration cannot exceed ${OfferingDuration.MAX_MINUTES} minutes`);
+      throw new InvalidOfferingDurationException(minutes);
     }
 
     if (minutes % OfferingDuration.SLOT_INTERVAL !== 0) {
-      throw new Error(`Duration must be a multiple of ${OfferingDuration.SLOT_INTERVAL} minutes`);
+      throw new InvalidOfferingDurationException(minutes);
     }
   }
 
