@@ -49,7 +49,7 @@ describe("useLogin", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Reset auth store
+    // Reset auth store to initial state
     useAuthStore.setState({
       user: null,
       token: null,

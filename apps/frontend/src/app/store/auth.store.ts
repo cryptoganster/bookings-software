@@ -7,6 +7,9 @@ import type { UserDto } from "@packages/shared-types";
  *
  * Manages authentication state including user data, JWT token, and auth status.
  * Uses Zustand persist middleware to save state to localStorage.
+ *
+ * Note: isAuthenticated is computed from token presence.
+ * This ensures authentication state persists correctly across page reloads.
  */
 interface AuthState {
   // State
@@ -42,21 +45,21 @@ interface AuthState {
  */
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       // Initial state
       user: null,
       token: null,
       isAuthenticated: false,
 
-      // Login action
+      // Login action - updates token and derives isAuthenticated
       login: (user, token) =>
         set({
           user,
           token,
-          isAuthenticated: true,
+          isAuthenticated: !!token,
         }),
 
-      // Logout action
+      // Logout action - clears all auth state
       logout: () =>
         set({
           user: null,
@@ -69,7 +72,13 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({
         token: state.token,
         user: state.user,
-      }), // Only persist token and user, not isAuthenticated
+      }), // Only persist token and user - isAuthenticated is computed on hydration
+      onRehydrateStorage: () => (state) => {
+        // After rehydration, compute isAuthenticated from token
+        if (state) {
+          state.isAuthenticated = !!state.token;
+        }
+      },
     },
   ),
 );

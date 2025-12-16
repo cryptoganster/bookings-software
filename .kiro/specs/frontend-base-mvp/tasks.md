@@ -133,6 +133,17 @@
   - _Requirements: 2.2, 2.3_
   - **Commit:** `feat: create auth store with Zustand`
 
+- [x] 16.1 Fix: Restaurar estado de autenticación al recargar página
+  - Modificar `app/store/auth.store.ts` para derivar `isAuthenticated` del token
+  - Cambiar `isAuthenticated` de campo de estado a computed getter
+  - Implementar: `get isAuthenticated() { return !!this.token; }`
+  - Eliminar `isAuthenticated` del estado inicial y de la acción `login`
+  - Mantener solo `token` y `user` en `partialize` (ya no es necesario persistir `isAuthenticated`)
+  - Verificar que `ProtectedRoute` funciona correctamente con el getter
+  - Probar manualmente: login → refresh → debe permanecer autenticado
+  - _Validates: Property 1 (Authentication token persistence), Requirements 2.2, 2.3_
+  - **Commit:** `fix: derive isAuthenticated from token for persistence`
+
 - [x] 17. Crear entity de user
   - Crear `entities/user/model/types.ts` con User, LoginDto
   - Crear `entities/user/model/queries.ts` con query keys

@@ -58,4 +58,13 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   broadcastToClient(socketId: string, eventName: string, data: unknown) {
     this.server.to(socketId).emit(eventName, data);
   }
+
+  /**
+   * Broadcast evento a TODOS los clientes conectados
+   * Usar con precaución - preferir broadcastToBusinessRoom para multi-tenancy
+   */
+  broadcastToAllClients(eventName: string, data: unknown) {
+    this.server.emit(eventName, data);
+    this.logger.debug(`Broadcasted ${eventName} to all clients`);
+  }
 }
