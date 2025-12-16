@@ -1,7 +1,8 @@
 import { Command } from '@nestjs/cqrs';
 
-export class CreateOfferingCommand extends Command<{ offeringId: string }> {
+export class UpdateOfferingCommand extends Command<void> {
   constructor(
+    public readonly offeringId: string,
     public readonly businessId: string,
     public readonly name: string,
     public readonly durationMinutes: number,
