@@ -46,37 +46,53 @@ export function LoginPage() {
   }, [isAuthenticated, navigate]);
 
   return (
-    <Grid h="100vh" m={0}>
-      {/* Columna izquierda: Formulario (50%) */}
-      <Grid.Col 
-        span={{ base: 12, md: 6 }} 
-        style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center',
-          padding: '2rem'
-        }}
-      >
-        <Box w="100%" style={{ maxWidth: 420 }}>
-          <LoginForm />
-        </Box>
-      </Grid.Col>
-
-      {/* Columna derecha: Imagen de fondo (50%) - Oculta en mobile */}
-      <Grid.Col 
-        span={{ base: 0, md: 6 }} 
-        visibleFrom="md"
-        p={0}
-      >
-        <BackgroundImage
-          src={loginBackgroundImage}
-          h="100%"
-          style={{
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
+    <Box
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100vw',
+        height: '100vh',
+        overflow: 'hidden',
+      }}
+    >
+      <Grid h="100%" m={0} gutter={0}>
+        {/* Columna izquierda: Formulario (50%) */}
+        <Grid.Col 
+          span={{ base: 12, md: 6 }} 
+          style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            padding: '2rem',
+            height: '100%',
           }}
-        />
-      </Grid.Col>
-    </Grid>
+        >
+          <Box w="100%" style={{ maxWidth: 420 }}>
+            <LoginForm />
+          </Box>
+        </Grid.Col>
+
+        {/* Columna derecha: Imagen de fondo (50%) - Oculta en mobile */}
+        <Grid.Col 
+          span={{ base: 0, md: 6 }} 
+          visibleFrom="md"
+          p={0}
+          style={{ height: '100%' }}
+        >
+          <BackgroundImage
+            src={loginBackgroundImage}
+            h="100%"
+            style={{
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              height: '100%',
+            }}
+          />
+        </Grid.Col>
+      </Grid>
+    </Box>
   );
 }
