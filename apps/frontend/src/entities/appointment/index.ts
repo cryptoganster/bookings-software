@@ -19,3 +19,5 @@ export {
   useUpcomingAppointments,
   useTodayAppointments,
 } from './model/queries';
+
+export { appointmentsApi } from './model/api';
