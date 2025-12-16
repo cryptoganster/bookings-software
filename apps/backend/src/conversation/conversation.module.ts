@@ -14,6 +14,9 @@ import { GetAvailableTimeSlotsHandler } from './app/queries/get-available-time-s
 // External clients
 import { WhatsAppBusinessApiClient } from './infra/external/whatsapp-business-api-client';
 
+// Factories
+import { ConversationFactory } from './infra/persistence/factories/conversation-factory';
+
 // Controllers
 import { WebhookController } from './presentation/controllers/webhook';
 
@@ -24,7 +27,23 @@ import { WhatsAppSignatureGuard } from './presentation/guards/whatsapp-signature
 // Using a global Map so it can be cleared between tests
 const conversationsStore = new Map();
 
+/**
+ * TEMPORARY Mock Write Repository
+ *
+ * NOTE: This mock still includes read methods (findByCustomerIdAndBusinessId)
+ * which violates CQRS strict compliance. This is acceptable temporarily because:
+ * 1. No real persistence layer exists yet (no TypeORM models)
+ * 2. ConversationFactory is implemented but returns null (waiting for persistence)
+ * 3. ProcessIncomingMessageHandler still uses the mock directly
+ *
+ * TODO: When real persistence is implemented:
+ * 1. Remove findByCustomerIdAndBusinessId from this mock
+ * 2. Update ConversationFactory to use real TypeORM repository
+ * 3. Update ProcessIncomingMessageHandler to use IConversationFactory
+ * 4. This mock should only have save() method
+ */
 class MockConversationWriteRepository {
+  // TEMPORARY: This method should be in IConversationFactory instead
   findByCustomerIdAndBusinessId(
     customerId: { getValue: () => string },
     businessId: { getValue: () => string },
@@ -71,6 +90,12 @@ const QueryHandlers = [GetAvailableDatesHandler, GetAvailableTimeSlotsHandler];
     // Guards
     WhatsAppSignatureGuard,
 
+    // Factories
+    {
+      provide: 'IConversationFactory',
+      useClass: ConversationFactory,
+    },
+
     // Repositories
     {
       provide: 'IConversationWriteRepository',
@@ -84,6 +109,6 @@ const QueryHandlers = [GetAvailableDatesHandler, GetAvailableTimeSlotsHandler];
       useClass: WhatsAppBusinessApiClient,
     },
   ],
-  exports: ['IConversationWriteRepository', 'IWhatsAppClient'],
+  exports: ['IConversationFactory', 'IConversationWriteRepository', 'IWhatsAppClient'],
 })
 export class ConversationModule {}

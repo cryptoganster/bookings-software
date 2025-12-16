@@ -4,13 +4,13 @@ import { JwtService } from '@nestjs/jwt';
 import { PinoLogger } from 'nestjs-pino';
 import type { LoginResponseDto } from '@packages/shared-types';
 import { LoginCommand } from './command';
-import { IUserWriteRepository } from '@auth/domain/interfaces/repositories/user-write';
+import { IUserFactory } from '@auth/domain/interfaces/factories/user-factory';
 
 @CommandHandler(LoginCommand)
 export class LoginHandler implements ICommandHandler<LoginCommand> {
   constructor(
-    @Inject('IUserWriteRepository')
-    private readonly userWriteRepository: IUserWriteRepository,
+    @Inject('IUserFactory')
+    private readonly userFactory: IUserFactory,
     private readonly jwtService: JwtService,
     private readonly logger: PinoLogger,
   ) {
@@ -30,8 +30,8 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     );
 
     try {
-      // Buscar usuario por email (usando WRITE repository porque necesitamos el aggregate completo para validar password)
-      const user = await this.userWriteRepository.findByEmail(command.email);
+      // Buscar usuario por email (usando FACTORY para cargar aggregate con lógica de negocio)
+      const user = await this.userFactory.loadByEmail(command.email);
       if (!user) {
         this.logger.warn(
           {

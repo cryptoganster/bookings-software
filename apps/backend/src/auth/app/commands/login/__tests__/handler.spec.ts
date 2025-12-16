@@ -4,21 +4,20 @@ import { UnauthorizedException } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { LoginHandler } from '../handler';
 import { LoginCommand } from '../command';
-import { IUserWriteRepository } from '@auth/domain/interfaces/repositories/user-write';
+import { IUserFactory } from '@auth/domain/interfaces/factories/user-factory';
 import { User } from '@auth/domain/aggregates/user';
 import { UUID } from '@shared/vo/uuid';
 import { Email } from '@auth/domain/vo/email';
 
 describe('LoginHandler', () => {
   let handler: LoginHandler;
-  let userWriteRepository: jest.Mocked<IUserWriteRepository>;
+  let userFactory: jest.Mocked<IUserFactory>;
   let jwtService: jest.Mocked<JwtService>;
 
   beforeEach(async () => {
-    const mockUserWriteRepository = {
-      save: jest.fn(),
-      findById: jest.fn(),
-      findByEmail: jest.fn(),
+    const mockUserFactory = {
+      loadById: jest.fn(),
+      loadByEmail: jest.fn(),
     };
 
     const mockJwtService = {
@@ -37,8 +36,8 @@ describe('LoginHandler', () => {
       providers: [
         LoginHandler,
         {
-          provide: 'IUserWriteRepository',
-          useValue: mockUserWriteRepository,
+          provide: 'IUserFactory',
+          useValue: mockUserFactory,
         },
         {
           provide: JwtService,
@@ -52,7 +51,7 @@ describe('LoginHandler', () => {
     }).compile();
 
     handler = module.get<LoginHandler>(LoginHandler);
-    userWriteRepository = module.get('IUserWriteRepository');
+    userFactory = module.get('IUserFactory');
     jwtService = module.get(JwtService);
   });
 
@@ -65,7 +64,7 @@ describe('LoginHandler', () => {
       'Password123',
       'Test User',
     );
-    userWriteRepository.findByEmail.mockResolvedValue(user);
+    userFactory.loadByEmail.mockResolvedValue(user);
     jwtService.sign.mockReturnValue('mock-jwt-token');
 
     // Act
@@ -77,14 +76,14 @@ describe('LoginHandler', () => {
     expect(result.token).toBe('mock-jwt-token');
     expect(result.user.email).toBe('test@example.com');
     expect(result.user.name).toBe('Test User');
-    expect(userWriteRepository.findByEmail).toHaveBeenCalledWith('test@example.com');
+    expect(userFactory.loadByEmail).toHaveBeenCalledWith('test@example.com');
     expect(jwtService.sign).toHaveBeenCalled();
   });
 
   it('should throw UnauthorizedException if user not found', async () => {
     // Arrange
     const command = new LoginCommand('nonexistent@example.com', 'Password123');
-    userWriteRepository.findByEmail.mockResolvedValue(null);
+    userFactory.loadByEmail.mockResolvedValue(null);
 
     // Act & Assert
     await expect(handler.execute(command)).rejects.toThrow(UnauthorizedException);
@@ -100,7 +99,7 @@ describe('LoginHandler', () => {
       'Password123',
       'Test User',
     );
-    userWriteRepository.findByEmail.mockResolvedValue(user);
+    userFactory.loadByEmail.mockResolvedValue(user);
 
     // Act & Assert
     await expect(handler.execute(command)).rejects.toThrow(UnauthorizedException);
@@ -117,7 +116,7 @@ describe('LoginHandler', () => {
       'Password123',
       'Test User',
     );
-    userWriteRepository.findByEmail.mockResolvedValue(user);
+    userFactory.loadByEmail.mockResolvedValue(user);
     jwtService.sign.mockReturnValue('mock-jwt-token');
 
     // Act

@@ -15,11 +15,8 @@ import { AppointmentModified } from '@booking/domain/events/appointment-modified
  *
  * Nota: Estas pruebas requieren un servidor corriendo y pueden ser lentas.
  * Para ejecutarlas: npm test -- websocket.integration.spec.ts
- *
- * Las pruebas están deshabilitadas por defecto para no ralentizar el CI.
- * Descomenta describe.skip para ejecutarlas.
  */
-describe.skip('WebSocket Integration Tests', () => {
+describe('WebSocket Integration Tests', () => {
   let app: INestApplication;
   let eventBus: EventBus;
   let client1: ClientSocket | undefined;
