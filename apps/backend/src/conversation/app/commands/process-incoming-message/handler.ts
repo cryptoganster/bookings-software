@@ -1,18 +1,31 @@
 import { CommandHandler, ICommandHandler, QueryBus, CommandBus } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
 import { ProcessIncomingMessageCommand } from './command';
-import { IConversationWriteRepository } from '../../../domain/interfaces/repositories/conversation-write';
 import { IWhatsAppClient, Button } from '../../../domain/interfaces/external/whatsapp-client';
 import { Conversation } from '../../../domain/aggregates/conversation';
 import { UUID } from '@shared/vo/uuid';
 import { CreateAppointmentCommand } from '@booking/app/commands/create-appointment';
 import { NoAvailableSlotsException } from '@booking/domain/exceptions/no-available-slots';
 
+/**
+ * TEMPORARY: This handler still uses the mock repository directly
+ * because there's no real persistence layer yet.
+ *
+ * TODO: When real persistence is implemented:
+ * 1. Inject IConversationFactory instead of IConversationWriteRepository
+ * 2. Use factory.loadByCustomerIdAndBusinessId() to load conversations
+ * 3. Keep using IConversationWriteRepository only for save()
+ */
+interface MockConversationRepository {
+  findByCustomerIdAndBusinessId(customerId: UUID, businessId: UUID): Promise<Conversation | null>;
+  save(conversation: Conversation): Promise<void>;
+}
+
 @CommandHandler(ProcessIncomingMessageCommand)
 export class ProcessIncomingMessageHandler implements ICommandHandler<ProcessIncomingMessageCommand> {
   constructor(
     @Inject('IConversationWriteRepository')
-    private readonly conversationRepository: IConversationWriteRepository,
+    private readonly conversationRepository: MockConversationRepository,
     @Inject('IWhatsAppClient')
     private readonly whatsappClient: IWhatsAppClient,
     private readonly queryBus: QueryBus,
