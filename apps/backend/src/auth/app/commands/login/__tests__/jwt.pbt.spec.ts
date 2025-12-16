@@ -138,7 +138,7 @@ describe('Property 13: JWT tokens contain valid user data', () => {
           );
 
           // Verify token from login
-          const loginPayload = jwtService.verify(loginResult.accessToken);
+          const loginPayload = jwtService.verify(loginResult.token);
           expect(loginPayload).toHaveProperty('sub');
           expect(loginPayload).toHaveProperty('email');
           expect(loginPayload.email).toBe(userData.email.toLowerCase());

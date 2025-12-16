@@ -56,7 +56,7 @@ describe('LoginHandler', () => {
     jwtService = module.get(JwtService);
   });
 
-  it('should login successfully and return accessToken', async () => {
+  it('should login successfully and return user and token', async () => {
     // Arrange
     const command = new LoginCommand('test@example.com', 'Password123');
     const user = await User.create(
@@ -72,8 +72,11 @@ describe('LoginHandler', () => {
     const result = await handler.execute(command);
 
     // Assert
-    expect(result).toHaveProperty('accessToken');
-    expect(result.accessToken).toBe('mock-jwt-token');
+    expect(result).toHaveProperty('token');
+    expect(result).toHaveProperty('user');
+    expect(result.token).toBe('mock-jwt-token');
+    expect(result.user.email).toBe('test@example.com');
+    expect(result.user.name).toBe('Test User');
     expect(userWriteRepository.findByEmail).toHaveBeenCalledWith('test@example.com');
     expect(jwtService.sign).toHaveBeenCalled();
   });

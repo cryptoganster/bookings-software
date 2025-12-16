@@ -2,6 +2,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { UnauthorizedException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PinoLogger } from 'nestjs-pino';
+import type { LoginResponseDto } from '@packages/shared-types';
 import { LoginCommand } from './command';
 import { IUserWriteRepository } from '@auth/domain/interfaces/repositories/user-write';
 
@@ -16,7 +17,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     this.logger.setContext(LoginHandler.name);
   }
 
-  async execute(command: LoginCommand): Promise<{ accessToken: string }> {
+  async execute(command: LoginCommand): Promise<LoginResponseDto> {
     const startTime = Date.now();
 
     this.logger.info(
@@ -64,7 +65,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
         email: user.getEmail().getValue(),
         businessId: user.getBusinessId()?.getValue(),
       };
-      const accessToken = this.jwtService.sign(payload);
+      const token = this.jwtService.sign(payload);
 
       const duration = Date.now() - startTime;
       this.logger.info(
@@ -78,7 +79,17 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
         'LoginCommand executed successfully',
       );
 
-      return { accessToken };
+      // Retornar respuesta según el contrato de shared-types
+      return {
+        user: {
+          id: user.getId().getValue(),
+          email: user.getEmail().getValue(),
+          name: user.getName(),
+          businessId: user.getBusinessId()?.getValue() ?? null,
+          createdAt: user.getCreatedAt().toISOString(),
+        },
+        token,
+      };
     } catch (error) {
       const duration = Date.now() - startTime;
       this.logger.error(
