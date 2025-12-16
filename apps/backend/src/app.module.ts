@@ -11,6 +11,7 @@ import { AuthModule } from '@auth/auth.module';
 import { AvailabilityModule } from '@availability/availability.module';
 import { BookingModule } from '@booking/booking.module';
 import { ConversationModule } from '@conversation/conversation.module';
+import { OfferingModule } from '@offering/offering.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { ConversationModule } from '@conversation/conversation.module';
     AvailabilityModule,
     BookingModule,
     ConversationModule,
+    OfferingModule,
     LoggerModule.forRoot({
       pinoHttp: {
         // Configuración de transporte

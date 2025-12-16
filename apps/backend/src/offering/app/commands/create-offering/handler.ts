@@ -2,6 +2,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { CreateOfferingCommand } from './command';
+import { IOfferingFactory } from '@offering/domain/interfaces/factories/offering-factory';
 import { IOfferingWriteRepository } from '@offering/domain/interfaces/repositories/offering-write';
 import { Offering } from '@offering/domain/aggregates/offering';
 import { UUID } from '@shared/vo/uuid';
@@ -11,6 +12,8 @@ import { DuplicateOfferingNameException } from '@offering/domain/exceptions/dupl
 @CommandHandler(CreateOfferingCommand)
 export class CreateOfferingHandler implements ICommandHandler<CreateOfferingCommand> {
   constructor(
+    @Inject('IOfferingFactory')
+    private readonly offeringFactory: IOfferingFactory,
     @Inject('IOfferingWriteRepository')
     private readonly offeringRepository: IOfferingWriteRepository,
     private readonly logger: PinoLogger,
@@ -38,9 +41,9 @@ export class CreateOfferingHandler implements ICommandHandler<CreateOfferingComm
     try {
       const businessIdUuid = UUID.fromString(command.businessId);
 
-      // Validate name uniqueness
-      const existingOffering = await this.offeringRepository.findByBusinessIdAndName(
-        businessIdUuid,
+      // Validate name uniqueness using factory
+      const existingOffering = await this.offeringFactory.loadByBusinessIdAndName(
+        command.businessId,
         command.name,
       );
 
