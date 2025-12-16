@@ -10,9 +10,9 @@
 - Email: `test@example.com`
 - Password: `Test123!`
 
-**Resultado:**
+**Prueba 1: Backend directo**
 ```bash
-curl -X POST http://localhost:3000/auth/login \
+curl -X POST http://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com","password":"Test123!"}'
 ```
@@ -32,6 +32,33 @@ curl -X POST http://localhost:3000/auth/login \
 ```
 
 ✅ **Login exitoso** - El backend retorna el usuario y el token JWT correctamente.
+
+**Prueba 2: A través del proxy del frontend**
+```bash
+curl -X POST http://localhost:5173/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"Test123!"}'
+```
+
+✅ **Proxy funcionando** - El frontend puede comunicarse con el backend correctamente.
+
+**Prueba 3: Credenciales incorrectas**
+```bash
+curl -X POST http://localhost:5173/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"WrongPassword"}'
+```
+
+**Respuesta:**
+```json
+{
+  "message": "Invalid credentials",
+  "error": "Unauthorized",
+  "statusCode": 401
+}
+```
+
+✅ **Manejo de errores correcto** - El backend retorna error 401 con mensaje apropiado.
 
 ### 2. ⏳ Verificar redirección a dashboard
 
@@ -104,9 +131,49 @@ curl -X POST http://localhost:3000/auth/login \
 2. **Task 23** - Crear layout principal con DashboardLayout
 3. **Task 24** - Configurar navegación
 
+## Resumen de Pruebas
+
+### ✅ Pruebas Completadas (API)
+
+1. **Backend Health Check** - ✅ Funcionando
+   - URL: `http://localhost:3000/api/health`
+   - Respuesta: `{"status":"ok"}`
+
+2. **Login con credenciales válidas** - ✅ Funcionando
+   - Backend directo: ✅
+   - A través de proxy: ✅
+   - Retorna usuario y token correctamente
+
+3. **Login con credenciales inválidas** - ✅ Funcionando
+   - Retorna error 401 con mensaje apropiado
+
+4. **Proxy Vite → Backend** - ✅ Funcionando
+   - Todas las rutas `/api/*` se proxean correctamente
+
+### ⏳ Pruebas Pendientes (UI en Navegador)
+
+Las siguientes pruebas requieren interacción manual en el navegador:
+
+1. **Flujo de login en UI**
+   - Abrir `http://localhost:5173`
+   - Ingresar credenciales
+   - Verificar redirección a dashboard
+
+2. **Persistencia en localStorage**
+   - Verificar que el token se guarda
+   - Verificar que persiste después de refresh
+
+3. **Logout**
+   - Verificar que limpia el estado
+   - Verificar redirección a login
+
+4. **Rutas protegidas**
+   - Verificar que redirige a login si no está autenticado
+
 ## Notas
 
 - El backend usa tipos compartidos de `@packages/shared-types` correctamente
 - El frontend tiene configurado el API client con interceptors
 - El auth store de Zustand está configurado con persistencia en localStorage
 - Las rutas protegidas están configuradas con `ProtectedRoute` component
+- **Todas las rutas del backend ahora tienen prefijo `/api`**
