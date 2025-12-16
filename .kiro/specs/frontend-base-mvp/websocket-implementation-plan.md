@@ -18,7 +18,7 @@
 - AppointmentCancelled
 - AppointmentModified
 
-// Messaging BC (futuro)
+// Conversation BC (futuro)
 - MessageReceived
 - AdminQueryRequested
 - AdminResponseSent

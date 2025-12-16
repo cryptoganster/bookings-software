@@ -235,8 +235,8 @@ import { UserDto } from "@bookings/shared-types";
     ↑       ↑       ↑
     │       │       │
 ┌───┴───┐ ┌─┴─────┐ ┌─┴──────┐
-│ Auth  │ │Booking│ │Messaging│
-│Service│ │Service│ │ Service │
+│ Auth  │ │Booking│ │Conversation│
+│Service│ │Service│ │  Service   │
 └───────┘ └───────┘ └─────────┘
 ```
 

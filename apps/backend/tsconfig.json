@@ -22,6 +22,7 @@
       "@conversation/*": ["src/conversation/*"],
       "@auth/*": ["src/auth/*"],
       "@availability/*": ["src/availability/*"],
+      "@offering/*": ["src/offering/*"],
       "@test-utils/*": ["src/test-utils/*"]
     }
   }
