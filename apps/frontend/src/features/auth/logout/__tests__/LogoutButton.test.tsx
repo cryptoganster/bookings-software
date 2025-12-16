@@ -46,9 +46,9 @@ describe("LogoutButton", () => {
   it("should clear auth state when clicked", () => {
     // Set up authenticated state
     useAuthStore.setState({
-      user: { 
-        id: "1", 
-        email: "test@test.com", 
+      user: {
+        id: "1",
+        email: "test@test.com",
         name: "Test User",
         businessId: "business-1",
         createdAt: new Date().toISOString(),

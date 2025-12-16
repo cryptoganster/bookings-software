@@ -1,19 +1,25 @@
 /**
  * AppointmentCard Component
- * 
+ *
  * Card de presentación para mostrar información de una cita
  */
 
-import { Card, Group, Stack, Text, Avatar } from '@mantine/core';
-import { IconCalendar, IconClock, IconScissors, IconUser, IconPhone } from '@tabler/icons-react';
-import type { AppointmentReadModel } from '../model/types';
-import { AppointmentBadge } from './AppointmentBadge';
-import { 
-  formatAppointmentDate, 
+import { Card, Group, Stack, Text, Avatar } from "@mantine/core";
+import {
+  IconCalendar,
+  IconClock,
+  IconScissors,
+  IconUser,
+  IconPhone,
+} from "@tabler/icons-react";
+import type { AppointmentReadModel } from "../model/types";
+import { AppointmentBadge } from "./AppointmentBadge";
+import {
+  formatAppointmentDate,
   formatAppointmentTime,
   formatCustomerName,
-  formatPhoneNumber 
-} from '../lib/formatAppointment';
+  formatPhoneNumber,
+} from "../lib/formatAppointment";
 
 interface AppointmentCardProps {
   appointment: AppointmentReadModel;
@@ -23,10 +29,10 @@ interface AppointmentCardProps {
 
 /**
  * Card que muestra información completa de una cita
- * 
+ *
  * @example
  * ```tsx
- * <AppointmentCard 
+ * <AppointmentCard
  *   appointment={appointment}
  *   onClick={() => handleViewDetails(appointment.id)}
  *   actions={
@@ -35,18 +41,18 @@ interface AppointmentCardProps {
  * />
  * ```
  */
-export function AppointmentCard({ 
-  appointment, 
+export function AppointmentCard({
+  appointment,
   onClick,
-  actions 
+  actions,
 }: AppointmentCardProps) {
   return (
-    <Card 
-      shadow="sm" 
-      padding="lg" 
-      radius="md" 
+    <Card
+      shadow="sm"
+      padding="lg"
+      radius="md"
       withBorder
-      style={{ cursor: onClick ? 'pointer' : 'default' }}
+      style={{ cursor: onClick ? "pointer" : "default" }}
       onClick={onClick}
     >
       <Stack gap="md">

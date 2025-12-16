@@ -1,8 +1,8 @@
 /**
  * Navbar Component
- * 
+ *
  * Side navigation with welcome message and navigation links.
- * 
+ *
  * Adapted from templates-mantine-ui/dashvista/Navbar.tsx
  * Changes:
  * - Replaced title with "Bienvenido al Sistema de Reservas"
@@ -15,14 +15,14 @@
  * - Maintained radius="xl" on navlinks
  * - Maintained ScrollArea for responsive navigation
  * - Maintained smooth transition: cubic-bezier(0.075, 0.82, 0.165, 1)
- * 
+ *
  * Requirements: 6.3, 6.4, 6.5, 6.6, 6.7, 6.10, 6.11, 6.12
  */
 
-import { Flex, ScrollArea, Text } from '@mantine/core';
-import { Link, useLocation } from 'react-router-dom';
-import { IconHome2, IconCalendar } from '@tabler/icons-react';
-import classes from './Navbar.module.css';
+import { Flex, ScrollArea, Text } from "@mantine/core";
+import { Link, useLocation } from "react-router-dom";
+import { IconHome2, IconCalendar } from "@tabler/icons-react";
+import classes from "./Navbar.module.css";
 
 interface NavLink {
   id: number;
@@ -34,14 +34,14 @@ interface NavLink {
 const navlinks: NavLink[] = [
   {
     id: 1,
-    name: 'Dashboard',
-    link: '/',
+    name: "Dashboard",
+    link: "/",
     icon: IconHome2,
   },
   {
     id: 2,
-    name: 'Appointments',
-    link: '/appointments',
+    name: "Appointments",
+    link: "/appointments",
     icon: IconCalendar,
   },
 ];
@@ -62,15 +62,11 @@ export function Navbar() {
       </Flex>
 
       {/* Navigation Links */}
-      <ScrollArea
-        scrollbarSize={0}
-        h="calc(100% - 100px)"
-        w="100%"
-      >
+      <ScrollArea scrollbarSize={0} h="calc(100% - 100px)" w="100%">
         <Flex className={classes.navlinkContainer}>
           {navlinks.map(({ id, link, name, icon: Icon }) => {
             const isActive = pathname === link;
-            
+
             return (
               <Link
                 data-active={isActive}

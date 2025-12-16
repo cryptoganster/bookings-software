@@ -2,4 +2,4 @@
  * AppointmentsPage Public API
  */
 
-export { AppointmentsPage } from './ui/AppointmentsPage';
+export { AppointmentsPage } from "./ui/AppointmentsPage";

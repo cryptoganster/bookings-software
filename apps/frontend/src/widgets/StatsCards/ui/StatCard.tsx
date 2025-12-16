@@ -1,5 +1,5 @@
-import { Paper, Group, Text, ThemeIcon } from '@mantine/core';
-import { TablerIconsProps } from '@tabler/icons-react';
+import { Paper, Group, Text, ThemeIcon } from "@mantine/core";
+import type { TablerIconsProps } from "@tabler/icons-react";
 
 interface StatCardProps {
   title: string;
@@ -8,7 +8,12 @@ interface StatCardProps {
   color?: string;
 }
 
-export function StatCard({ title, value, icon: Icon, color = 'brandGreen' }: StatCardProps) {
+export function StatCard({
+  title,
+  value,
+  icon: Icon,
+  color = "brandGreen",
+}: StatCardProps) {
   return (
     <Paper withBorder p="md" radius="xl" shadow="sm">
       <Group justify="space-between">
@@ -20,12 +25,7 @@ export function StatCard({ title, value, icon: Icon, color = 'brandGreen' }: Sta
             {value}
           </Text>
         </div>
-        <ThemeIcon
-          color={color}
-          variant="light"
-          size={60}
-          radius="xl"
-        >
+        <ThemeIcon color={color} variant="light" size={60} radius="xl">
           <Icon size={32} stroke={1.5} />
         </ThemeIcon>
       </Group>

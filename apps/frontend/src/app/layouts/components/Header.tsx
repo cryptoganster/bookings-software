@@ -1,8 +1,8 @@
 /**
  * Header Component
- * 
+ *
  * Top navigation bar with burger menu, business name, and user menu.
- * 
+ *
  * Adapted from templates-mantine-ui/dashvista/Header.tsx
  * Changes:
  * - Replaced logo with simple business name text
@@ -12,24 +12,23 @@
  * - Using @tabler/icons-react instead of iconsax-react
  * - Applied brandGreen color scheme
  * - Applied radius="xl" to ActionIcons and Popover
- * 
+ *
  * Requirements: 6.2, 6.6, 6.7, 6.8
  */
 
 import {
   ActionIcon,
-  Avatar,
   Burger,
   Divider,
   Flex,
   Group,
   Popover,
   Text,
-} from '@mantine/core';
-import { IconUser } from '@tabler/icons-react';
-import { LogoutButton } from '@features/auth/logout';
-import { useAuthStore } from '@app/store/auth.store';
-import classes from './Header.module.css';
+} from "@mantine/core";
+import { IconUser } from "@tabler/icons-react";
+import { LogoutButton } from "@features/auth/logout";
+import { useAuthStore } from "@app/store/auth.store";
+import classes from "./Header.module.css";
 
 interface HeaderProps {
   opened: boolean;
@@ -62,23 +61,24 @@ export function Header({ opened, toggle }: HeaderProps) {
         gap={14}
         className={classes.toolSection}
       >
-        {/* Desktop: Show user info + avatar */}
-        <Group visibleFrom="md" align="center" gap={8}>
-          <Avatar size={36} color="brandGreen" radius="xl">
-            <IconUser size={20} />
-          </Avatar>
-          <Flex direction="column" gap={3} align="start">
-            <Text lh={1} fw={500} fz={14}>
-              {user?.name || 'Usuario'}
-            </Text>
-            <Text lh={1} fz={13} c="dimmed">
-              {user?.email || ''}
-            </Text>
-          </Flex>
-        </Group>
+        {/* Desktop: Show user info (text only, no avatar) */}
+        <Flex visibleFrom="md" direction="column" gap={3} align="end">
+          <Text lh={1} fw={500} fz={14}>
+            {user?.name || "Usuario"}
+          </Text>
+          <Text lh={1} fz={13} c="dimmed">
+            {user?.email || ""}
+          </Text>
+        </Flex>
 
         {/* Mobile: Avatar with Popover */}
-        <Popover width={200} position="bottom" withArrow shadow="md" radius="xl">
+        <Popover
+          width={200}
+          position="bottom"
+          withArrow
+          shadow="md"
+          radius="xl"
+        >
           <Popover.Target>
             <ActionIcon
               hiddenFrom="md"
@@ -94,10 +94,10 @@ export function Header({ opened, toggle }: HeaderProps) {
             <Flex direction="column" gap={10} align="start">
               <Flex direction="column" gap={3} align="start">
                 <Text fw={500} fz={14}>
-                  {user?.name || 'Usuario'}
+                  {user?.name || "Usuario"}
                 </Text>
                 <Text fz={13} c="dimmed">
-                  {user?.email || ''}
+                  {user?.email || ""}
                 </Text>
               </Flex>
               <Divider w="100%" />
@@ -130,10 +130,10 @@ export function Header({ opened, toggle }: HeaderProps) {
               <Flex direction="column" gap={10} align="start">
                 <Flex direction="column" gap={3} align="start">
                   <Text fw={500} fz={14}>
-                    {user?.name || 'Usuario'}
+                    {user?.name || "Usuario"}
                   </Text>
                   <Text fz={13} c="dimmed">
-                    {user?.email || ''}
+                    {user?.email || ""}
                   </Text>
                 </Flex>
                 <Divider w="100%" />

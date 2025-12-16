@@ -1,13 +1,13 @@
 /**
  * DashboardPage Component
- * 
+ *
  * Temporary placeholder for the Dashboard page.
  * Will be replaced with actual dashboard implementation in later phases.
- * 
+ *
  * Requirements: 6.1, 6.4
  */
 
-import { Container, Title, Text, Paper } from '@mantine/core';
+import { Container, Title, Text, Paper } from "@mantine/core";
 
 export function DashboardPage() {
   return (

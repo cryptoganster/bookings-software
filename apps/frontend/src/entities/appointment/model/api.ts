@@ -1,22 +1,24 @@
 /**
  * Appointments API Service
- * 
+ *
  * Este módulo maneja todas las llamadas a la API relacionadas con citas (appointments).
  * Usa el cliente axios configurado y los endpoints centralizados.
  */
 
-import { apiClient } from '@shared/api/client';
-import { ENDPOINTS } from '@shared/api/endpoints';
-import type { 
+import { apiClient } from "@shared/api/client";
+import { ENDPOINTS } from "@shared/api/endpoints";
+import type {
   AppointmentDto,
-  AppointmentFiltersDto 
-} from '@packages/shared-types';
-import type { AppointmentFilters } from './types';
+  AppointmentFiltersDto,
+} from "@packages/shared-types";
+import type { AppointmentFilters } from "./types";
 
 /**
  * Convierte filtros del frontend al formato de la API
  */
-function convertFiltersToApi(filters: AppointmentFilters): AppointmentFiltersDto {
+function convertFiltersToApi(
+  filters: AppointmentFilters,
+): AppointmentFiltersDto {
   const apiFilters: AppointmentFiltersDto = {};
 
   if (filters.status) {
@@ -48,12 +50,12 @@ export const appointmentsApi = {
    */
   async getAll(filters?: AppointmentFilters): Promise<AppointmentDto[]> {
     const params = filters ? convertFiltersToApi(filters) : undefined;
-    
+
     const { data } = await apiClient.get<AppointmentDto[]>(
       ENDPOINTS.APPOINTMENTS.LIST,
-      { params }
+      { params },
     );
-    
+
     return data;
   },
 
@@ -65,14 +67,17 @@ export const appointmentsApi = {
   async getById(id: string): Promise<AppointmentDto | null> {
     try {
       const { data } = await apiClient.get<AppointmentDto>(
-        ENDPOINTS.APPOINTMENTS.DETAIL(id)
+        ENDPOINTS.APPOINTMENTS.DETAIL(id),
       );
-      
+
       return data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Si es 404, retornar null en lugar de lanzar error
-      if (error.response?.status === 404) {
-        return null;
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as { response?: { status?: number } };
+        if (axiosError.response?.status === 404) {
+          return null;
+        }
       }
       throw error;
     }
@@ -93,9 +98,9 @@ export const appointmentsApi = {
    */
   async getToday(): Promise<AppointmentDto[]> {
     const { data } = await apiClient.get<AppointmentDto[]>(
-      ENDPOINTS.APPOINTMENTS.TODAY
+      ENDPOINTS.APPOINTMENTS.TODAY,
     );
-    
+
     return data;
   },
 
@@ -105,9 +110,9 @@ export const appointmentsApi = {
    */
   async getUpcoming(): Promise<AppointmentDto[]> {
     const { data } = await apiClient.get<AppointmentDto[]>(
-      ENDPOINTS.APPOINTMENTS.UPCOMING
+      ENDPOINTS.APPOINTMENTS.UPCOMING,
     );
-    
+
     return data;
   },
 };

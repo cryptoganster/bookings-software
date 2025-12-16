@@ -1,20 +1,28 @@
 /**
  * LoginForm Component
- * 
+ *
  * Formulario de login con validación y manejo de errores
  * Diseño profesional con Paper, inputs redondeados y paleta brandGreen
  */
 
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { TextInput, PasswordInput, Button, Stack, Paper, Title, Text } from '@mantine/core';
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  TextInput,
+  PasswordInput,
+  Button,
+  Stack,
+  Paper,
+  Title,
+  Text,
+} from "@mantine/core";
 
-import { loginSchema, type LoginFormData } from '../model/schema';
-import { useLogin } from '../model/useLogin';
+import { loginSchema, type LoginFormData } from "../model/schema";
+import { useLogin } from "../model/useLogin";
 
 /**
  * Formulario de login
- * 
+ *
  * Features:
  * - Validación con Zod
  * - Manejo de errores por campo
@@ -23,13 +31,13 @@ import { useLogin } from '../model/useLogin';
  * - Diseño profesional con Paper (shadow="xl", padding={30}, radius="xl")
  * - Inputs con size="md" y radius="xl"
  * - Botón con color="brandGreen" (paleta verde personalizada)
- * 
+ *
  * Requirements:
  * - 2.6: Formulario con Paper profesional
  * - 2.8: Inputs con size="md" y radius="xl"
  * - 2.9: PasswordInput con size="md" y radius="xl"
  * - 2.12: Botón con color="brandGreen"
- * 
+ *
  * @example
  * ```tsx
  * <LoginForm />
@@ -37,7 +45,7 @@ import { useLogin } from '../model/useLogin';
  */
 export function LoginForm() {
   const { mutate: login, isPending } = useLogin();
-  
+
   const {
     register,
     handleSubmit,
@@ -45,8 +53,8 @@ export function LoginForm() {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: '',
-      password: '',
+      email: "",
+      password: "",
     },
   });
 
@@ -55,17 +63,17 @@ export function LoginForm() {
   };
 
   return (
-    <Paper 
-      withBorder 
-      shadow="xl" 
-      p={30} 
-      radius="xl" 
-      style={{ maxWidth: 420, width: '100%' }}
+    <Paper
+      withBorder
+      shadow="xl"
+      p={30}
+      radius="xl"
+      style={{ maxWidth: 420, width: "100%" }}
     >
       <Title order={2} ta="center" mb="md">
         Iniciar Sesión
       </Title>
-      
+
       <Text c="dimmed" size="sm" ta="center" mb="xl">
         Ingresa tus credenciales para acceder al panel
       </Text>
@@ -77,7 +85,7 @@ export function LoginForm() {
             placeholder="tu@email.com"
             size="md"
             radius="xl"
-            {...register('email')}
+            {...register("email")}
             error={errors.email?.message}
             disabled={isPending}
             required
@@ -88,15 +96,15 @@ export function LoginForm() {
             placeholder="Tu contraseña"
             size="md"
             radius="xl"
-            {...register('password')}
+            {...register("password")}
             error={errors.password?.message}
             disabled={isPending}
             required
           />
 
-          <Button 
-            type="submit" 
-            fullWidth 
+          <Button
+            type="submit"
+            fullWidth
             loading={isPending}
             mt="md"
             radius="xl"

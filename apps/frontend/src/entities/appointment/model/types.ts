@@ -1,16 +1,16 @@
 /**
  * Appointment Entity Types
- * 
+ *
  * Este módulo define los tipos relacionados con las citas (appointments).
  * Los tipos principales se importan desde @packages/shared-types
  * para mantener consistencia con el contrato de API.
  */
 
-import type { 
-  AppointmentDto, 
+import type {
+  AppointmentDto,
   AppointmentStatus,
-  AppointmentFiltersDto 
-} from '@packages/shared-types';
+  AppointmentFiltersDto,
+} from "@packages/shared-types";
 
 /**
  * AppointmentReadModel - Representa una cita en el sistema

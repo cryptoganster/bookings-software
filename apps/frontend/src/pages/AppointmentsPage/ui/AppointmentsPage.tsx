@@ -1,13 +1,13 @@
 /**
  * AppointmentsPage Component
- * 
+ *
  * Temporary placeholder for the Appointments page.
  * Will be replaced with actual appointments management in later phases.
- * 
+ *
  * Requirements: 6.1, 6.4
  */
 
-import { Container, Title, Text, Paper } from '@mantine/core';
+import { Container, Title, Text, Paper } from "@mantine/core";
 
 export function AppointmentsPage() {
   return (

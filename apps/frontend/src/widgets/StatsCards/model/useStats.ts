@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { apiClient } from '@shared/api/client';
+import { useQuery } from "@tanstack/react-query";
+import { apiClient } from "@shared/api/client";
 
 interface StatsData {
   appointmentsToday: number;
@@ -7,12 +7,12 @@ interface StatsData {
 }
 
 const statsKeys = {
-  all: ['stats'] as const,
-  current: () => [...statsKeys.all, 'current'] as const,
+  all: ["stats"] as const,
+  current: () => [...statsKeys.all, "current"] as const,
 };
 
 async function fetchStats(): Promise<StatsData> {
-  const { data } = await apiClient.get<StatsData>('/appointments/stats');
+  const { data } = await apiClient.get<StatsData>("/appointments/stats");
   return data;
 }
 

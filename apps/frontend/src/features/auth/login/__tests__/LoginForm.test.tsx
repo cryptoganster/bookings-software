@@ -51,7 +51,9 @@ describe("LoginForm", () => {
     const Wrapper = createWrapper();
     render(<LoginForm />, { wrapper: Wrapper });
 
-    expect(screen.getByRole("heading", { name: /iniciar sesión/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /iniciar sesión/i }),
+    ).toBeInTheDocument();
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/contraseña/i)).toBeInTheDocument();
     expect(
@@ -66,7 +68,9 @@ describe("LoginForm", () => {
 
     const emailInput = screen.getByLabelText(/email/i);
     const passwordInput = screen.getByLabelText(/contraseña/i);
-    const submitButton = screen.getByRole("button", { name: /iniciar sesión/i });
+    const submitButton = screen.getByRole("button", {
+      name: /iniciar sesión/i,
+    });
 
     // Enter invalid email but valid password
     await user.type(emailInput, "invalid-email");
@@ -86,7 +90,9 @@ describe("LoginForm", () => {
 
     const emailInput = screen.getByLabelText(/email/i);
     const passwordInput = screen.getByLabelText(/contraseña/i);
-    const submitButton = screen.getByRole("button", { name: /iniciar sesión/i });
+    const submitButton = screen.getByRole("button", {
+      name: /iniciar sesión/i,
+    });
 
     // Enter valid email but short password
     await user.type(emailInput, "test@test.com");
@@ -121,7 +127,9 @@ describe("LoginForm", () => {
 
     const emailInput = screen.getByLabelText(/email/i);
     const passwordInput = screen.getByLabelText(/contraseña/i);
-    const submitButton = screen.getByRole("button", { name: /iniciar sesión/i });
+    const submitButton = screen.getByRole("button", {
+      name: /iniciar sesión/i,
+    });
 
     // Fill form with valid data
     await user.type(emailInput, "test@test.com");
@@ -168,7 +176,9 @@ describe("LoginForm", () => {
     const passwordInput = screen.getByLabelText(
       /contraseña/i,
     ) as HTMLInputElement;
-    const submitButton = screen.getByRole("button", { name: /iniciar sesión/i });
+    const submitButton = screen.getByRole("button", {
+      name: /iniciar sesión/i,
+    });
 
     // Fill and submit form
     await user.type(emailInput, "test@test.com");
@@ -187,7 +197,9 @@ describe("LoginForm", () => {
     const Wrapper = createWrapper();
     render(<LoginForm />, { wrapper: Wrapper });
 
-    const submitButton = screen.getByRole("button", { name: /iniciar sesión/i });
+    const submitButton = screen.getByRole("button", {
+      name: /iniciar sesión/i,
+    });
 
     // Try to submit without filling fields
     await user.click(submitButton);

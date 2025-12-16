@@ -1,6 +1,6 @@
 /**
  * Test Setup
- * 
+ *
  * Configuración global para todos los tests
  */
 
@@ -37,4 +37,4 @@ global.IntersectionObserver = class IntersectionObserver {
     return [];
   }
   unobserve() {}
-} as any;
+} as unknown as typeof IntersectionObserver;

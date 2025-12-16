@@ -1,8 +1,12 @@
-import { SimpleGrid, Alert } from '@mantine/core';
-import { IconCalendar, IconCalendarWeek, IconAlertCircle } from '@tabler/icons-react';
-import { useStats } from '../model/useStats';
-import { StatCard } from './StatCard';
-import { LoadingOverlay } from '@shared/ui/LoadingOverlay/LoadingOverlay';
+import { SimpleGrid, Alert } from "@mantine/core";
+import {
+  IconCalendar,
+  IconCalendarWeek,
+  IconAlertCircle,
+} from "@tabler/icons-react";
+import { useStats } from "../model/useStats";
+import { StatCard } from "./StatCard";
+import { LoadingOverlay } from "@shared/ui/LoadingOverlay/LoadingOverlay";
 
 export function StatsCards() {
   const { data: stats, isLoading, isError, error } = useStats();
@@ -19,7 +23,7 @@ export function StatsCards() {
         color="red"
         radius="xl"
       >
-        {error instanceof Error ? error.message : 'Error desconocido'}
+        {error instanceof Error ? error.message : "Error desconocido"}
       </Alert>
     );
   }

@@ -1,12 +1,16 @@
 /**
  * User Entity Types
- * 
+ *
  * Este módulo define los tipos relacionados con el usuario.
  * Los tipos principales se importan desde @packages/shared-types
  * para mantener consistencia con el contrato de API.
  */
 
-import type { UserDto, LoginRequestDto, LoginResponseDto } from '@packages/shared-types';
+import type {
+  UserDto,
+  LoginRequestDto,
+  LoginResponseDto,
+} from "@packages/shared-types";
 
 /**
  * User - Representa un usuario en el sistema

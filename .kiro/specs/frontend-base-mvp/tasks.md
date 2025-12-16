@@ -284,14 +284,14 @@
 
 ## Fase 6: Entity de Appointment
 
-- [ ] 24. Crear tipos de appointment
+- [x] 24. Crear tipos de appointment
   - Crear `entities/appointment/model/types.ts`
   - Importar AppointmentReadModel desde shared-types
   - Crear tipos de filtros: AppointmentFilters
   - _Requirements: 8.5_
   - **Commit:** `feat: add appointment entity types`
 
-- [ ] 25. Crear query keys y hooks
+- [x] 25. Crear query keys y hooks
   - Crear `entities/appointment/model/queries.ts` con appointmentKeys
   - Crear `useAppointments()` hook para lista
   - Crear `useAppointment(id)` hook para detalle
@@ -299,7 +299,7 @@
   - _Requirements: 8.2_
   - **Commit:** `feat: add appointment query hooks`
 
-- [ ] 26. Crear API de appointments
+- [x] 26. Crear API de appointments
   - Crear `entities/appointment/model/api.ts`
   - Implementar `appointmentsApi.getAll()`
   - Implementar `appointmentsApi.getById()`
@@ -307,7 +307,7 @@
   - _Requirements: 8.2, 8.3_
   - **Commit:** `feat: implement appointments API service`
 
-- [ ] 27. Crear componentes de presentación
+- [x] 27. Crear componentes de presentación
   - Crear `entities/appointment/ui/AppointmentCard.tsx`
   - Crear `entities/appointment/ui/AppointmentBadge.tsx` para status
   - Crear `entities/appointment/lib/formatAppointment.ts`
@@ -317,7 +317,7 @@
 
 ## Fase 7: Dashboard
 
-- [ ] 28. Crear widget de stats cards
+- [x] 28. Crear widget de stats cards
   - Crear `widgets/StatsCards/model/useStats.ts` (query hook)
   - Crear `widgets/StatsCards/ui/StatCard.tsx`
   - Crear `widgets/StatsCards/ui/StatsCards.tsx`
