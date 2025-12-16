@@ -1,23 +1,30 @@
 /**
  * Appointment Entity - Public API
  * 
- * Este módulo expone la API pública de la entidad Appointment.
- * Siguiendo el patrón Public API de Feature-Sliced Design.
+ * Exporta componentes, hooks y utilidades de la entidad Appointment
  */
 
-export type {
-  AppointmentReadModel,
-  AppointmentFilters,
-  AppointmentFiltersApi,
-  AppointmentStatus,
+// UI Components
+export { AppointmentCard } from './ui/AppointmentCard';
+export { AppointmentBadge } from './ui/AppointmentBadge';
+
+// Model
+export type { 
+  AppointmentReadModel, 
+  AppointmentFilters, 
+  AppointmentStatus 
 } from './model/types';
-
-export {
-  appointmentKeys,
-  useAppointments,
-  useAppointment,
-  useUpcomingAppointments,
-  useTodayAppointments,
-} from './model/queries';
-
+export { appointmentKeys } from './model/queries';
+export { useAppointments, useAppointment } from './model/queries';
 export { appointmentsApi } from './model/api';
+
+// Utilities
+export { 
+  formatAppointmentDateTime,
+  formatAppointmentDate,
+  formatAppointmentTime,
+  formatCustomerName,
+  formatPhoneNumber,
+  formatAppointmentSummary
+} from './lib/formatAppointment';
+export { getStatusColor, getStatusLabel } from './lib/getStatusColor';
