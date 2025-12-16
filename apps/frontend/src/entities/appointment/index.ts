@@ -11,3 +11,11 @@ export type {
   AppointmentFiltersApi,
   AppointmentStatus,
 } from './model/types';
+
+export {
+  appointmentKeys,
+  useAppointments,
+  useAppointment,
+  useUpcomingAppointments,
+  useTodayAppointments,
+} from './model/queries';
