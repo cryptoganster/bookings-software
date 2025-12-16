@@ -13,6 +13,7 @@ async function seed() {
     console.log('🧹 Cleaning existing data...');
     await AppDataSource.query('TRUNCATE TABLE appointments CASCADE');
     await AppDataSource.query('TRUNCATE TABLE capacities CASCADE');
+    await AppDataSource.query('TRUNCATE TABLE offerings CASCADE');
     await AppDataSource.query('TRUNCATE TABLE users CASCADE');
 
     // 1. Crear usuario de prueba (dueño de negocio)
@@ -34,9 +35,25 @@ async function seed() {
     const offering2Id = uuidv4();
     const offering3Id = uuidv4();
 
-    // Nota: Como no tenemos tabla de offerings aún, usaremos IDs ficticios
-    // En una implementación completa, aquí insertaríamos en la tabla offerings
-    console.log(`✅ Offering IDs created: ${offering1Id}, ${offering2Id}, ${offering3Id}`);
+    await AppDataSource.query(
+      `INSERT INTO offerings (id, business_id, name, duration_minutes, max_capacity_per_slot, max_daily_capacity, is_active, version, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())`,
+      [offering1Id, businessId, 'Corte de Pelo', 30, 4, 20, true, 0],
+    );
+
+    await AppDataSource.query(
+      `INSERT INTO offerings (id, business_id, name, duration_minutes, max_capacity_per_slot, max_daily_capacity, is_active, version, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())`,
+      [offering2Id, businessId, 'Lavado', 15, 6, 30, true, 0],
+    );
+
+    await AppDataSource.query(
+      `INSERT INTO offerings (id, business_id, name, duration_minutes, max_capacity_per_slot, max_daily_capacity, is_active, version, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())`,
+      [offering3Id, businessId, 'Tinte', 60, 2, 8, true, 0],
+    );
+
+    console.log(`✅ Created 3 offerings: Corte de Pelo, Lavado, Tinte`);
 
     // 3. Crear capacidades para los próximos 30 días
     console.log('📅 Creating capacities for next 30 days...');
@@ -141,7 +158,7 @@ async function seed() {
     console.log('✅ 1 test user created');
     console.log('   Email: test@example.com');
     console.log('   Password: Test123!');
-    console.log(`✅ 3 offering IDs generated`);
+    console.log(`✅ 3 offerings created (Corte de Pelo, Lavado, Tinte)`);
     console.log(`✅ ${capacities.length} capacity records created (30 days)`);
     console.log('✅ 2 sample appointments created');
     console.log('==================\n');

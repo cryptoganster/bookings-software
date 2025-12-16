@@ -4,7 +4,7 @@
 
 Este plan implementa el BC Offering en el backend siguiendo Clean Architecture, DDD, y CQRS. Las tareas están organizadas para construir incrementalmente desde el dominio hacia la infraestructura y presentación.
 
-## ✅ Progress: 39/51 tasks completed (76.5%) - OFFERING BC COMPLETE! 🎉
+## ✅ Progress: 40/51 tasks completed (78.4%) - OFFERING BC COMPLETE! 🎉
 
 **Last Update:** December 16, 2024
 **Status:** Phase 1 Complete ✅ | Phase 2 Complete ✅ | Phase 3 Complete ✅ | Phase 4 Complete ✅ | Phase 5 Complete ✅ | Phase 6 Complete ✅ | Phase 7 Complete ✅ | Phase 8 Complete ✅ | Phase 9 Complete ✅
@@ -449,11 +449,12 @@ Este plan implementa el BC Offering en el backend siguiendo Clean Architecture, 
   - Multi-tenancy explicado
   - _Requirements: 9.1, 9.2, 9.3_
 
-- [ ] 39. Create Seed Data (Optional)
-  - Crear `src/database/seeds/offerings-seed.ts`
-  - Seed offerings de ejemplo para desarrollo
+- [x] 39. Create Seed Data (Optional) ✅
+  - Actualizado `src/database/seeds/seed.ts` para incluir offerings
+  - Agregados 3 offerings de ejemplo: Corte de Pelo (30min), Lavado (15min), Tinte (60min)
+  - Seed data incluye: 1 usuario, 3 offerings, capacidades para 30 días, 2 citas de ejemplo
+  - Comando: `npm run seed` desde apps/backend
   - _Requirements: Optional_
-  - **NOTA:** Skipped for MVP - not critical for functionality
 
 - [x] 40. Final Checkpoint ✅
   - ✅ TypeScript compilation: No errors
