@@ -1,4 +1,5 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
+import { UserRole } from '../../domain/vo/user-role';
 
 export class RegisterDto {
   @IsEmail()
@@ -13,4 +14,8 @@ export class RegisterDto {
   @IsString()
   @IsNotEmpty()
   name!: string;
+
+  @IsEnum(UserRole)
+  @IsOptional()
+  initialRole?: UserRole;
 }
