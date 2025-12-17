@@ -50,18 +50,25 @@ export class RegisterHandler implements ICommandHandler<RegisterCommand> {
         throw new ConflictException('User with this email already exists');
       }
 
-      // Crear nuevo usuario
+      // Crear nuevo usuario con rol inicial del comando
       const userId = UUID.generate();
       const email = Email.fromString(command.email);
-      const user = await User.create(userId, email, command.password, command.name);
+      const user = await User.register(
+        userId,
+        email,
+        command.password,
+        command.name,
+        command.initialRole,
+      );
 
       // Guardar usuario (usando WRITE repository)
       await this.userWriteRepository.save(user);
 
-      // Generar JWT token
+      // Generar JWT token con roles
       const payload = {
         sub: userId.getValue(),
         email: email.getValue(),
+        roles: user.getRoles(),
       };
       const accessToken = this.jwtService.sign(payload);
 

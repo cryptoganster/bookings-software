@@ -10,12 +10,13 @@ import { IUserWriteRepository } from '@auth/domain/interfaces/repositories/user-
 import { IUserReadRepository } from '@auth/domain/interfaces/repositories/user-read';
 import { IUserFactory } from '@auth/domain/interfaces/factories/user-factory';
 import { User } from '@auth/domain/aggregates/user';
+import { UserRole } from '@auth/domain/vo/user-role';
 
 /**
- * Feature: proyecto-base-mvp, Property 13: JWT tokens contain valid user data
- * Validates: Requirements 9.3
+ * Feature: auth-bc-roles-refactor, Property 5: JWT contains roles array
+ * Validates: Requirements 4.1, 4.2
  */
-describe('Property 13: JWT tokens contain valid user data', () => {
+describe('Property 5: JWT tokens contain valid user data with roles', () => {
   let registerHandler: RegisterHandler;
   let loginHandler: LoginHandler;
   let userRepository: Map<string, User>;
@@ -53,7 +54,9 @@ describe('Property 13: JWT tokens contain valid user data', () => {
               id: user.getId().getValue(),
               email: user.getEmail().getValue(),
               name: user.getName(),
-              businessId: user.getBusinessId()?.getValue() || null,
+              roles: user.getRoles(),
+              isActive: user.getIsActive(),
+              emailVerified: user.getEmailVerified(),
               createdAt: user.getCreatedAt(),
             });
           }
@@ -67,7 +70,9 @@ describe('Property 13: JWT tokens contain valid user data', () => {
           id: user.getId().getValue(),
           email: user.getEmail().getValue(),
           name: user.getName(),
-          businessId: user.getBusinessId()?.getValue() || null,
+          roles: user.getRoles(),
+          isActive: user.getIsActive(),
+          emailVerified: user.getEmailVerified(),
           createdAt: user.getCreatedAt(),
         });
       },
@@ -116,7 +121,7 @@ describe('Property 13: JWT tokens contain valid user data', () => {
     jwtService = module.get<JwtService>(JwtService);
   });
 
-  it('should generate JWT tokens with valid user data for any valid user', async () => {
+  it('should generate JWT tokens with roles array for any valid user', async () => {
     await fc.assert(
       fc.asyncProperty(
         fc.record({
@@ -129,13 +134,21 @@ describe('Property 13: JWT tokens contain valid user data', () => {
         async (userData) => {
           // Register user
           const registerResult = await registerHandler.execute(
-            new RegisterCommand(userData.email, userData.password, userData.name),
+            new RegisterCommand(
+              userData.email,
+              userData.password,
+              userData.name,
+              UserRole.BUSINESS_OWNER,
+            ),
           );
 
-          // Verify token from registration
+          // Verify token from registration contains roles
           const registerPayload = jwtService.verify(registerResult.accessToken);
           expect(registerPayload).toHaveProperty('sub');
           expect(registerPayload).toHaveProperty('email');
+          expect(registerPayload).toHaveProperty('roles');
+          expect(Array.isArray(registerPayload.roles)).toBe(true);
+          expect(registerPayload.roles).toContain(UserRole.BUSINESS_OWNER);
           expect(registerPayload.email).toBe(userData.email.toLowerCase());
           expect(registerPayload.sub).toBe(registerResult.userId);
 
@@ -144,23 +157,27 @@ describe('Property 13: JWT tokens contain valid user data', () => {
             new LoginCommand(userData.email, userData.password),
           );
 
-          // Verify token from login
+          // Verify token from login contains roles
           const loginPayload = jwtService.verify(loginResult.token);
           expect(loginPayload).toHaveProperty('sub');
           expect(loginPayload).toHaveProperty('email');
+          expect(loginPayload).toHaveProperty('roles');
+          expect(Array.isArray(loginPayload.roles)).toBe(true);
+          expect(loginPayload.roles).toContain(UserRole.BUSINESS_OWNER);
           expect(loginPayload.email).toBe(userData.email.toLowerCase());
           expect(loginPayload.sub).toBe(registerResult.userId);
 
           // Verify both tokens contain the same user data
           expect(loginPayload.sub).toBe(registerPayload.sub);
           expect(loginPayload.email).toBe(registerPayload.email);
+          expect(loginPayload.roles).toEqual(registerPayload.roles);
         },
       ),
       { numRuns: 10 },
     );
   }, 30000);
 
-  it('should generate unique tokens for different users', async () => {
+  it('should generate unique tokens for different users with roles', async () => {
     await fc.assert(
       fc.asyncProperty(
         fc.array(
@@ -185,7 +202,12 @@ describe('Property 13: JWT tokens contain valid user data', () => {
 
           for (const userData of uniqueUsers) {
             const result = await registerHandler.execute(
-              new RegisterCommand(userData.email, userData.password, userData.name),
+              new RegisterCommand(
+                userData.email,
+                userData.password,
+                userData.name,
+                UserRole.BUSINESS_OWNER,
+              ),
             );
             tokens.push(result.accessToken);
           }
@@ -194,10 +216,11 @@ describe('Property 13: JWT tokens contain valid user data', () => {
           const uniqueTokens = new Set(tokens);
           expect(uniqueTokens.size).toBe(tokens.length);
 
-          // Verify each token contains correct user data
+          // Verify each token contains correct user data with roles
           for (let i = 0; i < tokens.length; i++) {
             const payload = jwtService.verify(tokens[i]);
             expect(payload.email).toBe(uniqueUsers[i].email.toLowerCase());
+            expect(payload.roles).toContain(UserRole.BUSINESS_OWNER);
           }
         },
       ),
