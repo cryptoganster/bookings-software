@@ -39,7 +39,7 @@ export function DateRangeFilter() {
   };
 
   return (
-    <Stack gap="md">
+    <Stack gap="md" role="group" aria-label="Filtro de rango de fechas">
       <SegmentedControl
         value={preset}
         onChange={(value) => setPreset(value as typeof preset)}
