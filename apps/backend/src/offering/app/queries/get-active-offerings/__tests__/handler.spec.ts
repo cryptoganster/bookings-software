@@ -26,9 +26,7 @@ describe('GetActiveOfferingsHandler', () => {
       ],
     }).compile();
 
-    handler = module.get<GetActiveOfferingsHandler>(
-      GetActiveOfferingsHandler,
-    );
+    handler = module.get<GetActiveOfferingsHandler>(GetActiveOfferingsHandler);
   });
 
   afterEach(() => {
@@ -64,9 +62,7 @@ describe('GetActiveOfferingsHandler', () => {
         },
       ];
 
-      mockReadRepository.findActiveByBusinessId.mockResolvedValue(
-        activeOfferings,
-      );
+      mockReadRepository.findActiveByBusinessId.mockResolvedValue(activeOfferings);
 
       const query = new GetActiveOfferingsQuery(businessId);
 
@@ -77,12 +73,8 @@ describe('GetActiveOfferingsHandler', () => {
       expect(result).toEqual(activeOfferings);
       expect(result).toHaveLength(2);
       expect(result.every((o) => o.isActive)).toBe(true);
-      expect(mockReadRepository.findActiveByBusinessId).toHaveBeenCalledWith(
-        businessId,
-      );
-      expect(mockReadRepository.findActiveByBusinessId).toHaveBeenCalledTimes(
-        1,
-      );
+      expect(mockReadRepository.findActiveByBusinessId).toHaveBeenCalledWith(businessId);
+      expect(mockReadRepository.findActiveByBusinessId).toHaveBeenCalledTimes(1);
     });
 
     it('should return empty array if no active offerings', async () => {
@@ -98,9 +90,7 @@ describe('GetActiveOfferingsHandler', () => {
       // Assert
       expect(result).toEqual([]);
       expect(result).toHaveLength(0);
-      expect(mockReadRepository.findActiveByBusinessId).toHaveBeenCalledWith(
-        businessId,
-      );
+      expect(mockReadRepository.findActiveByBusinessId).toHaveBeenCalledWith(businessId);
     });
 
     it('should return offerings ordered alphabetically', async () => {
@@ -142,9 +132,7 @@ describe('GetActiveOfferingsHandler', () => {
         },
       ];
 
-      mockReadRepository.findActiveByBusinessId.mockResolvedValue(
-        activeOfferings,
-      );
+      mockReadRepository.findActiveByBusinessId.mockResolvedValue(activeOfferings);
 
       const query = new GetActiveOfferingsQuery(businessId);
 
@@ -188,9 +176,7 @@ describe('GetActiveOfferingsHandler', () => {
       // Assert
       expect(result).toEqual(offerings);
       expect(result.every((o) => o.businessId === businessId)).toBe(true);
-      expect(result.every((o) => o.businessId === otherBusinessId)).toBe(
-        false,
-      );
+      expect(result.every((o) => o.businessId === otherBusinessId)).toBe(false);
     });
   });
 });

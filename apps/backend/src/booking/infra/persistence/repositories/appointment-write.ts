@@ -43,7 +43,7 @@ export class AppointmentWriteRepository implements IAppointmentWriteRepository {
         // - currentVersion es la NUEVA versión (después del incremento)
         // - existing.version es la versión ANTERIOR (en la BD)
         const previousVersion = existing.version;
-        
+
         const result = await this.repository
           .createQueryBuilder()
           .update(AppointmentModel)

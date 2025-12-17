@@ -41,9 +41,7 @@ export class AppointmentController {
   @Get('upcoming')
   async findUpcoming(@CurrentUser() user: UserPayload) {
     const businessId = user.businessId || user.userId;
-    const appointments = await this.queryBus.execute(
-      new GetUpcomingAppointmentsQuery(businessId),
-    );
+    const appointments = await this.queryBus.execute(new GetUpcomingAppointmentsQuery(businessId));
     return appointments;
   }
 

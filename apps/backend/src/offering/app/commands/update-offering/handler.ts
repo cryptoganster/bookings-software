@@ -31,9 +31,7 @@ export class UpdateOfferingHandler implements ICommandHandler<UpdateOfferingComm
         if (error instanceof ConcurrencyException) {
           attempt++;
           if (attempt >= this.MAX_RETRIES) {
-            throw new Error(
-              'Unable to update offering after multiple attempts. Please try again.',
-            );
+            throw new Error('Unable to update offering after multiple attempts. Please try again.');
           }
           // Espera breve antes de reintentar (exponential backoff)
           await new Promise((resolve) => setTimeout(resolve, 100 * Math.pow(2, attempt)));
@@ -70,12 +68,7 @@ export class UpdateOfferingHandler implements ICommandHandler<UpdateOfferingComm
     // Actualizar aggregate
     const duration = OfferingDuration.fromMinutes(command.durationMinutes);
 
-    offering.update(
-      command.name,
-      duration,
-      command.maxCapacityPerSlot,
-      command.maxDailyCapacity,
-    );
+    offering.update(command.name, duration, command.maxCapacityPerSlot, command.maxDailyCapacity);
 
     // Persistir (puede lanzar ConcurrencyException)
     await this.writeRepository.save(offering);

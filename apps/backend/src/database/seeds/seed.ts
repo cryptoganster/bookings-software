@@ -19,13 +19,10 @@ async function seed() {
     console.log('✅ Data cleaned\n');
 
     // Seed por Bounded Context
-    const { userId, businessId } = await seedAuth(AppDataSource);
+    const { businessId } = await seedAuth(AppDataSource);
     console.log('');
 
-    const { offering1Id, offering2Id, offering3Id } = await seedOffering(
-      AppDataSource,
-      businessId,
-    );
+    const { offering1Id, offering2Id, offering3Id } = await seedOffering(AppDataSource, businessId);
     console.log('');
 
     await seedAvailability(AppDataSource, offering1Id, offering2Id, offering3Id);

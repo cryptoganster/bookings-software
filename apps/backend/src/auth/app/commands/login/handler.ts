@@ -59,11 +59,11 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
         throw new UnauthorizedException('Invalid credentials');
       }
 
-      // Generar JWT token
+      // Generar JWT token con roles
       const payload = {
         sub: user.getId().getValue(),
         email: user.getEmail().getValue(),
-        businessId: user.getBusinessId()?.getValue(),
+        roles: user.getRoles(),
       };
       const token = this.jwtService.sign(payload);
 
@@ -73,6 +73,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
           commandName: 'LoginCommand',
           userId: user.getId().getValue(),
           email: user.getEmail().getValue(),
+          roles: user.getRoles(),
           duration,
           timestamp: new Date().toISOString(),
         },
@@ -85,7 +86,9 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
           id: user.getId().getValue(),
           email: user.getEmail().getValue(),
           name: user.getName(),
-          businessId: user.getBusinessId()?.getValue() ?? null,
+          roles: user.getRoles(),
+          isActive: user.getIsActive(),
+          emailVerified: user.getEmailVerified(),
           createdAt: user.getCreatedAt().toISOString(),
         },
         token,

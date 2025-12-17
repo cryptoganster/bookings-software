@@ -14,7 +14,7 @@ import { UUID } from '@shared/vo/uuid';
 const validUuidArbitrary = fc.string().map(() => UUID.generate().getValue());
 
 // Duration generator that produces multiples of 15
-const validDurationArbitrary = fc.integer({ min: 1, max: 32 }).map(n => n * 15); // 15 to 480
+const validDurationArbitrary = fc.integer({ min: 1, max: 32 }).map((n) => n * 15); // 15 to 480
 
 describe('CreateOfferingHandler PBT', () => {
   let handler: CreateOfferingHandler;
@@ -72,7 +72,7 @@ describe('CreateOfferingHandler PBT', () => {
         async (businessId, name, duration, capacity, dailyCapacity) => {
           // Clear mocks before each iteration
           jest.clearAllMocks();
-          
+
           // Arrange - Simular que ya existe un offering con ese nombre
           factory.loadByBusinessIdAndName.mockResolvedValue({} as Offering);
 
@@ -87,9 +87,9 @@ describe('CreateOfferingHandler PBT', () => {
           // Act & Assert
           await expect(handler.execute(command)).rejects.toThrow(DuplicateOfferingNameException);
           expect(writeRepository.save).not.toHaveBeenCalled();
-        }
+        },
       ),
-      { numRuns: 10 } // Reduce iterations for faster tests
+      { numRuns: 10 }, // Reduce iterations for faster tests
     );
   });
 
@@ -110,7 +110,7 @@ describe('CreateOfferingHandler PBT', () => {
         async (businessId, name, invalidDuration, capacity, dailyCapacity) => {
           // Clear mocks before each iteration
           jest.clearAllMocks();
-          
+
           // Arrange
           factory.loadByBusinessIdAndName.mockResolvedValue(null);
 
@@ -125,9 +125,9 @@ describe('CreateOfferingHandler PBT', () => {
           // Act & Assert
           await expect(handler.execute(command)).rejects.toThrow(InvalidOfferingDurationException);
           expect(writeRepository.save).not.toHaveBeenCalled();
-        }
+        },
       ),
-      { numRuns: 10 }
+      { numRuns: 10 },
     );
   });
 
@@ -142,7 +142,7 @@ describe('CreateOfferingHandler PBT', () => {
         async (businessId, name, invalidDuration, capacity, dailyCapacity) => {
           // Clear mocks before each iteration
           jest.clearAllMocks();
-          
+
           // Arrange
           factory.loadByBusinessIdAndName.mockResolvedValue(null);
 
@@ -157,9 +157,9 @@ describe('CreateOfferingHandler PBT', () => {
           // Act & Assert
           await expect(handler.execute(command)).rejects.toThrow(InvalidOfferingDurationException);
           expect(writeRepository.save).not.toHaveBeenCalled();
-        }
+        },
       ),
-      { numRuns: 10 }
+      { numRuns: 10 },
     );
   });
 
@@ -182,7 +182,7 @@ describe('CreateOfferingHandler PBT', () => {
         async (businessId, name, duration, invalidCapacity, dailyCapacity) => {
           // Clear mocks before each iteration
           jest.clearAllMocks();
-          
+
           // Arrange
           factory.loadByBusinessIdAndName.mockResolvedValue(null);
 
@@ -197,9 +197,9 @@ describe('CreateOfferingHandler PBT', () => {
           // Act & Assert
           await expect(handler.execute(command)).rejects.toThrow(InvalidOfferingCapacityException);
           expect(writeRepository.save).not.toHaveBeenCalled();
-        }
+        },
       ),
-      { numRuns: 10 }
+      { numRuns: 10 },
     );
   });
 
@@ -214,7 +214,7 @@ describe('CreateOfferingHandler PBT', () => {
         async (businessId, name, duration, capacity, invalidDailyCapacity) => {
           // Clear mocks before each iteration
           jest.clearAllMocks();
-          
+
           // Arrange
           factory.loadByBusinessIdAndName.mockResolvedValue(null);
 
@@ -229,9 +229,9 @@ describe('CreateOfferingHandler PBT', () => {
           // Act & Assert
           await expect(handler.execute(command)).rejects.toThrow(InvalidOfferingCapacityException);
           expect(writeRepository.save).not.toHaveBeenCalled();
-        }
+        },
       ),
-      { numRuns: 10 }
+      { numRuns: 10 },
     );
   });
 
@@ -246,15 +246,14 @@ describe('CreateOfferingHandler PBT', () => {
         async (businessId, name, duration, capacity, dailyCapacity) => {
           // Clear mocks before each iteration
           jest.clearAllMocks();
-          
+
           // Arrange
           factory.loadByBusinessIdAndName.mockResolvedValue(null);
           writeRepository.save.mockResolvedValue();
 
           // Asegurar que dailyCapacity >= capacity si no es null
-          const validDailyCapacity = dailyCapacity !== null && dailyCapacity < capacity
-            ? capacity
-            : dailyCapacity;
+          const validDailyCapacity =
+            dailyCapacity !== null && dailyCapacity < capacity ? capacity : dailyCapacity;
 
           const command = new CreateOfferingCommand(
             businessId,
@@ -278,9 +277,9 @@ describe('CreateOfferingHandler PBT', () => {
           expect(savedOffering.getMaxCapacityPerSlot()).toBe(capacity);
           expect(savedOffering.getMaxDailyCapacity()).toBe(validDailyCapacity);
           expect(savedOffering.isActiveOffering()).toBe(true);
-        }
+        },
       ),
-      { numRuns: 10 }
+      { numRuns: 10 },
     );
   });
 });

@@ -9,17 +9,13 @@ import { IOfferingReadRepository } from '../../../domain/interfaces/repositories
  * Valida businessId si se proporciona (multi-tenancy)
  */
 @QueryHandler(GetOfferingByIdQuery)
-export class GetOfferingByIdHandler
-  implements IQueryHandler<GetOfferingByIdQuery>
-{
+export class GetOfferingByIdHandler implements IQueryHandler<GetOfferingByIdQuery> {
   constructor(
     @Inject('IOfferingReadRepository')
     private readonly readRepository: IOfferingReadRepository,
   ) {}
 
-  async execute(
-    query: GetOfferingByIdQuery,
-  ): Promise<OfferingReadModel | null> {
+  async execute(query: GetOfferingByIdQuery): Promise<OfferingReadModel | null> {
     const offering = await this.readRepository.findById(query.offeringId);
 
     // Si no existe, retornar null

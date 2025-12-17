@@ -2,6 +2,7 @@ import { User } from '@auth/domain/aggregates/user';
 import { UserModel } from '../models/user';
 import { UUID } from '@shared/vo/uuid';
 import { Email } from '@auth/domain/vo/email';
+import { UserRole } from '@auth/domain/vo/user-role';
 
 export class UserWriteMapper {
   static toModel(user: User): Partial<UserModel> {
@@ -10,7 +11,9 @@ export class UserWriteMapper {
       email: user.getEmail().getValue(),
       password: user.getPassword().getValue(),
       name: user.getName(),
-      businessId: user.getBusinessId()?.getValue() || null,
+      roles: user.getRoles(),
+      isActive: user.getIsActive(),
+      emailVerified: user.getEmailVerified(),
       createdAt: user.getCreatedAt(),
       version: user.getVersion().getValue(),
     };
@@ -22,7 +25,9 @@ export class UserWriteMapper {
       Email.fromString(model.email),
       model.password,
       model.name,
-      model.businessId ? UUID.fromString(model.businessId) : null,
+      model.roles as UserRole[],
+      model.isActive,
+      model.emailVerified,
       model.createdAt,
       model.version,
     );

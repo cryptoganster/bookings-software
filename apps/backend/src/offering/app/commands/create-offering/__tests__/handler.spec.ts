@@ -52,13 +52,7 @@ describe('CreateOfferingHandler', () => {
     it('should create offering correctly', async () => {
       // Arrange
       const businessId = UUID.generate();
-      const command = new CreateOfferingCommand(
-        businessId.getValue(),
-        'Corte de Pelo',
-        30,
-        4,
-        20,
-      );
+      const command = new CreateOfferingCommand(businessId.getValue(), 'Corte de Pelo', 30, 4, 20);
 
       factory.loadByBusinessIdAndName.mockResolvedValue(null);
       writeRepository.save.mockResolvedValue();
@@ -69,9 +63,12 @@ describe('CreateOfferingHandler', () => {
       // Assert
       expect(result).toHaveProperty('offeringId');
       expect(typeof result.offeringId).toBe('string');
-      expect(factory.loadByBusinessIdAndName).toHaveBeenCalledWith(businessId.getValue(), 'Corte de Pelo');
+      expect(factory.loadByBusinessIdAndName).toHaveBeenCalledWith(
+        businessId.getValue(),
+        'Corte de Pelo',
+      );
       expect(writeRepository.save).toHaveBeenCalledTimes(1);
-      
+
       const savedOffering = writeRepository.save.mock.calls[0][0] as Offering;
       expect(savedOffering.getName()).toBe('Corte de Pelo');
       expect(savedOffering.getDuration().getMinutes()).toBe(30);
@@ -83,13 +80,7 @@ describe('CreateOfferingHandler', () => {
     it('should throw DuplicateOfferingNameException if name exists', async () => {
       // Arrange
       const businessId = UUID.generate();
-      const command = new CreateOfferingCommand(
-        businessId.getValue(),
-        'Corte de Pelo',
-        30,
-        4,
-        20,
-      );
+      const command = new CreateOfferingCommand(businessId.getValue(), 'Corte de Pelo', 30, 4, 20);
 
       const existingOffering = Offering.fromPersistence(
         UUID.generate(),
@@ -148,13 +139,7 @@ describe('CreateOfferingHandler', () => {
     it('should create offering and increment version', async () => {
       // Arrange
       const businessId = UUID.generate();
-      const command = new CreateOfferingCommand(
-        businessId.getValue(),
-        'Corte de Pelo',
-        30,
-        4,
-        20,
-      );
+      const command = new CreateOfferingCommand(businessId.getValue(), 'Corte de Pelo', 30, 4, 20);
 
       factory.loadByBusinessIdAndName.mockResolvedValue(null);
       writeRepository.save.mockResolvedValue();
@@ -164,10 +149,10 @@ describe('CreateOfferingHandler', () => {
 
       // Assert
       const savedOffering = writeRepository.save.mock.calls[0][0] as Offering;
-      
+
       // Version should be incremented (starts at 0, incremented to 1)
       expect(savedOffering.getVersion().getValue()).toBe(1);
-      
+
       // Note: Events are auto-published with autoCommit=true, so getUncommittedEvents() returns empty
       // The event was published, but we can't check it in unit tests without EventBus integration
     });
