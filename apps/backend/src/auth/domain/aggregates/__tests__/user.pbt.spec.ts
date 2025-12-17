@@ -17,9 +17,27 @@ import { EmailAlreadyVerifiedException } from '../../exceptions/email-already-ve
 describe('User Aggregate - Property-Based Tests', () => {
   // Arbitrary for valid UUID that passes our UUID.fromString validation
   // Generate valid v4 UUIDs
-  const hexChar = fc.constantFrom('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f');
-  const hexString = (length: number) => fc.array(hexChar, { minLength: length, maxLength: length }).map(arr => arr.join(''));
-  
+  const hexChar = fc.constantFrom(
+    '0',
+    '1',
+    '2',
+    '3',
+    '4',
+    '5',
+    '6',
+    '7',
+    '8',
+    '9',
+    'a',
+    'b',
+    'c',
+    'd',
+    'e',
+    'f',
+  );
+  const hexString = (length: number) =>
+    fc.array(hexChar, { minLength: length, maxLength: length }).map((arr) => arr.join(''));
+
   const validUuidArbitrary = fc
     .tuple(
       hexString(8),
@@ -237,7 +255,7 @@ describe('User Aggregate - Property-Based Tests', () => {
 
             // Act & Assert
             expect(() => user.removeRole(role)).toThrow(CannotRemoveLastRoleException);
-            
+
             // Verify user still has the role
             expect(user.getRoles()).toHaveLength(1);
             expect(user.hasRole(role)).toBe(true);
@@ -263,7 +281,7 @@ describe('User Aggregate - Property-Based Tests', () => {
             // Arrange
             const userId = UUID.fromString(id);
             const user = await User.register(userId, email, password, name, uniqueRoles[0]);
-            
+
             // Add remaining roles
             for (let i = 1; i < uniqueRoles.length; i++) {
               user.addRole(uniqueRoles[i]);
@@ -305,7 +323,7 @@ describe('User Aggregate - Property-Based Tests', () => {
             // Arrange
             const userId = UUID.fromString(id);
             const user = await User.register(userId, email, password, name, role);
-            
+
             // Act - Verify email first time
             user.verifyEmail();
             expect(user.getEmailVerified()).toBe(true);
@@ -332,7 +350,7 @@ describe('User Aggregate - Property-Based Tests', () => {
             // Arrange
             const userId = UUID.fromString(id);
             const user = await User.register(userId, email, password, name, role);
-            
+
             // Act - Verify email first time
             user.verifyEmail();
             const versionAfterFirstVerify = user.getVersion().getValue();
@@ -372,7 +390,7 @@ describe('User Aggregate - Property-Based Tests', () => {
             // Arrange
             const userId = UUID.fromString(id);
             const user = await User.register(userId, email, password, name, role);
-            
+
             // Test addRole
             const versionBeforeAdd = user.getVersion().getValue();
             const roleToAdd = role === UserRole.CUSTOMER ? UserRole.ADMIN : UserRole.CUSTOMER;
