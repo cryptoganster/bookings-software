@@ -176,4 +176,91 @@ describe('RegisterHandler', () => {
       }),
     );
   });
+
+  it('should register user with CUSTOMER role when specified', async () => {
+    // Arrange
+    const command = new RegisterCommand(
+      'customer@example.com',
+      'Password123',
+      'Customer User',
+      UserRole.CUSTOMER,
+    );
+    userReadRepository.findByEmail.mockResolvedValue(null);
+    jwtService.sign.mockReturnValue('mock-jwt-token');
+
+    // Act
+    const result = await handler.execute(command);
+
+    // Assert
+    expect(result).toHaveProperty('userId');
+    expect(result).toHaveProperty('accessToken');
+    const savedUser = userWriteRepository.save.mock.calls[0][0];
+    expect(savedUser.getRoles()).toContain(UserRole.CUSTOMER);
+    expect(savedUser.getRoles()).toHaveLength(1);
+    expect(jwtService.sign).toHaveBeenCalledWith(
+      expect.objectContaining({
+        roles: [UserRole.CUSTOMER],
+      }),
+    );
+  });
+
+  it('should register user with ADMIN role when specified', async () => {
+    // Arrange
+    const command = new RegisterCommand(
+      'admin@example.com',
+      'Password123',
+      'Admin User',
+      UserRole.ADMIN,
+    );
+    userReadRepository.findByEmail.mockResolvedValue(null);
+    jwtService.sign.mockReturnValue('mock-jwt-token');
+
+    // Act
+    const result = await handler.execute(command);
+
+    // Assert
+    expect(result).toHaveProperty('userId');
+    expect(result).toHaveProperty('accessToken');
+    const savedUser = userWriteRepository.save.mock.calls[0][0];
+    expect(savedUser.getRoles()).toContain(UserRole.ADMIN);
+    expect(savedUser.getRoles()).toHaveLength(1);
+    expect(jwtService.sign).toHaveBeenCalledWith(
+      expect.objectContaining({
+        roles: [UserRole.ADMIN],
+      }),
+    );
+  });
+
+  it('should verify JWT contains correct role based on initialRole', async () => {
+    // Arrange - Test with each role
+    const testCases = [
+      { role: UserRole.BUSINESS_OWNER, email: 'owner@example.com' },
+      { role: UserRole.CUSTOMER, email: 'customer@example.com' },
+      { role: UserRole.ADMIN, email: 'admin@example.com' },
+    ];
+
+    for (const testCase of testCases) {
+      // Reset mocks
+      jest.clearAllMocks();
+      userReadRepository.findByEmail.mockResolvedValue(null);
+      jwtService.sign.mockReturnValue('mock-jwt-token');
+
+      const command = new RegisterCommand(
+        testCase.email,
+        'Password123',
+        'Test User',
+        testCase.role,
+      );
+
+      // Act
+      await handler.execute(command);
+
+      // Assert
+      expect(jwtService.sign).toHaveBeenCalledWith(
+        expect.objectContaining({
+          roles: [testCase.role],
+        }),
+      );
+    }
+  });
 });
