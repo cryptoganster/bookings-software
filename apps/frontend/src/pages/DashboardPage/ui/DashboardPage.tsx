@@ -22,15 +22,15 @@ export function DashboardPage() {
       <Stack gap="lg">
         <PageHeader title="Dashboard" />
 
-        {/* Stats Cards Section */}
-        <StatsCards />
+      {/* Stats Cards Section */}
+      <StatsCards />
 
-        {/* Upcoming Appointments Section */}
-        <Grid gutter="lg">
-          <Grid.Col span={12}>
-            <UpcomingAppointments />
-          </Grid.Col>
-        </Grid>
+      {/* Upcoming Appointments Section */}
+      <Grid gutter="lg">
+        <Grid.Col span={12}>
+          <UpcomingAppointments />
+        </Grid.Col>
+      </Grid>
       </Stack>
     </Container>
   );
