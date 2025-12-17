@@ -2,9 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { AppointmentController } from '../appointment.controller';
 import { CreateAppointmentDto } from '../../dtos/create-appointment.dto';
+import { AppointmentFiltersDto } from '../../dtos/appointment-filters.dto';
 import { UserPayload } from '@auth/presentation/decorators/current-user';
 import { CreateAppointmentCommand } from '@booking/app/commands/create-appointment';
-import { GetCustomerAppointmentsQuery } from '@booking/app/queries/get-customer-appointments';
+import { GetBusinessAppointmentsQuery } from '@booking/app/queries/get-business-appointments';
 import { GetAppointmentQuery } from '@booking/app/queries/get-appointment';
 
 describe('AppointmentController', () => {
@@ -41,15 +42,33 @@ describe('AppointmentController', () => {
   });
 
   describe('findAll', () => {
-    it('should execute GetCustomerAppointmentsQuery with user id', async () => {
-      const user: UserPayload = { userId: 'user-123', email: 'test@example.com' };
+    it('should execute GetBusinessAppointmentsQuery with business id and filters', async () => {
+      const user: UserPayload = {
+        userId: 'user-123',
+        email: 'test@example.com',
+        businessId: 'business-456',
+      };
       const mockAppointments = [{ id: 'apt-1' }, { id: 'apt-2' }];
+      const filtersDto: AppointmentFiltersDto = { status: 'CONFIRMED' };
 
       jest.spyOn(queryBus, 'execute').mockResolvedValue(mockAppointments);
 
-      const result = await controller.findAll(user);
+      const result = await controller.findAll(user, filtersDto);
 
-      expect(queryBus.execute).toHaveBeenCalledWith(new GetCustomerAppointmentsQuery('user-123'));
+      expect(queryBus.execute).toHaveBeenCalled();
+      expect(result).toEqual(mockAppointments);
+    });
+
+    it('should use userId as businessId when businessId is not provided', async () => {
+      const user: UserPayload = { userId: 'user-123', email: 'test@example.com' };
+      const mockAppointments = [{ id: 'apt-1' }];
+      const filtersDto: AppointmentFiltersDto = {};
+
+      jest.spyOn(queryBus, 'execute').mockResolvedValue(mockAppointments);
+
+      const result = await controller.findAll(user, filtersDto);
+
+      expect(queryBus.execute).toHaveBeenCalled();
       expect(result).toEqual(mockAppointments);
     });
   });

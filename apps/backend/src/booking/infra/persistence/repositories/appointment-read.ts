@@ -32,11 +32,48 @@ export class AppointmentReadRepository implements IAppointmentReadRepository {
     return models.map((model) => AppointmentReadMapper.toReadModel(model));
   }
 
-  async findByBusinessId(businessId: string): Promise<AppointmentReadModel[]> {
-    const models = await this.repository.find({
-      where: { businessId },
-      order: { dateTime: 'ASC' },
-    });
+  async findByBusinessId(
+    businessId: string,
+    filters?: {
+      status?: 'CONFIRMED' | 'CANCELLED' | 'COMPLETED';
+      startDate?: Date;
+      endDate?: Date;
+      offeringId?: string;
+      customerId?: string;
+    },
+  ): Promise<AppointmentReadModel[]> {
+    const queryBuilder = this.repository
+      .createQueryBuilder('appointment')
+      .where('appointment.businessId = :businessId', { businessId });
+
+    // Aplicar filtros opcionales
+    if (filters?.status) {
+      queryBuilder.andWhere('appointment.status = :status', { status: filters.status });
+    }
+
+    if (filters?.startDate) {
+      queryBuilder.andWhere('appointment.dateTime >= :startDate', { startDate: filters.startDate });
+    }
+
+    if (filters?.endDate) {
+      queryBuilder.andWhere('appointment.dateTime <= :endDate', { endDate: filters.endDate });
+    }
+
+    if (filters?.offeringId) {
+      queryBuilder.andWhere('appointment.offeringId = :offeringId', {
+        offeringId: filters.offeringId,
+      });
+    }
+
+    if (filters?.customerId) {
+      queryBuilder.andWhere('appointment.customerId = :customerId', {
+        customerId: filters.customerId,
+      });
+    }
+
+    queryBuilder.orderBy('appointment.dateTime', 'ASC');
+
+    const models = await queryBuilder.getMany();
 
     return models.map((model) => AppointmentReadMapper.toReadModel(model));
   }

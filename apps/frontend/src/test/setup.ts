@@ -4,13 +4,25 @@
  * Configuración global para todos los tests
  */
 
-import { afterEach, vi } from "vitest";
+import { afterEach, beforeAll, afterAll, vi } from "vitest";
 import { cleanup } from "@testing-library/react";
 import "@testing-library/jest-dom/vitest";
+import { server } from "../mocks/server";
 
-// Cleanup después de cada test
+// Setup MSW server
+beforeAll(() => {
+  server.listen({ onUnhandledRequest: "warn" });
+});
+
+// Reset handlers after each test
 afterEach(() => {
+  server.resetHandlers();
   cleanup();
+});
+
+// Cleanup MSW server
+afterAll(() => {
+  server.close();
 });
 
 // Mock window.matchMedia (requerido por Mantine)

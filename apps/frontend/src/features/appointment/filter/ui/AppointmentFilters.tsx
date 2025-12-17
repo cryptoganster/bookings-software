@@ -41,7 +41,7 @@ export function AppointmentFilters() {
         type="range"
         label="Rango de fechas"
         placeholder="Selecciona fechas"
-        value={dateRange as DatesRangeValue}
+        value={dateRange ? [dateRange[0], dateRange[1]] : [null, null]}
         onChange={handleDateRangeChange}
         clearable
         style={{ minWidth: 300 }}
