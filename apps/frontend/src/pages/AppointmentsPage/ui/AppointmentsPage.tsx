@@ -1,25 +1,33 @@
 /**
  * AppointmentsPage Component
  *
- * Temporary placeholder for the Appointments page.
- * Will be replaced with actual appointments management in later phases.
- *
- * Requirements: 6.1, 6.4
+ * Página principal para gestión de citas
+ * Muestra lista de appointments con filtros y acciones
  */
 
-import { Container, Title, Text, Paper } from "@mantine/core";
+import { Stack } from "@mantine/core";
+import { PageHeader } from "@shared/ui/PageHeader/PageHeader";
+import { AppointmentFilters } from "@features/appointment/filter";
+import { AppointmentsList } from "./AppointmentsList";
 
+/**
+ * Página de gestión de citas
+ *
+ * Features:
+ * - Filtros por estado y rango de fechas
+ * - Lista de citas con información completa
+ * - Acciones: cancelar cita
+ * - Loading y error states
+ * - Empty state cuando no hay citas
+ */
 export function AppointmentsPage() {
   return (
-    <Container size="lg" py="xl">
-      <Paper shadow="sm" p="xl" radius="md" withBorder>
-        <Title order={1} mb="md">
-          Appointments
-        </Title>
-        <Text c="dimmed">
-          Coming Soon - Appointments list with filters and management
-        </Text>
-      </Paper>
-    </Container>
+    <Stack gap="lg">
+      <PageHeader title="Gestión de Citas" />
+
+      <AppointmentFilters />
+
+      <AppointmentsList />
+    </Stack>
   );
 }
