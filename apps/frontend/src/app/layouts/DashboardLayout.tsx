@@ -26,6 +26,7 @@ export function DashboardLayout() {
 
   return (
     <AppShell
+      withBorder={false}
       header={{ height: 60 }}
       navbar={{
         width: 280,
