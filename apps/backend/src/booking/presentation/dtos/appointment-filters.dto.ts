@@ -1,5 +1,4 @@
 import { IsOptional, IsEnum, IsDateString, IsUUID } from 'class-validator';
-import { AppointmentStatus } from '@booking/domain/vo/appointment-status';
 
 export class AppointmentFiltersDto {
   @IsOptional()
