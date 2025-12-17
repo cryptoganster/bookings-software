@@ -39,17 +39,22 @@ export class AppointmentWriteRepository implements IAppointmentWriteRepository {
         } as AppointmentModel);
       } else {
         // Es un appointment existente, hacer UPDATE con optimistic locking
+        // El aggregate ya incrementó la versión, así que:
+        // - currentVersion es la NUEVA versión (después del incremento)
+        // - existing.version es la versión ANTERIOR (en la BD)
+        const previousVersion = existing.version;
+        
         const result = await this.repository
           .createQueryBuilder()
           .update(AppointmentModel)
           .set({
             ...model,
-            version: currentVersion + 1, // Nueva versión
+            version: currentVersion, // Nueva versión (ya incrementada por el aggregate)
             updatedAt: new Date(),
           })
           .where('id = :id', { id: appointmentId })
           .andWhere('version = :version', {
-            version: currentVersion, // Versión actual
+            version: previousVersion, // Versión anterior (en la BD)
           })
           .execute();
 

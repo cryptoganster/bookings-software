@@ -16,6 +16,7 @@ import { ModifyAppointmentHandler } from './app/commands/modify-appointment/hand
 // Query Handlers
 import { GetAppointmentHandler } from './app/queries/get-appointment/handler';
 import { GetCustomerAppointmentsHandler } from './app/queries/get-customer-appointments/handler';
+import { GetBusinessAppointmentsHandler } from './app/queries/get-business-appointments/handler';
 
 // Event Handlers
 import { OnAppointmentCreatedHandler } from './app/event-handlers/on-appointment-created';
@@ -40,7 +41,11 @@ const CommandHandlers = [
   ModifyAppointmentHandler,
 ];
 
-const QueryHandlers = [GetAppointmentHandler, GetCustomerAppointmentsHandler];
+const QueryHandlers = [
+  GetAppointmentHandler,
+  GetCustomerAppointmentsHandler,
+  GetBusinessAppointmentsHandler,
+];
 
 const EventHandlers = [OnAppointmentCreatedHandler, OnAppointmentCancelledHandler];
 
