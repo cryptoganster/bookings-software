@@ -33,5 +33,22 @@
   );
   width: 100% !important;
   max-width: 100% !important;
-  padding: var(--mantine-spacing-md);
+  padding: var(--mantine-spacing-xl);
+}
+
+.main::before {
+  content: "";
+  width: 20px;
+  height: 20px;
+  background-color: transparent;
+  position: absolute;
+  left: var(--app-shell-navbar-width);
+  top: var(--app-shell-header-height);
+  transform: rotate(90deg);
+  background-image: radial-gradient(
+    circle at 100% 0,
+    transparent 0%,
+    transparent 20px,
+    light-dark(var(--mantine-color-white), var(--mantine-color-dark-7)) 10px
+  );
 }

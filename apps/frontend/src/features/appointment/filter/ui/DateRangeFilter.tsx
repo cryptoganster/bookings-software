@@ -56,7 +56,7 @@ export function DateRangeFilter() {
           value={mantineDateRange}
           onChange={handleDateRangeChange}
           clearable
-          style={{ minWidth: 300 }}
+          style={{ minWidth: "min(300px, 100%)" }}
           aria-label="Rango de fechas personalizado"
         />
       )}

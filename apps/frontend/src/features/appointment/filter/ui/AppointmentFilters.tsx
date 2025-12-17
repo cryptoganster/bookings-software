@@ -25,7 +25,7 @@ export function AppointmentFilters() {
         value={status}
         onChange={(value) => setStatus(value as AppointmentStatus | null)}
         clearable
-        style={{ minWidth: 200 }}
+        style={{ minWidth: "min(200px, 100%)" }}
       />
 
       <DateRangeFilter />
