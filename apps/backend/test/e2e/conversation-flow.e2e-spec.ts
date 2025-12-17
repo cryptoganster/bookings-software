@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { AppModule } from '../src/app.module';
+import { AppModule } from '../../src/app.module';
 import { CommandBus } from '@nestjs/cqrs';
 import { ProcessIncomingMessageCommand } from '@conversation/app/commands/process-incoming-message';
 import { IWhatsAppClient, Button } from '@conversation/domain/interfaces/external/whatsapp-client';
