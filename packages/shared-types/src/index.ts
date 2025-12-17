@@ -56,6 +56,8 @@ export interface LoginRequestDto {
 export interface LoginResponseDto {
   user: UserDto;
   token: string;
+  // Note: businessId removed - use Business.ownerId → User.id instead
+  // roles array is included in UserDto
 }
 
 /**
