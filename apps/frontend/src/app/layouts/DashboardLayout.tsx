@@ -33,8 +33,9 @@ export function DashboardLayout() {
         breakpoint: "md",
         collapsed: { mobile: !opened },
       }}
-      padding="md"
+      padding={0}
       classNames={{
+        root: classes.root,
         navbar: classes.navbar,
         header: classes.header,
         main: classes.main,

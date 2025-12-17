@@ -21,9 +21,16 @@
   padding-right: calc(var(--mantine-spacing-sm) * 2);
 }
 
+.root {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
 .main {
   background-color: light-dark(
     var(--mantine-color-gray-0),
     var(--mantine-color-dark-8)
   );
+  width: 100% !important;
+  max-width: 100% !important;
 }

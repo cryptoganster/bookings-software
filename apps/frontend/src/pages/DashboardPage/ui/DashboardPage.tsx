@@ -18,7 +18,7 @@ import { PageHeader } from "@shared/ui/PageHeader/PageHeader";
 
 export function DashboardPage() {
   return (
-    <Container size="xl" py="md">
+    <Container fluid py="md">
       <Stack gap="lg">
         <PageHeader title="Dashboard" />
 
