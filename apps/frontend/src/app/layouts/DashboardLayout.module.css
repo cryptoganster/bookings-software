@@ -3,12 +3,17 @@
  * 
  * Adapted from templates-mantine-ui/dashvista/App.module.css
  * Changes:
- * - Removed font-family Fredoka (using default)
+ * - Added font-family Fredoka from Google Fonts
  * - Removed custom variables
- * - Removed decorative ::before pseudo-element
+ * - Added rounded corner effect with ::before pseudo-element
  * - Kept essential navbar, header, main styles
  * - Adapted background colors to use Mantine palette
  */
+
+.root {
+  font-family: "Fredoka", sans-serif;
+  font-optical-sizing: auto;
+}
 
 .navbar {
   border: 0;
@@ -21,9 +26,31 @@
   padding-right: calc(var(--mantine-spacing-sm) * 2);
 }
 
+
+
 .main {
   background-color: light-dark(
     var(--mantine-color-gray-0),
     var(--mantine-color-dark-8)
+  );
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: var(--mantine-spacing-xl);
+}
+
+.main::before {
+  content: "";
+  width: 20px;
+  height: 20px;
+  background-color: transparent;
+  position: absolute;
+  left: var(--app-shell-navbar-width);
+  top: var(--app-shell-header-height);
+  transform: rotate(90deg);
+  background-image: radial-gradient(
+    circle at 100% 0,
+    transparent 0%,
+    transparent 20px,
+    light-dark(var(--mantine-color-white), var(--mantine-color-dark-7)) 10px
   );
 }

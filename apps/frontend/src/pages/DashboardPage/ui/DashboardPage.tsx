@@ -18,19 +18,19 @@ import { PageHeader } from "@shared/ui/PageHeader/PageHeader";
 
 export function DashboardPage() {
   return (
-    <Container size="xl" py="md">
+    <Container fluid py="md">
       <Stack gap="lg">
         <PageHeader title="Dashboard" />
 
-        {/* Stats Cards Section */}
-        <StatsCards />
+      {/* Stats Cards Section */}
+      <StatsCards />
 
-        {/* Upcoming Appointments Section */}
-        <Grid gutter="lg">
-          <Grid.Col span={12}>
-            <UpcomingAppointments />
-          </Grid.Col>
-        </Grid>
+      {/* Upcoming Appointments Section */}
+      <Grid gutter="lg">
+        <Grid.Col span={12}>
+          <UpcomingAppointments />
+        </Grid.Col>
+      </Grid>
       </Stack>
     </Container>
   );

@@ -37,7 +37,12 @@ export function AppointmentsList() {
   };
 
   // Fetch appointments con filtros
-  const { data: appointments, isLoading, isError, error } = useAppointments(filters);
+  const {
+    data: appointments,
+    isLoading,
+    isError,
+    error,
+  } = useAppointments(filters);
 
   // Loading state
   if (isLoading) {
@@ -52,7 +57,8 @@ export function AppointmentsList() {
         title="Error al cargar citas"
         color="red"
       >
-        {error?.message || "No se pudieron cargar las citas. Por favor, intenta de nuevo."}
+        {error?.message ||
+          "No se pudieron cargar las citas. Por favor, intenta de nuevo."}
       </Alert>
     );
   }
@@ -73,10 +79,7 @@ export function AppointmentsList() {
 
   // Lista de appointments
   return (
-    <SimpleGrid
-      cols={{ base: 1, sm: 2, lg: 3 }}
-      spacing="lg"
-    >
+    <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="lg">
       {appointments.map((appointment) => (
         <AppointmentCard
           key={appointment.id}

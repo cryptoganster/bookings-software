@@ -50,3 +50,11 @@ global.IntersectionObserver = class IntersectionObserver {
   }
   unobserve() {}
 } as unknown as typeof IntersectionObserver;
+
+// Mock ResizeObserver (requerido por Mantine SegmentedControl)
+global.ResizeObserver = class ResizeObserver {
+  constructor() {}
+  disconnect() {}
+  observe() {}
+  unobserve() {}
+} as unknown as typeof ResizeObserver;

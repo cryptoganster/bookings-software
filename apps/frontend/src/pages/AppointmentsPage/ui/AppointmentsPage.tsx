@@ -5,7 +5,7 @@
  * Muestra lista de appointments con filtros y acciones
  */
 
-import { Stack } from "@mantine/core";
+import { Container, Stack } from "@mantine/core";
 import { PageHeader } from "@shared/ui/PageHeader/PageHeader";
 import { AppointmentFilters } from "@features/appointment/filter";
 import { AppointmentsList } from "./AppointmentsList";
@@ -22,12 +22,14 @@ import { AppointmentsList } from "./AppointmentsList";
  */
 export function AppointmentsPage() {
   return (
-    <Stack gap="lg">
-      <PageHeader title="Gestión de Citas" />
+    <Container fluid py="md">
+      <Stack gap="lg">
+        <PageHeader title="Gestión de Citas" />
 
       <AppointmentFilters />
 
       <AppointmentsList />
-    </Stack>
+      </Stack>
+    </Container>
   );
 }

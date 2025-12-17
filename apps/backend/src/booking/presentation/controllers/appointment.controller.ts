@@ -8,6 +8,7 @@ import { CreateAppointmentCommand } from '@booking/app/commands/create-appointme
 import { CancelAppointmentCommand } from '@booking/app/commands/cancel-appointment';
 import { GetBusinessAppointmentsQuery } from '@booking/app/queries/get-business-appointments';
 import { GetAppointmentQuery } from '@booking/app/queries/get-appointment';
+import { GetUpcomingAppointmentsQuery } from '@booking/app/queries/get-upcoming-appointments';
 
 @Controller('appointments')
 @UseGuards(JwtAuthGuard)
@@ -33,6 +34,15 @@ export class AppointmentController {
 
     const appointments = await this.queryBus.execute(
       new GetBusinessAppointmentsQuery(businessId, filters),
+    );
+    return appointments;
+  }
+
+  @Get('upcoming')
+  async findUpcoming(@CurrentUser() user: UserPayload) {
+    const businessId = user.businessId || user.userId;
+    const appointments = await this.queryBus.execute(
+      new GetUpcomingAppointmentsQuery(businessId),
     );
     return appointments;
   }

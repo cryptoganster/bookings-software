@@ -26,14 +26,16 @@ export function DashboardLayout() {
 
   return (
     <AppShell
+      withBorder={false}
       header={{ height: 60 }}
       navbar={{
         width: 280,
         breakpoint: "md",
         collapsed: { mobile: !opened },
       }}
-      padding="md"
+      padding={0}
       classNames={{
+        root: classes.root,
         navbar: classes.navbar,
         header: classes.header,
         main: classes.main,

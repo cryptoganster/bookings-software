@@ -50,7 +50,7 @@ export function Header({ opened, toggle }: HeaderProps) {
 
       <Flex gap="sm" align="center">
         <Text fz={18} fw={600}>
-          Sistema de Reservas
+          Skeda
         </Text>
       </Flex>
 

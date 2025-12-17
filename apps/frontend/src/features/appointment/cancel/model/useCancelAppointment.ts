@@ -39,7 +39,8 @@ export function useCancelAppointment() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (appointmentId: string) => appointmentsApi.cancel(appointmentId),
+    mutationFn: (appointmentId: string) =>
+      appointmentsApi.cancel(appointmentId),
 
     // onMutate se ejecuta ANTES de la mutación
     // Aquí hacemos el optimistic update
@@ -50,9 +51,10 @@ export function useCancelAppointment() {
       });
 
       // 2. Guardar snapshot del estado actual (para rollback si falla)
-      const previousAppointment = queryClient.getQueryData<AppointmentReadModel>(
-        appointmentKeys.detail(appointmentId),
-      );
+      const previousAppointment =
+        queryClient.getQueryData<AppointmentReadModel>(
+          appointmentKeys.detail(appointmentId),
+        );
 
       // 3. Optimistic update: actualizar la cita a CANCELLED
       if (previousAppointment) {
