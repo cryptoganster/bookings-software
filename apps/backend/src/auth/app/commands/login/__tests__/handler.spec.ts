@@ -8,6 +8,7 @@ import { IUserFactory } from '@auth/domain/interfaces/factories/user-factory';
 import { User } from '@auth/domain/aggregates/user';
 import { UUID } from '@shared/vo/uuid';
 import { Email } from '@auth/domain/vo/email';
+import { UserRole } from '@auth/domain/vo/user-role';
 
 describe('LoginHandler', () => {
   let handler: LoginHandler;
@@ -58,11 +59,12 @@ describe('LoginHandler', () => {
   it('should login successfully and return user and token', async () => {
     // Arrange
     const command = new LoginCommand('test@example.com', 'Password123');
-    const user = await User.create(
+    const user = await User.register(
       UUID.generate(),
       Email.fromString('test@example.com'),
       'Password123',
       'Test User',
+      UserRole.BUSINESS_OWNER,
     );
     userFactory.loadByEmail.mockResolvedValue(user);
     jwtService.sign.mockReturnValue('mock-jwt-token');
@@ -76,6 +78,7 @@ describe('LoginHandler', () => {
     expect(result.token).toBe('mock-jwt-token');
     expect(result.user.email).toBe('test@example.com');
     expect(result.user.name).toBe('Test User');
+    expect(result.user.roles).toContain(UserRole.BUSINESS_OWNER);
     expect(userFactory.loadByEmail).toHaveBeenCalledWith('test@example.com');
     expect(jwtService.sign).toHaveBeenCalled();
   });
@@ -93,11 +96,12 @@ describe('LoginHandler', () => {
   it('should throw UnauthorizedException if password is invalid', async () => {
     // Arrange
     const command = new LoginCommand('test@example.com', 'WrongPassword');
-    const user = await User.create(
+    const user = await User.register(
       UUID.generate(),
       Email.fromString('test@example.com'),
       'Password123',
       'Test User',
+      UserRole.BUSINESS_OWNER,
     );
     userFactory.loadByEmail.mockResolvedValue(user);
 
@@ -106,15 +110,16 @@ describe('LoginHandler', () => {
     expect(jwtService.sign).not.toHaveBeenCalled();
   });
 
-  it('should generate JWT with correct payload', async () => {
+  it('should generate JWT with correct payload including roles', async () => {
     // Arrange
     const command = new LoginCommand('test@example.com', 'Password123');
     const userId = UUID.generate();
-    const user = await User.create(
+    const user = await User.register(
       userId,
       Email.fromString('test@example.com'),
       'Password123',
       'Test User',
+      UserRole.BUSINESS_OWNER,
     );
     userFactory.loadByEmail.mockResolvedValue(user);
     jwtService.sign.mockReturnValue('mock-jwt-token');
@@ -126,7 +131,7 @@ describe('LoginHandler', () => {
     expect(jwtService.sign).toHaveBeenCalledWith({
       sub: userId.getValue(),
       email: 'test@example.com',
-      businessId: undefined,
+      roles: [UserRole.BUSINESS_OWNER],
     });
   });
 });
