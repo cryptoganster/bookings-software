@@ -49,10 +49,7 @@ describe('GetOfferingByIdHandler - Property-Based Tests', () => {
           name: fc.string({ minLength: 1, maxLength: 50 }),
           duration: fc.integer({ min: 15, max: 480 }),
           maxCapacityPerSlot: fc.integer({ min: 1, max: 20 }),
-          maxDailyCapacity: fc.oneof(
-            fc.constant(null),
-            fc.integer({ min: 1, max: 100 }),
-          ),
+          maxDailyCapacity: fc.oneof(fc.constant(null), fc.integer({ min: 1, max: 100 })),
           isActive: fc.boolean(),
           createdAt: fc.constant(new Date()),
           updatedAt: fc.constant(new Date()),
@@ -63,10 +60,7 @@ describe('GetOfferingByIdHandler - Property-Based Tests', () => {
 
           mockReadRepository.findById.mockResolvedValue(offering);
 
-          const query = new GetOfferingByIdQuery(
-            offering.id,
-            differentBusinessId,
-          );
+          const query = new GetOfferingByIdQuery(offering.id, differentBusinessId);
 
           // Act
           const result = await handler.execute(query);
@@ -94,10 +88,7 @@ describe('GetOfferingByIdHandler - Property-Based Tests', () => {
           name: fc.string({ minLength: 1, maxLength: 50 }),
           duration: fc.integer({ min: 15, max: 480 }),
           maxCapacityPerSlot: fc.integer({ min: 1, max: 20 }),
-          maxDailyCapacity: fc.oneof(
-            fc.constant(null),
-            fc.integer({ min: 1, max: 100 }),
-          ),
+          maxDailyCapacity: fc.oneof(fc.constant(null), fc.integer({ min: 1, max: 100 })),
           isActive: fc.boolean(),
           createdAt: fc.constant(new Date()),
           updatedAt: fc.constant(new Date()),
@@ -106,10 +97,7 @@ describe('GetOfferingByIdHandler - Property-Based Tests', () => {
           // Arrange
           mockReadRepository.findById.mockResolvedValue(offering);
 
-          const query = new GetOfferingByIdQuery(
-            offering.id,
-            offering.businessId,
-          );
+          const query = new GetOfferingByIdQuery(offering.id, offering.businessId);
 
           // Act
           const result = await handler.execute(query);
@@ -138,10 +126,7 @@ describe('GetOfferingByIdHandler - Property-Based Tests', () => {
           name: fc.string({ minLength: 1, maxLength: 50 }),
           duration: fc.integer({ min: 15, max: 480 }),
           maxCapacityPerSlot: fc.integer({ min: 1, max: 20 }),
-          maxDailyCapacity: fc.oneof(
-            fc.constant(null),
-            fc.integer({ min: 1, max: 100 }),
-          ),
+          maxDailyCapacity: fc.oneof(fc.constant(null), fc.integer({ min: 1, max: 100 })),
           isActive: fc.boolean(),
           createdAt: fc.constant(new Date()),
           updatedAt: fc.constant(new Date()),

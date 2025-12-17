@@ -64,10 +64,7 @@ describe('ActivateOfferingHandler', () => {
         1,
       );
 
-      const command = new ActivateOfferingCommand(
-        offeringId.getValue(),
-        businessId.getValue(),
-      );
+      const command = new ActivateOfferingCommand(offeringId.getValue(), businessId.getValue());
 
       factory.loadById.mockResolvedValue(existingOffering);
       writeRepository.save.mockResolvedValue();
@@ -141,10 +138,7 @@ describe('ActivateOfferingHandler', () => {
         1,
       );
 
-      const command = new ActivateOfferingCommand(
-        offeringId.getValue(),
-        businessId.getValue(),
-      );
+      const command = new ActivateOfferingCommand(offeringId.getValue(), businessId.getValue());
 
       factory.loadById.mockResolvedValue(existingOffering);
       writeRepository.save.mockResolvedValue();
@@ -157,7 +151,7 @@ describe('ActivateOfferingHandler', () => {
 
       // Version should be incremented (from 1 to 2)
       expect(savedOffering.getVersion().getValue()).toBe(2);
-      
+
       // Note: Events are auto-published with autoCommit=true, so getUncommittedEvents() returns empty
       // The event was published, but we can't check it in unit tests without EventBus integration
     });

@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { UserFactory } from '../user-factory';
 import { UserModel } from '../../models/user';
 import { User } from '@auth/domain/aggregates/user';
+import { UserRole } from '@auth/domain/vo/user-role';
 
 describe('UserFactory', () => {
   let factory: UserFactory;
@@ -14,7 +15,9 @@ describe('UserFactory', () => {
     email: 'test@example.com',
     password: '$2b$10$hashedpassword',
     name: 'Test User',
-    businessId: '550e8400-e29b-41d4-a716-446655440002',
+    roles: [UserRole.BUSINESS_OWNER],
+    isActive: true,
+    emailVerified: false,
     version: 5,
     createdAt: new Date('2024-01-01T00:00:00Z'),
   };
@@ -87,19 +90,45 @@ describe('UserFactory', () => {
       expect(typeof user!.validatePassword).toBe('function');
       expect(typeof user!.getId).toBe('function');
       expect(typeof user!.getEmail).toBe('function');
+      expect(typeof user!.addRole).toBe('function');
+      expect(typeof user!.removeRole).toBe('function');
+      expect(typeof user!.hasRole).toBe('function');
     });
 
-    it('should handle user without businessId', async () => {
+    it('should reconstruct user with roles', async () => {
       // Arrange
-      const modelWithoutBusiness = { ...mockUserModel, businessId: null };
-      jest.spyOn(repository, 'findOne').mockResolvedValue(modelWithoutBusiness);
+      const modelWithMultipleRoles = {
+        ...mockUserModel,
+        roles: [UserRole.BUSINESS_OWNER, UserRole.CUSTOMER],
+      };
+      jest.spyOn(repository, 'findOne').mockResolvedValue(modelWithMultipleRoles);
 
       // Act
       const user = await factory.loadById(mockUserModel.id);
 
       // Assert
       expect(user).toBeDefined();
-      expect(user!.getBusinessId()).toBeNull();
+      expect(user!.getRoles()).toContain(UserRole.BUSINESS_OWNER);
+      expect(user!.getRoles()).toContain(UserRole.CUSTOMER);
+      expect(user!.getRoles()).toHaveLength(2);
+    });
+
+    it('should reconstruct user with isActive and emailVerified', async () => {
+      // Arrange
+      const modelWithVerifiedEmail = {
+        ...mockUserModel,
+        isActive: true,
+        emailVerified: true,
+      };
+      jest.spyOn(repository, 'findOne').mockResolvedValue(modelWithVerifiedEmail);
+
+      // Act
+      const user = await factory.loadById(mockUserModel.id);
+
+      // Assert
+      expect(user).toBeDefined();
+      expect(user!.getIsActive()).toBe(true);
+      expect(user!.getEmailVerified()).toBe(true);
     });
   });
 

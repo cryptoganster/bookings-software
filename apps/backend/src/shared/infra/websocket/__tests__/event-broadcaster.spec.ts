@@ -362,14 +362,7 @@ describe('WebSocketEventBroadcaster', () => {
 
     it('should broadcast offering:created to business room', () => {
       // Arrange
-      const event = new OfferingCreated(
-        'offering-123',
-        'business-456',
-        'Corte de Pelo',
-        30,
-        4,
-        20,
-      );
+      const event = new OfferingCreated('offering-123', 'business-456', 'Corte de Pelo', 30, 4, 20);
 
       // Act
       eventBusSubject.next(event);
@@ -442,14 +435,7 @@ describe('WebSocketEventBroadcaster', () => {
 
     it('should broadcast offering:updated to business room', () => {
       // Arrange
-      const event = new OfferingUpdated(
-        'offering-123',
-        'business-456',
-        'Corte Premium',
-        45,
-        2,
-        10,
-      );
+      const event = new OfferingUpdated('offering-123', 'business-456', 'Corte Premium', 45, 2, 10);
 
       // Act
       eventBusSubject.next(event);

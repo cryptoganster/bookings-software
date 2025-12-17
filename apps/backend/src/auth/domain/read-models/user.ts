@@ -1,7 +1,11 @@
+import { UserRole } from '../vo/user-role';
+
 export class UserReadModel {
   id!: string;
   email!: string;
   name!: string;
-  businessId!: string | null;
+  roles!: UserRole[];
+  isActive!: boolean;
+  emailVerified!: boolean;
   createdAt!: Date;
 }

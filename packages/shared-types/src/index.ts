@@ -68,13 +68,20 @@ export interface RegisterRequestDto {
 }
 
 /**
+ * Roles de usuario disponibles
+ */
+export type UserRole = 'BUSINESS_OWNER' | 'CUSTOMER' | 'ADMIN';
+
+/**
  * User DTO - Representa un usuario en la API
  */
 export interface UserDto {
   id: string;
   email: string;
   name: string;
-  businessId: string | null;
+  roles: UserRole[];
+  isActive: boolean;
+  emailVerified: boolean;
   createdAt: string; // ISO 8601 string
 }
 

@@ -9,17 +9,13 @@ import { IOfferingReadRepository } from '../../../domain/interfaces/repositories
  * Usa read repository para queries optimizadas
  */
 @QueryHandler(GetActiveOfferingsQuery)
-export class GetActiveOfferingsHandler
-  implements IQueryHandler<GetActiveOfferingsQuery>
-{
+export class GetActiveOfferingsHandler implements IQueryHandler<GetActiveOfferingsQuery> {
   constructor(
     @Inject('IOfferingReadRepository')
     private readonly readRepository: IOfferingReadRepository,
   ) {}
 
-  async execute(
-    query: GetActiveOfferingsQuery,
-  ): Promise<OfferingReadModel[]> {
+  async execute(query: GetActiveOfferingsQuery): Promise<OfferingReadModel[]> {
     return this.readRepository.findActiveByBusinessId(query.businessId);
   }
 }

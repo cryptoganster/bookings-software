@@ -26,9 +26,7 @@ describe('GetOfferingsByBusinessHandler', () => {
       ],
     }).compile();
 
-    handler = module.get<GetOfferingsByBusinessHandler>(
-      GetOfferingsByBusinessHandler,
-    );
+    handler = module.get<GetOfferingsByBusinessHandler>(GetOfferingsByBusinessHandler);
   });
 
   afterEach(() => {
@@ -85,9 +83,7 @@ describe('GetOfferingsByBusinessHandler', () => {
       // Assert
       expect(result).toEqual(offerings);
       expect(result).toHaveLength(3);
-      expect(mockReadRepository.findByBusinessId).toHaveBeenCalledWith(
-        businessId,
-      );
+      expect(mockReadRepository.findByBusinessId).toHaveBeenCalledWith(businessId);
       expect(mockReadRepository.findByBusinessId).toHaveBeenCalledTimes(1);
     });
 
@@ -145,9 +141,7 @@ describe('GetOfferingsByBusinessHandler', () => {
       // Assert
       expect(result).toEqual([]);
       expect(result).toHaveLength(0);
-      expect(mockReadRepository.findByBusinessId).toHaveBeenCalledWith(
-        businessId,
-      );
+      expect(mockReadRepository.findByBusinessId).toHaveBeenCalledWith(businessId);
     });
 
     it('should return offerings ordered alphabetically', async () => {
@@ -233,9 +227,7 @@ describe('GetOfferingsByBusinessHandler', () => {
       // Assert
       expect(result).toEqual(offerings);
       expect(result.every((o) => o.businessId === businessId)).toBe(true);
-      expect(result.every((o) => o.businessId === otherBusinessId)).toBe(
-        false,
-      );
+      expect(result.every((o) => o.businessId === otherBusinessId)).toBe(false);
     });
   });
 });

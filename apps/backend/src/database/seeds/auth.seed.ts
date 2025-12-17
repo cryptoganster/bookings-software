@@ -2,7 +2,9 @@ import { DataSource } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import * as bcrypt from 'bcrypt';
 
-export async function seedAuth(dataSource: DataSource): Promise<{ userId: string; businessId: string }> {
+export async function seedAuth(
+  dataSource: DataSource,
+): Promise<{ userId: string; businessId: string }> {
   console.log('👤 Seeding Auth BC...');
 
   const userId = uuidv4();

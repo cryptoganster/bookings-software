@@ -5,9 +5,7 @@ import { AppointmentReadModel } from '@booking/domain/read-models/appointment';
 import { IAppointmentReadRepository } from '@booking/domain/interfaces/repositories/appointment-read';
 
 @QueryHandler(GetUpcomingAppointmentsQuery)
-export class GetUpcomingAppointmentsHandler
-  implements IQueryHandler<GetUpcomingAppointmentsQuery>
-{
+export class GetUpcomingAppointmentsHandler implements IQueryHandler<GetUpcomingAppointmentsQuery> {
   constructor(
     @Inject('IAppointmentReadRepository')
     private readonly appointmentReadRepo: IAppointmentReadRepository,

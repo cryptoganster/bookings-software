@@ -27,9 +27,7 @@ describe('GetActiveOfferingsHandler - Property-Based Tests', () => {
       ],
     }).compile();
 
-    handler = module.get<GetActiveOfferingsHandler>(
-      GetActiveOfferingsHandler,
-    );
+    handler = module.get<GetActiveOfferingsHandler>(GetActiveOfferingsHandler);
   });
 
   afterEach(() => {
@@ -52,10 +50,7 @@ describe('GetActiveOfferingsHandler - Property-Based Tests', () => {
             name: fc.string({ minLength: 1, maxLength: 50 }),
             duration: fc.integer({ min: 15, max: 480 }),
             maxCapacityPerSlot: fc.integer({ min: 1, max: 20 }),
-            maxDailyCapacity: fc.oneof(
-              fc.constant(null),
-              fc.integer({ min: 1, max: 100 }),
-            ),
+            maxDailyCapacity: fc.oneof(fc.constant(null), fc.integer({ min: 1, max: 100 })),
             isActive: fc.boolean(), // Random active/inactive
             createdAt: fc.constant(new Date()),
             updatedAt: fc.constant(new Date()),
@@ -67,9 +62,7 @@ describe('GetActiveOfferingsHandler - Property-Based Tests', () => {
           const businessId = UUID.generate().getValue();
           const activeOfferings = offerings.filter((o) => o.isActive);
 
-          mockReadRepository.findActiveByBusinessId.mockResolvedValue(
-            activeOfferings,
-          );
+          mockReadRepository.findActiveByBusinessId.mockResolvedValue(activeOfferings);
 
           const query = new GetActiveOfferingsQuery(businessId);
 
@@ -103,10 +96,7 @@ describe('GetActiveOfferingsHandler - Property-Based Tests', () => {
             name: fc.string({ minLength: 1, maxLength: 50 }),
             duration: fc.integer({ min: 15, max: 480 }),
             maxCapacityPerSlot: fc.integer({ min: 1, max: 20 }),
-            maxDailyCapacity: fc.oneof(
-              fc.constant(null),
-              fc.integer({ min: 1, max: 100 }),
-            ),
+            maxDailyCapacity: fc.oneof(fc.constant(null), fc.integer({ min: 1, max: 100 })),
             isActive: fc.constant(false), // All inactive
             createdAt: fc.constant(new Date()),
             updatedAt: fc.constant(new Date()),
@@ -148,10 +138,7 @@ describe('GetActiveOfferingsHandler - Property-Based Tests', () => {
             name: fc.string({ minLength: 1, maxLength: 50 }),
             duration: fc.integer({ min: 15, max: 480 }),
             maxCapacityPerSlot: fc.integer({ min: 1, max: 20 }),
-            maxDailyCapacity: fc.oneof(
-              fc.constant(null),
-              fc.integer({ min: 1, max: 100 }),
-            ),
+            maxDailyCapacity: fc.oneof(fc.constant(null), fc.integer({ min: 1, max: 100 })),
             isActive: fc.constant(true), // All active
             createdAt: fc.constant(new Date()),
             updatedAt: fc.constant(new Date()),
@@ -162,9 +149,7 @@ describe('GetActiveOfferingsHandler - Property-Based Tests', () => {
           // Arrange
           const businessId = UUID.generate().getValue();
 
-          mockReadRepository.findActiveByBusinessId.mockResolvedValue(
-            offerings,
-          );
+          mockReadRepository.findActiveByBusinessId.mockResolvedValue(offerings);
 
           const query = new GetActiveOfferingsQuery(businessId);
 
@@ -178,12 +163,8 @@ describe('GetActiveOfferingsHandler - Property-Based Tests', () => {
             expect(offering.businessId).toBe(offerings[index].businessId);
             expect(offering.name).toBe(offerings[index].name);
             expect(offering.duration).toBe(offerings[index].duration);
-            expect(offering.maxCapacityPerSlot).toBe(
-              offerings[index].maxCapacityPerSlot,
-            );
-            expect(offering.maxDailyCapacity).toBe(
-              offerings[index].maxDailyCapacity,
-            );
+            expect(offering.maxCapacityPerSlot).toBe(offerings[index].maxCapacityPerSlot);
+            expect(offering.maxDailyCapacity).toBe(offerings[index].maxDailyCapacity);
             expect(offering.isActive).toBe(offerings[index].isActive);
           });
 

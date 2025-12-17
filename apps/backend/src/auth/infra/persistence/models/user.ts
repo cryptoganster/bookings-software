@@ -14,8 +14,14 @@ export class UserModel {
   @Column('varchar')
   name!: string;
 
-  @Column('uuid', { nullable: true })
-  businessId!: string | null;
+  @Column('simple-array')
+  roles!: string[];
+
+  @Column('boolean', { default: true })
+  isActive!: boolean;
+
+  @Column('boolean', { default: false })
+  emailVerified!: boolean;
 
   @Column('int', { default: 0 })
   version!: number;

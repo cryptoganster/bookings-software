@@ -312,5 +312,4 @@ export class ProcessIncomingMessageHandler implements ICommandHandler<ProcessInc
 
     return `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
   }
-
 }

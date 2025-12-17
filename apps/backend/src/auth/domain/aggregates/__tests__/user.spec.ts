@@ -137,9 +137,7 @@ describe('User Aggregate', () => {
       );
 
       // Act & Assert
-      expect(() => user.addRole(UserRole.BUSINESS_OWNER)).toThrow(
-        UserAlreadyHasRoleException,
-      );
+      expect(() => user.addRole(UserRole.BUSINESS_OWNER)).toThrow(UserAlreadyHasRoleException);
     });
 
     it('should publish UserRoleAdded event', async () => {
@@ -214,9 +212,7 @@ describe('User Aggregate', () => {
       );
 
       // Act & Assert
-      expect(() => user.removeRole(UserRole.CUSTOMER)).toThrow(
-        UserDoesNotHaveRoleException,
-      );
+      expect(() => user.removeRole(UserRole.CUSTOMER)).toThrow(UserDoesNotHaveRoleException);
     });
 
     it('should throw CannotRemoveLastRoleException when removing last role', async () => {
@@ -230,9 +226,7 @@ describe('User Aggregate', () => {
       );
 
       // Act & Assert
-      expect(() => user.removeRole(UserRole.BUSINESS_OWNER)).toThrow(
-        CannotRemoveLastRoleException,
-      );
+      expect(() => user.removeRole(UserRole.BUSINESS_OWNER)).toThrow(CannotRemoveLastRoleException);
     });
 
     it('should publish UserRoleRemoved event', async () => {
@@ -652,7 +646,7 @@ describe('User Aggregate', () => {
         validName,
         UserRole.BUSINESS_OWNER,
       );
-      
+
       // Initial version after register
       expect(user.getVersion().getValue()).toBe(1);
 

@@ -84,7 +84,10 @@ describe('UpdateOfferingHandler', () => {
 
       // Assert
       expect(factory.loadById).toHaveBeenCalledWith(offeringId.getValue());
-      expect(factory.loadByBusinessIdAndName).toHaveBeenCalledWith(businessId.getValue(), 'Corte Premium');
+      expect(factory.loadByBusinessIdAndName).toHaveBeenCalledWith(
+        businessId.getValue(),
+        'Corte Premium',
+      );
       expect(writeRepository.save).toHaveBeenCalledTimes(1);
 
       const savedOffering = writeRepository.save.mock.calls[0][0] as Offering;
@@ -208,7 +211,7 @@ describe('UpdateOfferingHandler', () => {
 
       // Version should be incremented (from 1 to 2)
       expect(savedOffering.getVersion().getValue()).toBe(2);
-      
+
       // Note: Events are auto-published with autoCommit=true, so getUncommittedEvents() returns empty
       // The event was published, but we can't check it in unit tests without EventBus integration
     });
