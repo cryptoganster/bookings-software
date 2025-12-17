@@ -1,6 +1,14 @@
-import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, format } from 'date-fns';
+import {
+  startOfDay,
+  endOfDay,
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
+  endOfMonth,
+  format,
+} from "date-fns";
 
-export type DateRangePreset = 'today' | 'week' | 'month' | 'custom';
+export type DateRangePreset = "today" | "week" | "month" | "custom";
 
 export type DateRange = [Date, Date];
 
@@ -19,7 +27,7 @@ export function getWeekRange(): DateRange {
   const now = new Date();
   return [
     startOfWeek(now, { weekStartsOn: 1 }),
-    endOfWeek(now, { weekStartsOn: 1 })
+    endOfWeek(now, { weekStartsOn: 1 }),
   ];
 }
 
@@ -36,7 +44,7 @@ export function getMonthRange(): DateRange {
  */
 export function formatDateRangeLabel(range: DateRange): string {
   const [start, end] = range;
-  const startStr = format(start, 'dd/MM/yyyy');
-  const endStr = format(end, 'dd/MM/yyyy');
+  const startStr = format(start, "dd/MM/yyyy");
+  const endStr = format(end, "dd/MM/yyyy");
   return `${startStr} - ${endStr}`;
 }

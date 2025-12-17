@@ -4,8 +4,10 @@
  * Common utilities and wrappers for testing
  */
 
-import { ReactElement } from "react";
-import { render, RenderOptions } from "@testing-library/react";
+/* eslint-disable react-refresh/only-export-components */
+
+import type { ReactElement } from "react";
+import { render, type RenderOptions } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MantineProvider } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
@@ -63,7 +65,7 @@ interface CustomRenderOptions extends Omit<RenderOptions, "wrapper"> {
 
 export function renderWithProviders(
   ui: ReactElement,
-  options?: CustomRenderOptions
+  options?: CustomRenderOptions,
 ) {
   const { queryClient, ...renderOptions } = options || {};
 

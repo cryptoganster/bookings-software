@@ -46,7 +46,7 @@ describe("DateRangeFilter", () => {
 
     // Verificar que DatePickerInput ya no está visible
     expect(
-      screen.queryByLabelText("Rango personalizado")
+      screen.queryByLabelText("Rango personalizado"),
     ).not.toBeInTheDocument();
   });
 
@@ -62,7 +62,7 @@ describe("DateRangeFilter", () => {
 
     // Verificar que DatePickerInput ya no está visible
     expect(
-      screen.queryByLabelText("Rango personalizado")
+      screen.queryByLabelText("Rango personalizado"),
     ).not.toBeInTheDocument();
   });
 
@@ -78,7 +78,7 @@ describe("DateRangeFilter", () => {
 
     // Verificar que DatePickerInput ya no está visible
     expect(
-      screen.queryByLabelText("Rango personalizado")
+      screen.queryByLabelText("Rango personalizado"),
     ).not.toBeInTheDocument();
   });
 
@@ -89,7 +89,7 @@ describe("DateRangeFilter", () => {
     // Primero cambiar a otro preset
     await user.click(screen.getByText("Hoy"));
     expect(
-      screen.queryByLabelText("Rango personalizado")
+      screen.queryByLabelText("Rango personalizado"),
     ).not.toBeInTheDocument();
 
     // Luego click en "Personalizado"
@@ -112,21 +112,21 @@ describe("DateRangeFilter", () => {
     useAppointmentFilters.getState().setDateRangePreset("today");
     rerender(<DateRangeFilter />);
     expect(
-      screen.queryByLabelText("Rango personalizado")
+      screen.queryByLabelText("Rango personalizado"),
     ).not.toBeInTheDocument();
 
     // Cambiar preset a 'week'
     useAppointmentFilters.getState().setDateRangePreset("week");
     rerender(<DateRangeFilter />);
     expect(
-      screen.queryByLabelText("Rango personalizado")
+      screen.queryByLabelText("Rango personalizado"),
     ).not.toBeInTheDocument();
 
     // Cambiar preset a 'month'
     useAppointmentFilters.getState().setDateRangePreset("month");
     rerender(<DateRangeFilter />);
     expect(
-      screen.queryByLabelText("Rango personalizado")
+      screen.queryByLabelText("Rango personalizado"),
     ).not.toBeInTheDocument();
 
     // Cambiar preset de vuelta a 'custom'
@@ -135,8 +135,7 @@ describe("DateRangeFilter", () => {
     expect(screen.getByLabelText("Rango personalizado")).toBeInTheDocument();
   });
 
-  it("cambiar fecha personalizada mantiene preset en 'custom'", async () => {
-    const user = userEvent.setup();
+  it("cambiar fecha personalizada mantiene preset en 'custom'", () => {
     render(<DateRangeFilter />, { wrapper: Wrapper });
 
     // Verificar que preset inicial es 'custom'
