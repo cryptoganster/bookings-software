@@ -20,21 +20,37 @@ export class UserWriteRepository implements IUserWriteRepository {
   async save(user: User): Promise<void> {
     await this.uow.transaction(async () => {
       const model = UserWriteMapper.toModel(user);
+      const currentVersion = user.getVersion().getValue();
+      const newVersion = currentVersion + 1;
 
-      // Intentar actualizar con optimistic locking
+      // Try to update with optimistic locking
       const result = await this.repository
         .createQueryBuilder()
-        .insert()
-        .into(UserModel)
-        .values(model)
-        .orUpdate(['password', 'name', 'businessId', 'version'], ['id'])
+        .update(UserModel)
+        .set({
+          ...model,
+          version: newVersion,
+        })
+        .where('id = :id', { id: user.getId().getValue() })
+        .andWhere('version = :version', { version: currentVersion })
         .execute();
 
-      // Si es una actualización, verificar versión
-      if (result.raw.affectedRows === 0) {
-        throw new ConcurrencyException(
-          `User ${user.getId().getValue()} was modified by another transaction`,
-        );
+      // If no rows affected, either doesn't exist or version mismatch
+      if (result.affected === 0) {
+        // Check if user exists
+        const exists = await this.repository.findOne({
+          where: { id: user.getId().getValue() },
+        });
+
+        if (!exists) {
+          // User doesn't exist, insert it
+          await this.repository.save(model);
+        } else {
+          // Version mismatch - concurrency conflict
+          throw new ConcurrencyException(
+            `User ${user.getId().getValue()} was modified by another transaction`,
+          );
+        }
       }
     });
   }
