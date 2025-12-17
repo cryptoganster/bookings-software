@@ -5,7 +5,7 @@
  *
  * Adapted from templates-mantine-ui/dashvista/Navbar.tsx
  * Changes:
- * - Replaced title with "Bienvenido al Sistema de Reservas"
+ * - Replaced title with "Bienvenido a Skeda"
  * - Removed UsersChat component (out of MVP scope)
  * - Created navlinks array: Dashboard (IconHome2), Appointments (IconCalendar)
  * - Using @tabler/icons-react instead of iconsax-react
@@ -54,10 +54,10 @@ export function Navbar() {
       {/* Welcome Title */}
       <Flex direction="column" align="start">
         <Text className={classes.title} lh={1.1} fz={26} fw={500}>
-          Bienvenido al
+          Bienvenido a
         </Text>
         <Text className={classes.title} fz={26} fw={500}>
-          Sistema de Reservas
+          Skeda
         </Text>
       </Flex>
 
