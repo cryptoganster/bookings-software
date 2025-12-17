@@ -6,3 +6,4 @@
  */
 
 export { useCancelAppointment } from "./model/useCancelAppointment";
+export { CancelAppointmentButton } from "./ui/CancelAppointmentButton";
