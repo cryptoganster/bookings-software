@@ -22,7 +22,7 @@
     "@mantine/core": "^7.3.0",
     "@mantine/dates": "^7.3.0",
     "@mantine/hooks": "^7.3.0",
-    "@mantine/modals": "^7.3.0",
+    "@mantine/modals": "^8.3.10",
     "@mantine/notifications": "^7.3.0",
     "@packages/shared-types": "workspace:*",
     "@tabler/icons-react": "^2.44.0",
