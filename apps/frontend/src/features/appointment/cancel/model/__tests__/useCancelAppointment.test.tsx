@@ -52,11 +52,7 @@ describe("useCancelAppointment", () => {
       cancelledAt: null,
     };
 
-    vi.mocked(appointmentsApi.cancel).mockResolvedValue({
-      ...mockAppointment,
-      status: "CANCELLED",
-      cancelledAt: new Date().toISOString(),
-    });
+    vi.mocked(appointmentsApi.cancel).mockResolvedValue(undefined);
 
     const { queryClient, wrapper } = createWrapper();
 
@@ -143,11 +139,7 @@ describe("useCancelAppointment", () => {
       cancelledAt: null,
     };
 
-    vi.mocked(appointmentsApi.cancel).mockResolvedValue({
-      ...mockAppointment,
-      status: "CANCELLED",
-      cancelledAt: new Date().toISOString(),
-    });
+    vi.mocked(appointmentsApi.cancel).mockResolvedValue(undefined);
 
     const { queryClient, wrapper } = createWrapper();
 

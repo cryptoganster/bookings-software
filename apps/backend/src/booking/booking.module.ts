@@ -18,6 +18,7 @@ import { GetAppointmentHandler } from './app/queries/get-appointment/handler';
 import { GetCustomerAppointmentsHandler } from './app/queries/get-customer-appointments/handler';
 import { GetBusinessAppointmentsHandler } from './app/queries/get-business-appointments/handler';
 import { GetUpcomingAppointmentsHandler } from './app/queries/get-upcoming-appointments/handler';
+import { GetAppointmentStatsHandler } from './app/queries/get-appointment-stats/handler';
 
 // Event Handlers
 import { OnAppointmentCreatedHandler } from './app/event-handlers/on-appointment-created';
@@ -47,6 +48,7 @@ const QueryHandlers = [
   GetCustomerAppointmentsHandler,
   GetBusinessAppointmentsHandler,
   GetUpcomingAppointmentsHandler,
+  GetAppointmentStatsHandler,
 ];
 
 const EventHandlers = [OnAppointmentCreatedHandler, OnAppointmentCancelledHandler];

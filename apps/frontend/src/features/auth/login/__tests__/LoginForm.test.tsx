@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MantineProvider } from "@mantine/core";
 import { BrowserRouter } from "react-router-dom";
 import type { ReactNode } from "react";
+import type { LoginResponseDto, UserRole } from "@packages/shared-types";
 import { LoginForm } from "../ui/LoginForm";
 import { loginApi } from "../api/loginApi";
 
@@ -109,12 +110,14 @@ describe("LoginForm", () => {
 
   it("should call login API with correct credentials", async () => {
     const user = userEvent.setup();
-    const mockResponse = {
+    const mockResponse: LoginResponseDto = {
       user: {
         id: "user-123",
         email: "test@test.com",
         name: "Test User",
-        businessId: null,
+        roles: ["BUSINESS_OWNER"] as UserRole[],
+        isActive: true,
+        emailVerified: true,
         createdAt: new Date().toISOString(),
       },
       token: "jwt-token-123",
@@ -159,7 +162,9 @@ describe("LoginForm", () => {
                   id: "user-123",
                   email: "test@test.com",
                   name: "Test User",
-                  businessId: null,
+                  roles: ["BUSINESS_OWNER"],
+                  isActive: true,
+                  emailVerified: true,
                   createdAt: new Date().toISOString(),
                 },
                 token: "jwt-token-123",

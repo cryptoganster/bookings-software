@@ -90,4 +90,21 @@ export class AppointmentReadRepository implements IAppointmentReadRepository {
 
     return models.map((model) => AppointmentReadMapper.toReadModel(model));
   }
+
+  async findByBusinessAndDateRange(
+    businessId: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<AppointmentReadModel[]> {
+    const models = await this.repository
+      .createQueryBuilder('appointment')
+      .where('appointment.businessId = :businessId', { businessId })
+      .andWhere('appointment.dateTime >= :startDate', { startDate })
+      .andWhere('appointment.dateTime <= :endDate', { endDate })
+      .andWhere('appointment.status != :cancelled', { cancelled: 'CANCELLED' })
+      .orderBy('appointment.dateTime', 'ASC')
+      .getMany();
+
+    return models.map((model) => AppointmentReadMapper.toReadModel(model));
+  }
 }

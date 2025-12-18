@@ -75,10 +75,15 @@ export interface AppointmentModifiedPayload {
 export function connectWebSocket(): Socket | null {
   const user = useAuthStore.getState().user;
 
-  if (!user?.businessId) {
-    console.warn("[WebSocket] Cannot connect: no businessId");
+  if (!user?.id) {
+    console.warn("[WebSocket] Cannot connect: no user");
     return null;
   }
+
+  // TODO: WebSocket needs businessId but UserDto no longer has it
+  // Need to fetch business data first or pass businessId separately
+  // For now, using userId as fallback
+  console.warn("[WebSocket] Using userId as businessId (temporary)");
 
   // Already connected
   if (socket?.connected) {
@@ -90,7 +95,7 @@ export function connectWebSocket(): Socket | null {
   const wsUrl = env.apiUrl.replace(/^http/, "ws");
   socket = io(`${wsUrl}/events`, {
     auth: {
-      businessId: user.businessId,
+      businessId: user.id, // TODO: Should be actual businessId
     },
     transports: ["websocket"], // Force WebSocket (no polling)
     reconnection: true,

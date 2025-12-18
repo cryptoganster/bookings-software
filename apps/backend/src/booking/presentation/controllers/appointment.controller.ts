@@ -9,6 +9,7 @@ import { CancelAppointmentCommand } from '@booking/app/commands/cancel-appointme
 import { GetBusinessAppointmentsQuery } from '@booking/app/queries/get-business-appointments';
 import { GetAppointmentQuery } from '@booking/app/queries/get-appointment';
 import { GetUpcomingAppointmentsQuery } from '@booking/app/queries/get-upcoming-appointments';
+import { GetAppointmentStatsQuery } from '@booking/app/queries/get-appointment-stats';
 
 @Controller('appointments')
 @UseGuards(JwtAuthGuard)
@@ -36,6 +37,13 @@ export class AppointmentController {
       new GetBusinessAppointmentsQuery(businessId, filters),
     );
     return appointments;
+  }
+
+  @Get('stats')
+  async getStats(@CurrentUser() user: UserPayload) {
+    const businessId = user.businessId || user.userId;
+    const stats = await this.queryBus.execute(new GetAppointmentStatsQuery(businessId));
+    return stats;
   }
 
   @Get('upcoming')

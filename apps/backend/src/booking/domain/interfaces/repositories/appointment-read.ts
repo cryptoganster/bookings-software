@@ -16,4 +16,9 @@ export interface IAppointmentReadRepository {
     filters?: AppointmentFilters,
   ): Promise<AppointmentReadModel[]>;
   findUpcoming(businessId: string): Promise<AppointmentReadModel[]>;
+  findByBusinessAndDateRange(
+    businessId: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<AppointmentReadModel[]>;
 }
