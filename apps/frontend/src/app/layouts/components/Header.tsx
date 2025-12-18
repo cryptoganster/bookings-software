@@ -1,11 +1,11 @@
 /**
  * Header Component
  *
- * Top navigation bar with burger menu, business name, and user menu.
+ * Top navigation bar with logo, business name, burger menu, and user menu.
  *
  * Adapted from templates-mantine-ui/dashvista/Header.tsx
  * Changes:
- * - Replaced logo with simple business name text
+ * - Added logo image (logo.png) before business name
  * - Removed SearchInput (out of MVP scope)
  * - Removed notification and settings ActionIcons (out of MVP scope)
  * - Integrated existing LogoutButton in Popover
@@ -48,8 +48,13 @@ export function Header({ opened, toggle }: HeaderProps) {
         size="sm"
       />
 
-      <Flex gap="sm" align="center">
-        <Text fz={18} fw={600}>
+      <Flex gap="1" align="center">
+        <img
+          src="/logo.png"
+          alt="Skeda Logo"
+          style={{ height: "64px", width: "64px", objectFit: "contain" }}
+        />
+        <Text fz={26} fw={600}>
           Skeda
         </Text>
       </Flex>

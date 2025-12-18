@@ -32,7 +32,7 @@ const theme = createTheme({
   },
   primaryColor: "brandGreen",
   primaryShade: { light: 6, dark: 7 },
-  fontFamily: "Inter, system-ui, Avenir, Helvetica, Arial, sans-serif",
+  fontFamily: "Montserrat, system-ui, Avenir, Helvetica, Arial, sans-serif",
 });
 
 export function MantineProvider({ children }: MantineProviderProps) {
