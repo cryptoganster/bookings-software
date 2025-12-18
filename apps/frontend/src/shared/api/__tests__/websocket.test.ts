@@ -52,20 +52,12 @@ describe("WebSocket Client", () => {
   });
 
   describe("connectWebSocket", () => {
-    it("should not connect if user has no businessId", () => {
+    it("should not connect if user is not authenticated", () => {
       // Arrange
       vi.mocked(useAuthStore.getState).mockReturnValue({
-        user: {
-          id: "1",
-          email: "test@test.com",
-          name: "Test",
-          roles: ["BUSINESS_OWNER"],
-          isActive: true,
-          emailVerified: true,
-          createdAt: "2024-01-01",
-        },
-        token: "token",
-        isAuthenticated: true,
+        user: null,
+        token: null,
+        isAuthenticated: false,
         login: vi.fn(),
         logout: vi.fn(),
       });
@@ -105,11 +97,13 @@ describe("WebSocket Client", () => {
         expect.stringContaining("/events"),
         expect.objectContaining({
           auth: {
-            roles: ["BUSINESS_OWNER"],
-            isActive: true,
-            emailVerified: true,
+            businessId: "1", // Uses user.id as businessId
           },
           transports: ["websocket"],
+          reconnection: true,
+          reconnectionAttempts: 5,
+          reconnectionDelay: 1000,
+          reconnectionDelayMax: 5000,
         }),
       );
     });

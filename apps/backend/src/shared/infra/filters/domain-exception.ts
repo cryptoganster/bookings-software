@@ -1,5 +1,5 @@
 import { ExceptionFilter, Catch, ArgumentsHost, HttpStatus } from '@nestjs/common';
-import { FastifyReply } from 'fastify';
+import type { FastifyReply } from 'fastify';
 import { DomainException } from '@shared/kernel/exceptions/domain';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 
