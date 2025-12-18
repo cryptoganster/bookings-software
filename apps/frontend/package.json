@@ -18,7 +18,7 @@
     "test:ui": "vitest --ui"
   },
   "dependencies": {
-    "@hookform/resolvers": "^3.3.0",
+    "@hookform/resolvers": "^5.2.2",
     "@mantine/core": "^7.3.0",
     "@mantine/dates": "^7.3.0",
     "@mantine/hooks": "^7.3.0",
