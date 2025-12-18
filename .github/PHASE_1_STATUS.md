@@ -43,6 +43,29 @@
 
 ---
 
+## 🔴 Post-Merge Issues Detected
+
+**Date:** December 18, 2024  
+**Run ID:** [20344441841](https://github.com/cryptoganster/bookings-software/actions/runs/20344441841)
+
+### Issue #1: pnpm-lock.yaml in .gitignore
+- **Status:** 🔴 CRITICAL
+- **Impact:** CI fails on all merges
+- **Cause:** `pnpm-lock.yaml` is in `.gitignore` (line 11)
+- **Fix:** Remove from `.gitignore` and commit the file
+- **Documentation:** `.kiro/specs/ci-cd-devsecops/FIXES_REQUIRED.md`
+
+### Issue #2: CodeQL Configuration Error
+- **Status:** 🟡 MEDIUM
+- **Impact:** CodeQL workflow fails to upload results
+- **Cause:** Incorrect `fail-on` parameter configuration
+- **Fix:** Remove `fail-on` parameter from workflow
+- **Documentation:** `.kiro/specs/ci-cd-devsecops/FIXES_REQUIRED.md`
+
+**Analysis Document:** `.kiro/specs/ci-cd-devsecops/CI_FAILURES_ANALYSIS.md`
+
+---
+
 ## 🔗 Quick Links
 
 - **Security Settings:** https://github.com/cryptoganster/bookings-software/settings/security_analysis
