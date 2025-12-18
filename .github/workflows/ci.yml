@@ -150,6 +150,9 @@ jobs:
             packages/*/node_modules
           key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
 
+      - name: Build Shared Types
+        run: pnpm --filter @packages/shared-types build
+
       - name: Type Check Backend
         run: pnpm --filter backend typecheck
 
@@ -477,6 +480,9 @@ jobs:
             packages/*/node_modules
           key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
 
+      - name: Build Shared Types
+        run: pnpm --filter @packages/shared-types build
+
       - name: Build Backend
         run: pnpm --filter backend build
 
@@ -522,6 +528,9 @@ jobs:
             apps/*/node_modules
             packages/*/node_modules
           key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Build Shared Types
+        run: pnpm --filter @packages/shared-types build
 
       - name: Build Frontend
         run: pnpm --filter frontend build
