@@ -27,10 +27,13 @@ export async function cleanDatabase(dataSource: DataSource): Promise<void> {
 /**
  * Helper para crear un DataSource de test
  * Usa la base de datos específica del worker de Jest
+ * Cuando se ejecuta con --runInBand, usar bookings_test directamente
+ * En modo paralelo, usar bookings_test_${workerId}
  */
 export function createTestDataSource(): DataSource {
-  const workerId = process.env.JEST_WORKER_ID || '1';
-  const database = `bookings_test_${workerId}`;
+  const isRunInBand = process.argv.includes('--runInBand');
+  const workerId = process.env.JEST_WORKER_ID;
+  const database = isRunInBand ? 'bookings_test' : `bookings_test_${workerId || '1'}`;
 
   return new DataSource({
     type: 'postgres',
