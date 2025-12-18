@@ -71,7 +71,7 @@ jobs:
       - name: Generate SBOM
         uses: anchore/sbom-action@v0
         with:
-          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}
           format: spdx-json
           output-file: sbom.spdx.json
 
@@ -104,7 +104,7 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ needs.build-docker.outputs.image-digest }}
           format: 'sarif'
           output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
@@ -140,13 +140,13 @@ jobs:
       - name: Deploy to Staging
         run: |
           echo "🚀 Deploying to staging environment..."
-          echo "Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+          echo "Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
           
           # TODO: Add actual deployment commands here
           # Examples:
-          # - kubectl set image deployment/backend backend=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          # - kubectl set image deployment/backend backend=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           # - docker-compose -f docker-compose.staging.yml up -d
-          # - ssh user@staging-server "docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} && docker-compose up -d"
+          # - ssh user@staging-server "docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest && docker-compose up -d"
           
           echo "✅ Deployment command executed"
 
@@ -202,7 +202,7 @@ jobs:
           echo "📝 Logging deployment..."
           echo "Timestamp: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
           echo "Commit: ${{ github.sha }}"
-          echo "Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+          echo "Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
           echo "Environment: staging"
           echo "Deployed by: ${{ github.actor }}"
 
@@ -223,7 +223,7 @@ jobs:
       - name: Deploy to Production
         run: |
           echo "🚀 Deploying to production environment..."
-          echo "Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+          echo "Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
           
           # TODO: Add actual deployment commands here
           
@@ -278,7 +278,7 @@ jobs:
           echo "📝 Logging deployment..."
           echo "Timestamp: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
           echo "Commit: ${{ github.sha }}"
-          echo "Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+          echo "Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
           echo "Environment: production"
           echo "Deployed by: ${{ github.actor }}"
 
@@ -293,7 +293,7 @@ jobs:
             ## Deployment to Production
             
             **Commit:** ${{ github.sha }}
-            **Image:** ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            **Image:** ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
             **Deployed by:** ${{ github.actor }}
             **Timestamp:** ${{ github.event.head_commit.timestamp }}
             
