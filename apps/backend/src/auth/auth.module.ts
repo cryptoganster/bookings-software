@@ -13,6 +13,12 @@ import { UserReadRepository } from './infra/persistence/repositories/user-read';
 import { UserFactory } from './infra/persistence/factories/user-factory';
 import { RegisterHandler } from './app/commands/register';
 import { LoginHandler } from './app/commands/login';
+import { AddUserRoleHandler } from './app/commands/add-user-role';
+import { RemoveUserRoleHandler } from './app/commands/remove-user-role';
+import { VerifyEmailHandler } from './app/commands/verify-email';
+import { DeactivateUserHandler } from './app/commands/deactivate-user';
+import { ActivateUserHandler } from './app/commands/activate-user';
+import { OnCustomerLinkedToUserHandler } from './app/event-handlers/on-customer-linked-to-user';
 import { AuthController } from './presentation/controllers/auth';
 
 @Module({
@@ -35,9 +41,22 @@ import { AuthController } from './presentation/controllers/auth';
   ],
   controllers: [AuthController],
   providers: [
+    // Strategies
     JwtStrategy,
+
+    // Command Handlers
     RegisterHandler,
     LoginHandler,
+    AddUserRoleHandler,
+    RemoveUserRoleHandler,
+    VerifyEmailHandler,
+    DeactivateUserHandler,
+    ActivateUserHandler,
+
+    // Event Handlers
+    OnCustomerLinkedToUserHandler,
+
+    // Repositories
     {
       provide: 'IUserWriteRepository',
       useClass: UserWriteRepository,

@@ -8,11 +8,13 @@ import { UUID } from '@shared/vo/uuid';
 import { DateTime } from '@booking/domain/vo/date-time';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
+import { AppointmentFactory } from '../../factories/appointment-factory';
 import { cleanDatabase } from '../../../../../../test/setup-db';
 
 describe('AppointmentWriteRepository Integration Tests', () => {
   let module: TestingModule;
   let repository: AppointmentWriteRepository;
+  let factory: AppointmentFactory;
   let dataSource: DataSource;
 
   beforeAll(async () => {
@@ -33,6 +35,7 @@ describe('AppointmentWriteRepository Integration Tests', () => {
       ],
       providers: [
         AppointmentWriteRepository,
+        AppointmentFactory,
         {
           provide: 'IUnitOfWork',
           useClass: TypeOrmUnitOfWork,
@@ -41,6 +44,7 @@ describe('AppointmentWriteRepository Integration Tests', () => {
     }).compile();
 
     repository = module.get<AppointmentWriteRepository>(AppointmentWriteRepository);
+    factory = module.get<AppointmentFactory>(AppointmentFactory);
     dataSource = module.get<DataSource>(DataSource);
   }, 30000); // Aumentar timeout a 30 segundos
 
@@ -88,15 +92,28 @@ describe('AppointmentWriteRepository Integration Tests', () => {
         DateTime.fromDate(new Date(Date.now() + 86400000)),
       );
 
+      // Save initial appointment (version will be 1)
       await repository.save(appointment);
 
-      // Simular que otro proceso modificó el appointment
-      await dataSource
-        .getRepository(AppointmentModel)
-        .update({ id: appointment.getId().getValue() }, { version: 2 });
+      // Simular dos procesos concurrentes:
+      // Proceso 1: Reload y modifica
+      const process1Appointment = await factory.loadById(appointment.getId().getValue());
+      expect(process1Appointment).toBeDefined();
+      expect(process1Appointment!.getVersion().getValue()).toBe(1);
+      process1Appointment!.cancel(); // version 2
 
+      // Proceso 2: Reload y modifica
+      const process2Appointment = await factory.loadById(appointment.getId().getValue());
+      expect(process2Appointment).toBeDefined();
+      expect(process2Appointment!.getVersion().getValue()).toBe(1);
+      process2Appointment!.cancel(); // version 2
+
+      // Proceso 1 guarda primero (éxito - BD pasa de version 1 a 2)
+      await repository.save(process1Appointment!);
+
+      // Proceso 2 intenta guardar (fallo - BD tiene version 2, pero proceso2 espera version 1)
       // Act & Assert
-      await expect(repository.save(appointment)).rejects.toThrow(ConcurrencyException);
+      await expect(repository.save(process2Appointment!)).rejects.toThrow(ConcurrencyException);
     });
   });
 

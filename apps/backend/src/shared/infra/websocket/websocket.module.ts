@@ -1,4 +1,5 @@
 import { Module, Global } from '@nestjs/common';
+import { CqrsModule } from '@nestjs/cqrs';
 import { EventsGateway } from './events.gateway';
 import { WebSocketEventBroadcaster } from './event-broadcaster';
 
@@ -19,6 +20,7 @@ import { WebSocketEventBroadcaster } from './event-broadcaster';
  */
 @Global() // Disponible en toda la aplicación sin necesidad de importar
 @Module({
+  imports: [CqrsModule], // Importar CqrsModule para acceso al EventBus
   providers: [EventsGateway, WebSocketEventBroadcaster],
   exports: [EventsGateway], // Exportar por si otros módulos necesitan acceso directo
 })

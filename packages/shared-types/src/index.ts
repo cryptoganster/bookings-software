@@ -52,6 +52,11 @@ export interface LoginRequestDto {
 
 /**
  * DTO para login response
+ * 
+ * @remarks
+ * - businessId removed: Use Business.ownerId → User.id instead
+ * - roles array is included in UserDto
+ * - isActive and emailVerified are included in UserDto
  */
 export interface LoginResponseDto {
   user: UserDto;
