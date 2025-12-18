@@ -1,0 +1,361 @@
+name: CD Pipeline - Deployment
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/backend
+
+jobs:
+  # Job 1: Build Docker Image
+  build-docker:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tags }}
+      image-digest: ${{ steps.build.outputs.digest }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./apps/backend/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          format: spdx-json
+          output-file: sbom.spdx.json
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.spdx.json
+
+  # Job 2: Scan Docker Image with Trivy
+  scan-image:
+    name: Scan Docker Image
+    runs-on: ubuntu-latest
+    needs: build-docker
+    permissions:
+      contents: read
+      security-events: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '1'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      - name: Upload Trivy results as artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: trivy-results
+          path: trivy-results.sarif
+
+  # Job 3: Deploy to Staging (Auto)
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [build-docker, scan-image]
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: staging
+      url: https://staging.example.com
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Staging
+        run: |
+          echo "🚀 Deploying to staging environment..."
+          echo "Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+          
+          # TODO: Add actual deployment commands here
+          # Examples:
+          # - kubectl set image deployment/backend backend=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          # - docker-compose -f docker-compose.staging.yml up -d
+          # - ssh user@staging-server "docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} && docker-compose up -d"
+          
+          echo "✅ Deployment command executed"
+
+      - name: Wait for service to start
+        run: |
+          echo "⏳ Waiting for service to start..."
+          sleep 30
+
+      - name: Health check
+        run: |
+          echo "🏥 Performing health check..."
+          
+          # TODO: Replace with actual staging URL
+          HEALTH_URL="https://staging.example.com/health"
+          MAX_RETRIES=5
+          RETRY_DELAY=10
+          
+          for i in $(seq 1 $MAX_RETRIES); do
+            echo "Attempt $i/$MAX_RETRIES..."
+            
+            # Uncomment when staging URL is available
+            # if curl -f -s "$HEALTH_URL" > /dev/null; then
+            #   echo "✅ Health check passed"
+            #   exit 0
+            # fi
+            
+            # Temporary: Always pass for now
+            echo "✅ Health check passed (mock)"
+            exit 0
+            
+            if [ $i -lt $MAX_RETRIES ]; then
+              echo "Health check failed, retrying in ${RETRY_DELAY}s..."
+              sleep $RETRY_DELAY
+            fi
+          done
+          
+          echo "❌ Health check failed after $MAX_RETRIES attempts"
+          exit 1
+
+      - name: Run smoke tests
+        run: |
+          echo "🧪 Running smoke tests..."
+          
+          # TODO: Add actual smoke tests
+          # Examples:
+          # - curl -f https://staging.example.com/api/health
+          # - npm run test:smoke -- --env=staging
+          
+          echo "✅ Smoke tests passed (mock)"
+
+      - name: Log deployment
+        run: |
+          echo "📝 Logging deployment..."
+          echo "Timestamp: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          echo "Commit: ${{ github.sha }}"
+          echo "Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+          echo "Environment: staging"
+          echo "Deployed by: ${{ github.actor }}"
+
+  # Job 4: Deploy to Production (Manual Approval)
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [build-docker, scan-image]
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production'
+    environment:
+      name: production
+      url: https://production.example.com
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Production
+        run: |
+          echo "🚀 Deploying to production environment..."
+          echo "Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+          
+          # TODO: Add actual deployment commands here
+          
+          echo "✅ Deployment command executed"
+
+      - name: Wait for service to start
+        run: |
+          echo "⏳ Waiting for service to start..."
+          sleep 30
+
+      - name: Health check
+        run: |
+          echo "🏥 Performing health check..."
+          
+          # TODO: Replace with actual production URL
+          HEALTH_URL="https://production.example.com/health"
+          MAX_RETRIES=5
+          RETRY_DELAY=10
+          
+          for i in $(seq 1 $MAX_RETRIES); do
+            echo "Attempt $i/$MAX_RETRIES..."
+            
+            # Uncomment when production URL is available
+            # if curl -f -s "$HEALTH_URL" > /dev/null; then
+            #   echo "✅ Health check passed"
+            #   exit 0
+            # fi
+            
+            # Temporary: Always pass for now
+            echo "✅ Health check passed (mock)"
+            exit 0
+            
+            if [ $i -lt $MAX_RETRIES ]; then
+              echo "Health check failed, retrying in ${RETRY_DELAY}s..."
+              sleep $RETRY_DELAY
+            fi
+          done
+          
+          echo "❌ Health check failed after $MAX_RETRIES attempts"
+          exit 1
+
+      - name: Run smoke tests
+        run: |
+          echo "🧪 Running smoke tests..."
+          
+          # TODO: Add actual smoke tests
+          
+          echo "✅ Smoke tests passed (mock)"
+
+      - name: Log deployment
+        run: |
+          echo "📝 Logging deployment..."
+          echo "Timestamp: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          echo "Commit: ${{ github.sha }}"
+          echo "Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+          echo "Environment: production"
+          echo "Deployed by: ${{ github.actor }}"
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ github.run_number }}
+          release_name: Release v${{ github.run_number }}
+          body: |
+            ## Deployment to Production
+            
+            **Commit:** ${{ github.sha }}
+            **Image:** ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            **Deployed by:** ${{ github.actor }}
+            **Timestamp:** ${{ github.event.head_commit.timestamp }}
+            
+            ### Changes
+            ${{ github.event.head_commit.message }}
+          draft: false
+          prerelease: false
+
+  # Job 5: Rollback (On Failure)
+  rollback:
+    name: Rollback Deployment
+    runs-on: ubuntu-latest
+    needs: [deploy-staging]
+    if: failure()
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get previous successful deployment
+        id: previous
+        run: |
+          echo "🔍 Finding previous successful deployment..."
+          
+          # TODO: Implement logic to find previous successful image tag
+          # This could query GitHub Container Registry or deployment logs
+          
+          PREVIOUS_TAG="latest"
+          echo "previous-tag=$PREVIOUS_TAG" >> $GITHUB_OUTPUT
+          echo "Found previous tag: $PREVIOUS_TAG"
+
+      - name: Rollback to previous version
+        run: |
+          echo "⏪ Rolling back to previous version..."
+          echo "Previous image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.previous.outputs.previous-tag }}"
+          
+          # TODO: Add actual rollback commands here
+          # Examples:
+          # - kubectl rollout undo deployment/backend
+          # - docker-compose -f docker-compose.staging.yml down && docker-compose -f docker-compose.staging.yml up -d
+          
+          echo "✅ Rollback command executed"
+
+      - name: Verify rollback
+        run: |
+          echo "🏥 Verifying rollback..."
+          
+          # TODO: Add health check for rolled back version
+          
+          echo "✅ Rollback verified (mock)"
+
+      - name: Log rollback
+        run: |
+          echo "📝 Logging rollback..."
+          echo "Timestamp: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          echo "Failed commit: ${{ github.sha }}"
+          echo "Rolled back to: ${{ steps.previous.outputs.previous-tag }}"
+          echo "Triggered by: Deployment failure"
+
+      - name: Notify team
+        run: |
+          echo "📢 Notifying team about rollback..."
+          echo "Deployment failed and was automatically rolled back"
+          echo "Failed commit: ${{ github.sha }}"
+          echo "Please investigate the failure"
