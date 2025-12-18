@@ -277,7 +277,15 @@ jobs:
 
       - name: Scan for secrets
         run: |
-          trufflehog filesystem . --json --fail > trufflehog-report.json || true
+          # Scan only source code directories, exclude .git, node_modules, dist, coverage
+          trufflehog filesystem . \
+            --exclude-paths=.git \
+            --exclude-paths=node_modules \
+            --exclude-paths=dist \
+            --exclude-paths=coverage \
+            --exclude-paths=.next \
+            --exclude-paths=build \
+            --json --fail > trufflehog-report.json || true
           
           # Check if secrets were found
           if [ -s trufflehog-report.json ]; then
