@@ -3,7 +3,7 @@
  * 
  * Adapted from templates-mantine-ui/dashvista/App.module.css
  * Changes:
- * - Added font-family Fredoka from Google Fonts
+ * - Added font-family Montserrat from Google Fonts
  * - Removed custom variables
  * - Added rounded corner effect with ::before pseudo-element
  * - Kept essential navbar, header, main styles
@@ -11,7 +11,7 @@
  */
 
 .root {
-  font-family: "Fredoka", sans-serif;
+  font-family: "Montserrat", sans-serif;
   font-optical-sizing: auto;
 }
 

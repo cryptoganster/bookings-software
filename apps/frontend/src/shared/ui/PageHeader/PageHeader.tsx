@@ -29,9 +29,7 @@ export function PageHeader({ title, breadcrumbs, actions }: PageHeaderProps) {
         </Breadcrumbs>
       )}
       <Group justify="space-between" align="center">
-        <Title order={1} style={{ fontFamily: "Fredoka, sans-serif" }}>
-          {title}
-        </Title>
+        <Title order={1}>{title}</Title>
         {actions && <Group gap="sm">{actions}</Group>}
       </Group>
     </div>
