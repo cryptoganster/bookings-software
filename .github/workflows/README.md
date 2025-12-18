@@ -1,377 +1,348 @@
 # GitHub Actions Workflows
 
-This directory contains all CI/CD workflows for the Bookings Software project.
-
-## 📋 Table of Contents
-
-- [Workflows Overview](#workflows-overview)
-- [CI Pipeline](#ci-pipeline)
-- [CodeQL Security Analysis](#codeql-security-analysis)
-- [Required Secrets](#required-secrets)
-- [Trigger Conditions](#trigger-conditions)
-- [Status Checks](#status-checks)
-- [Troubleshooting](#troubleshooting)
-
----
+This directory contains all CI/CD workflows for the project.
 
 ## Workflows Overview
 
-| Workflow | Purpose | Trigger | Duration |
-|----------|---------|---------|----------|
-| **CI Pipeline** | Code quality, security, tests, builds | Push, PR | ~8-12 min |
-| **CodeQL** | Static security analysis (SAST) | Push, PR, Schedule | ~5-8 min |
+### 1. CI Pipeline (`ci.yml`)
+
+**Purpose:** Continuous Integration - validates code quality, security, and functionality
+
+**Triggers:**
+- Push to `main`, `develop`, `feature/**`, `fix/**`, `refactor/**`
+- Pull requests to `main`, `develop`
+
+**Jobs:**
+1. **setup** - Install dependencies and cache
+2. **lint** - ESLint on backend and frontend
+3. **format** - Prettier format check
+4. **typecheck** - TypeScript compilation check
+5. **audit** - npm audit for vulnerabilities
+6. **license-check** - Verify compatible licenses
+7. **secret-scan** - TruffleHog secret scanning
+8. **test-backend** - Jest tests with PostgreSQL
+9. **test-frontend** - Vitest tests
+10. **coverage-check** - Verify 70% coverage threshold
+11. **build-backend** - Build backend application
+12. **build-frontend** - Build frontend application
+13. **validate-monorepo** - Validate pnpm workspace
+14. **ci-status** - Final status check
+
+**Duration:** ~8-12 minutes
+
+**Required Secrets:** None (uses GitHub token)
+
+**Status Checks:** All jobs must pass for PR merge
 
 ---
 
-## CI Pipeline
+### 2. CodeQL Analysis (`codeql.yml`)
 
-**File:** `ci.yml`
+**Purpose:** Static Application Security Testing (SAST)
 
-### Purpose
-Comprehensive continuous integration pipeline that validates code quality, security, and functionality.
+**Triggers:**
+- Push to `main`, `develop`
+- Pull requests to `main`, `develop`
+- Schedule: Every Monday at 00:00 UTC
 
-### Jobs
+**Jobs:**
+1. **analyze** - CodeQL security analysis
 
-#### 1. Setup & Install Dependencies
-- Installs pnpm and Node.js
-- Installs all dependencies with frozen lockfile
-- Caches node_modules for subsequent jobs
+**Query Suite:** `security-extended`
 
-#### 2. Lint Code
-- Runs ESLint on backend and frontend
-- Fails on any linting errors
-- **Requirements:** 6.1, 6.4
+**Languages:** JavaScript/TypeScript
 
-#### 3. Check Code Formatting
-- Runs Prettier check on backend and frontend
-- Fails if code is not properly formatted
-- **Requirements:** 6.2, 6.5
+**Fail Conditions:** Critical or High severity vulnerabilities
 
-#### 4. TypeScript Type Check
-- Runs `tsc --noEmit` on backend and frontend
-- Fails on any type errors
-- **Requirements:** 6.3, 2.5
+**Duration:** ~5-8 minutes
 
-#### 5. Security Audit Dependencies
-- Runs `pnpm audit` to check for vulnerabilities
-- Fails on critical or high severity vulnerabilities
-- Generates audit report artifact
-- **Requirements:** 3.1, 3.2
+**Results:** Uploaded to GitHub Security tab
 
-#### 6. Check Dependency Licenses
-- Scans all dependencies for licenses
-- Fails on incompatible licenses (GPL, AGPL)
-- Generates license report artifact
-- **Requirements:** 3.4
+---
 
-#### 7. Scan for Secrets
-- Uses TruffleHog to scan for exposed secrets
-- Scans entire git history
-- Fails immediately if secrets detected
-- **Requirements:** 4.1, 4.2, 4.3
+### 3. CD Pipeline (`cd.yml`)
 
-#### 8. Test Backend
-- Runs Jest tests with coverage
-- Uses PostgreSQL service container
-- Uploads coverage artifacts
-- **Requirements:** 5.1, 5.2, 5.4
+**Purpose:** Continuous Deployment - build, scan, and deploy Docker images
 
-#### 9. Test Frontend
-- Runs Vitest tests with coverage
-- Uploads coverage artifacts
-- **Requirements:** 5.1, 5.4
+**Triggers:**
+- Push to `main` (auto-deploy to staging)
+- Manual workflow dispatch (for production)
 
-#### 10. Check Test Coverage
-- Downloads coverage from backend and frontend
-- Checks if coverage >= 70%
-- Warns if below threshold (doesn't fail)
-- **Requirements:** 5.5
+**Jobs:**
+1. **build-docker** - Build and push Docker image to GHCR
+2. **scan-image** - Trivy vulnerability scan
+3. **deploy-staging** - Auto-deploy to staging (on main push)
+4. **deploy-production** - Manual deploy to production (requires approval)
+5. **rollback** - Auto-rollback on deployment failure
 
-#### 11. Build Backend
-- Runs `pnpm build` for backend
-- Verifies dist folder created
-- Caches build artifacts
-- **Requirements:** 7.1, 7.3, 7.4
+**Environments:**
+- **staging**: Auto-deployed from main
+- **production**: Manual approval required
 
-#### 12. Build Frontend
-- Runs `pnpm build` for frontend
-- Verifies dist folder created
-- Caches build artifacts
-- **Requirements:** 7.2, 7.3, 7.4
+**Image Registry:** GitHub Container Registry (ghcr.io)
 
-#### 13. Validate Monorepo Structure
-- Validates pnpm workspace structure
-- Checks for circular dependencies
-- **Requirements:** 7.5
+**Image Tags:**
+- `main-{sha}` - Branch + commit SHA
+- `latest` - Latest main branch build
+- `v{run_number}` - Release version
 
-#### 14. CI Status
-- Final job that checks all previous jobs
-- Fails if any job failed
-- Provides clear status message
+**Duration:** ~10-15 minutes
 
-### Artifacts Generated
+**Required Secrets:**
+- `GITHUB_TOKEN` (auto-provided)
 
-| Artifact | Description | Retention |
-|----------|-------------|-----------|
-| `audit-report` | npm audit results (JSON) | 30 days |
-| `license-report` | License scan results (JSON) | 30 days |
-| `secret-scan-report` | TruffleHog results (JSON) | 30 days |
-| `backend-coverage` | Backend test coverage | 30 days |
-| `frontend-coverage` | Frontend test coverage | 30 days |
+**Artifacts:**
+- SBOM (Software Bill of Materials)
+- Trivy scan results
 
-### Environment Variables
+---
+
+### 4. Manual Rollback (`rollback.yml`)
+
+**Purpose:** Rollback to a previous version in case of issues
+
+**Triggers:**
+- Manual workflow dispatch only
+
+**Inputs:**
+- `environment`: staging or production
+- `version`: Commit SHA or tag to rollback to
+- `reason`: Reason for rollback (required)
+
+**Jobs:**
+1. **validate-version** - Verify image exists in registry
+2. **rollback** - Execute rollback and verify health
+3. **notify-failure** - Create urgent issue if rollback fails
+
+**Duration:** ~3-5 minutes
+
+**Post-Rollback:**
+- Creates GitHub issue for tracking
+- Logs rollback details
+- Verifies application health
+
+---
+
+## Environment Variables
+
+### Global
 
 ```yaml
 NODE_VERSION: '20'
-PNPM_VERSION: '8'
+PNPM_VERSION: '10'
+REGISTRY: ghcr.io
+IMAGE_NAME: ${{ github.repository }}/backend
 ```
 
-### Trigger Conditions
+### Per-Job
 
-```yaml
-on:
-  push:
-    branches: [main, develop, feature/**, fix/**, refactor/**]
-  pull_request:
-    branches: [main, develop]
+Set in workflow files as needed.
+
+---
+
+## Secrets Management
+
+### Required Secrets
+
+None currently required. All workflows use `GITHUB_TOKEN` which is automatically provided.
+
+### Future Secrets (when deploying)
+
+- `DEPLOY_SSH_KEY` - SSH key for deployment server
+- `KUBECONFIG` - Kubernetes config (if using K8s)
+- `SLACK_WEBHOOK` - Slack notifications (optional)
+
+**How to add secrets:**
+1. Go to repository Settings
+2. Navigate to Secrets and variables > Actions
+3. Click "New repository secret"
+4. Add name and value
+5. Click "Add secret"
+
+---
+
+## Branch Protection Rules
+
+### Main Branch
+
+- ✅ Require pull request before merging
+- ✅ Require status checks to pass:
+  - `lint`
+  - `format`
+  - `typecheck`
+  - `audit`
+  - `license-check`
+  - `secret-scan`
+  - `test-backend`
+  - `test-frontend`
+  - `build-backend`
+  - `build-frontend`
+  - `CodeQL`
+- ✅ Require branches to be up to date
+- ✅ Require linear history
+- ❌ Allow force pushes (disabled)
+- ❌ Allow deletions (disabled)
+
+---
+
+## Workflow Dependencies
+
+```
+CI Pipeline (ci.yml)
+    ↓
+CodeQL (codeql.yml) - Runs in parallel
+    ↓
+CD Pipeline (cd.yml) - Only on main
+    ↓
+Manual Rollback (rollback.yml) - If needed
 ```
 
 ---
 
-## CodeQL Security Analysis
+## Local Testing
 
-**File:** `codeql.yml`
+### Test CI Workflow Locally
 
-### Purpose
-Static Application Security Testing (SAST) using GitHub's CodeQL engine.
-
-### Features
-- Analyzes JavaScript/TypeScript code for security vulnerabilities
-- Uses `security-extended` query suite for comprehensive analysis
-- Fails on critical or high severity issues
-- Uploads results to GitHub Security tab
-- Runs on schedule (weekly) for continuous monitoring
-
-### Query Suite
-- **security-extended**: Comprehensive security analysis including:
-  - SQL injection
-  - XSS vulnerabilities
-  - Command injection
-  - Path traversal
-  - Insecure cryptography
-  - Authentication issues
-  - Authorization bypasses
-
-### Trigger Conditions
-
-```yaml
-on:
-  push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main, develop]
-  schedule:
-    - cron: '0 0 * * 1'  # Every Monday at 00:00 UTC
-```
-
-### Permissions Required
-
-```yaml
-permissions:
-  actions: read
-  contents: read
-  security-events: write
-```
-
----
-
-## Required Secrets
-
-Currently, no secrets are required for CI workflows. All tools used are free and don't require authentication.
-
-**Future secrets (for CD pipeline):**
-- `DOCKER_USERNAME` - Docker Hub username
-- `DOCKER_PASSWORD` - Docker Hub password or token
-
-See [SECRETS.md](../SECRETS.md) for detailed documentation.
-
----
-
-## Status Checks
-
-The following status checks are required to pass before merging to `main`:
-
-### Required Checks
-- ✅ Lint Code
-- ✅ Check Code Formatting
-- ✅ TypeScript Type Check
-- ✅ Security Audit Dependencies
-- ✅ Check Dependency Licenses
-- ✅ Scan for Secrets
-- ✅ Test Backend
-- ✅ Test Frontend
-- ✅ Build Backend
-- ✅ Build Frontend
-- ✅ Validate Monorepo Structure
-- ✅ CodeQL Analysis
-
-### Optional Checks
-- ⚠️ Check Test Coverage (warns but doesn't fail)
-
----
-
-## Troubleshooting
-
-### Common Issues
-
-#### 1. "pnpm: command not found"
-**Cause:** pnpm not installed or not in PATH  
-**Solution:** The workflow installs pnpm automatically. If running locally, install with:
-```bash
-npm install -g pnpm@8
-```
-
-#### 2. "Frozen lockfile error"
-**Cause:** pnpm-lock.yaml is out of sync with package.json  
-**Solution:** Run locally:
-```bash
-pnpm install
-git add pnpm-lock.yaml
-git commit -m "chore: update lockfile"
-```
-
-#### 3. "Critical vulnerabilities found"
-**Cause:** Dependencies have known security issues  
-**Solution:** 
-```bash
-# Check vulnerabilities
-pnpm audit
-
-# Update vulnerable packages
-pnpm update
-
-# If no fix available, check Dependabot PRs
-```
-
-#### 4. "Secrets detected"
-**Cause:** TruffleHog found potential secrets in code  
-**Solution:**
-1. Review the secret scan report artifact
-2. Remove the secret from code
-3. Rotate the compromised secret
-4. Add to `.gitignore` if it's a local config file
-5. Use environment variables instead
-
-#### 5. "Type check failed"
-**Cause:** TypeScript compilation errors  
-**Solution:**
-```bash
-# Check types locally
-pnpm typecheck:backend
-pnpm typecheck:frontend
-
-# Fix errors and commit
-```
-
-#### 6. "Tests failed"
-**Cause:** Unit or integration tests failing  
-**Solution:**
-```bash
-# Run tests locally
-pnpm test:backend
-pnpm test:frontend
-
-# Fix failing tests and commit
-```
-
-#### 7. "Build failed"
-**Cause:** Build process errors  
-**Solution:**
-```bash
-# Build locally to see errors
-pnpm build:backend
-pnpm build:frontend
-
-# Fix build errors and commit
-```
-
-#### 8. "License check failed"
-**Cause:** Dependency with incompatible license (GPL/AGPL)  
-**Solution:**
-1. Review license-report artifact
-2. Find alternative package with compatible license
-3. Or get legal approval for the license
-
-#### 9. "CodeQL analysis failed"
-**Cause:** Critical or high severity security issues found  
-**Solution:**
-1. Go to Security tab → Code scanning alerts
-2. Review each alert
-3. Fix the vulnerability
-4. Re-run the workflow
-
-#### 10. "Coverage below threshold"
-**Cause:** Test coverage < 70%  
-**Solution:**
-```bash
-# Check coverage locally
-pnpm test:backend:coverage
-pnpm test:frontend:coverage
-
-# Add more tests to increase coverage
-```
-
-### Debugging Workflows Locally
-
-Use [act](https://github.com/nektos/act) to run workflows locally:
+Install `act` (GitHub Actions local runner):
 
 ```bash
-# Install act
-brew install act  # macOS
-# or
+# macOS
+brew install act
+
+# Linux
 curl https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash
+```
 
-# Run CI workflow
+Run workflows:
+
+```bash
+# Run entire CI pipeline
 act push
 
 # Run specific job
 act push -j lint
 
 # Run with secrets
-act push --secret-file .secrets
+act push -s GITHUB_TOKEN=your_token
 ```
 
-### Viewing Workflow Logs
+### Test Docker Build Locally
 
-1. Go to **Actions** tab in GitHub
-2. Click on the workflow run
-3. Click on the failed job
-4. Expand the failed step to see logs
+```bash
+# Build image
+docker build -f apps/backend/Dockerfile -t backend:test .
 
-### Re-running Failed Workflows
+# Run container
+docker run -p 3000:3000 backend:test
 
-1. Go to **Actions** tab
-2. Click on the failed workflow run
-3. Click **Re-run jobs** → **Re-run failed jobs**
+# Test health check
+curl http://localhost:3000/health
+```
 
 ---
 
-## Performance Optimization
+## Troubleshooting
+
+### CI Pipeline Fails
+
+1. **Check job logs** in GitHub Actions tab
+2. **Run locally** with `act` to reproduce
+3. **Verify dependencies** are up to date
+4. **Check for breaking changes** in dependencies
+
+### CodeQL Fails
+
+1. **Review security alerts** in Security tab
+2. **Check query results** in workflow logs
+3. **Fix vulnerabilities** or suppress false positives
+4. **Re-run workflow** after fixes
+
+### Docker Build Fails
+
+1. **Check Dockerfile syntax**
+2. **Verify base image** is available
+3. **Test build locally** with Docker
+4. **Check disk space** on runner
+
+### Deployment Fails
+
+1. **Check deployment logs**
+2. **Verify health check** endpoint
+3. **Check environment variables**
+4. **Rollback** if necessary
+
+### Rollback Fails
+
+1. **Verify image exists** in registry
+2. **Check deployment configuration**
+3. **Manual intervention** may be required
+4. **Contact on-call engineer**
+
+---
+
+## Monitoring & Alerts
+
+### GitHub Actions Insights
+
+View workflow metrics:
+1. Go to repository Actions tab
+2. Click on workflow name
+3. View run history and duration
+
+### Security Alerts
+
+View security findings:
+1. Go to repository Security tab
+2. Check Code scanning alerts
+3. Check Dependabot alerts
+4. Check Secret scanning alerts
+
+### Notifications
+
+Configure notifications:
+1. Go to repository Settings
+2. Navigate to Notifications
+3. Configure email/Slack webhooks
+
+---
+
+## Best Practices
+
+### For Developers
+
+1. ✅ Run `pnpm lint` before pushing
+2. ✅ Run `pnpm test` before pushing
+3. ✅ Keep PRs small and focused
+4. ✅ Write descriptive commit messages
+5. ✅ Update tests when changing code
+6. ✅ Review CI logs if pipeline fails
+
+### For Maintainers
+
+1. ✅ Review security alerts weekly
+2. ✅ Update dependencies regularly
+3. ✅ Monitor workflow duration
+4. ✅ Optimize slow jobs
+5. ✅ Keep workflows DRY (Don't Repeat Yourself)
+6. ✅ Document workflow changes
+
+---
+
+## Workflow Optimization
 
 ### Caching Strategy
 
-The workflows use aggressive caching to speed up execution:
-
-1. **pnpm cache**: Caches pnpm store
-2. **node_modules cache**: Caches installed dependencies
-3. **Build artifacts cache**: Caches compiled output
+- **pnpm cache**: Speeds up dependency installation
+- **node_modules cache**: Reused across jobs
+- **Docker layer cache**: Speeds up image builds
+- **Build artifacts cache**: Reused in deployment
 
 ### Parallelization
 
-Jobs run in parallel where possible:
-- Lint, format, typecheck run in parallel
-- Backend and frontend tests run in parallel
-- Backend and frontend builds run in parallel
+Jobs run in parallel when possible:
+- lint, format, typecheck run in parallel
+- test-backend and test-frontend run in parallel
+- build-backend and build-frontend run in parallel
 
 ### Conditional Execution
 
@@ -381,29 +352,42 @@ Future optimization: Skip jobs based on changed files
 
 ---
 
-## Metrics
+## Maintenance
 
-Track these metrics over time:
-- **Success Rate**: % of successful workflow runs
-- **Average Duration**: Time to complete full pipeline
-- **Failure Rate by Stage**: Which jobs fail most often
-- **Coverage Trend**: Test coverage over time
+### Weekly Tasks
+
+- [ ] Review security alerts
+- [ ] Check workflow duration trends
+- [ ] Update dependencies if needed
+
+### Monthly Tasks
+
+- [ ] Review and optimize workflows
+- [ ] Update documentation
+- [ ] Clean up old workflow runs
+
+### Quarterly Tasks
+
+- [ ] Review and update security policies
+- [ ] Audit secrets and permissions
+- [ ] Update base images and actions
 
 ---
 
-## References
+## Resources
 
 - [GitHub Actions Documentation](https://docs.github.com/en/actions)
+- [Docker Best Practices](https://docs.docker.com/develop/dev-best-practices/)
 - [CodeQL Documentation](https://codeql.github.com/docs/)
-- [pnpm Documentation](https://pnpm.io/)
-- [TruffleHog Documentation](https://github.com/trufflesecurity/trufflehog)
+- [Trivy Documentation](https://aquasecurity.github.io/trivy/)
+- [act - Local GitHub Actions](https://github.com/nektos/act)
 
 ---
 
 ## Support
 
-For issues with workflows:
-1. Check this troubleshooting guide
-2. Review workflow logs in GitHub Actions
-3. Check [SETUP_GUIDE.md](../SETUP_GUIDE.md) for configuration
-4. Open an issue in the repository
+For questions or issues with workflows:
+1. Check this documentation
+2. Review workflow logs
+3. Search GitHub Issues
+4. Create new issue with `ci/cd` label
