@@ -8,7 +8,7 @@ export async function seedAuth(
   console.log('👤 Seeding Auth BC...');
 
   const userId = uuidv4();
-  const businessId = uuidv4(); // Temporary: Will come from Business BC in the future
+  const businessId = uuidv4(); // TODO: Temporary: Will come from Business BC in the future
   const hashedPassword = await bcrypt.hash('Test123!', 10);
 
   // Create test user with BUSINESS_OWNER role

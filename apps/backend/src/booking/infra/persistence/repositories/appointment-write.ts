@@ -41,8 +41,8 @@ export class AppointmentWriteRepository implements IAppointmentWriteRepository {
         // Es un appointment existente, hacer UPDATE con optimistic locking
         // El aggregate ya incrementó la versión, así que:
         // - currentVersion es la NUEVA versión (después del incremento)
-        // - existing.version es la versión ANTERIOR (en la BD)
-        const previousVersion = existing.version;
+        // - loadedVersion es la versión que tenía cuando se cargó desde BD
+        const loadedVersion = appointment.getLoadedVersion().getValue();
 
         const result = await this.repository
           .createQueryBuilder()
@@ -54,14 +54,15 @@ export class AppointmentWriteRepository implements IAppointmentWriteRepository {
           })
           .where('id = :id', { id: appointmentId })
           .andWhere('version = :version', {
-            version: previousVersion, // Versión anterior (en la BD)
+            version: loadedVersion, // Versión cargada (NO re-leer desde BD)
           })
           .execute();
 
         // Si no se actualizó ninguna fila, significa que hubo concurrencia
         if (result.affected === 0) {
           throw new ConcurrencyException(
-            `Appointment ${appointmentId} was modified by another transaction`,
+            `Appointment ${appointmentId} was modified by another transaction. ` +
+            `Expected version ${loadedVersion}, but database has a different version.`,
           );
         }
       }

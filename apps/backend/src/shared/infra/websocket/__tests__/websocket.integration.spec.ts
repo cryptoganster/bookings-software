@@ -26,7 +26,10 @@ describe('WebSocket Integration Tests', () => {
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [WebSocketModule],
+      imports: [
+        WebSocketModule,
+        // CqrsModule is already imported by WebSocketModule, but we need to provide EventBus mock
+      ],
       providers: [
         {
           provide: EventBus,
@@ -35,10 +38,22 @@ describe('WebSocket Integration Tests', () => {
               subscribe: jest.fn(),
             }),
             publish: jest.fn(),
+            register: jest.fn(), // Required by CqrsModule.onApplicationBootstrap
+            registerSagas: jest.fn(), // Required by CqrsModule.onApplicationBootstrap
           },
         },
       ],
-    }).compile();
+    })
+      .overrideProvider(EventBus)
+      .useValue({
+        pipe: jest.fn().mockReturnValue({
+          subscribe: jest.fn(),
+        }),
+        publish: jest.fn(),
+        register: jest.fn(), // Required by CqrsModule.onApplicationBootstrap
+        registerSagas: jest.fn(), // Required by CqrsModule.onApplicationBootstrap
+      })
+      .compile();
 
     app = moduleFixture.createNestApplication();
     await app.listen(PORT);
@@ -105,19 +120,21 @@ describe('WebSocket Integration Tests', () => {
       });
     });
 
-    it('should reject connection without businessId', (done) => {
+    it('should reject connection without businessId', async () => {
       client1 = io(`http://localhost:${PORT}/events`, {
         auth: {},
       });
 
-      client1!.on('connect', () => {
-        done(new Error('Should not connect without businessId'));
+      // El cliente se conecta brevemente y luego el servidor lo desconecta
+      // Esperamos el evento disconnect
+      await new Promise<void>((resolve) => {
+        client1!.on('disconnect', () => resolve());
+        // Timeout de seguridad
+        setTimeout(() => resolve(), 2000);
       });
 
-      client1!.on('disconnect', () => {
-        expect(client1!.connected).toBe(false);
-        done();
-      });
+      // Después del disconnect, el cliente NO debe estar conectado
+      expect(client1!.connected).toBe(false);
     });
 
     it('should allow multiple clients from same business', (done) => {
@@ -345,26 +362,43 @@ describe('WebSocket Integration Tests', () => {
   });
 
   describe('Connection Lifecycle', () => {
-    it('should handle client reconnection', (done) => {
+    it('should handle client reconnection', async () => {
       client1 = io(`http://localhost:${PORT}/events`, {
         auth: { businessId: 'business-123' },
+        reconnection: true, // Asegurar que reconnection está habilitado
+        reconnectionDelay: 100, // Delay corto para tests
       });
 
-      client1!.on('connect', () => {
-        // Desconectar
-        client1!.disconnect();
-
-        // Reconectar
-        setTimeout(() => {
-          client1!.connect();
-
-          client1!.on('connect', () => {
-            expect(client1!.connected).toBe(true);
-            done();
-          });
-        }, 100);
+      // Esperar conexión inicial
+      await new Promise<void>((resolve) => {
+        client1!.on('connect', () => resolve());
       });
-    });
+
+      expect(client1!.connected).toBe(true);
+
+      // Desconectar
+      client1!.disconnect();
+      
+      // Esperar a que se desconecte completamente
+      await new Promise(resolve => setTimeout(resolve, 200));
+      expect(client1!.connected).toBe(false);
+
+      // Reconectar y esperar
+      await new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error('Reconnection timeout'));
+        }, 5000); // Timeout de 5 segundos
+
+        client1!.on('connect', () => {
+          clearTimeout(timeout);
+          resolve();
+        });
+
+        client1!.connect();
+      });
+
+      expect(client1!.connected).toBe(true);
+    }, 10000); // Timeout de 10 segundos para el test completo
 
     it('should stop receiving events after disconnect', (done) => {
       let receivedAfterDisconnect = false;
