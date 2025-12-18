@@ -1,5 +1,9 @@
 # Sistema de Reservas Multi-Tenant vía WhatsApp
 
+[![CI Pipeline](https://github.com/cryptoganster/bookings-software/actions/workflows/ci.yml/badge.svg)](https://github.com/cryptoganster/bookings-software/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/cryptoganster/bookings-software/actions/workflows/codeql.yml/badge.svg)](https://github.com/cryptoganster/bookings-software/actions/workflows/codeql.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 Sistema de gestión de citas automatizado a través de WhatsApp Business API, construido con NestJS, TypeScript, PostgreSQL y siguiendo principios de Clean Architecture, DDD y CQRS.
 
 ## 🚀 Características Principales
@@ -386,6 +390,54 @@ Limpiar base de datos de test y volver a ejecutar:
 ```bash
 npm run test:e2e
 ```
+
+## 🔄 CI/CD & DevSecOps
+
+El proyecto implementa un pipeline completo de CI/CD con seguridad integrada:
+
+### Pipeline de CI
+
+El pipeline de CI se ejecuta automáticamente en cada push y pull request:
+
+- ✅ **Linting**: ESLint en backend y frontend
+- ✅ **Formatting**: Prettier check
+- ✅ **Type Checking**: TypeScript compilation
+- ✅ **Security Audit**: npm audit para vulnerabilidades
+- ✅ **License Check**: Verificación de licencias compatibles
+- ✅ **Secret Scanning**: TruffleHog para detectar secretos expuestos
+- ✅ **Tests**: Jest (backend) y Vitest (frontend) con cobertura
+- ✅ **Build**: Compilación de backend y frontend
+- ✅ **CodeQL**: Análisis estático de seguridad (SAST)
+
+### Herramientas de Seguridad
+
+- **CodeQL**: Análisis estático de código (SAST)
+- **Dependabot**: Actualizaciones automáticas de dependencias
+- **Secret Scanning**: Detección de secretos en código
+- **npm audit**: Escaneo de vulnerabilidades en dependencias
+- **TruffleHog**: Escaneo de secretos en historial de git
+
+### Ejecutar CI Localmente
+
+```bash
+# Instalar act (GitHub Actions local runner)
+brew install act  # macOS
+# o
+curl https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash
+
+# Ejecutar pipeline de CI
+act push
+
+# Ejecutar job específico
+act push -j lint
+```
+
+### Documentación CI/CD
+
+- [Setup Guide](.github/SETUP_GUIDE.md) - Configuración de GitHub
+- [Workflows README](.github/workflows/README.md) - Documentación de workflows
+- [Secrets Management](.github/SECRETS.md) - Gestión de secretos
+- [Verification Checklist](.github/VERIFICATION_CHECKLIST.md) - Checklist de validación
 
 ## 📖 Documentación Adicional
 

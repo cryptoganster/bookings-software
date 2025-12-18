@@ -1,0 +1,91 @@
+name: CodeQL Security Analysis
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  schedule:
+    # Run CodeQL analysis every Monday at 00:00 UTC
+    - cron: '0 0 * * 1'
+
+jobs:
+  analyze:
+    name: Analyze Code with CodeQL
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ['javascript']
+        # CodeQL supports: 'cpp', 'csharp', 'go', 'java', 'javascript', 'python', 'ruby'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: ${{ matrix.language }}
+          # Use security-extended query suite for comprehensive security analysis
+          queries: security-extended
+          # Additional queries can be added here
+          # queries: +security-and-quality
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: '8'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build project
+        run: |
+          pnpm --filter backend build
+          pnpm --filter frontend build
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+        with:
+          category: "/language:${{ matrix.language }}"
+          # Fail on critical and high severity issues
+          fail-on: critical,high
+
+      - name: Upload CodeQL Results
+        if: always()
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: ../results
+          category: "/language:${{ matrix.language }}"
+
+  # Job to check CodeQL results and fail if critical/high vulnerabilities found
+  check-results:
+    name: Check CodeQL Results
+    runs-on: ubuntu-latest
+    needs: analyze
+    if: always()
+    steps:
+      - name: Check Analysis Status
+        run: |
+          if [ "${{ needs.analyze.result }}" != "success" ]; then
+            echo "❌ CodeQL analysis found critical or high severity issues"
+            echo "Please review the Security tab for details"
+            exit 1
+          else
+            echo "✅ CodeQL analysis passed - no critical/high issues found"
+          fi

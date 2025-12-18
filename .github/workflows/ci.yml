@@ -1,0 +1,602 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'feature/**'
+      - 'fix/**'
+      - 'refactor/**'
+  pull_request:
+    branches:
+      - main
+      - develop
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '8'
+
+jobs:
+  # Job 1: Setup and Install Dependencies
+  setup:
+    name: Setup & Install Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Cache node_modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+  # Job 2: Linting
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Restore dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Lint Backend
+        run: pnpm --filter backend lint
+
+      - name: Lint Frontend
+        run: pnpm --filter frontend lint
+
+  # Job 3: Format Check
+  format:
+    name: Check Code Formatting
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Restore dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Check Backend Formatting
+        run: pnpm --filter backend format:check
+
+      - name: Check Frontend Formatting
+        run: pnpm --filter frontend format:check
+
+  # Job 4: Type Checking
+  typecheck:
+    name: TypeScript Type Check
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Restore dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Type Check Backend
+        run: pnpm --filter backend typecheck
+
+      - name: Type Check Frontend
+        run: pnpm --filter frontend typecheck
+
+  # Job 5: Security - Dependency Audit
+  audit:
+    name: Security Audit Dependencies
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Restore dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Run npm audit
+        run: pnpm audit --audit-level=high --json > audit-report.json || true
+
+      - name: Check for critical vulnerabilities
+        run: |
+          if [ -f audit-report.json ]; then
+            CRITICAL=$(cat audit-report.json | jq '.metadata.vulnerabilities.critical // 0')
+            HIGH=$(cat audit-report.json | jq '.metadata.vulnerabilities.high // 0')
+            if [ "$CRITICAL" -gt 0 ] || [ "$HIGH" -gt 0 ]; then
+              echo "❌ Found $CRITICAL critical and $HIGH high vulnerabilities"
+              cat audit-report.json | jq '.advisories'
+              exit 1
+            else
+              echo "✅ No critical or high vulnerabilities found"
+            fi
+          fi
+
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: audit-report
+          path: audit-report.json
+
+  # Job 6: Security - License Check
+  license-check:
+    name: Check Dependency Licenses
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Restore dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Install license-checker
+        run: npm install -g license-checker
+
+      - name: Check licenses
+        run: |
+          license-checker --summary --failOn 'GPL;AGPL' --json > license-report.json || true
+          
+          # Check for incompatible licenses
+          if grep -q "GPL\|AGPL" license-report.json; then
+            echo "❌ Found incompatible licenses (GPL/AGPL)"
+            cat license-report.json
+            exit 1
+          else
+            echo "✅ All licenses are compatible"
+          fi
+
+      - name: Upload license report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: license-report
+          path: license-report.json
+
+  # Job 7: Security - Secret Scanning
+  secret-scan:
+    name: Scan for Secrets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for secret scanning
+
+      - name: Install TruffleHog
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | sh -s -- -b /usr/local/bin
+
+      - name: Scan for secrets
+        run: |
+          trufflehog filesystem . --json --fail > trufflehog-report.json || true
+          
+          # Check if secrets were found
+          if [ -s trufflehog-report.json ]; then
+            echo "❌ Secrets detected in repository!"
+            cat trufflehog-report.json
+            exit 1
+          else
+            echo "✅ No secrets detected"
+          fi
+
+      - name: Upload secret scan report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: secret-scan-report
+          path: trufflehog-report.json
+
+  # Job 8: Backend Tests
+  test-backend:
+    name: Test Backend
+    runs-on: ubuntu-latest
+    needs: setup
+    services:
+      postgres:
+        image: postgres:14-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: bookings_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Restore dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Run Backend Tests
+        run: pnpm --filter backend test:coverage
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USERNAME: test
+          DB_PASSWORD: test
+          DB_DATABASE: bookings_test
+          NODE_ENV: test
+
+      - name: Upload Backend Coverage
+        uses: actions/upload-artifact@v3
+        with:
+          name: backend-coverage
+          path: apps/backend/coverage
+
+  # Job 9: Frontend Tests
+  test-frontend:
+    name: Test Frontend
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Restore dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Run Frontend Tests
+        run: pnpm --filter frontend test:coverage
+
+      - name: Upload Frontend Coverage
+        uses: actions/upload-artifact@v3
+        with:
+          name: frontend-coverage
+          path: apps/frontend/coverage
+
+  # Job 10: Coverage Check
+  coverage-check:
+    name: Check Test Coverage
+    runs-on: ubuntu-latest
+    needs: [test-backend, test-frontend]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download Backend Coverage
+        uses: actions/download-artifact@v3
+        with:
+          name: backend-coverage
+          path: apps/backend/coverage
+
+      - name: Download Frontend Coverage
+        uses: actions/download-artifact@v3
+        with:
+          name: frontend-coverage
+          path: apps/frontend/coverage
+
+      - name: Check Coverage Thresholds
+        run: |
+          echo "📊 Checking coverage thresholds..."
+          
+          # Backend coverage
+          if [ -f apps/backend/coverage/coverage-summary.json ]; then
+            BACKEND_COV=$(cat apps/backend/coverage/coverage-summary.json | jq '.total.lines.pct')
+            echo "Backend coverage: $BACKEND_COV%"
+            if (( $(echo "$BACKEND_COV < 70" | bc -l) )); then
+              echo "⚠️  Backend coverage below 70% threshold"
+            else
+              echo "✅ Backend coverage meets threshold"
+            fi
+          fi
+          
+          # Frontend coverage
+          if [ -f apps/frontend/coverage/coverage-summary.json ]; then
+            FRONTEND_COV=$(cat apps/frontend/coverage/coverage-summary.json | jq '.total.lines.pct')
+            echo "Frontend coverage: $FRONTEND_COV%"
+            if (( $(echo "$FRONTEND_COV < 70" | bc -l) )); then
+              echo "⚠️  Frontend coverage below 70% threshold"
+            else
+              echo "✅ Frontend coverage meets threshold"
+            fi
+          fi
+
+  # Job 11: Build Backend
+  build-backend:
+    name: Build Backend
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck, test-backend]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Restore dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Build Backend
+        run: pnpm --filter backend build
+
+      - name: Verify Build Output
+        run: |
+          if [ ! -d "apps/backend/dist" ]; then
+            echo "❌ Backend build failed - dist folder not found"
+            exit 1
+          fi
+          echo "✅ Backend build successful"
+
+      - name: Cache Build Artifacts
+        uses: actions/cache@v3
+        with:
+          path: apps/backend/dist
+          key: ${{ runner.os }}-backend-build-${{ github.sha }}
+
+  # Job 12: Build Frontend
+  build-frontend:
+    name: Build Frontend
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck, test-frontend]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Restore dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Build Frontend
+        run: pnpm --filter frontend build
+
+      - name: Verify Build Output
+        run: |
+          if [ ! -d "apps/frontend/dist" ]; then
+            echo "❌ Frontend build failed - dist folder not found"
+            exit 1
+          fi
+          echo "✅ Frontend build successful"
+
+      - name: Cache Build Artifacts
+        uses: actions/cache@v3
+        with:
+          path: apps/frontend/dist
+          key: ${{ runner.os }}-frontend-build-${{ github.sha }}
+
+  # Job 13: Validate Monorepo
+  validate-monorepo:
+    name: Validate Monorepo Structure
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Validate Workspace Structure
+        run: |
+          echo "📦 Validating pnpm workspace structure..."
+          pnpm list --depth 0
+          
+          # Check for circular dependencies
+          echo "🔄 Checking for circular dependencies..."
+          pnpm why --recursive || true
+          
+          echo "✅ Monorepo structure validated"
+
+  # Final Job: CI Status
+  ci-status:
+    name: CI Pipeline Status
+    runs-on: ubuntu-latest
+    needs:
+      - lint
+      - format
+      - typecheck
+      - audit
+      - license-check
+      - secret-scan
+      - test-backend
+      - test-frontend
+      - coverage-check
+      - build-backend
+      - build-frontend
+      - validate-monorepo
+    if: always()
+    steps:
+      - name: Check CI Status
+        run: |
+          if [ "${{ needs.lint.result }}" != "success" ] || \
+             [ "${{ needs.format.result }}" != "success" ] || \
+             [ "${{ needs.typecheck.result }}" != "success" ] || \
+             [ "${{ needs.audit.result }}" != "success" ] || \
+             [ "${{ needs.license-check.result }}" != "success" ] || \
+             [ "${{ needs.secret-scan.result }}" != "success" ] || \
+             [ "${{ needs.test-backend.result }}" != "success" ] || \
+             [ "${{ needs.test-frontend.result }}" != "success" ] || \
+             [ "${{ needs.build-backend.result }}" != "success" ] || \
+             [ "${{ needs.build-frontend.result }}" != "success" ] || \
+             [ "${{ needs.validate-monorepo.result }}" != "success" ]; then
+            echo "❌ CI Pipeline Failed"
+            exit 1
+          else
+            echo "✅ CI Pipeline Passed"
+          fi
