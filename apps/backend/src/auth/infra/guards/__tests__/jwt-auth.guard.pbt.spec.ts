@@ -247,7 +247,10 @@ describe('Property 14: Protected endpoints reject invalid tokens', () => {
         fc.record({
           sub: fc.uuid(),
           email: fc.emailAddress(),
-          businessId: fc.option(fc.uuid(), { nil: undefined }),
+          roles: fc.array(fc.constantFrom('BUSINESS_OWNER', 'CUSTOMER', 'ADMIN'), {
+            minLength: 1,
+            maxLength: 3,
+          }),
         }),
         async (payload) => {
           const validToken = jwtService.sign(payload);
