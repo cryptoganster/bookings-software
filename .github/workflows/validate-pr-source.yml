@@ -1,0 +1,47 @@
+name: Validate PR Source Branch
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate-source-branch:
+    name: Validate Source Branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check source branch
+        run: |
+          SOURCE_BRANCH="${{ github.head_ref }}"
+          echo "PR source branch: $SOURCE_BRANCH"
+          
+          # Allowed branch patterns
+          ALLOWED_PATTERNS=(
+            "^develop$"
+            "^hotfix/.*"
+            "^release/.*"
+          )
+          
+          # Check if source branch matches any allowed pattern
+          MATCH_FOUND=false
+          for pattern in "${ALLOWED_PATTERNS[@]}"; do
+            if [[ "$SOURCE_BRANCH" =~ $pattern ]]; then
+              MATCH_FOUND=true
+              echo "✅ Branch '$SOURCE_BRANCH' matches allowed pattern: $pattern"
+              break
+            fi
+          done
+          
+          if [ "$MATCH_FOUND" = false ]; then
+            echo "❌ ERROR: Branch '$SOURCE_BRANCH' is not allowed to merge to main"
+            echo ""
+            echo "Allowed branch patterns:"
+            echo "  - develop"
+            echo "  - hotfix/*"
+            echo "  - release/*"
+            echo ""
+            echo "Please merge your changes to 'develop' first, then create a PR from 'develop' to 'main'"
+            exit 1
+          fi
+          
+          echo "✅ Source branch validation passed"
