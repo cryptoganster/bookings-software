@@ -26,9 +26,9 @@ export function AppointmentsPage() {
       <Stack gap="lg">
         <PageHeader title="Gestión de Citas" />
 
-      <AppointmentFilters />
+        <AppointmentFilters />
 
-      <AppointmentsList />
+        <AppointmentsList />
       </Stack>
     </Container>
   );

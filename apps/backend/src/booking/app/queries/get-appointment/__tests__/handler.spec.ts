@@ -14,6 +14,7 @@ describe('GetAppointmentHandler', () => {
       findByCustomerId: jest.fn(),
       findByBusinessId: jest.fn(),
       findUpcoming: jest.fn(),
+      findByBusinessAndDateRange: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({

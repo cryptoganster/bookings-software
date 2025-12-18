@@ -44,7 +44,7 @@ export function StatsCards() {
         title="Citas Esta Semana"
         value={stats.appointmentsThisWeek}
         icon={IconCalendarWeek}
-        color="blue"
+        color="brandGreen"
       />
     </SimpleGrid>
   );

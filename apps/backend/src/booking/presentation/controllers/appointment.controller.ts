@@ -9,6 +9,7 @@ import { CancelAppointmentCommand } from '@booking/app/commands/cancel-appointme
 import { GetBusinessAppointmentsQuery } from '@booking/app/queries/get-business-appointments';
 import { GetAppointmentQuery } from '@booking/app/queries/get-appointment';
 import { GetUpcomingAppointmentsQuery } from '@booking/app/queries/get-upcoming-appointments';
+import { GetAppointmentStatsQuery } from '@booking/app/queries/get-appointment-stats';
 
 @Controller('appointments')
 @UseGuards(JwtAuthGuard)
@@ -21,7 +22,8 @@ export class AppointmentController {
   @Get()
   async findAll(@CurrentUser() user: UserPayload, @Query() filtersDto: AppointmentFiltersDto) {
     // Obtener todas las citas del negocio con filtros opcionales
-    const businessId = user.businessId || user.userId;
+    // TODO: Obtener businessId real del Business BC cuando esté implementado
+    const businessId = user.businessId || '489b4d38-5146-4760-ae5f-d1910c3308bb'; // Hardcoded para MVP
 
     // Convertir DTO a filtros del dominio
     const filters = {
@@ -38,9 +40,18 @@ export class AppointmentController {
     return appointments;
   }
 
+  @Get('stats')
+  async getStats(@CurrentUser() user: UserPayload) {
+    // TODO: Obtener businessId real del Business BC cuando esté implementado
+    const businessId = user.businessId || '489b4d38-5146-4760-ae5f-d1910c3308bb'; // Hardcoded para MVP
+    const stats = await this.queryBus.execute(new GetAppointmentStatsQuery(businessId));
+    return stats;
+  }
+
   @Get('upcoming')
   async findUpcoming(@CurrentUser() user: UserPayload) {
-    const businessId = user.businessId || user.userId;
+    // TODO: Obtener businessId real del Business BC cuando esté implementado
+    const businessId = user.businessId || '489b4d38-5146-4760-ae5f-d1910c3308bb'; // Hardcoded para MVP
     const appointments = await this.queryBus.execute(new GetUpcomingAppointmentsQuery(businessId));
     return appointments;
   }

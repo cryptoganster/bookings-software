@@ -20,7 +20,11 @@ describe("getStatusColor", () => {
     });
 
     it("should handle all valid appointment statuses", () => {
-      const statuses: AppointmentStatus[] = ["CONFIRMED", "CANCELLED", "COMPLETED"];
+      const statuses: AppointmentStatus[] = [
+        "CONFIRMED",
+        "CANCELLED",
+        "COMPLETED",
+      ];
 
       statuses.forEach((status) => {
         const result = getStatusColor(status);
@@ -47,7 +51,11 @@ describe("getStatusColor", () => {
     });
 
     it("should return Spanish labels for all statuses", () => {
-      const statuses: AppointmentStatus[] = ["CONFIRMED", "CANCELLED", "COMPLETED"];
+      const statuses: AppointmentStatus[] = [
+        "CONFIRMED",
+        "CANCELLED",
+        "COMPLETED",
+      ];
 
       statuses.forEach((status) => {
         const result = getStatusLabel(status);
