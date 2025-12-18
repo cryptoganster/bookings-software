@@ -15,7 +15,7 @@ on:
 
 env:
   NODE_VERSION: '20'
-  PNPM_VERSION: '8'
+  PNPM_VERSION: '10'
 
 jobs:
   # Job 1: Setup and Install Dependencies
