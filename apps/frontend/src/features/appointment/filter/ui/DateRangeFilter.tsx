@@ -39,7 +39,7 @@ export function DateRangeFilter() {
   };
 
   return (
-    <Stack gap="md" role="group" aria-label="Filtro de rango de fechas">
+    <Stack gap="xs" role="group" aria-label="Filtro de rango de fechas">
       <SegmentedControl
         value={preset}
         onChange={(value) => setPreset(value as typeof preset)}
@@ -56,6 +56,7 @@ export function DateRangeFilter() {
           value={mantineDateRange}
           onChange={handleDateRangeChange}
           clearable
+          radius="xl"
           style={{ minWidth: "min(300px, 100%)" }}
           aria-label="Rango de fechas personalizado"
         />

@@ -17,7 +17,7 @@ export function AppointmentFilters() {
   ];
 
   return (
-    <Group gap="md">
+    <Group gap="md" align="end">
       <Select
         label="Estado"
         placeholder="Todos los estados"
@@ -25,12 +25,13 @@ export function AppointmentFilters() {
         value={status}
         onChange={(value) => setStatus(value as AppointmentStatus | null)}
         clearable
+        radius="xl"
         style={{ minWidth: "min(200px, 100%)" }}
       />
 
       <DateRangeFilter />
 
-      <Button variant="subtle" onClick={reset} style={{ marginTop: 24 }}>
+      <Button variant="subtle" onClick={reset} radius="xl">
         Limpiar filtros
       </Button>
     </Group>
