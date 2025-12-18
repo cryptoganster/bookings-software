@@ -62,7 +62,7 @@ export class AppointmentWriteRepository implements IAppointmentWriteRepository {
         if (result.affected === 0) {
           throw new ConcurrencyException(
             `Appointment ${appointmentId} was modified by another transaction. ` +
-            `Expected version ${loadedVersion}, but database has a different version.`,
+              `Expected version ${loadedVersion}, but database has a different version.`,
           );
         }
       }

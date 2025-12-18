@@ -43,8 +43,11 @@ export class UserWriteRepository implements IUserWriteRepository {
         });
 
         if (!exists) {
-          // User doesn't exist, insert it
-          await this.repository.save(model);
+          // User doesn't exist, insert it with correct version
+          await this.repository.save({
+            ...model,
+            version: newVersion,
+          });
         } else {
           // Version mismatch - concurrency conflict
           throw new ConcurrencyException(

@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Delete, Param, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Delete, Param, UseGuards, Patch } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { RegisterDto } from '../dtos/register';
 import { LoginDto } from '../dtos/login';
@@ -7,6 +7,9 @@ import { RegisterCommand } from '@auth/app/commands/register';
 import { LoginCommand } from '@auth/app/commands/login';
 import { AddUserRoleCommand } from '@auth/app/commands/add-user-role';
 import { RemoveUserRoleCommand } from '@auth/app/commands/remove-user-role';
+import { VerifyEmailCommand } from '@auth/app/commands/verify-email';
+import { ActivateUserCommand } from '@auth/app/commands/activate-user';
+import { DeactivateUserCommand } from '@auth/app/commands/deactivate-user';
 import { UserRole } from '@auth/domain/vo/user-role';
 import { JwtAuthGuard } from '@auth/infra/guards/jwt-auth';
 
@@ -55,5 +58,40 @@ export class AuthController {
   async removeRole(@Param('id') userId: string, @Param('role') role: UserRole) {
     await this.commandBus.execute(new RemoveUserRoleCommand(userId, role));
     return { message: 'Role removed successfully' };
+  }
+
+  /**
+   * Verify user email
+   * Requires authentication (JWT)
+   */
+  @Patch('users/:id/verify-email')
+  @UseGuards(JwtAuthGuard)
+  async verifyEmail(@Param('id') userId: string) {
+    await this.commandBus.execute(new VerifyEmailCommand(userId));
+    return { message: 'Email verified successfully' };
+  }
+
+  /**
+   * Activate user account
+   * Requires authentication (JWT)
+   * TODO: Add RolesGuard to restrict to ADMIN only (Phase 14)
+   */
+  @Patch('users/:id/activate')
+  @UseGuards(JwtAuthGuard)
+  async activateUser(@Param('id') userId: string) {
+    await this.commandBus.execute(new ActivateUserCommand(userId));
+    return { message: 'User activated successfully' };
+  }
+
+  /**
+   * Deactivate user account
+   * Requires authentication (JWT)
+   * TODO: Add RolesGuard to restrict to ADMIN only (Phase 14)
+   */
+  @Patch('users/:id/deactivate')
+  @UseGuards(JwtAuthGuard)
+  async deactivateUser(@Param('id') userId: string) {
+    await this.commandBus.execute(new DeactivateUserCommand(userId));
+    return { message: 'User deactivated successfully' };
   }
 }
