@@ -378,9 +378,9 @@ describe('WebSocket Integration Tests', () => {
 
       // Desconectar
       client1!.disconnect();
-      
+
       // Esperar a que se desconecte completamente
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise((resolve) => setTimeout(resolve, 200));
       expect(client1!.connected).toBe(false);
 
       // Reconectar y esperar

@@ -14,18 +14,18 @@ export class UserModel {
   @Column('varchar')
   name!: string;
 
-  @Column('simple-array')
+  @Column('text', { array: true })
   roles!: string[];
 
-  @Column('boolean', { default: true })
+  @Column('boolean', { name: 'is_active', default: true })
   isActive!: boolean;
 
-  @Column('boolean', { default: false })
+  @Column('boolean', { name: 'email_verified', default: false })
   emailVerified!: boolean;
 
   @Column('int', { default: 0 })
   version!: number;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 }

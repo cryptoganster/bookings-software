@@ -13,7 +13,7 @@ export async function seedAuth(
 
   // Create test user with BUSINESS_OWNER role
   await dataSource.query(
-    `INSERT INTO users (id, email, password, name, roles, "isActive", "emailVerified", version, "createdAt")
+    `INSERT INTO users (id, email, password, name, roles, is_active, email_verified, version, "createdAt")
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())`,
     [
       userId,
