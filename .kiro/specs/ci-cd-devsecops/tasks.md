@@ -10,7 +10,7 @@ Plan de implementación incremental para CI/CD y DevSecOps, dividido en 4 fases.
 
 ### 1. Setup GitHub Repository Configuration
 
-- [ ] 1.1 Configure branch protection rules for `main`
+- [x] 1.1 Configure branch protection rules for `main`
   - Enable "Require pull request before merging"
   - Enable "Require status checks to pass before merging"
   - Enable "Require branches to be up to date before merging"
@@ -18,14 +18,14 @@ Plan de implementación incremental para CI/CD y DevSecOps, dividido en 4 fases.
   - Disable "Allow force pushes"
   - _Requirements: 9.1, 9.2, 9.4, 9.5_
 
-- [ ] 1.2 Enable GitHub Security Features
+- [x] 1.2 Enable GitHub Security Features
   - Enable Dependabot alerts
   - Enable Dependabot security updates
   - Enable Secret scanning
   - Enable Code scanning (CodeQL)
   - _Requirements: 3.3, 4.4, 4.5_
 
-- [ ] 1.3 Create GitHub Secrets
+- [x] 1.3 Create GitHub Secrets
   - Document required secrets in `.github/SECRETS.md`
   - Add placeholder for `DOCKER_USERNAME` (if needed)
   - Add placeholder for `DOCKER_PASSWORD` (if needed)
