@@ -172,10 +172,10 @@ src/
 │   └── infra/                # Implementaciones compartidas (UnitOfWork)
 │
 ├── auth/                     # Bounded Context: Autenticación
-│   ├── domain/              # Aggregates, Events, Value Objects
-│   ├── app/                 # Commands, Queries, Event Handlers
-│   ├── infra/               # Repositories, Mappers, Guards
-│   └── presentation/        # Controllers, DTOs
+│   ├── domain/              # User aggregate, Events, Value Objects (UserRole enum)
+│   ├── app/                 # Commands (Register, Login, AddRole, RemoveRole), Queries, Event Handlers
+│   ├── infra/               # Repositories, Mappers, Guards (JwtAuthGuard, RolesGuard), JWT Strategy
+│   └── presentation/        # Controllers, DTOs (RegisterDto, AddUserRoleDto)
 │
 ├── availability/            # Bounded Context: Disponibilidad
 │   ├── domain/             # Capacity aggregate, Events
@@ -208,7 +208,11 @@ src/
 
 ### Bounded Contexts
 
-1. **Auth**: Gestión de autenticación y autorización (JWT)
+1. **Auth**: Gestión de autenticación y autorización con roles múltiples (JWT)
+   - Soporte para roles: `BUSINESS_OWNER`, `CUSTOMER`, `ADMIN`
+   - Un usuario puede tener múltiples roles simultáneamente
+   - Gestión de roles: agregar/remover roles dinámicamente
+   - Verificación de email y activación/desactivación de cuentas
 2. **Availability**: Gestión de capacidad y horarios disponibles
 3. **Booking**: Gestión de citas y reservaciones (BC principal)
 4. **Conversation**: Integración con WhatsApp y flujo conversacional
@@ -408,6 +412,245 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para
 ## 👥 Autores
 
 - **Bryan Stevens** - _Desarrollo Inicial_ - [cryptoganster](https://github.com/cryptoganster)
+
+## 🔐 Autenticación y Autorización
+
+### Sistema de Roles
+
+El sistema implementa un modelo de autenticación basado en roles múltiples, donde un usuario puede tener varios roles simultáneamente:
+
+#### Roles Disponibles
+
+- **`BUSINESS_OWNER`**: Dueño de negocio, puede administrar servicios, horarios y ver citas
+- **`CUSTOMER`**: Cliente que agenda citas (futuro: panel web para clientes)
+- **`ADMIN`**: Administrador del sistema con permisos completos
+
+#### Registro de Usuario
+
+```bash
+POST /api/auth/register
+Content-Type: application/json
+
+{
+  "email": "usuario@example.com",
+  "password": "password123",
+  "name": "Juan Pérez",
+  "initialRole": "BUSINESS_OWNER"  // Opcional, default: BUSINESS_OWNER
+}
+```
+
+**Respuesta:**
+```json
+{
+  "user": {
+    "id": "uuid",
+    "email": "usuario@example.com",
+    "name": "Juan Pérez",
+    "roles": ["BUSINESS_OWNER"],
+    "isActive": true,
+    "emailVerified": false
+  },
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+#### Login
+
+```bash
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "email": "usuario@example.com",
+  "password": "password123"
+}
+```
+
+**Respuesta:**
+```json
+{
+  "user": {
+    "id": "uuid",
+    "email": "usuario@example.com",
+    "name": "Juan Pérez",
+    "roles": ["BUSINESS_OWNER", "CUSTOMER"],
+    "isActive": true,
+    "emailVerified": true
+  },
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+#### JWT Payload
+
+El token JWT contiene:
+
+```json
+{
+  "userId": "uuid",
+  "email": "usuario@example.com",
+  "roles": ["BUSINESS_OWNER", "CUSTOMER"],
+  "iat": 1734480000,
+  "exp": 1734566400
+}
+```
+
+**Nota:** El JWT **NO** contiene `businessId`. Para obtener el negocio de un usuario, usar el endpoint correspondiente del Business BC.
+
+### Gestión de Roles
+
+#### Agregar Rol a Usuario
+
+```bash
+POST /api/auth/users/:userId/roles
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "role": "CUSTOMER"
+}
+```
+
+**Reglas:**
+- No se puede agregar un rol que el usuario ya tiene
+- El usuario debe existir y estar activo
+
+#### Remover Rol de Usuario
+
+```bash
+DELETE /api/auth/users/:userId/roles/:role
+Authorization: Bearer {token}
+```
+
+**Reglas:**
+- No se puede remover el último rol de un usuario
+- El usuario siempre debe tener al menos un rol
+
+### Autorización Basada en Roles
+
+#### Proteger Endpoints con Guards
+
+```typescript
+import { Controller, Get, UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '@auth/infra/guards/jwt-auth.guard';
+import { RolesGuard } from '@auth/infra/guards/roles.guard';
+import { Roles } from '@auth/presentation/decorators/roles.decorator';
+import { UserRole } from '@auth/domain/vo/user-role';
+
+@Controller('admin')
+@UseGuards(JwtAuthGuard, RolesGuard)
+export class AdminController {
+  
+  @Get('dashboard')
+  @Roles(UserRole.ADMIN)
+  getDashboard() {
+    // Solo accesible para usuarios con rol ADMIN
+    return { message: 'Admin dashboard' };
+  }
+  
+  @Get('business-stats')
+  @Roles(UserRole.BUSINESS_OWNER, UserRole.ADMIN)
+  getBusinessStats() {
+    // Accesible para BUSINESS_OWNER o ADMIN
+    return { message: 'Business statistics' };
+  }
+}
+```
+
+#### Obtener Usuario Actual
+
+```typescript
+import { Controller, Get, UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '@auth/infra/guards/jwt-auth.guard';
+import { CurrentUser } from '@auth/presentation/decorators/current-user.decorator';
+import { UserPayload } from '@auth/presentation/decorators/current-user.decorator';
+
+@Controller('profile')
+@UseGuards(JwtAuthGuard)
+export class ProfileController {
+  
+  @Get()
+  getProfile(@CurrentUser() user: UserPayload) {
+    // user contiene: { userId, email, roles }
+    return {
+      id: user.userId,
+      email: user.email,
+      roles: user.roles,
+    };
+  }
+}
+```
+
+### Verificación de Email
+
+```bash
+POST /api/auth/verify-email
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "userId": "uuid"
+}
+```
+
+**Reglas:**
+- Solo se puede verificar una vez
+- Intentar verificar un email ya verificado lanza `EmailAlreadyVerifiedException`
+
+### Activación/Desactivación de Cuenta
+
+#### Desactivar Usuario
+
+```bash
+POST /api/auth/users/:userId/deactivate
+Authorization: Bearer {token}
+```
+
+#### Activar Usuario
+
+```bash
+POST /api/auth/users/:userId/activate
+Authorization: Bearer {token}
+```
+
+**Reglas:**
+- Usuarios desactivados no pueden hacer login
+- Las operaciones son idempotentes (no fallan si ya están en ese estado)
+
+### Integración con Otros BCs
+
+#### Account BC
+
+Cuando un usuario se registra con rol `BUSINESS_OWNER`, el Account BC automáticamente:
+1. Escucha el evento `UserRegistered`
+2. Crea un `BusinessOwner` vinculado al usuario
+3. Asigna plan de suscripción inicial (FREE)
+
+#### Customer BC
+
+Cuando un cliente anónimo se vincula a un usuario:
+1. Customer BC publica evento `CustomerLinkedToUser`
+2. Auth BC escucha el evento
+3. Agrega automáticamente el rol `CUSTOMER` al usuario
+
+### Arquitectura de Identidades
+
+El sistema sigue una arquitectura unificada de identidades:
+
+```
+User (Auth BC) → Identidad Universal
+    ↓                           ↓
+BusinessOwner (Account)    Customer (Customer)
+    ↓                           ↓
+Business (Business)        Appointment (Booking)
+```
+
+**Beneficios:**
+- Un usuario puede ser proveedor (BUSINESS_OWNER) y consumidor (CUSTOMER) simultáneamente
+- Preparado para marketplace: Juan (abogado) publica servicios Y agenda cita con dentista
+- Separación clara de concerns: User = autenticación, BusinessOwner = cuenta, Business = negocio
+
+Para más detalles, ver: `.kiro/steering/user-customer-businessowner-architecture.md`
 
 ## 📡 WebSocket Events API
 
