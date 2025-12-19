@@ -26,6 +26,10 @@ import { GetCustomerByPhoneHandler } from '@customer/app/queries/get-customer-by
 import { GetCustomersByUserIdHandler } from '@customer/app/queries/get-customers-by-user-id/handler';
 import { SearchCustomersHandler } from '@customer/app/queries/search-customers/handler';
 import { GetCustomerStatsHandler } from '@customer/app/queries/get-customer-stats/handler';
+import { DetectDuplicateCustomersHandler } from '@customer/app/queries/detect-duplicate-customers/handler';
+
+// Domain Services
+import { CustomerDeduplicationService } from '@customer/domain/services/customer-deduplication.service';
 
 const commandHandlers = [
   IdentifyCustomerHandler,
@@ -40,7 +44,10 @@ const queryHandlers = [
   GetCustomersByUserIdHandler,
   SearchCustomersHandler,
   GetCustomerStatsHandler,
+  DetectDuplicateCustomersHandler,
 ];
+
+const domainServices = [CustomerDeduplicationService];
 
 const factories = [
   {
@@ -75,7 +82,13 @@ const repositories = [
  */
 @Module({
   imports: [CqrsModule, TypeOrmModule.forFeature([CustomerModel])],
-  providers: [...commandHandlers, ...queryHandlers, ...factories, ...repositories],
+  providers: [
+    ...commandHandlers,
+    ...queryHandlers,
+    ...domainServices,
+    ...factories,
+    ...repositories,
+  ],
   exports: ['ICustomerFactory', 'ICustomerWriteRepository', 'ICustomerReadRepository'],
 })
 export class CustomerModule {}
