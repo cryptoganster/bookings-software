@@ -3,7 +3,7 @@ import { UnauthorizedException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PinoLogger } from 'nestjs-pino';
 import type { LoginResponseDto } from '@packages/shared-types';
-import { LoginCommand } from './command';
+import { LoginCommand } from '@auth/app/commands/login/command';
 import { IUserFactory } from '@auth/domain/interfaces/factories/user-factory';
 
 @CommandHandler(LoginCommand)

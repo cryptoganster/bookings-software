@@ -1,5 +1,5 @@
 import { DomainException } from '@shared/kernel/exceptions/domain';
-import { UserRole } from '../vo/user-role';
+import { UserRole } from '@auth/domain/vo/user-role';
 
 /**
  * Exception thrown when attempting to add a role that the user already has.

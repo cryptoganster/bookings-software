@@ -1,4 +1,4 @@
-import { Conversation } from '../../aggregates/conversation';
+import { Conversation } from '@conversation/domain/aggregates/conversation';
 
 /**
  * Write Repository interface for Conversation aggregate.

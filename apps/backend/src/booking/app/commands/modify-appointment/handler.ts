@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
-import { ModifyAppointmentCommand } from './command';
+import { ModifyAppointmentCommand } from '@booking/app/commands/modify-appointment/command';
 import { IAppointmentFactory } from '@booking/domain/interfaces/factories/appointment-factory';
 import { IAppointmentWriteRepository } from '@booking/domain/interfaces/repositories/appointment-write';
 import { DateTime } from '@booking/domain/vo/date-time';

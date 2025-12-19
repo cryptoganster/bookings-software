@@ -2,8 +2,8 @@ import { Controller, Get, Post, Put, Body, Param, Query, UseGuards } from '@nest
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { JwtAuthGuard } from '@auth/infra/guards/jwt-auth';
 import { CurrentUser, UserPayload } from '@auth/presentation/decorators/current-user';
-import { CreateAppointmentDto } from '../dtos/create-appointment.dto';
-import { AppointmentFiltersDto } from '../dtos/appointment-filters.dto';
+import { CreateAppointmentDto } from '@booking/presentation/dtos/create-appointment.dto';
+import { AppointmentFiltersDto } from '@booking/presentation/dtos/appointment-filters.dto';
 import { CreateAppointmentCommand } from '@booking/app/commands/create-appointment';
 import { CancelAppointmentCommand } from '@booking/app/commands/cancel-appointment';
 import { GetBusinessAppointmentsQuery } from '@booking/app/queries/get-business-appointments';

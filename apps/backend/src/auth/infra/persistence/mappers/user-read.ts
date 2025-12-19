@@ -1,5 +1,5 @@
 import { UserReadModel } from '@auth/domain/read-models/user';
-import { UserModel } from '../models/user';
+import { UserModel } from '@auth/infra/persistence/models/user';
 import { UserRole } from '@auth/domain/vo/user-role';
 
 export class UserReadMapper {

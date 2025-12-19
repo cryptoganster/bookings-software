@@ -1,4 +1,4 @@
-import { Appointment } from '../../aggregates/appointment';
+import { Appointment } from '@booking/domain/aggregates/appointment';
 
 /**
  * Factory interface for loading Appointment aggregates from persistence

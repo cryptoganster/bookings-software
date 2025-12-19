@@ -1,7 +1,7 @@
 import { Module, Global } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
-import { EventsGateway } from './events.gateway';
-import { WebSocketEventBroadcaster } from './event-broadcaster';
+import { EventsGateway } from '@shared/infra/websocket/events.gateway';
+import { WebSocketEventBroadcaster } from '@shared/infra/websocket/event-broadcaster';
 
 /**
  * WebSocket Module

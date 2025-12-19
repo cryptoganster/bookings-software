@@ -6,20 +6,20 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import type { StringValue } from 'ms';
 import { SharedModule } from '@shared/shared.module';
-import { JwtStrategy } from './infra/strategies/jwt';
-import { UserModel } from './infra/persistence/models/user';
-import { UserWriteRepository } from './infra/persistence/repositories/user-write';
-import { UserReadRepository } from './infra/persistence/repositories/user-read';
-import { UserFactory } from './infra/persistence/factories/user-factory';
-import { RegisterHandler } from './app/commands/register';
-import { LoginHandler } from './app/commands/login';
-import { AddUserRoleHandler } from './app/commands/add-user-role';
-import { RemoveUserRoleHandler } from './app/commands/remove-user-role';
-import { VerifyEmailHandler } from './app/commands/verify-email';
-import { DeactivateUserHandler } from './app/commands/deactivate-user';
-import { ActivateUserHandler } from './app/commands/activate-user';
-import { OnCustomerLinkedToUserHandler } from './app/event-handlers/on-customer-linked-to-user';
-import { AuthController } from './presentation/controllers/auth';
+import { JwtStrategy } from '@auth/infra/strategies/jwt';
+import { UserModel } from '@auth/infra/persistence/models/user';
+import { UserWriteRepository } from '@auth/infra/persistence/repositories/user-write';
+import { UserReadRepository } from '@auth/infra/persistence/repositories/user-read';
+import { UserFactory } from '@auth/infra/persistence/factories/user-factory';
+import { RegisterHandler } from '@auth/app/commands/register';
+import { LoginHandler } from '@auth/app/commands/login';
+import { AddUserRoleHandler } from '@auth/app/commands/add-user-role';
+import { RemoveUserRoleHandler } from '@auth/app/commands/remove-user-role';
+import { VerifyEmailHandler } from '@auth/app/commands/verify-email';
+import { DeactivateUserHandler } from '@auth/app/commands/deactivate-user';
+import { ActivateUserHandler } from '@auth/app/commands/activate-user';
+import { OnCustomerLinkedToUserHandler } from '@auth/app/event-handlers/on-customer-linked-to-user';
+import { AuthController } from '@auth/presentation/controllers/auth';
 
 @Module({
   imports: [

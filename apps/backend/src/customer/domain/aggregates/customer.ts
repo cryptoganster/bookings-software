@@ -1,18 +1,18 @@
 import { VersionedAggregateRoot } from '@shared/kernel/versioned-aggregate-root';
 import { UUID } from '@shared/vo/uuid';
-import { WhatsAppPhone } from '../vo/whatsapp-phone';
+import { WhatsAppPhone } from '@customer/domain/vo/whatsapp-phone';
 import {
   CustomerCreated,
   CustomerNameUpdated,
   CustomerLinkedToUser,
   CustomerUnlinkedFromUser,
-} from '../events';
+} from '@customer/domain/events';
 import {
   InvalidCustomerDataException,
   InvalidCustomerNameException,
   CustomerAlreadyLinkedToUserException,
   CustomerNotLinkedToUserException,
-} from '../exceptions';
+} from '@customer/domain/exceptions';
 
 /**
  * Customer Aggregate Root

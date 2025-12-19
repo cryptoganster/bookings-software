@@ -1,6 +1,6 @@
 import { QueryHandler, IQueryHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
-import { GetAvailableDatesQuery } from './query';
+import { GetAvailableDatesQuery } from '@conversation/app/queries/get-available-dates/query';
 import { ICapacityReadRepository } from '@availability/domain/interfaces/repositories/capacity-read';
 
 @QueryHandler(GetAvailableDatesQuery)

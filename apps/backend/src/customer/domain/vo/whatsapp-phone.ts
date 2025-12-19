@@ -1,5 +1,5 @@
 import { ValueObject } from '@shared/kernel/value-object';
-import { InvalidWhatsAppPhoneException } from '../exceptions/invalid-whatsapp-phone';
+import { InvalidWhatsAppPhoneException } from '@customer/domain/exceptions/invalid-whatsapp-phone';
 
 /**
  * WhatsAppPhone Value Object

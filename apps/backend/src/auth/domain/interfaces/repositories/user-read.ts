@@ -1,4 +1,4 @@
-import { UserReadModel } from '../../read-models/user';
+import { UserReadModel } from '@auth/domain/read-models/user';
 
 export interface IUserReadRepository {
   findById(id: string): Promise<UserReadModel | null>;

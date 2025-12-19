@@ -5,7 +5,7 @@ import {
   IWhatsAppClient,
   Button,
   Location,
-} from '../../domain/interfaces/external/whatsapp-client';
+} from '@conversation/domain/interfaces/external/whatsapp-client';
 
 @Injectable()
 export class WhatsAppBusinessApiClient implements IWhatsAppClient {

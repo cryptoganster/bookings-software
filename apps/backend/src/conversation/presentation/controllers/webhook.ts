@@ -1,7 +1,7 @@
 import { Controller, Post, Get, Body, UseGuards, Req, Res, HttpStatus } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
-import { WhatsAppSignatureGuard } from '../guards/whatsapp-signature';
-import { ProcessIncomingMessageCommand } from '../../app/commands/process-incoming-message/command';
+import { WhatsAppSignatureGuard } from '@conversation/presentation/guards/whatsapp-signature';
+import { ProcessIncomingMessageCommand } from '@conversation/app/commands/process-incoming-message/command';
 import type { FastifyRequest, FastifyReply } from 'fastify';
 
 interface WhatsAppWebhookPayload {

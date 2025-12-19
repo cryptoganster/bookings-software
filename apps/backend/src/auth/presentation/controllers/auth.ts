@@ -1,8 +1,8 @@
 import { Controller, Post, Body, Delete, Param, UseGuards, Patch } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
-import { RegisterDto } from '../dtos/register';
-import { LoginDto } from '../dtos/login';
-import { AddUserRoleDto } from '../dtos/add-user-role';
+import { RegisterDto } from '@auth/presentation/dtos/register';
+import { LoginDto } from '@auth/presentation/dtos/login';
+import { AddUserRoleDto } from '@auth/presentation/dtos/add-user-role';
 import { RegisterCommand } from '@auth/app/commands/register';
 import { LoginCommand } from '@auth/app/commands/login';
 import { AddUserRoleCommand } from '@auth/app/commands/add-user-role';

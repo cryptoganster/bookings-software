@@ -1,11 +1,11 @@
 import { VersionedAggregateRoot } from '@shared/kernel/versioned-aggregate-root';
 import { UUID } from '@shared/vo/uuid';
-import { OfferingDuration } from '../vo/offering-duration';
-import { OfferingCreated } from '../events/offering-created';
-import { OfferingUpdated } from '../events/offering-updated';
-import { OfferingDeactivated } from '../events/offering-deactivated';
-import { OfferingActivated } from '../events/offering-activated';
-import { InvalidOfferingCapacityException } from '../exceptions/invalid-offering-capacity';
+import { OfferingDuration } from '@offering/domain/vo/offering-duration';
+import { OfferingCreated } from '@offering/domain/events/offering-created';
+import { OfferingUpdated } from '@offering/domain/events/offering-updated';
+import { OfferingDeactivated } from '@offering/domain/events/offering-deactivated';
+import { OfferingActivated } from '@offering/domain/events/offering-activated';
+import { InvalidOfferingCapacityException } from '@offering/domain/exceptions/invalid-offering-capacity';
 
 export class Offering extends VersionedAggregateRoot {
   private id!: UUID;

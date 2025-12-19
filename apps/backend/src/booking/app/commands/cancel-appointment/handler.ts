@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
-import { CancelAppointmentCommand } from './command';
+import { CancelAppointmentCommand } from '@booking/app/commands/cancel-appointment/command';
 import { IAppointmentFactory } from '@booking/domain/interfaces/factories/appointment-factory';
 import { IAppointmentWriteRepository } from '@booking/domain/interfaces/repositories/appointment-write';
 import { AppointmentNotFoundException } from '@booking/domain/exceptions/appointment-not-found';

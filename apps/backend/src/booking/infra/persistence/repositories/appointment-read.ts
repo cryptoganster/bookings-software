@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { IAppointmentReadRepository } from '@booking/domain/interfaces/repositories/appointment-read';
 import { AppointmentReadModel } from '@booking/domain/read-models/appointment';
-import { AppointmentModel } from '../models/appointment';
-import { AppointmentReadMapper } from '../mappers/appointment-read';
+import { AppointmentModel } from '@booking/infra/persistence/models/appointment';
+import { AppointmentReadMapper } from '@booking/infra/persistence/mappers/appointment-read';
 
 @Injectable()
 export class AppointmentReadRepository implements IAppointmentReadRepository {

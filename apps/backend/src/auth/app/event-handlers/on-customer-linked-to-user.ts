@@ -1,7 +1,7 @@
 import { EventsHandler, IEventHandler } from '@nestjs/cqrs';
 import { CommandBus } from '@nestjs/cqrs';
 import { Logger } from '@nestjs/common';
-import { AddUserRoleCommand } from '../commands/add-user-role/command';
+import { AddUserRoleCommand } from '@auth/app/commands/add-user-role/command';
 import { UserRole } from '@auth/domain/vo/user-role';
 import { UserAlreadyHasRoleException } from '@auth/domain/exceptions/user-already-has-role';
 

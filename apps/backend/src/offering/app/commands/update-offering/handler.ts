@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
-import { UpdateOfferingCommand } from './command';
+import { UpdateOfferingCommand } from '@offering/app/commands/update-offering/command';
 import { IOfferingWriteRepository } from '@offering/domain/interfaces/repositories/offering-write';
 import { IOfferingFactory } from '@offering/domain/interfaces/factories/offering-factory';
 import { OfferingDuration } from '@offering/domain/vo/offering-duration';

@@ -1,8 +1,8 @@
 import { CommandHandler, ICommandHandler, QueryBus, CommandBus } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
-import { ProcessIncomingMessageCommand } from './command';
-import { IWhatsAppClient, Button } from '../../../domain/interfaces/external/whatsapp-client';
-import { Conversation } from '../../../domain/aggregates/conversation';
+import { ProcessIncomingMessageCommand } from '@conversation/app/commands/process-incoming-message/command';
+import { IWhatsAppClient, Button } from '@conversation/domain/interfaces/external/whatsapp-client';
+import { Conversation } from '@conversation/domain/aggregates/conversation';
 import { UUID } from '@shared/vo/uuid';
 import { CreateAppointmentCommand } from '@booking/app/commands/create-appointment';
 import { NoAvailableSlotsException } from '@booking/domain/exceptions/no-available-slots';

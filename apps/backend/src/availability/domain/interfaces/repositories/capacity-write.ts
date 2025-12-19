@@ -1,4 +1,4 @@
-import { Capacity } from '../../aggregates/capacity';
+import { Capacity } from '@availability/domain/aggregates/capacity';
 
 /**
  * Write Repository for Capacity Aggregate

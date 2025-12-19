@@ -1,5 +1,5 @@
 import { Offering } from '@offering/domain/aggregates/offering';
-import { OfferingModel } from '../models/offering';
+import { OfferingModel } from '@offering/infra/persistence/models/offering';
 import { UUID } from '@shared/vo/uuid';
 import { OfferingDuration } from '@offering/domain/vo/offering-duration';
 

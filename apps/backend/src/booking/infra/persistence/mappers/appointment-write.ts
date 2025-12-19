@@ -1,5 +1,5 @@
 import { Appointment } from '@booking/domain/aggregates/appointment';
-import { AppointmentModel } from '../models/appointment';
+import { AppointmentModel } from '@booking/infra/persistence/models/appointment';
 import { UUID } from '@shared/vo/uuid';
 import { DateTime } from '@booking/domain/vo/date-time';
 import { AppointmentStatus } from '@booking/domain/vo/appointment-status';

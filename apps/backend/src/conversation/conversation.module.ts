@@ -5,23 +5,23 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { AvailabilityModule } from '@availability/availability.module';
 
 // Command Handlers
-import { ProcessIncomingMessageHandler } from './app/commands/process-incoming-message/handler';
+import { ProcessIncomingMessageHandler } from '@conversation/app/commands/process-incoming-message/handler';
 
 // Query Handlers
-import { GetAvailableDatesHandler } from './app/queries/get-available-dates/handler';
-import { GetAvailableTimeSlotsHandler } from './app/queries/get-available-time-slots/handler';
+import { GetAvailableDatesHandler } from '@conversation/app/queries/get-available-dates/handler';
+import { GetAvailableTimeSlotsHandler } from '@conversation/app/queries/get-available-time-slots/handler';
 
 // External clients
-import { WhatsAppBusinessApiClient } from './infra/external/whatsapp-business-api-client';
+import { WhatsAppBusinessApiClient } from '@conversation/infra/external/whatsapp-business-api-client';
 
 // Factories
-import { ConversationFactory } from './infra/persistence/factories/conversation-factory';
+import { ConversationFactory } from '@conversation/infra/persistence/factories/conversation-factory';
 
 // Controllers
-import { WebhookController } from './presentation/controllers/webhook';
+import { WebhookController } from '@conversation/presentation/controllers/webhook';
 
 // Guards
-import { WhatsAppSignatureGuard } from './presentation/guards/whatsapp-signature';
+import { WhatsAppSignatureGuard } from '@conversation/presentation/guards/whatsapp-signature';
 
 // Mock repositories for conversation (will be implemented later)
 // Using a global Map so it can be cleared between tests

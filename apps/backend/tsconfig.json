@@ -23,7 +23,10 @@
       "@auth/*": ["src/auth/*"],
       "@availability/*": ["src/availability/*"],
       "@offering/*": ["src/offering/*"],
-      "@test-utils/*": ["src/test-utils/*"]
+      "@customer/*": ["src/customer/*"],
+      "@test-utils/*": ["src/test-utils/*"],
+      "@database/*": ["src/database/*"],
+      "@config/*": ["src/config/*"]
     }
   }
 }

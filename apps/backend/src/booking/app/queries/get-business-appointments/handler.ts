@@ -1,7 +1,7 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { AppointmentReadModel } from '@booking/domain/read-models/appointment';
 import { Inject } from '@nestjs/common';
-import { GetBusinessAppointmentsQuery } from './query';
+import { GetBusinessAppointmentsQuery } from '@booking/app/queries/get-business-appointments/query';
 import { IAppointmentReadRepository } from '@booking/domain/interfaces/repositories/appointment-read';
 
 @QueryHandler(GetBusinessAppointmentsQuery)

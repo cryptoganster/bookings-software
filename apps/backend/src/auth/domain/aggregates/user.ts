@@ -1,20 +1,20 @@
 import { VersionedAggregateRoot } from '@shared/kernel/versioned-aggregate-root';
 import { UUID } from '@shared/vo/uuid';
-import { Email } from '../vo/email';
-import { Password } from '../vo/password';
-import { UserRole } from '../vo/user-role';
-import { UserRegistered } from '../events/user-registered';
-import { UserRoleAdded } from '../events/user-role-added';
-import { UserRoleRemoved } from '../events/user-role-removed';
-import { UserEmailVerified } from '../events/user-email-verified';
-import { UserActivated } from '../events/user-activated';
-import { UserDeactivated } from '../events/user-deactivated';
-import { UserAlreadyHasRoleException } from '../exceptions/user-already-has-role';
-import { UserDoesNotHaveRoleException } from '../exceptions/user-does-not-have-role';
-import { CannotRemoveLastRoleException } from '../exceptions/cannot-remove-last-role';
-import { EmailAlreadyVerifiedException } from '../exceptions/email-already-verified';
-import { UserAlreadyActiveException } from '../exceptions/user-already-active';
-import { UserAlreadyInactiveException } from '../exceptions/user-already-inactive';
+import { Email } from '@auth/domain/vo/email';
+import { Password } from '@auth/domain/vo/password';
+import { UserRole } from '@auth/domain/vo/user-role';
+import { UserRegistered } from '@auth/domain/events/user-registered';
+import { UserRoleAdded } from '@auth/domain/events/user-role-added';
+import { UserRoleRemoved } from '@auth/domain/events/user-role-removed';
+import { UserEmailVerified } from '@auth/domain/events/user-email-verified';
+import { UserActivated } from '@auth/domain/events/user-activated';
+import { UserDeactivated } from '@auth/domain/events/user-deactivated';
+import { UserAlreadyHasRoleException } from '@auth/domain/exceptions/user-already-has-role';
+import { UserDoesNotHaveRoleException } from '@auth/domain/exceptions/user-does-not-have-role';
+import { CannotRemoveLastRoleException } from '@auth/domain/exceptions/cannot-remove-last-role';
+import { EmailAlreadyVerifiedException } from '@auth/domain/exceptions/email-already-verified';
+import { UserAlreadyActiveException } from '@auth/domain/exceptions/user-already-active';
+import { UserAlreadyInactiveException } from '@auth/domain/exceptions/user-already-inactive';
 
 /**
  * User Aggregate - Identidad Universal del Sistema

@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { IUserWriteRepository } from '@auth/domain/interfaces/repositories/user-write';
 import { User } from '@auth/domain/aggregates/user';
-import { UserModel } from '../models/user';
-import { UserWriteMapper } from '../mappers/user-write';
+import { UserModel } from '@auth/infra/persistence/models/user';
+import { UserWriteMapper } from '@auth/infra/persistence/mappers/user-write';
 import { IUnitOfWork } from '@shared/kernel/uow';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 
