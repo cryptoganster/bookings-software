@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
-    "@mantine/core": "^7.3.0",
+    "@mantine/core": "^8.3.10",
     "@mantine/dates": "^7.3.0",
     "@mantine/hooks": "^7.3.0",
     "@mantine/modals": "^7.3.0",
