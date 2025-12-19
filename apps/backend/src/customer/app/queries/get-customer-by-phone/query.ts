@@ -1,5 +1,5 @@
 import { Query } from '@nestjs/cqrs';
-import { CustomerReadModel } from '../../../domain/read-models/customer';
+import { CustomerReadModel } from '@customer/domain/read-models/customer';
 
 /**
  * GetCustomerByPhoneQuery

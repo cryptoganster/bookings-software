@@ -1,10 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
-import { IdentifyCustomerCommand } from './command';
-import { ICustomerFactory } from '../../../domain/interfaces/factories';
-import { ICustomerWriteRepository } from '../../../domain/interfaces/repositories';
-import { Customer } from '../../../domain/aggregates/customer';
-import { WhatsAppPhone } from '../../../domain/vo/whatsapp-phone';
+import { IdentifyCustomerCommand } from '@customer/app/commands/identify-customer/command';
+import { ICustomerFactory } from '@customer/domain/interfaces/factories';
+import { ICustomerWriteRepository } from '@customer/domain/interfaces/repositories';
+import { Customer } from '@customer/domain/aggregates/customer';
+import { WhatsAppPhone } from '@customer/domain/vo/whatsapp-phone';
 import { UUID } from '@shared/vo/uuid';
 
 /**

@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
-import { CreateAppointmentCommand } from './command';
+import { CreateAppointmentCommand } from '@booking/app/commands/create-appointment/command';
 import { IAppointmentWriteRepository } from '@booking/domain/interfaces/repositories/appointment-write';
 import { ICapacityFactory } from '@availability/domain/interfaces/factories/capacity-factory';
 import { ICapacityWriteRepository } from '@availability/domain/interfaces/repositories/capacity-write';

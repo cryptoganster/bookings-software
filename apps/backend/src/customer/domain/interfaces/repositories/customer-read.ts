@@ -1,4 +1,4 @@
-import { CustomerReadModel } from '../../read-models/customer';
+import { CustomerReadModel } from '@customer/domain/read-models/customer';
 
 /**
  * Read Repository Interface for Customer Queries

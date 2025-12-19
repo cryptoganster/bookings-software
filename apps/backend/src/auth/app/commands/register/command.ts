@@ -1,5 +1,5 @@
 import { Command } from '@nestjs/cqrs';
-import { UserRole } from '../../../domain/vo/user-role';
+import { UserRole } from '@auth/domain/vo/user-role';
 
 export class RegisterCommand extends Command<{ userId: string; accessToken: string }> {
   constructor(

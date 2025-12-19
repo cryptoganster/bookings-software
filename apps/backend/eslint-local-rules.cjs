@@ -6,6 +6,119 @@
  */
 
 module.exports = {
+  'enforce-path-aliases': {
+    meta: {
+      type: 'problem',
+      docs: {
+        description: 'Enforce use of TypeScript path aliases instead of relative imports',
+        category: 'Best Practices',
+        recommended: true,
+      },
+      messages: {
+        usePathAlias: 'Use path alias "{{alias}}" instead of relative import. Change "{{from}}" to "{{to}}"',
+        invalidAlias: 'Invalid path alias "{{alias}}". Only these aliases are allowed: {{allowedAliases}}',
+      },
+      fixable: 'code',
+      schema: [],
+    },
+    create(context) {
+      const filename = context.getFilename();
+      
+      // Ignorar archivos de test
+      if (filename.includes('.spec.ts') || filename.includes('.test.ts') || filename.includes('.e2e-spec.ts')) {
+        return {};
+      }
+      
+      // Definir aliases permitidos (deben coincidir con tsconfig.json)
+      const allowedAliases = [
+        '@packages/shared-types',
+        '@shared',
+        '@booking',
+        '@conversation',
+        '@auth',
+        '@availability',
+        '@offering',
+        '@customer',
+        '@test-utils',
+        '@database',
+        '@config',
+      ];
+      
+      // Mapeo de paths para detección
+      const aliasMap = {
+        'src/shared': '@shared',
+        'src/booking': '@booking',
+        'src/conversation': '@conversation',
+        'src/auth': '@auth',
+        'src/availability': '@availability',
+        'src/offering': '@offering',
+        'src/customer': '@customer',
+        'src/test-utils': '@test-utils',
+        'src/database': '@database',
+        'src/config': '@config',
+      };
+      
+      return {
+        ImportDeclaration(node) {
+          const importPath = node.source.value;
+          
+          // Ignorar imports externos (node_modules)
+          if (!importPath.startsWith('.')) {
+            // Validar que los aliases usados sean permitidos
+            const usedAlias = allowedAliases.find(alias => importPath.startsWith(alias));
+            if (usedAlias) {
+              // Es un alias válido, todo bien
+              return;
+            }
+            
+            // Si empieza con @ pero no está en la lista, es inválido
+            if (importPath.startsWith('@') && !importPath.startsWith('@nestjs') && !importPath.startsWith('@types')) {
+              context.report({
+                node,
+                messageId: 'invalidAlias',
+                data: {
+                  alias: importPath.split('/')[0],
+                  allowedAliases: allowedAliases.join(', '),
+                },
+              });
+            }
+            return;
+          }
+          
+          // Es un import relativo - verificar si debería usar alias
+          const path = require('path');
+          const currentDir = path.dirname(filename);
+          const resolvedPath = path.resolve(currentDir, importPath);
+          
+          // Detectar si el import apunta a un directorio que tiene alias
+          for (const [srcPath, alias] of Object.entries(aliasMap)) {
+            const fullSrcPath = path.resolve(process.cwd(), srcPath);
+            
+            if (resolvedPath.startsWith(fullSrcPath)) {
+              // Calcular el path relativo desde el directorio base del alias
+              const relativePath = path.relative(fullSrcPath, resolvedPath);
+              const suggestedImport = `${alias}/${relativePath}`.replace(/\\/g, '/');
+              
+              context.report({
+                node,
+                messageId: 'usePathAlias',
+                data: {
+                  alias,
+                  from: importPath,
+                  to: suggestedImport,
+                },
+                fix(fixer) {
+                  return fixer.replaceText(node.source, `'${suggestedImport}'`);
+                },
+              });
+              break;
+            }
+          }
+        },
+      };
+    },
+  },
+  
   'no-cross-boundary-imports': {
     meta: {
       type: 'problem',

@@ -1,4 +1,4 @@
-import { Conversation } from '../../aggregates/conversation';
+import { Conversation } from '@conversation/domain/aggregates/conversation';
 import { UUID } from '@shared/vo/uuid';
 
 /**

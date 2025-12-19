@@ -20,7 +20,8 @@ export default [
       },
     },
     rules: {
-      // Regla personalizada de arquitectura
+      // Reglas personalizadas de arquitectura
+      'local-rules/enforce-path-aliases': 'error',
       'local-rules/no-cross-boundary-imports': 'error',
       
       // Reglas de TypeScript

@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject, NotFoundException } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
-import { VerifyEmailCommand } from './command';
+import { VerifyEmailCommand } from '@auth/app/commands/verify-email/command';
 import { IUserFactory } from '@auth/domain/interfaces/factories/user-factory';
 import { IUserWriteRepository } from '@auth/domain/interfaces/repositories/user-write';
 

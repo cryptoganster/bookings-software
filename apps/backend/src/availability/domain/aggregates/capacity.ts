@@ -1,9 +1,9 @@
 import { VersionedAggregateRoot } from '@shared/kernel/versioned-aggregate-root';
 import { UUID } from '@shared/vo/uuid';
-import { CapacityCreated } from '../events/capacity-created';
-import { SlotBooked } from '../events/slot-booked';
-import { SlotReleased } from '../events/slot-released';
-import { CapacityChanged } from '../events/capacity-changed';
+import { CapacityCreated } from '@availability/domain/events/capacity-created';
+import { SlotBooked } from '@availability/domain/events/slot-booked';
+import { SlotReleased } from '@availability/domain/events/slot-released';
+import { CapacityChanged } from '@availability/domain/events/capacity-changed';
 
 export class Capacity extends VersionedAggregateRoot {
   private id!: UUID;

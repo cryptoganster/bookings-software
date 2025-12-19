@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject, NotFoundException } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
-import { ActivateUserCommand } from './command';
+import { ActivateUserCommand } from '@auth/app/commands/activate-user/command';
 import { IUserFactory } from '@auth/domain/interfaces/factories/user-factory';
 import { IUserWriteRepository } from '@auth/domain/interfaces/repositories/user-write';
 

@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { IUserReadRepository } from '@auth/domain/interfaces/repositories/user-read';
 import { UserReadModel } from '@auth/domain/read-models/user';
-import { UserModel } from '../models/user';
-import { UserReadMapper } from '../mappers/user-read';
+import { UserModel } from '@auth/infra/persistence/models/user';
+import { UserReadMapper } from '@auth/infra/persistence/mappers/user-read';
 
 @Injectable()
 export class UserReadRepository implements IUserReadRepository {

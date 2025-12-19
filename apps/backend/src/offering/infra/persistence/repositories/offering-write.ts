@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { IOfferingWriteRepository } from '@offering/domain/interfaces/repositories/offering-write';
 import { Offering } from '@offering/domain/aggregates/offering';
-import { OfferingModel } from '../models/offering';
-import { OfferingWriteMapper } from '../mappers/offering-write';
+import { OfferingModel } from '@offering/infra/persistence/models/offering';
+import { OfferingWriteMapper } from '@offering/infra/persistence/mappers/offering-write';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 import { IUnitOfWork } from '@shared/kernel/uow';
 

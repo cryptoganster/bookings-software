@@ -1,7 +1,7 @@
 import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
 import { EventBus } from '@nestjs/cqrs';
 import { Subject, takeUntil } from 'rxjs';
-import { EventsGateway } from './events.gateway';
+import { EventsGateway } from '@shared/infra/websocket/events.gateway';
 
 // Domain Events - Booking
 import { AppointmentCreated } from '@booking/domain/events/appointment-created';

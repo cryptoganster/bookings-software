@@ -1,5 +1,5 @@
 import { ValueObject } from '@shared/kernel/value-object';
-import { InvalidOfferingDurationException } from '../exceptions/invalid-offering-duration';
+import { InvalidOfferingDurationException } from '@offering/domain/exceptions/invalid-offering-duration';
 
 /**
  * Value Object representing the duration of an offering in minutes.

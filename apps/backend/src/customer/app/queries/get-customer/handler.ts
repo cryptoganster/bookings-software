@@ -1,8 +1,8 @@
 import { QueryHandler, IQueryHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
-import { GetCustomerQuery } from './query';
-import { CustomerReadModel } from '../../../domain/read-models/customer';
-import { ICustomerReadRepository } from '../../../domain/interfaces/repositories';
+import { GetCustomerQuery } from '@customer/app/queries/get-customer/query';
+import { CustomerReadModel } from '@customer/domain/read-models/customer';
+import { ICustomerReadRepository } from '@customer/domain/interfaces/repositories';
 
 /**
  * GetCustomerHandler

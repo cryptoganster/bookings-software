@@ -3,20 +3,20 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 // Models
-import { CapacityModel } from './infra/persistence/models/capacity';
+import { CapacityModel } from '@availability/infra/persistence/models/capacity';
 
 // Repositories
-import { CapacityReadRepository } from './infra/persistence/repositories/capacity-read';
-import { CapacityWriteRepository } from './infra/persistence/repositories/capacity-write';
+import { CapacityReadRepository } from '@availability/infra/persistence/repositories/capacity-read';
+import { CapacityWriteRepository } from '@availability/infra/persistence/repositories/capacity-write';
 
 // Factories
-import { CapacityFactory } from './infra/persistence/factories/capacity-factory';
+import { CapacityFactory } from '@availability/infra/persistence/factories/capacity-factory';
 
 // Command Handlers
-import { SetCapacityHandler } from './app/commands/set-capacity/handler';
+import { SetCapacityHandler } from '@availability/app/commands/set-capacity/handler';
 
 // Query Handlers
-import { GetAvailableSlotsHandler } from './app/queries/get-available-slots/handler';
+import { GetAvailableSlotsHandler } from '@availability/app/queries/get-available-slots/handler';
 
 const CommandHandlers = [SetCapacityHandler];
 const QueryHandlers = [GetAvailableSlotsHandler];

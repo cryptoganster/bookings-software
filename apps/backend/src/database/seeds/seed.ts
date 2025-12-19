@@ -1,8 +1,8 @@
-import { AppDataSource } from '../../config/database';
-import { seedAuth } from './auth.seed';
-import { seedOffering } from './offering.seed';
-import { seedAvailability } from './availability.seed';
-import { seedBooking } from './booking.seed';
+import { AppDataSource } from '@config/database';
+import { seedAuth } from '@database/seeds/auth.seed';
+import { seedOffering } from '@database/seeds/offering.seed';
+import { seedAvailability } from '@database/seeds/availability.seed';
+import { seedBooking } from '@database/seeds/booking.seed';
 
 async function seed() {
   try {

@@ -1,8 +1,8 @@
 import { QueryHandler, IQueryHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
-import { GetOfferingByIdQuery } from './query';
-import { OfferingReadModel } from '../../../domain/read-models/offering';
-import { IOfferingReadRepository } from '../../../domain/interfaces/repositories/offering-read';
+import { GetOfferingByIdQuery } from '@offering/app/queries/get-offering-by-id/query';
+import { OfferingReadModel } from '@offering/domain/read-models/offering';
+import { IOfferingReadRepository } from '@offering/domain/interfaces/repositories/offering-read';
 
 /**
  * Handler para obtener un offering por ID

@@ -1,4 +1,4 @@
-import { UserRole } from '../vo/user-role';
+import { UserRole } from '@auth/domain/vo/user-role';
 
 /**
  * Domain event emitted when a new user is registered.

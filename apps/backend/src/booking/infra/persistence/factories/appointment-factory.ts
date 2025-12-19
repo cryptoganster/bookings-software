@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { IAppointmentFactory } from '@booking/domain/interfaces/factories/appointment-factory';
-import { AppointmentModel } from '../models/appointment';
+import { AppointmentModel } from '@booking/infra/persistence/models/appointment';
 import { Appointment } from '@booking/domain/aggregates/appointment';
 import { UUID } from '@shared/vo/uuid';
 import { DateTime } from '@booking/domain/vo/date-time';

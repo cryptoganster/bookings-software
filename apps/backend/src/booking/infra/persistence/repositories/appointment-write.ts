@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { IAppointmentWriteRepository } from '@booking/domain/interfaces/repositories/appointment-write';
 import { Appointment } from '@booking/domain/aggregates/appointment';
-import { AppointmentModel } from '../models/appointment';
-import { AppointmentWriteMapper } from '../mappers/appointment-write';
+import { AppointmentModel } from '@booking/infra/persistence/models/appointment';
+import { AppointmentWriteMapper } from '@booking/infra/persistence/mappers/appointment-write';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 import { IUnitOfWork } from '@shared/kernel/uow';
 

@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { IUserFactory } from '@auth/domain/interfaces/factories/user-factory';
 import { User } from '@auth/domain/aggregates/user';
-import { UserModel } from '../models/user';
-import { UserWriteMapper } from '../mappers/user-write';
+import { UserModel } from '@auth/infra/persistence/models/user';
+import { UserWriteMapper } from '@auth/infra/persistence/mappers/user-write';
 
 /**
  * Factory implementation for loading User aggregates.

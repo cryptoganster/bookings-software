@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ICapacityFactory } from '@availability/domain/interfaces/factories/capacity-factory';
-import { CapacityModel } from '../models/capacity';
+import { CapacityModel } from '@availability/infra/persistence/models/capacity';
 import { Capacity } from '@availability/domain/aggregates/capacity';
 import { UUID } from '@shared/vo/uuid';
 

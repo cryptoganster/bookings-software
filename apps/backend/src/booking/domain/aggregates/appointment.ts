@@ -1,10 +1,10 @@
 import { VersionedAggregateRoot } from '@shared/kernel/versioned-aggregate-root';
 import { UUID } from '@shared/vo/uuid';
-import { AppointmentStatus } from '../vo/appointment-status';
-import { DateTime } from '../vo/date-time';
-import { AppointmentCreated } from '../events/appointment-created';
-import { AppointmentCancelled } from '../events/appointment-cancelled';
-import { AppointmentModified } from '../events/appointment-modified';
+import { AppointmentStatus } from '@booking/domain/vo/appointment-status';
+import { DateTime } from '@booking/domain/vo/date-time';
+import { AppointmentCreated } from '@booking/domain/events/appointment-created';
+import { AppointmentCancelled } from '@booking/domain/events/appointment-cancelled';
+import { AppointmentModified } from '@booking/domain/events/appointment-modified';
 
 export class Appointment extends VersionedAggregateRoot {
   private id!: UUID;

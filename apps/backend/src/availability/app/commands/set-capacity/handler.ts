@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
-import { SetCapacityCommand } from './command';
+import { SetCapacityCommand } from '@availability/app/commands/set-capacity/command';
 import { ICapacityFactory } from '@availability/domain/interfaces/factories/capacity-factory';
 import { ICapacityWriteRepository } from '@availability/domain/interfaces/repositories/capacity-write';
 import { IUnitOfWork } from '@shared/kernel/uow';

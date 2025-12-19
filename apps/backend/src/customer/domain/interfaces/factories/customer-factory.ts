@@ -1,4 +1,4 @@
-import { Customer } from '../../aggregates/customer';
+import { Customer } from '@customer/domain/aggregates/customer';
 
 /**
  * Factory Interface for loading Customer aggregates

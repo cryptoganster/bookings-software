@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { IOfferingFactory } from '@offering/domain/interfaces/factories/offering-factory';
 import { Offering } from '@offering/domain/aggregates/offering';
-import { OfferingModel } from '../models/offering';
+import { OfferingModel } from '@offering/infra/persistence/models/offering';
 import { UUID } from '@shared/vo/uuid';
 import { OfferingDuration } from '@offering/domain/vo/offering-duration';
 

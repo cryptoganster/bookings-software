@@ -1,4 +1,4 @@
-import { User } from '../../aggregates/user';
+import { User } from '@auth/domain/aggregates/user';
 
 /**
  * Factory for loading User aggregates for modification.

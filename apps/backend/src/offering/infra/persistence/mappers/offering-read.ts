@@ -1,5 +1,5 @@
 import { OfferingReadModel } from '@offering/domain/read-models/offering';
-import { OfferingModel } from '../models/offering';
+import { OfferingModel } from '@offering/infra/persistence/models/offering';
 
 export class OfferingReadMapper {
   static toReadModel(model: OfferingModel): OfferingReadModel {

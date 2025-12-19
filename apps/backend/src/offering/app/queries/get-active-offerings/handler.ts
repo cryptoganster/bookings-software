@@ -1,8 +1,8 @@
 import { QueryHandler, IQueryHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
-import { GetActiveOfferingsQuery } from './query';
-import { OfferingReadModel } from '../../../domain/read-models/offering';
-import { IOfferingReadRepository } from '../../../domain/interfaces/repositories/offering-read';
+import { GetActiveOfferingsQuery } from '@offering/app/queries/get-active-offerings/query';
+import { OfferingReadModel } from '@offering/domain/read-models/offering';
+import { IOfferingReadRepository } from '@offering/domain/interfaces/repositories/offering-read';
 
 /**
  * Handler para obtener offerings activos de un negocio

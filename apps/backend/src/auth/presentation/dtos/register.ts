@@ -1,5 +1,5 @@
 import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
-import { UserRole } from '../../domain/vo/user-role';
+import { UserRole } from '@auth/domain/vo/user-role';
 
 export class RegisterDto {
   @IsEmail()

@@ -1,9 +1,9 @@
 import { VersionedAggregateRoot } from '@shared/kernel/versioned-aggregate-root';
 import { UUID } from '@shared/vo/uuid';
-import { ConversationState } from '../vo/conversation-state';
-import { ConversationStarted } from '../events/conversation-started';
-import { ConversationStateChanged } from '../events/conversation-state-changed';
-import { ConversationCompleted } from '../events/conversation-completed';
+import { ConversationState } from '@conversation/domain/vo/conversation-state';
+import { ConversationStarted } from '@conversation/domain/events/conversation-started';
+import { ConversationStateChanged } from '@conversation/domain/events/conversation-state-changed';
+import { ConversationCompleted } from '@conversation/domain/events/conversation-completed';
 
 export class Conversation extends VersionedAggregateRoot {
   private id!: UUID;

@@ -2,7 +2,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ConflictException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PinoLogger } from 'nestjs-pino';
-import { RegisterCommand } from './command';
+import { RegisterCommand } from '@auth/app/commands/register/command';
 import { IUserWriteRepository } from '@auth/domain/interfaces/repositories/user-write';
 import { IUserReadRepository } from '@auth/domain/interfaces/repositories/user-read';
 import { User } from '@auth/domain/aggregates/user';

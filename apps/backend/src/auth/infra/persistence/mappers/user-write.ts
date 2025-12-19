@@ -1,5 +1,5 @@
 import { User } from '@auth/domain/aggregates/user';
-import { UserModel } from '../models/user';
+import { UserModel } from '@auth/infra/persistence/models/user';
 import { UUID } from '@shared/vo/uuid';
 import { Email } from '@auth/domain/vo/email';
 import { UserRole } from '@auth/domain/vo/user-role';

@@ -1,9 +1,9 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
-import { UnlinkCustomerFromUserCommand } from './command';
-import { ICustomerFactory } from '../../../domain/interfaces/factories';
-import { ICustomerWriteRepository } from '../../../domain/interfaces/repositories';
-import { CustomerNotFoundException } from '../../../domain/exceptions';
+import { UnlinkCustomerFromUserCommand } from '@customer/app/commands/unlink-customer-from-user/command';
+import { ICustomerFactory } from '@customer/domain/interfaces/factories';
+import { ICustomerWriteRepository } from '@customer/domain/interfaces/repositories';
+import { CustomerNotFoundException } from '@customer/domain/exceptions';
 
 /**
  * UnlinkCustomerFromUserHandler

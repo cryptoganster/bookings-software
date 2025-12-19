@@ -1,6 +1,6 @@
 import { QueryHandler, IQueryHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
-import { GetAvailableTimeSlotsQuery } from './query';
+import { GetAvailableTimeSlotsQuery } from '@conversation/app/queries/get-available-time-slots/query';
 import { ICapacityReadRepository } from '@availability/domain/interfaces/repositories/capacity-read';
 import { TimeSlot } from '@availability/domain/read-models/capacity';
 

@@ -1,5 +1,5 @@
 import { Query } from '@nestjs/cqrs';
-import { OfferingReadModel } from '../../../domain/read-models/offering';
+import { OfferingReadModel } from '@offering/domain/read-models/offering';
 
 /**
  * Query para obtener todos los offerings de un negocio
