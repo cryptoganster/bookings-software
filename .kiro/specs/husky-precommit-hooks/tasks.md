@@ -214,3 +214,12 @@ This document outlines the implementation tasks for setting up Husky pre-commit 
 - [ ] 19. Final Checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
+- [ ] 20. Create Pull Request and Cleanup
+  - Create PR with title: "feat: implement Husky pre-commit hooks"
+  - Add description with summary of all implemented checks
+  - Link to requirements and design documents
+  - Wait for CI to pass
+  - Request review if needed
+  - After merge: Delete local feature branch
+  - _Requirements: All_
+
