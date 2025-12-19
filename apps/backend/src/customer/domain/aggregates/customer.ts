@@ -6,12 +6,14 @@ import {
   CustomerNameUpdated,
   CustomerLinkedToUser,
   CustomerUnlinkedFromUser,
+  CustomerDeleted,
 } from '@customer/domain/events';
 import {
   InvalidCustomerDataException,
   InvalidCustomerNameException,
   CustomerAlreadyLinkedToUserException,
   CustomerNotLinkedToUserException,
+  CustomerAlreadyDeletedException,
 } from '@customer/domain/exceptions';
 
 /**
@@ -148,6 +150,34 @@ export class Customer extends VersionedAggregateRoot {
 
     // Publish event
     this.apply(new CustomerUnlinkedFromUser(this.id.getValue(), previousUserId.getValue()));
+  }
+
+  /**
+   * Anonymizes customer data (GDPR compliance)
+   * Removes personal information while preserving referential integrity
+   * @param deletedBy User ID of business owner performing deletion
+   * @throws CustomerAlreadyDeletedException if already deleted
+   */
+  anonymize(deletedBy: string): void {
+    // Check if already deleted (phone starts with "DELETED_")
+    if (this.whatsappPhone.getValue().startsWith('DELETED_')) {
+      throw new CustomerAlreadyDeletedException(this.id.getValue());
+    }
+
+    // Anonymize data
+    this.name = null;
+    this.whatsappPhone = WhatsAppPhone.fromString(`DELETED_${Date.now()}`);
+
+    // Unlink from User if linked
+    if (this.userId !== null) {
+      this.userId = null;
+    }
+
+    this.updatedAt = new Date();
+    this.incrementVersion();
+
+    // Publish event
+    this.apply(new CustomerDeleted(this.id.getValue(), deletedBy));
   }
 
   /**

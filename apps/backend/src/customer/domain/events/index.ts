@@ -3,3 +3,4 @@ export * from './customer-name-updated';
 export * from './customer-linked-to-user';
 export * from './customer-unlinked-from-user';
 export * from './customers-merged';
+export * from './customer-deleted';

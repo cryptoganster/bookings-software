@@ -275,7 +275,7 @@ Este documento proporciona un checklist de implementación paso a paso para las 
   - _Edge Cases: 1, 6, 8_
   - **Commit:** `test(customer): add unit tests for MergeCustomersHandler`
 
-- [ ] 3.11 Write Integration Tests for Merge
+- [x] 3.11 Write Integration Tests for Merge
   - Test merge with real database
   - Test appointments are updated
   - Test conversations are updated
@@ -284,7 +284,7 @@ Este documento proporciona un checklist de implementación paso a paso para las 
   - _Properties: 3_
   - **Commit:** `test(customer): add integration tests for merge`
 
-- [ ] 3.12 Phase 3 Checkpoint
+- [x] 3.12 Phase 3 Checkpoint
   - Run migrations: `pnpm --filter backend migration:run`
   - Run tests: `pnpm test:backend -- --testPathPattern=merge`
   - Verify merge completes in < 2 seconds
