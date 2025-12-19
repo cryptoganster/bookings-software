@@ -8,25 +8,23 @@ import { UUID } from '@shared/vo/uuid';
 
 /**
  * LinkCustomerToUserHandler
- * 
+ *
  * Links an anonymous customer to a registered User
- * 
+ *
  * Flow:
  * 1. Load customer via Factory
  * 2. Call linkToUser() on aggregate
  * 3. Save via Write Repository
  * 4. Event CustomerLinkedToUser is published
  * 5. Auth BC event handler adds CUSTOMER role to User
- * 
+ *
  * @throws CustomerNotFoundException if customer doesn't exist
  * @throws CustomerAlreadyLinkedToUserException if already linked
- * 
+ *
  * @see Property 8: Linking preserves customer identity
  */
 @CommandHandler(LinkCustomerToUserCommand)
-export class LinkCustomerToUserHandler
-  implements ICommandHandler<LinkCustomerToUserCommand>
-{
+export class LinkCustomerToUserHandler implements ICommandHandler<LinkCustomerToUserCommand> {
   constructor(
     @Inject('ICustomerFactory')
     private readonly factory: ICustomerFactory,

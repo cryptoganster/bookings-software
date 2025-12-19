@@ -9,9 +9,9 @@ import { UUID } from '@shared/vo/uuid';
 
 /**
  * IdentifyCustomerHandler
- * 
+ *
  * Identifies or creates a customer based on WhatsApp phone
- * 
+ *
  * Flow:
  * 1. Try to load existing customer by (businessId, whatsappPhone)
  * 2. If exists:
@@ -20,15 +20,13 @@ import { UUID } from '@shared/vo/uuid';
  * 3. If doesn't exist:
  *    - Create new anonymous customer (userId = null)
  *    - Return new customerId
- * 
+ *
  * Idempotent: calling multiple times returns same customerId
- * 
+ *
  * @see Property 2: Idempotency
  */
 @CommandHandler(IdentifyCustomerCommand)
-export class IdentifyCustomerHandler
-  implements ICommandHandler<IdentifyCustomerCommand>
-{
+export class IdentifyCustomerHandler implements ICommandHandler<IdentifyCustomerCommand> {
   constructor(
     @Inject('ICustomerFactory')
     private readonly factory: ICustomerFactory,
@@ -36,9 +34,7 @@ export class IdentifyCustomerHandler
     private readonly writeRepo: ICustomerWriteRepository,
   ) {}
 
-  async execute(
-    command: IdentifyCustomerCommand,
-  ): Promise<{ customerId: string }> {
+  async execute(command: IdentifyCustomerCommand): Promise<{ customerId: string }> {
     const whatsappPhone = WhatsAppPhone.fromString(command.whatsappPhone);
 
     // Try to load existing customer
@@ -49,10 +45,7 @@ export class IdentifyCustomerHandler
 
     if (existingCustomer) {
       // Customer exists - update name if changed
-      if (
-        command.name &&
-        existingCustomer.getName() !== command.name
-      ) {
+      if (command.name && existingCustomer.getName() !== command.name) {
         existingCustomer.updateName(command.name);
         await this.writeRepo.save(existingCustomer);
       }

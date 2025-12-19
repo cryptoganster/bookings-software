@@ -7,20 +7,18 @@ import { CustomerNotFoundException } from '@customer/domain/exceptions';
 
 /**
  * UpdateCustomerNameHandler
- * 
+ *
  * Updates the name of an existing customer
- * 
+ *
  * Flow:
  * 1. Load customer via Factory
  * 2. Call updateName() on aggregate
  * 3. Save via Write Repository
- * 
+ *
  * @throws CustomerNotFoundException if customer doesn't exist
  */
 @CommandHandler(UpdateCustomerNameCommand)
-export class UpdateCustomerNameHandler
-  implements ICommandHandler<UpdateCustomerNameCommand>
-{
+export class UpdateCustomerNameHandler implements ICommandHandler<UpdateCustomerNameCommand> {
   constructor(
     @Inject('ICustomerFactory')
     private readonly factory: ICustomerFactory,

@@ -6,22 +6,18 @@ import { ICustomerReadRepository } from '@customer/domain/interfaces/repositorie
 
 /**
  * GetCustomersByUserIdHandler
- * 
+ *
  * Retrieves all customers linked to a User
  * Returns empty array if no customers found
  */
 @QueryHandler(GetCustomersByUserIdQuery)
-export class GetCustomersByUserIdHandler
-  implements IQueryHandler<GetCustomersByUserIdQuery>
-{
+export class GetCustomersByUserIdHandler implements IQueryHandler<GetCustomersByUserIdQuery> {
   constructor(
     @Inject('ICustomerReadRepository')
     private readonly readRepo: ICustomerReadRepository,
   ) {}
 
-  async execute(
-    query: GetCustomersByUserIdQuery,
-  ): Promise<CustomerReadModel[]> {
+  async execute(query: GetCustomersByUserIdQuery): Promise<CustomerReadModel[]> {
     return this.readRepo.findByUserId(query.userId);
   }
 }

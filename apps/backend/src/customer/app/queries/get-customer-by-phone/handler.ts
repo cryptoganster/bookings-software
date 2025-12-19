@@ -6,25 +6,18 @@ import { ICustomerReadRepository } from '@customer/domain/interfaces/repositorie
 
 /**
  * GetCustomerByPhoneHandler
- * 
+ *
  * Retrieves a customer by WhatsApp phone within a business
  * Returns null if not found (doesn't throw)
  */
 @QueryHandler(GetCustomerByPhoneQuery)
-export class GetCustomerByPhoneHandler
-  implements IQueryHandler<GetCustomerByPhoneQuery>
-{
+export class GetCustomerByPhoneHandler implements IQueryHandler<GetCustomerByPhoneQuery> {
   constructor(
     @Inject('ICustomerReadRepository')
     private readonly readRepo: ICustomerReadRepository,
   ) {}
 
-  async execute(
-    query: GetCustomerByPhoneQuery,
-  ): Promise<CustomerReadModel | null> {
-    return this.readRepo.findByWhatsAppPhone(
-      query.businessId,
-      query.whatsappPhone,
-    );
+  async execute(query: GetCustomerByPhoneQuery): Promise<CustomerReadModel | null> {
+    return this.readRepo.findByWhatsAppPhone(query.businessId, query.whatsappPhone);
   }
 }

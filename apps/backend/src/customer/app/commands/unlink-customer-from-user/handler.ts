@@ -7,24 +7,22 @@ import { CustomerNotFoundException } from '@customer/domain/exceptions';
 
 /**
  * UnlinkCustomerFromUserHandler
- * 
+ *
  * Unlinks a registered customer from their User
- * 
+ *
  * Flow:
  * 1. Load customer via Factory
  * 2. Call unlinkFromUser() on aggregate
  * 3. Save via Write Repository
  * 4. Event CustomerUnlinkedFromUser is published
- * 
+ *
  * @throws CustomerNotFoundException if customer doesn't exist
  * @throws CustomerNotLinkedToUserException if not linked
- * 
+ *
  * @see Property 9: Unlinking preserves customer identity
  */
 @CommandHandler(UnlinkCustomerFromUserCommand)
-export class UnlinkCustomerFromUserHandler
-  implements ICommandHandler<UnlinkCustomerFromUserCommand>
-{
+export class UnlinkCustomerFromUserHandler implements ICommandHandler<UnlinkCustomerFromUserCommand> {
   constructor(
     @Inject('ICustomerFactory')
     private readonly factory: ICustomerFactory,
