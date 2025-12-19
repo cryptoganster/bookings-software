@@ -159,14 +159,17 @@ export class Customer extends VersionedAggregateRoot {
    * @throws CustomerAlreadyDeletedException if already deleted
    */
   anonymize(deletedBy: string): void {
-    // Check if already deleted (phone starts with "DELETED_")
-    if (this.whatsappPhone.getValue().startsWith('DELETED_')) {
+    // Check if already deleted (phone starts with "+999")
+    if (this.whatsappPhone.getValue().startsWith('+999')) {
       throw new CustomerAlreadyDeletedException(this.id.getValue());
     }
 
     // Anonymize data
     this.name = null;
-    this.whatsappPhone = WhatsAppPhone.fromString(`DELETED_${Date.now()}`);
+    // Use a special phone number format for deleted customers: +999 + last 10 digits of timestamp
+    // This maintains E.164 format while being clearly identifiable as deleted
+    const timestamp = Date.now().toString().slice(-10);
+    this.whatsappPhone = WhatsAppPhone.fromString(`+999${timestamp}`);
 
     // Unlink from User if linked
     if (this.userId !== null) {
