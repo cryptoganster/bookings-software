@@ -40,12 +40,12 @@ logs/
 coverage/
 .nyc_output/
 
-# Kiro
-.kiro/
-
 # TypeORM
 ormconfig.json
 
 # Tests
 test-results/
+
+# Kiro IDE settings (contains secrets)
+.kiro/settings/
 
