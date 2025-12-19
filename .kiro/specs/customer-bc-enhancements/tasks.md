@@ -116,7 +116,7 @@ Este documento proporciona un checklist de implementación paso a paso para las 
   - _Edge Cases: 2, 7, 9_
   - **Commit:** `feat(customer): implement search in CustomerReadRepository`
 
-- [ ] 2.5 Write Unit Tests for SearchCustomersHandler
+- [x] 2.5 Write Unit Tests for SearchCustomersHandler
   - Test search by name (case-insensitive)
   - Test search by phone
   - Test filter by type (anonymous/registered)
@@ -129,14 +129,14 @@ Este documento proporciona un checklist de implementación paso a paso para las 
   - _Edge Cases: 2, 7, 9_
   - **Commit:** `test(customer): add unit tests for SearchCustomersHandler`
 
-- [ ] 2.6 Create GetCustomerStatsQuery
+- [x] 2.6 Create GetCustomerStatsQuery
   - Create `apps/backend/src/customer/app/queries/get-customer-stats/query.ts`
   - Query extends `Query<CustomerStats>`
   - Include: totalCustomers, anonymousCount, registeredCount, newThisMonth, newThisWeek, topCustomers
   - _Requirements: 3.1_
   - **Commit:** `feat(customer): add GetCustomerStatsQuery`
 
-- [ ] 2.7 Implement GetCustomerStatsHandler
+- [x] 2.7 Implement GetCustomerStatsHandler
   - Create `apps/backend/src/customer/app/queries/get-customer-stats/handler.ts`
   - Use aggregation queries (COUNT, GROUP BY)
   - Join with appointments table for appointmentCount
@@ -144,25 +144,25 @@ Este documento proporciona un checklist de implementación paso a paso para las 
   - _Requirements: 3.1_
   - **Commit:** `feat(customer): implement GetCustomerStatsHandler`
 
-- [ ] 2.8 Update ICustomerReadRepository for Stats
+- [x] 2.8 Update ICustomerReadRepository for Stats
   - Add `getStats(businessId: string): Promise<CustomerStats>` method
   - _Requirements: 3.1_
   - **Commit:** `feat(customer): add getStats method to ICustomerReadRepository`
 
-- [ ] 2.9 Implement CustomerReadRepository.getStats
+- [x] 2.9 Implement CustomerReadRepository.getStats
   - Implement getStats method with aggregation queries
   - Cache results for 5 minutes
   - _Requirements: 3.1_
   - **Commit:** `feat(customer): implement getStats in CustomerReadRepository`
 
-- [ ] 2.10 Write Unit Tests for GetCustomerStatsHandler
+- [x] 2.10 Write Unit Tests for GetCustomerStatsHandler
   - Test stats calculation
   - Test time-based filtering
   - Test top customers query
   - _Requirements: 3.1_
   - **Commit:** `test(customer): add unit tests for GetCustomerStatsHandler`
 
-- [ ] 2.11 Create Database Migration for Search Indexes
+- [x] 2.11 Create Database Migration for Search Indexes
   - Create migration `apps/backend/src/database/migrations/XXXXXX-add-search-indexes-to-customers.ts`
   - Add index on LOWER(name) for case-insensitive search
   - Add index on whatsapp_phone

@@ -24,6 +24,8 @@ import { UnlinkCustomerFromUserHandler } from '@customer/app/commands/unlink-cus
 import { GetCustomerHandler } from '@customer/app/queries/get-customer/handler';
 import { GetCustomerByPhoneHandler } from '@customer/app/queries/get-customer-by-phone/handler';
 import { GetCustomersByUserIdHandler } from '@customer/app/queries/get-customers-by-user-id/handler';
+import { SearchCustomersHandler } from '@customer/app/queries/search-customers/handler';
+import { GetCustomerStatsHandler } from '@customer/app/queries/get-customer-stats/handler';
 
 const commandHandlers = [
   IdentifyCustomerHandler,
@@ -32,7 +34,13 @@ const commandHandlers = [
   UnlinkCustomerFromUserHandler,
 ];
 
-const queryHandlers = [GetCustomerHandler, GetCustomerByPhoneHandler, GetCustomersByUserIdHandler];
+const queryHandlers = [
+  GetCustomerHandler,
+  GetCustomerByPhoneHandler,
+  GetCustomersByUserIdHandler,
+  SearchCustomersHandler,
+  GetCustomerStatsHandler,
+];
 
 const factories = [
   {
