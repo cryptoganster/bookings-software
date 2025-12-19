@@ -19,6 +19,7 @@ import { IdentifyCustomerHandler } from '@customer/app/commands/identify-custome
 import { UpdateCustomerNameHandler } from '@customer/app/commands/update-customer-name/handler';
 import { LinkCustomerToUserHandler } from '@customer/app/commands/link-customer-to-user/handler';
 import { UnlinkCustomerFromUserHandler } from '@customer/app/commands/unlink-customer-from-user/handler';
+import { MergeCustomersHandler } from '@customer/app/commands/merge-customers/handler';
 
 // Query Handlers
 import { GetCustomerHandler } from '@customer/app/queries/get-customer/handler';
@@ -36,6 +37,7 @@ const commandHandlers = [
   UpdateCustomerNameHandler,
   LinkCustomerToUserHandler,
   UnlinkCustomerFromUserHandler,
+  MergeCustomersHandler,
 ];
 
 const queryHandlers = [

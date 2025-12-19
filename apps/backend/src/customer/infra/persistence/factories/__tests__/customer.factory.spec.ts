@@ -55,6 +55,7 @@ describe('CustomerFactory', () => {
         whatsapp_phone: '+18095551234',
         name: 'Test Customer',
         version: 5, // Specific version
+        merged_into: null,
         created_at: new Date(),
         updated_at: new Date(),
       };
@@ -98,6 +99,7 @@ describe('CustomerFactory', () => {
         whatsapp_phone: '+18095555678',
         name: 'Anonymous Customer',
         version: 1,
+        merged_into: null,
         created_at: new Date(),
         updated_at: new Date(),
       };
@@ -125,6 +127,7 @@ describe('CustomerFactory', () => {
         whatsapp_phone: '+18095559999',
         name: 'Registered Customer',
         version: 3,
+        merged_into: null,
         created_at: new Date(),
         updated_at: new Date(),
       };
@@ -151,6 +154,7 @@ describe('CustomerFactory', () => {
         whatsapp_phone: '+18095558888',
         name: 'Test Customer',
         version: 2,
+        merged_into: null,
         created_at: new Date(),
         updated_at: new Date(),
       };
@@ -180,6 +184,7 @@ describe('CustomerFactory', () => {
         whatsapp_phone: phone,
         name: 'Phone Customer',
         version: 1,
+        merged_into: null,
         created_at: new Date(),
         updated_at: new Date(),
       };
@@ -225,6 +230,7 @@ describe('CustomerFactory', () => {
         whatsapp_phone: phone,
         name: 'Customer 1',
         version: 1,
+        merged_into: null,
         created_at: new Date(),
         updated_at: new Date(),
       };
@@ -262,6 +268,7 @@ describe('CustomerFactory', () => {
           whatsapp_phone: `+1809555${version.toString().padStart(4, '0')}`,
           name: `Customer ${version}`,
           version,
+          merged_into: null,
           created_at: new Date(),
           updated_at: new Date(),
         };
