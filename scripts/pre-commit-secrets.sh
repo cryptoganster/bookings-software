@@ -1,69 +1,40 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Secret scanning script for pre-commit hook
 # Detects common secret patterns in staged files
 
 set -e
 
-# Colors for output
-RED='\033[0;31m'
-YELLOW='\033[1;33m'
-GREEN='\033[0;32m'
-NC='\033[0m' # No Color
-
-# Secret patterns to detect
-declare -A PATTERNS=(
-  ["AWS Access Key"]="AKIA[0-9A-Z]{16}"
-  ["AWS Secret Key"]="aws_secret_access_key.*['\"][0-9a-zA-Z/+]{40}['\"]"
-  ["Generic API Key"]="api[_-]?key.*['\"][0-9a-zA-Z]{32,}['\"]"
-  ["Generic Secret"]="secret.*['\"][0-9a-zA-Z]{32,}['\"]"
-  ["Private Key"]="-----BEGIN (RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----"
-  ["GitHub Token"]="gh[pousr]_[0-9a-zA-Z]{36}"
-  ["Slack Token"]="xox[baprs]-[0-9a-zA-Z-]+"
-  ["Stripe Key"]="sk_live_[0-9a-zA-Z]{24,}"
-  ["JWT Token"]="eyJ[A-Za-z0-9-_=]+\.eyJ[A-Za-z0-9-_=]+\.[A-Za-z0-9-_.+/=]+"
-  ["Password in URL"]="[a-zA-Z]{3,10}://[^/\\s:@]{3,20}:[^/\\s:@]{3,20}@.{1,100}"
-)
-
-# Files to exclude from scanning
-EXCLUDE_PATTERNS=(
-  "pnpm-lock.yaml"
-  "package-lock.json"
-  "*.min.js"
-  "*.min.css"
-  "dist/"
-  "build/"
-  "coverage/"
-  ".next/"
-  "node_modules/"
-)
-
-# Load .secretsignore if it exists
-if [ -f ".secretsignore" ]; then
-  while IFS= read -r line; do
-    # Skip empty lines and comments
-    [[ -z "$line" || "$line" =~ ^# ]] && continue
-    EXCLUDE_PATTERNS+=("$line")
-  done < ".secretsignore"
-fi
-
 # Get staged files
 STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
 
 if [ -z "$STAGED_FILES" ]; then
-  echo -e "${GREEN}✓${NC} No staged files to scan"
+  echo "✓ No staged files to scan"
   exit 0
 fi
 
-# Function to check if file should be excluded
+# Files to exclude from scanning
 should_exclude() {
   local file=$1
-  for pattern in "${EXCLUDE_PATTERNS[@]}"; do
-    if [[ "$file" == $pattern ]]; then
-      return 0
-    fi
-  done
-  return 1
+  
+  # Check .secretsignore if it exists
+  if [ -f ".secretsignore" ]; then
+    while IFS= read -r pattern; do
+      # Skip empty lines and comments
+      [[ -z "$pattern" || "$pattern" =~ ^# ]] && continue
+      # Check if file matches pattern
+      if [[ "$file" == $pattern || "$file" == *"$pattern"* ]]; then
+        return 0
+      fi
+    done < ".secretsignore"
+  fi
+  
+  # Default exclusions
+  case "$file" in
+    pnpm-lock.yaml|package-lock.json|*.min.js|*.min.css) return 0 ;;
+    dist/*|build/*|coverage/*|.next/*|node_modules/*) return 0 ;;
+    *) return 1 ;;
+  esac
 }
 
 # Scan files
@@ -82,24 +53,65 @@ for file in $STAGED_FILES; do
     continue
   fi
   
-  # Scan file for each pattern
-  for pattern_name in "${!PATTERNS[@]}"; do
-    pattern="${PATTERNS[$pattern_name]}"
-    
-    # Use grep with Perl regex for better pattern matching
-    if grep -qP "$pattern" "$file" 2>/dev/null; then
-      echo -e "${RED}✗${NC} Potential secret detected in ${YELLOW}$file${NC}"
-      echo -e "  Pattern: ${YELLOW}$pattern_name${NC}"
-      echo -e "  Regex: $pattern"
-      echo ""
-      SECRETS_FOUND=$((SECRETS_FOUND + 1))
-    fi
-  done
+  # Check for AWS Access Keys
+  if grep -qE "AKIA[0-9A-Z]{16}" "$file" 2>/dev/null; then
+    echo "✗ Potential AWS Access Key detected in $file"
+    SECRETS_FOUND=$((SECRETS_FOUND + 1))
+  fi
+  
+  # Check for AWS Secret Keys
+  if grep -qE "aws_secret_access_key" "$file" 2>/dev/null; then
+    echo "✗ Potential AWS Secret Key detected in $file"
+    SECRETS_FOUND=$((SECRETS_FOUND + 1))
+  fi
+  
+  # Check for Generic API Keys
+  if grep -qE "api[_-]?key.*['\"][0-9a-zA-Z]{32,}['\"]" "$file" 2>/dev/null; then
+    echo "✗ Potential API Key detected in $file"
+    SECRETS_FOUND=$((SECRETS_FOUND + 1))
+  fi
+  
+  # Check for Private Keys
+  if grep -qE "BEGIN.*PRIVATE KEY" "$file" 2>/dev/null; then
+    echo "✗ Potential Private Key detected in $file"
+    SECRETS_FOUND=$((SECRETS_FOUND + 1))
+  fi
+  
+  # Check for GitHub Tokens
+  if grep -qE "gh[pousr]_[0-9a-zA-Z]{36}" "$file" 2>/dev/null; then
+    echo "✗ Potential GitHub Token detected in $file"
+    SECRETS_FOUND=$((SECRETS_FOUND + 1))
+  fi
+  
+  # Check for Slack Tokens
+  if grep -qE "xox[baprs]-" "$file" 2>/dev/null; then
+    echo "✗ Potential Slack Token detected in $file"
+    SECRETS_FOUND=$((SECRETS_FOUND + 1))
+  fi
+  
+  # Check for Stripe Keys
+  if grep -qE "sk_live_" "$file" 2>/dev/null; then
+    echo "✗ Potential Stripe Key detected in $file"
+    SECRETS_FOUND=$((SECRETS_FOUND + 1))
+  fi
+  
+  # Check for JWT Tokens (long ones)
+  if grep -qE "eyJ[A-Za-z0-9_-]{20,}\.eyJ[A-Za-z0-9_-]{20,}" "$file" 2>/dev/null; then
+    echo "✗ Potential JWT Token detected in $file"
+    SECRETS_FOUND=$((SECRETS_FOUND + 1))
+  fi
+  
+  # Check for Passwords in URLs
+  if grep -qE "://[^/\s:@]{3,20}:[^/\s:@]{3,20}@" "$file" 2>/dev/null; then
+    echo "✗ Potential Password in URL detected in $file"
+    SECRETS_FOUND=$((SECRETS_FOUND + 1))
+  fi
 done
 
 if [ $SECRETS_FOUND -gt 0 ]; then
-  echo -e "${RED}❌ Secret scanning failed!${NC}"
-  echo -e "${YELLOW}$SECRETS_FOUND potential secret(s) detected${NC}"
+  echo ""
+  echo "❌ Secret scanning failed!"
+  echo "$SECRETS_FOUND potential secret(s) detected"
   echo ""
   echo "To fix:"
   echo "  1. Remove the secrets from the files"
@@ -111,5 +123,5 @@ if [ $SECRETS_FOUND -gt 0 ]; then
   exit 1
 fi
 
-echo -e "${GREEN}✓${NC} No secrets detected"
+echo "✓ No secrets detected"
 exit 0
