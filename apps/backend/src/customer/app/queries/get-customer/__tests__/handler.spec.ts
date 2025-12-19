@@ -22,6 +22,7 @@ describe('GetCustomerHandler', () => {
   beforeEach(async () => {
     mockReadRepo = {
       search: jest.fn(),
+      getStats: jest.fn(),
       findById: jest.fn() as any,
       findByWhatsAppPhone: jest.fn(),
       findByBusinessId: jest.fn(),

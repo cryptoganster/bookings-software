@@ -3,6 +3,7 @@ import {
   SearchCustomersFilters,
   SearchCustomersResult,
 } from '@customer/app/queries/search-customers/query';
+import { CustomerStats } from '@customer/app/queries/get-customer-stats/query';
 
 /**
  * Read Repository Interface for Customer Queries
@@ -20,6 +21,15 @@ export interface ICustomerReadRepository {
    * Requirements: 2.1, 2.2, 2.3, 2.4, 2.5
    */
   search(filters: SearchCustomersFilters): Promise<SearchCustomersResult>;
+
+  /**
+   * Get customer statistics for a business
+   * Includes counts, time-based metrics, and top customers
+   *
+   * Requirements: 3.1
+   */
+  getStats(businessId: string): Promise<CustomerStats>;
+
   /**
    * Find customer by ID
    * @throws CustomerNotFoundException if not found
