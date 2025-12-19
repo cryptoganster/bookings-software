@@ -217,7 +217,7 @@ Este documento proporciona un checklist de implementación paso a paso para las 
   - _Edge Cases: 5_
   - **Commit:** `test(customer): add unit tests for deduplication service`
 
-- [ ] 3.5 Write Unit Tests for DetectDuplicateCustomersHandler
+- [x] 3.5 Write Unit Tests for DetectDuplicateCustomersHandler
   - Test duplicate detection
   - Test threshold filtering
   - Test symmetry (A duplicate of B = B duplicate of A)
