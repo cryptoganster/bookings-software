@@ -1,6 +1,5 @@
 import { AppDataSource } from '@config/database';
 import { seedAuth } from '@database/seeds/auth.seed';
-import { seedCustomer } from '@database/seeds/customer.seed';
 import { seedOffering } from '@database/seeds/offering.seed';
 import { seedAvailability } from '@database/seeds/availability.seed';
 import { seedBooking } from '@database/seeds/booking.seed';
