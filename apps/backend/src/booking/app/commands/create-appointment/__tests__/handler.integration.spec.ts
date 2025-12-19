@@ -11,6 +11,7 @@ describe('CreateAppointmentHandler Integration', () => {
   let appointmentRepository: jest.Mocked<IAppointmentWriteRepository>;
   let capacityFactory: any;
   let capacityWriteRepository: any;
+  let customerReadRepository: any;
   let uow: jest.Mocked<IUnitOfWork>;
 
   beforeEach(async () => {
@@ -27,6 +28,14 @@ describe('CreateAppointmentHandler Integration', () => {
 
     capacityWriteRepository = {
       save: jest.fn(),
+    };
+
+    customerReadRepository = {
+      findById: jest.fn(),
+      findByWhatsAppPhone: jest.fn(),
+      findByBusinessId: jest.fn(),
+      findByUserId: jest.fn(),
+      findAnonymousByBusinessId: jest.fn(),
     };
 
     uow = {
@@ -58,6 +67,10 @@ describe('CreateAppointmentHandler Integration', () => {
           useValue: capacityWriteRepository,
         },
         {
+          provide: 'ICustomerReadRepository',
+          useValue: customerReadRepository,
+        },
+        {
           provide: 'IUnitOfWork',
           useValue: uow,
         },
@@ -79,6 +92,7 @@ describe('CreateAppointmentHandler Integration', () => {
     };
 
     capacityFactory.loadByOfferingAndDate.mockResolvedValue(mockCapacity);
+    customerReadRepository.findById.mockResolvedValue({ id: '550e8400-e29b-41d4-a716-446655440001' });
 
     // Use a future date
     const futureDate = new Date();
@@ -109,6 +123,7 @@ describe('CreateAppointmentHandler Integration', () => {
     };
 
     capacityFactory.loadByOfferingAndDate.mockResolvedValue(mockCapacity);
+    customerReadRepository.findById.mockResolvedValue({ id: '550e8400-e29b-41d4-a716-446655440001' });
 
     // Use a future date
     const futureDate = new Date();
@@ -129,6 +144,7 @@ describe('CreateAppointmentHandler Integration', () => {
   it('should throw NoAvailableSlotsException if capacity is null', async () => {
     // Arrange
     capacityFactory.loadByOfferingAndDate.mockResolvedValue(null);
+    customerReadRepository.findById.mockResolvedValue({ id: '550e8400-e29b-41d4-a716-446655440001' });
 
     // Use a future date
     const futureDate = new Date();
