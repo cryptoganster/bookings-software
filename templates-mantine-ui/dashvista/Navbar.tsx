@@ -1,17 +1,17 @@
-import { Badge, Flex, ScrollArea, Text } from "@mantine/core"
-import { Link, useLocation } from "@remix-run/react"
+import { Badge, Flex, ScrollArea, Text } from "@mantine/core";
+import { Link, useLocation } from "@remix-run/react";
 import {
   Calendar,
   Home2,
   Message,
   Profile2User,
   TaskSquare,
-} from "iconsax-react"
-import UsersChat from "../components/UsersChat"
-import classes from "./styles/Navbar.module.css"
+} from "iconsax-react";
+import UsersChat from "../components/UsersChat";
+import classes from "./styles/Navbar.module.css";
 
 export default function Navbar() {
-  const { pathname } = useLocation()
+  const { pathname } = useLocation();
 
   return (
     <Flex h="100%" direction="column" gap={30} align="start" w="100%">
@@ -59,14 +59,14 @@ export default function Navbar() {
                   </Badge>
                 )}
               </Link>
-            )
+            );
           })}
         </Flex>
       </ScrollArea>
 
       <UsersChat />
     </Flex>
-  )
+  );
 }
 
 const navlinks = [
@@ -105,4 +105,4 @@ const navlinks = [
     icon: Calendar,
     notiCount: 0,
   },
-]
+];

@@ -1,4 +1,4 @@
-Vamos a proceder a crear un spec donde se incluya la implementación backend-frontend de 
+Vamos a proceder a crear un spec donde se incluya la implementación backend-frontend de
 
 1. Offering Categories y Tags
 
@@ -34,13 +34,13 @@ Ejemplo:
 
 Offering {
 
-  name: "Corte de Pelo"
+name: "Corte de Pelo"
 
-  duration: 30 min
+duration: 30 min
 
-  price: 150.00  // ← Nuevo campo
+price: 150.00 // ← Nuevo campo
 
-  currency: "MXN"
+currency: "MXN"
 
 }
 
@@ -62,11 +62,11 @@ Ejemplo:
 
 Offering {
 
-  name: "Corte de Pelo"
+name: "Corte de Pelo"
 
-  description: "Corte profesional con lavado incluido. Incluye asesoría de estilo."
+description: "Corte profesional con lavado incluido. Incluye asesoría de estilo."
 
-  imageUrl: "https://cdn.example.com/corte.jpg"
+imageUrl: "https://cdn.example.com/corte.jpg"
 
 }
 
@@ -88,9 +88,9 @@ Ejemplos:
 
 Offering {
 
-  name: "Tinte"
+name: "Tinte"
 
-  availabilityRules: {
+availabilityRules: {
 
     daysOfWeek: [1, 2, 3, 4, 5],  // Solo lunes a viernes
 
@@ -102,7 +102,7 @@ Offering {
 
     blackoutDates: ["2024-12-25"]   // Fechas específicas bloqueadas
 
-  }
+}
 
 }
 
@@ -114,9 +114,9 @@ Ejemplos:
 
 Offering {
 
-  name: "Consulta Inicial Gratis"
+name: "Consulta Inicial Gratis"
 
-  bookingLimits: {
+bookingLimits: {
 
     maxPerCustomer: 1,              // Solo 1 vez por cliente
 
@@ -124,7 +124,7 @@ Offering {
 
     cooldownDays: 30                // Esperar 30 días entre reservas
 
-  }
+}
 
 }
 
@@ -142,9 +142,9 @@ REST API + Frontend (necesario para usar el sistema)
 
 Utiliza inteligentemente entre REST API y Websocket dependiendo el tipo de endpoint, busca actualmente como están nuestros endpoints, puedes hacer endpoints de stream de eventos en ws por ejemplo. Los test e2e estarán en apps/backend/test/e2e
 
-Además, es suficiente con los BC actuales o será necesario antes que todo implementar el BC Customer por ejemplo que aún no está? 
+Además, es suficiente con los BC actuales o será necesario antes que todo implementar el BC Customer por ejemplo que aún no está?
 
-Lee el PRD: 
+Lee el PRD:
 
 .kiro/steering/PRD.md
 

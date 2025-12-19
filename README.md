@@ -492,6 +492,7 @@ Content-Type: application/json
 ```
 
 **Respuesta:**
+
 ```json
 {
   "user": {
@@ -519,6 +520,7 @@ Content-Type: application/json
 ```
 
 **Respuesta:**
+
 ```json
 {
   "user": {
@@ -564,6 +566,7 @@ Content-Type: application/json
 ```
 
 **Reglas:**
+
 - No se puede agregar un rol que el usuario ya tiene
 - El usuario debe existir y estar activo
 
@@ -575,6 +578,7 @@ Authorization: Bearer {token}
 ```
 
 **Reglas:**
+
 - No se puede remover el último rol de un usuario
 - El usuario siempre debe tener al menos un rol
 
@@ -583,28 +587,27 @@ Authorization: Bearer {token}
 #### Proteger Endpoints con Guards
 
 ```typescript
-import { Controller, Get, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '@auth/infra/guards/jwt-auth.guard';
-import { RolesGuard } from '@auth/infra/guards/roles.guard';
-import { Roles } from '@auth/presentation/decorators/roles.decorator';
-import { UserRole } from '@auth/domain/vo/user-role';
+import { Controller, Get, UseGuards } from "@nestjs/common";
+import { JwtAuthGuard } from "@auth/infra/guards/jwt-auth.guard";
+import { RolesGuard } from "@auth/infra/guards/roles.guard";
+import { Roles } from "@auth/presentation/decorators/roles.decorator";
+import { UserRole } from "@auth/domain/vo/user-role";
 
-@Controller('admin')
+@Controller("admin")
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class AdminController {
-  
-  @Get('dashboard')
+  @Get("dashboard")
   @Roles(UserRole.ADMIN)
   getDashboard() {
     // Solo accesible para usuarios con rol ADMIN
-    return { message: 'Admin dashboard' };
+    return { message: "Admin dashboard" };
   }
-  
-  @Get('business-stats')
+
+  @Get("business-stats")
   @Roles(UserRole.BUSINESS_OWNER, UserRole.ADMIN)
   getBusinessStats() {
     // Accesible para BUSINESS_OWNER o ADMIN
-    return { message: 'Business statistics' };
+    return { message: "Business statistics" };
   }
 }
 ```
@@ -612,15 +615,14 @@ export class AdminController {
 #### Obtener Usuario Actual
 
 ```typescript
-import { Controller, Get, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '@auth/infra/guards/jwt-auth.guard';
-import { CurrentUser } from '@auth/presentation/decorators/current-user.decorator';
-import { UserPayload } from '@auth/presentation/decorators/current-user.decorator';
+import { Controller, Get, UseGuards } from "@nestjs/common";
+import { JwtAuthGuard } from "@auth/infra/guards/jwt-auth.guard";
+import { CurrentUser } from "@auth/presentation/decorators/current-user.decorator";
+import { UserPayload } from "@auth/presentation/decorators/current-user.decorator";
 
-@Controller('profile')
+@Controller("profile")
 @UseGuards(JwtAuthGuard)
 export class ProfileController {
-  
   @Get()
   getProfile(@CurrentUser() user: UserPayload) {
     // user contiene: { userId, email, roles }
@@ -646,6 +648,7 @@ Content-Type: application/json
 ```
 
 **Reglas:**
+
 - Solo se puede verificar una vez
 - Intentar verificar un email ya verificado lanza `EmailAlreadyVerifiedException`
 
@@ -666,6 +669,7 @@ Authorization: Bearer {token}
 ```
 
 **Reglas:**
+
 - Usuarios desactivados no pueden hacer login
 - Las operaciones son idempotentes (no fallan si ya están en ese estado)
 
@@ -674,6 +678,7 @@ Authorization: Bearer {token}
 #### Account BC
 
 Cuando un usuario se registra con rol `BUSINESS_OWNER`, el Account BC automáticamente:
+
 1. Escucha el evento `UserRegistered`
 2. Crea un `BusinessOwner` vinculado al usuario
 3. Asigna plan de suscripción inicial (FREE)
@@ -681,6 +686,7 @@ Cuando un usuario se registra con rol `BUSINESS_OWNER`, el Account BC automátic
 #### Customer BC
 
 Cuando un cliente anónimo se vincula a un usuario:
+
 1. Customer BC publica evento `CustomerLinkedToUser`
 2. Auth BC escucha el evento
 3. Agrega automáticamente el rol `CUSTOMER` al usuario
@@ -698,6 +704,7 @@ Business (Business)        Appointment (Booking)
 ```
 
 **Beneficios:**
+
 - Un usuario puede ser proveedor (BUSINESS_OWNER) y consumidor (CUSTOMER) simultáneamente
 - Preparado para marketplace: Juan (abogado) publica servicios Y agenda cita con dentista
 - Separación clara de concerns: User = autenticación, BusinessOwner = cuenta, Business = negocio
@@ -711,12 +718,12 @@ El sistema emite eventos en tiempo real vía WebSocket para notificar cambios a 
 ### Conexión
 
 ```javascript
-import { io } from 'socket.io-client';
+import { io } from "socket.io-client";
 
-const socket = io('http://localhost:3000', {
+const socket = io("http://localhost:3000", {
   auth: {
-    token: 'your-jwt-token'
-  }
+    token: "your-jwt-token",
+  },
 });
 
 // El servidor automáticamente une al cliente a la room de su negocio
@@ -730,21 +737,23 @@ const socket = io('http://localhost:3000', {
 Emitido cuando se crea un nuevo servicio.
 
 **Payload:**
+
 ```typescript
 {
-  offeringId: string;        // UUID del offering
-  name: string;              // Nombre del servicio
-  durationMinutes: number;   // Duración en minutos
+  offeringId: string; // UUID del offering
+  name: string; // Nombre del servicio
+  durationMinutes: number; // Duración en minutos
   maxCapacityPerSlot: number; // Capacidad máxima por slot
   maxDailyCapacity: number | null; // Límite diario (opcional)
-  timestamp: string;         // ISO 8601 timestamp
+  timestamp: string; // ISO 8601 timestamp
 }
 ```
 
 **Ejemplo:**
+
 ```javascript
-socket.on('offering:created', (data) => {
-  console.log('Nuevo servicio creado:', data);
+socket.on("offering:created", (data) => {
+  console.log("Nuevo servicio creado:", data);
   // Actualizar UI, invalidar cache, etc.
 });
 ```
@@ -754,21 +763,23 @@ socket.on('offering:created', (data) => {
 Emitido cuando se actualiza un servicio existente.
 
 **Payload:**
+
 ```typescript
 {
-  offeringId: string;        // UUID del offering
-  name: string;              // Nombre actualizado
-  durationMinutes: number;   // Duración actualizada
+  offeringId: string; // UUID del offering
+  name: string; // Nombre actualizado
+  durationMinutes: number; // Duración actualizada
   maxCapacityPerSlot: number; // Capacidad actualizada
   maxDailyCapacity: number | null; // Límite diario actualizado
-  timestamp: string;         // ISO 8601 timestamp
+  timestamp: string; // ISO 8601 timestamp
 }
 ```
 
 **Ejemplo:**
+
 ```javascript
-socket.on('offering:updated', (data) => {
-  console.log('Servicio actualizado:', data);
+socket.on("offering:updated", (data) => {
+  console.log("Servicio actualizado:", data);
   // Actualizar servicio en UI
 });
 ```
@@ -778,17 +789,19 @@ socket.on('offering:updated', (data) => {
 Emitido cuando se desactiva un servicio.
 
 **Payload:**
+
 ```typescript
 {
-  offeringId: string;  // UUID del offering desactivado
-  timestamp: string;   // ISO 8601 timestamp
+  offeringId: string; // UUID del offering desactivado
+  timestamp: string; // ISO 8601 timestamp
 }
 ```
 
 **Ejemplo:**
+
 ```javascript
-socket.on('offering:deactivated', (data) => {
-  console.log('Servicio desactivado:', data);
+socket.on("offering:deactivated", (data) => {
+  console.log("Servicio desactivado:", data);
   // Marcar servicio como inactivo en UI
 });
 ```
@@ -798,17 +811,19 @@ socket.on('offering:deactivated', (data) => {
 Emitido cuando se reactiva un servicio previamente desactivado.
 
 **Payload:**
+
 ```typescript
 {
-  offeringId: string;  // UUID del offering activado
-  timestamp: string;   // ISO 8601 timestamp
+  offeringId: string; // UUID del offering activado
+  timestamp: string; // ISO 8601 timestamp
 }
 ```
 
 **Ejemplo:**
+
 ```javascript
-socket.on('offering:activated', (data) => {
-  console.log('Servicio activado:', data);
+socket.on("offering:activated", (data) => {
+  console.log("Servicio activado:", data);
   // Marcar servicio como activo en UI
 });
 ```
@@ -820,13 +835,14 @@ socket.on('offering:activated', (data) => {
 Emitido cuando se crea una nueva cita.
 
 **Payload:**
+
 ```typescript
 {
-  appointmentId: string;  // UUID de la cita
-  customerId: string;     // UUID del cliente
-  offeringId: string;     // UUID del servicio
-  dateTime: string;       // ISO 8601 timestamp de la cita
-  timestamp: string;      // ISO 8601 timestamp del evento
+  appointmentId: string; // UUID de la cita
+  customerId: string; // UUID del cliente
+  offeringId: string; // UUID del servicio
+  dateTime: string; // ISO 8601 timestamp de la cita
+  timestamp: string; // ISO 8601 timestamp del evento
 }
 ```
 
@@ -835,10 +851,11 @@ Emitido cuando se crea una nueva cita.
 Emitido cuando se cancela una cita.
 
 **Payload:**
+
 ```typescript
 {
-  appointmentId: string;  // UUID de la cita cancelada
-  timestamp: string;      // ISO 8601 timestamp
+  appointmentId: string; // UUID de la cita cancelada
+  timestamp: string; // ISO 8601 timestamp
 }
 ```
 
@@ -849,11 +866,12 @@ Emitido cuando se cancela una cita.
 Emitido cuando se modifica una cita existente.
 
 **Payload:**
+
 ```typescript
 {
-  appointmentId: string;  // UUID de la cita
-  newDateTime: string;    // Nueva fecha/hora (ISO 8601)
-  timestamp: string;      // ISO 8601 timestamp
+  appointmentId: string; // UUID de la cita
+  newDateTime: string; // Nueva fecha/hora (ISO 8601)
+  timestamp: string; // ISO 8601 timestamp
 }
 ```
 
@@ -868,67 +886,67 @@ Los eventos de Appointment actualmente se emiten a todos los clientes debido a l
 ### Manejo de Errores
 
 ```javascript
-socket.on('connect_error', (error) => {
-  console.error('Error de conexión:', error);
+socket.on("connect_error", (error) => {
+  console.error("Error de conexión:", error);
 });
 
-socket.on('error', (error) => {
-  console.error('Error de WebSocket:', error);
+socket.on("error", (error) => {
+  console.error("Error de WebSocket:", error);
 });
 ```
 
 ### Ejemplo Completo
 
 ```javascript
-import { io } from 'socket.io-client';
+import { io } from "socket.io-client";
 
-const socket = io('http://localhost:3000', {
+const socket = io("http://localhost:3000", {
   auth: {
-    token: localStorage.getItem('jwt-token')
-  }
+    token: localStorage.getItem("jwt-token"),
+  },
 });
 
 // Escuchar eventos de offerings
-socket.on('offering:created', (data) => {
+socket.on("offering:created", (data) => {
   // Agregar nuevo offering a la lista
   addOfferingToUI(data);
 });
 
-socket.on('offering:updated', (data) => {
+socket.on("offering:updated", (data) => {
   // Actualizar offering en la lista
   updateOfferingInUI(data);
 });
 
-socket.on('offering:deactivated', (data) => {
+socket.on("offering:deactivated", (data) => {
   // Marcar como inactivo
   markOfferingAsInactive(data.offeringId);
 });
 
-socket.on('offering:activated', (data) => {
+socket.on("offering:activated", (data) => {
   // Marcar como activo
   markOfferingAsActive(data.offeringId);
 });
 
 // Escuchar eventos de appointments
-socket.on('appointment:created', (data) => {
+socket.on("appointment:created", (data) => {
   // Agregar nueva cita al calendario
   addAppointmentToCalendar(data);
 });
 
-socket.on('appointment:cancelled', (data) => {
+socket.on("appointment:cancelled", (data) => {
   // Remover cita del calendario
   removeAppointmentFromCalendar(data.appointmentId);
 });
 
-socket.on('appointment:modified', (data) => {
+socket.on("appointment:modified", (data) => {
   // Actualizar cita en el calendario
   updateAppointmentInCalendar(data);
 });
 
 // Manejo de errores
-socket.on('connect_error', (error) => {
-  console.error('Error de conexión:', error);
-  showErrorNotification('No se pudo conectar al servidor');
+socket.on("connect_error", (error) => {
+  console.error("Error de conexión:", error);
+  showErrorNotification("No se pudo conectar al servidor");
 });
 ```
 

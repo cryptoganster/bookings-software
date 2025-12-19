@@ -52,7 +52,7 @@ export interface LoginRequestDto {
 
 /**
  * DTO para login response
- * 
+ *
  * @remarks
  * - businessId removed: Use Business.ownerId → User.id instead
  * - roles array is included in UserDto
@@ -75,7 +75,7 @@ export interface RegisterRequestDto {
 /**
  * Roles de usuario disponibles
  */
-export type UserRole = 'BUSINESS_OWNER' | 'CUSTOMER' | 'ADMIN';
+export type UserRole = "BUSINESS_OWNER" | "CUSTOMER" | "ADMIN";
 
 /**
  * User DTO - Representa un usuario en la API
