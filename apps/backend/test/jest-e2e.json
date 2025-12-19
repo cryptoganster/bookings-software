@@ -13,6 +13,8 @@
     "^@availability/(.*)$": "<rootDir>/../src/availability/$1",
     "^@conversation/(.*)$": "<rootDir>/../src/conversation/$1",
     "^@auth/(.*)$": "<rootDir>/../src/auth/$1",
+    "^@customer/(.*)$": "<rootDir>/../src/customer/$1",
+    "^@offering/(.*)$": "<rootDir>/../src/offering/$1",
     "^uuid$": "<rootDir>/../node_modules/uuid/dist/index.js"
   }
 }

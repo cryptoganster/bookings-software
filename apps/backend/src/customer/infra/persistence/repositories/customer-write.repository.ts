@@ -37,7 +37,6 @@ export class CustomerWriteRepository implements ICustomerWriteRepository {
   async save(customer: Customer): Promise<void> {
     const model = CustomerWriteMapper.toModel(customer);
     const currentVersion = customer.getVersion().getValue();
-    const newVersion = currentVersion + 1;
 
     // Check if customer exists
     const existing = await this.repository.findOne({
@@ -45,13 +44,14 @@ export class CustomerWriteRepository implements ICustomerWriteRepository {
     });
 
     if (!existing) {
-      // Insert new customer
-      await this.repository.save({
-        ...model,
-        version: newVersion,
-      });
+      // Insert new customer with current version from aggregate
+      await this.repository.save(model);
       return;
     }
+
+    // For updates, the aggregate should have already incremented its version
+    // We need to check against the previous version (currentVersion - 1)
+    const previousVersion = currentVersion - 1;
 
     // Update existing customer with optimistic locking
     const result = await this.repository
@@ -62,11 +62,11 @@ export class CustomerWriteRepository implements ICustomerWriteRepository {
         business_id: model.business_id,
         whatsapp_phone: model.whatsapp_phone,
         name: model.name,
-        version: newVersion,
+        version: currentVersion, // Save the new version from aggregate
         updated_at: model.updated_at,
       })
       .where('id = :id', { id: model.id })
-      .andWhere('version = :version', { version: currentVersion })
+      .andWhere('version = :version', { version: previousVersion }) // Check against previous version
       .execute();
 
     if (result.affected === 0) {
