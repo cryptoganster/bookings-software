@@ -8,6 +8,7 @@ import { CreateAppointmentCommand } from '@booking/app/commands/create-appointme
 import { NoAvailableSlotsException } from '@booking/domain/exceptions/no-available-slots';
 import { GetActiveOfferingsQuery } from '@offering/app/queries/get-active-offerings';
 import { OfferingReadModel } from '@offering/domain/read-models/offering';
+import { IdentifyCustomerCommand } from '@customer/app/commands/identify-customer';
 
 /**
  * TEMPORARY: This handler still uses the mock repository directly
@@ -35,10 +36,42 @@ export class ProcessIncomingMessageHandler implements ICommandHandler<ProcessInc
   ) {}
 
   async execute(command: ProcessIncomingMessageCommand): Promise<void> {
-    // Obtener o crear conversación
-    const customerId = UUID.fromString(command.customerId);
+    // 1. Identificar o crear customer (anónimo) antes de procesar conversación
+    // Esto garantiza que el customer existe en la BD antes de crear la conversación
+    const identifyResult = await this.commandBus.execute(
+      new IdentifyCustomerCommand(
+        command.businessId,
+        command.customerPhone,
+        null, // Nombre se obtendrá después del perfil de WhatsApp
+      ),
+    );
+
+    // Usar el customerId retornado por IdentifyCustomerCommand
+    const customerId = UUID.fromString(identifyResult.customerId);
     const businessId = UUID.fromString(command.businessId);
 
+    /**
+     * TODO (Task 7.3): Update customer name when obtained from WhatsApp profile
+     *
+     * When WhatsApp Business API provides customer name from profile:
+     *
+     * ```typescript
+     * if (command.customerName && command.customerName !== '') {
+     *   await this.commandBus.execute(
+     *     new UpdateCustomerNameCommand(customerId.getValue(), command.customerName)
+     *   );
+     * }
+     * ```
+     *
+     * This will:
+     * - Update the customer's name in the database
+     * - Publish CustomerNameUpdated event
+     * - Allow Booking BC to refresh appointment display names
+     *
+     * **Requirements: 8.3**
+     */
+
+    // 2. Obtener o crear conversación
     let conversation = await this.conversationRepository.findByCustomerIdAndBusinessId(
       customerId,
       businessId,
