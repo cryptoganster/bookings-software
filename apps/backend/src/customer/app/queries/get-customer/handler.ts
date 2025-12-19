@@ -6,10 +6,10 @@ import { ICustomerReadRepository } from '@customer/domain/interfaces/repositorie
 
 /**
  * GetCustomerHandler
- * 
+ *
  * Retrieves a customer by ID
  * Uses Read Repository (CQRS read side)
- * 
+ *
  * @throws CustomerNotFoundException if not found
  */
 @QueryHandler(GetCustomerQuery)

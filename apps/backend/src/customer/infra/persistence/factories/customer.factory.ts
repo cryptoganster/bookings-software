@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { ICustomerFactory } from '@customer/domain/interfaces/factories';
 import { Customer } from '@customer/domain/aggregates/customer';
 import { CustomerModel } from '@customer/infra/persistence/models';
-import { UUID } from '@shared/vo/uuid.vo';
+import { UUID } from '@shared/vo/uuid';
 import { WhatsAppPhone } from '@customer/domain/vo/whatsapp-phone';
 
 /**
@@ -46,10 +46,7 @@ export class CustomerFactory implements ICustomerFactory {
    * @param whatsappPhone - WhatsApp phone in E.164 format
    * @returns Customer aggregate with business logic, or null if not found
    */
-  async loadByWhatsAppPhone(
-    businessId: string,
-    whatsappPhone: string,
-  ): Promise<Customer | null> {
+  async loadByWhatsAppPhone(businessId: string, whatsappPhone: string): Promise<Customer | null> {
     const model = await this.repository.findOne({
       where: {
         business_id: businessId,

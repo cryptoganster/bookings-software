@@ -2,7 +2,7 @@ import { Command } from '@nestjs/cqrs';
 
 /**
  * UpdateCustomerNameCommand
- * 
+ *
  * Updates the name of an existing customer
  * Used when customer provides their name via WhatsApp or panel web
  */

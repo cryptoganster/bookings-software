@@ -1,11 +1,4 @@
-import {
-  Entity,
-  Column,
-  PrimaryColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-  Index,
-} from 'typeorm';
+import { Entity, Column, PrimaryColumn, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
 
 /**
  * CustomerModel - TypeORM Entity
@@ -28,26 +21,26 @@ import {
 @Index(['user_id'])
 export class CustomerModel {
   @PrimaryColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column('uuid', { nullable: true })
-  user_id: string | null;
+  user_id!: string | null;
 
   @Column('uuid')
-  business_id: string;
+  business_id!: string;
 
   @Column('varchar', { length: 20 })
-  whatsapp_phone: string;
+  whatsapp_phone!: string;
 
   @Column('varchar', { length: 255, nullable: true })
-  name: string | null;
+  name!: string | null;
 
   @Column('int', { default: 0 })
-  version: number;
+  version!: number;
 
   @CreateDateColumn()
-  created_at: Date;
+  created_at!: Date;
 
   @UpdateDateColumn()
-  updated_at: Date;
+  updated_at!: Date;
 }

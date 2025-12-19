@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, IsNull } from 'typeorm';
 import { ICustomerReadRepository } from '@customer/domain/interfaces/repositories';
 import { CustomerReadModel } from '@customer/domain/read-models/customer';
 import { CustomerModel } from '@customer/infra/persistence/models';
 import { CustomerReadMapper } from '@customer/infra/persistence/mappers';
-import { CustomerNotFoundException } from '@customer/domain/exceptions/customer-not-found.exception';
+import { CustomerNotFoundException } from '@customer/domain/exceptions/customer-not-found';
 
 /**
  * CustomerReadRepository
@@ -107,13 +107,11 @@ export class CustomerReadRepository implements ICustomerReadRepository {
    * @param businessId - Business UUID
    * @returns Array of CustomerReadModel
    */
-  async findAnonymousByBusinessId(
-    businessId: string,
-  ): Promise<CustomerReadModel[]> {
+  async findAnonymousByBusinessId(businessId: string): Promise<CustomerReadModel[]> {
     const models = await this.repository.find({
       where: {
         business_id: businessId,
-        user_id: null,
+        user_id: IsNull(), // TypeORM helper for querying null values
       },
       order: { created_at: 'DESC' },
     });

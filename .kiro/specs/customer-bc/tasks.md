@@ -247,27 +247,27 @@ Este documento proporciona un checklist de implementación paso a paso para el C
 
 ### Phase 4: Module Configuration
 
-- [ ] 4.1 Create Customer Module
+- [x] 4.1 Create Customer Module
   - Create `apps/backend/src/customer/customer.module.ts`
   - Import CqrsModule, TypeOrmModule.forFeature([CustomerModel])
   - Register all handlers, repositories, factory with DI tokens
   - _Requirements: 6.1-6.5_
   - **Commit:** `feat(customer): add CustomerModule configuration`
 
-- [ ] 4.2 Export Module Interfaces
+- [x] 4.2 Export Module Interfaces
   - Export ICustomerFactory, ICustomerWriteRepository, ICustomerReadRepository tokens
   - Allow other BCs (Booking, Conversation) to import CustomerModule
   - _Requirements: 7.1, 8.1_
   - **Commit:** `feat(customer): export module interfaces for BC integration`
 
-- [ ] 4.3 Register Module in AppModule
+- [x] 4.3 Register Module in AppModule
   - Import CustomerModule in AppModule
   - Verify module loads correctly
   - Run validations: `pnpm lint:backend && pnpm typecheck:backend && pnpm format:backend`
   - _Requirements: 6.1_
   - **Commit:** `feat(customer): register CustomerModule in AppModule`
 
-- [ ] 4.4 Phase 4 Checkpoint
+- [x] 4.4 Phase 4 Checkpoint
   - **Commit:** `feat(customer): complete module configuration`
 
 ### Phase 5: Database

@@ -32,11 +32,7 @@ const commandHandlers = [
   UnlinkCustomerFromUserHandler,
 ];
 
-const queryHandlers = [
-  GetCustomerHandler,
-  GetCustomerByPhoneHandler,
-  GetCustomersByUserIdHandler,
-];
+const queryHandlers = [GetCustomerHandler, GetCustomerByPhoneHandler, GetCustomersByUserIdHandler];
 
 const factories = [
   {

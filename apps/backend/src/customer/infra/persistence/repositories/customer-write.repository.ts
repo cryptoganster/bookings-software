@@ -5,7 +5,7 @@ import { ICustomerWriteRepository } from '@customer/domain/interfaces/repositori
 import { Customer } from '@customer/domain/aggregates/customer';
 import { CustomerModel } from '@customer/infra/persistence/models';
 import { CustomerWriteMapper } from '@customer/infra/persistence/mappers';
-import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency.exception';
+import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 
 /**
  * CustomerWriteRepository
@@ -70,9 +70,7 @@ export class CustomerWriteRepository implements ICustomerWriteRepository {
       .execute();
 
     if (result.affected === 0) {
-      throw new ConcurrencyException(
-        `Customer ${model.id} was modified by another transaction`,
-      );
+      throw new ConcurrencyException(`Customer ${model.id} was modified by another transaction`);
     }
   }
 }
