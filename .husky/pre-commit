@@ -1,2 +1,2 @@
-# Pre-commit hooks will be configured here
-# This file will be populated with lint-staged and other checks
+# Run lint-staged on staged files
+pnpm exec lint-staged

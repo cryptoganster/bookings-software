@@ -1,0 +1,12 @@
+{
+  "apps/backend/src/**/*.ts": [
+    "pnpm --filter backend lint:fix",
+    "pnpm --filter backend format"
+  ],
+  "apps/frontend/src/**/*.{ts,tsx}": [
+    "pnpm --filter frontend lint:fix",
+    "pnpm --filter frontend format"
+  ],
+  "packages/shared-types/src/**/*.ts": ["eslint --fix", "prettier --write"],
+  "*.{json,md}": ["prettier --write"]
+}
