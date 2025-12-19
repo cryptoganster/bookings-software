@@ -25,7 +25,7 @@
     "@mantine/modals": "^7.3.0",
     "@mantine/notifications": "^7.3.0",
     "@packages/shared-types": "workspace:*",
-    "@tabler/icons-react": "^2.44.0",
+    "@tabler/icons-react": "^3.36.0",
     "@tanstack/react-query": "^5.0.0",
     "@tanstack/react-query-devtools": "^5.91.1",
     "axios": "^1.6.0",
