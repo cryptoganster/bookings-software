@@ -1,2 +1,5 @@
+# Run secret scanning
+bash scripts/pre-commit-secrets.sh
+
 # Run lint-staged on staged files
 pnpm exec lint-staged
