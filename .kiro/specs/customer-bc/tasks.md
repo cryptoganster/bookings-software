@@ -272,7 +272,7 @@ Este documento proporciona un checklist de implementación paso a paso para el C
 
 ### Phase 5: Database
 
-- [ ] 5.1 Create Migration for customers table
+- [x] 5.1 Create Migration for customers table
   - Create migration with columns: id, user_id (nullable), business_id, whatsapp_phone, name, version, created_at, updated_at
   - Add unique index on (business_id, whatsapp_phone)
   - Add index on business_id, user_id
@@ -280,14 +280,14 @@ Este documento proporciona un checklist de implementación paso a paso para el C
   - _Requirements: 9.1, 9.2, 9.3, 2.1.5_
   - **Commit:** `feat(customer): add migration for customers table`
 
-- [ ] 5.2 Create Seed Data
+- [x] 5.2 Create Seed Data
   - Create 3 test customers with valid WhatsApp phones
   - Associate with existing test business
   - Include both anonymous (userId=null) and registered (userId=UUID) examples
   - _Requirements: 9.4_
   - **Commit:** `feat(customer): add seed data for customers`
 
-- [ ] 5.3 Update Appointment Seeds
+- [x] 5.3 Update Appointment Seeds
   - Update existing appointment seeds to reference customer IDs
   - Ensure referential integrity
   - _Requirements: 9.5_
