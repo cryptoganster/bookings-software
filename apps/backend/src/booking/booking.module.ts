@@ -57,7 +57,12 @@ const EventHandlers = [OnAppointmentCreatedHandler, OnAppointmentCancelledHandle
 const Sagas = [AppointmentNotificationSaga];
 
 @Module({
-  imports: [CqrsModule, TypeOrmModule.forFeature([AppointmentModel]), AvailabilityModule, CustomerModule],
+  imports: [
+    CqrsModule,
+    TypeOrmModule.forFeature([AppointmentModel]),
+    AvailabilityModule,
+    CustomerModule,
+  ],
   controllers: [AppointmentController],
   providers: [
     // Command Handlers

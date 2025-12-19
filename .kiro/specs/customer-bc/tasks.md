@@ -312,13 +312,13 @@ Este documento proporciona un checklist de implementación paso a paso para el C
   - _Requirements: 7.1, 7.5_
   - **Commit:** `feat(booking): add customer JOIN to AppointmentReadRepository`
 
-- [ ] 6.3 Update CreateAppointmentHandler
+- [x] 6.3 Update CreateAppointmentHandler
   - Verify customerId exists before creating appointment
   - Use GetCustomerQuery or direct repository check
   - _Requirements: 7.2_
   - **Commit:** `feat(booking): add customer validation to CreateAppointmentHandler`
 
-- [ ] 6.4 Phase 6 Checkpoint
+- [x] 6.4 Phase 6 Checkpoint
   - Run tests: `pnpm test:backend`
   - Verify appointments show customer info
   - **Commit:** `feat(customer): complete Booking BC integration`
