@@ -186,6 +186,21 @@ export interface CustomerDto {
   createdAt: string; // ISO 8601 string
 }
 
+/**
+ * Customer Read Model - Modelo de lectura enriquecido para queries
+ * Incluye datos desnormalizados para optimizar la UI
+ */
+export interface CustomerReadModel {
+  id: string;
+  businessId: string;
+  userId: string | null; // null = anónimo, UUID = registrado
+  whatsappPhone: string;
+  name: string | null;
+  appointmentCount?: number; // Número de citas del cliente
+  lastAppointmentDate?: string | null; // ISO 8601 string
+  createdAt: string; // ISO 8601 string
+}
+
 // ============================================================================
 // BUSINESS
 // ============================================================================
