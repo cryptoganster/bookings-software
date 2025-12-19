@@ -178,7 +178,7 @@ Este documento proporciona un checklist de implementación paso a paso para las 
 
 ### Phase 3: Deduplication and Merge (3 days)
 
-- [ ] 3.1 Create DetectDuplicateCustomersQuery
+- [x] 3.1 Create DetectDuplicateCustomersQuery
   - Create `apps/backend/src/customer/app/queries/detect-duplicate-customers/query.ts`
   - Query extends `Query<DuplicateCustomerPair[]>`
   - Include businessId and threshold (default 0.8)
@@ -186,7 +186,7 @@ Este documento proporciona un checklist de implementación paso a paso para las 
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
   - **Commit:** `feat(customer): add DetectDuplicateCustomersQuery`
 
-- [ ] 3.2 Implement Deduplication Algorithm
+- [x] 3.2 Implement Deduplication Algorithm
   - Create `apps/backend/src/customer/domain/services/customer-deduplication.service.ts`
   - Implement phone normalization (remove +, spaces, dashes)
   - Implement Levenshtein distance for name similarity
@@ -196,7 +196,7 @@ Este documento proporciona un checklist de implementación paso a paso para las 
   - _Edge Cases: 5_
   - **Commit:** `feat(customer): implement deduplication algorithm`
 
-- [ ] 3.3 Implement DetectDuplicateCustomersHandler
+- [x] 3.3 Implement DetectDuplicateCustomersHandler
   - Create `apps/backend/src/customer/app/queries/detect-duplicate-customers/handler.ts`
   - Load all customers for business
   - Use deduplication service to compare pairs
@@ -207,7 +207,7 @@ Este documento proporciona un checklist de implementación paso a paso para las 
   - _Edge Cases: 5_
   - **Commit:** `feat(customer): implement DetectDuplicateCustomersHandler`
 
-- [ ] 3.4 Write Unit Tests for Deduplication Service
+- [x] 3.4 Write Unit Tests for Deduplication Service
   - Test phone normalization
   - Test Levenshtein distance calculation
   - Test similarity score calculation
