@@ -120,6 +120,8 @@ This document outlines the implementation tasks for setting up Husky pre-commit 
   - Test that backend changes don't trigger frontend checks
   - Test that frontend changes don't trigger backend checks
   - _Requirements: 8.1, 8.2, 8.3, 8.4_
+  - **Note:** ✅ Implementation completed (workspace-specific patterns in `.lintstagedrc.json`)
+  - **Cannot mark complete:** Has non-optional property test subtask 8.1
 
 - [ ] 8.1 Write property test for monorepo workspace isolation
   - **Property 8: Hook bypass mechanism**
@@ -131,6 +133,9 @@ This document outlines the implementation tasks for setting up Husky pre-commit 
   - Add progress messages for each check
   - Test hook execution with various scenarios
   - _Requirements: 1.1, 2.1, 3.1, 4.1, 5.1, 6.1, 7.1_
+  - **Status:** ✅ COMPLETED (December 19, 2025)
+  - **Commit:** "feat(husky): enhance pre-commit hook with progress messages"
+  - **Cannot mark complete:** Has non-optional property test subtask 9.1
 
 - [ ] 9.1 Write property test for pre-commit hook execution
   - **Property 1: Pre-commit hook execution**
@@ -142,6 +147,8 @@ This document outlines the implementation tasks for setting up Husky pre-commit 
   - Include links to documentation
   - Test error messages with various failure scenarios
   - _Requirements: 2.2, 3.2, 4.2, 5.2, 6.2, 7.2_
+  - **Note:** ✅ Implementation completed (all scripts have clear error messages with actionable fixes)
+  - **Cannot mark complete:** Has non-optional unit test subtask 10.1
 
 - [ ] 10.1 Write unit tests for error message formatting
   - Test error message clarity and actionability
@@ -154,6 +161,8 @@ This document outlines the implementation tasks for setting up Husky pre-commit 
   - Add warnings about bypassing checks
   - Create troubleshooting guide
   - _Requirements: 11.1, 11.2, 11.3, 11.4_
+  - **Note:** ✅ Implementation completed (documented in `.kiro/steering/husky-precommit.md`)
+  - **Cannot mark complete:** Has non-optional property test subtask 11.1
 
 - [ ] 11.1 Write property test for hook bypass mechanism
   - **Property 9: Consistent configuration across developers**
@@ -165,6 +174,8 @@ This document outlines the implementation tasks for setting up Husky pre-commit 
   - Provide troubleshooting section
   - Include examples of common issues and fixes
   - _Requirements: 10.1, 10.2, 10.3, 10.4_
+  - **Note:** ✅ Implementation completed (comprehensive guide in `.kiro/steering/husky-precommit.md`)
+  - **Cannot mark complete:** Has non-optional unit test subtask 12.1
 
 - [ ] 12.1 Write unit tests for documentation completeness
   - Verify all hooks are documented
