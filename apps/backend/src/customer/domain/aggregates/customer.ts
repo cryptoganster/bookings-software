@@ -52,9 +52,7 @@ export class Customer extends VersionedAggregateRoot {
   ): Customer {
     // Validations
     if (!id || !businessId || !whatsappPhone) {
-      throw new InvalidCustomerDataException(
-        'id, businessId and whatsappPhone are required',
-      );
+      throw new InvalidCustomerDataException('id, businessId and whatsappPhone are required');
     }
 
     // Validate name if provided
@@ -95,9 +93,7 @@ export class Customer extends VersionedAggregateRoot {
       throw new InvalidCustomerNameException('Name cannot be empty');
     }
     if (name.length > 100) {
-      throw new InvalidCustomerNameException(
-        'Name cannot exceed 100 characters',
-      );
+      throw new InvalidCustomerNameException('Name cannot exceed 100 characters');
     }
   }
 
@@ -115,9 +111,7 @@ export class Customer extends VersionedAggregateRoot {
     this.incrementVersion();
 
     // Publish event
-    this.apply(
-      new CustomerNameUpdated(this.id.getValue(), this.name, previousName),
-    );
+    this.apply(new CustomerNameUpdated(this.id.getValue(), this.name, previousName));
   }
 
   /**
@@ -153,12 +147,7 @@ export class Customer extends VersionedAggregateRoot {
     this.incrementVersion();
 
     // Publish event
-    this.apply(
-      new CustomerUnlinkedFromUser(
-        this.id.getValue(),
-        previousUserId.getValue(),
-      ),
-    );
+    this.apply(new CustomerUnlinkedFromUser(this.id.getValue(), previousUserId.getValue()));
   }
 
   /**

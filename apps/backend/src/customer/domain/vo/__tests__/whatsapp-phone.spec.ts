@@ -36,57 +36,55 @@ describe('WhatsAppPhone Value Object', () => {
 
   describe('Invalid formats', () => {
     it('should reject phone without plus sign', () => {
-      expect(() => WhatsAppPhone.fromString('18095551234'))
-        .toThrow(InvalidWhatsAppPhoneException);
-      expect(() => WhatsAppPhone.fromString('18095551234'))
-        .toThrow('Invalid WhatsApp phone format');
+      expect(() => WhatsAppPhone.fromString('18095551234')).toThrow(InvalidWhatsAppPhoneException);
+      expect(() => WhatsAppPhone.fromString('18095551234')).toThrow(
+        'Invalid WhatsApp phone format',
+      );
     });
 
     it('should reject phone with spaces', () => {
-      expect(() => WhatsAppPhone.fromString('+1 809 555 1234'))
-        .toThrow(InvalidWhatsAppPhoneException);
+      expect(() => WhatsAppPhone.fromString('+1 809 555 1234')).toThrow(
+        InvalidWhatsAppPhoneException,
+      );
     });
 
     it('should reject phone with dashes', () => {
-      expect(() => WhatsAppPhone.fromString('+1-809-555-1234'))
-        .toThrow(InvalidWhatsAppPhoneException);
+      expect(() => WhatsAppPhone.fromString('+1-809-555-1234')).toThrow(
+        InvalidWhatsAppPhoneException,
+      );
     });
 
     it('should reject phone with parentheses', () => {
-      expect(() => WhatsAppPhone.fromString('+1(809)5551234'))
-        .toThrow(InvalidWhatsAppPhoneException);
+      expect(() => WhatsAppPhone.fromString('+1(809)5551234')).toThrow(
+        InvalidWhatsAppPhoneException,
+      );
     });
 
     it('should reject empty string', () => {
-      expect(() => WhatsAppPhone.fromString(''))
-        .toThrow(InvalidWhatsAppPhoneException);
-      expect(() => WhatsAppPhone.fromString(''))
-        .toThrow('WhatsApp phone cannot be empty');
+      expect(() => WhatsAppPhone.fromString('')).toThrow(InvalidWhatsAppPhoneException);
+      expect(() => WhatsAppPhone.fromString('')).toThrow('WhatsApp phone cannot be empty');
     });
 
     it('should reject phone starting with +0', () => {
-      expect(() => WhatsAppPhone.fromString('+0123456789'))
-        .toThrow(InvalidWhatsAppPhoneException);
+      expect(() => WhatsAppPhone.fromString('+0123456789')).toThrow(InvalidWhatsAppPhoneException);
     });
 
     it('should reject phone with letters', () => {
-      expect(() => WhatsAppPhone.fromString('+1809ABC1234'))
-        .toThrow(InvalidWhatsAppPhoneException);
+      expect(() => WhatsAppPhone.fromString('+1809ABC1234')).toThrow(InvalidWhatsAppPhoneException);
     });
 
     it('should reject phone too short (less than 8 digits)', () => {
-      expect(() => WhatsAppPhone.fromString('+123456'))
-        .toThrow(InvalidWhatsAppPhoneException);
+      expect(() => WhatsAppPhone.fromString('+123456')).toThrow(InvalidWhatsAppPhoneException);
     });
 
     it('should reject phone too long (more than 15 digits)', () => {
-      expect(() => WhatsAppPhone.fromString('+1234567890123456'))
-        .toThrow(InvalidWhatsAppPhoneException);
+      expect(() => WhatsAppPhone.fromString('+1234567890123456')).toThrow(
+        InvalidWhatsAppPhoneException,
+      );
     });
 
     it('should reject phone with only plus sign', () => {
-      expect(() => WhatsAppPhone.fromString('+'))
-        .toThrow(InvalidWhatsAppPhoneException);
+      expect(() => WhatsAppPhone.fromString('+')).toThrow(InvalidWhatsAppPhoneException);
     });
   });
 
@@ -118,11 +116,11 @@ describe('WhatsAppPhone Value Object', () => {
     it('should create new instance instead of modifying existing one', () => {
       const phone1 = WhatsAppPhone.fromString('+18095551234');
       const phone2 = WhatsAppPhone.fromString('+18095555678');
-      
+
       // Both instances should maintain their own values
       expect(phone1.getValue()).toBe('+18095551234');
       expect(phone2.getValue()).toBe('+18095555678');
-      
+
       // They should not be equal
       expect(phone1.equals(phone2)).toBe(false);
     });

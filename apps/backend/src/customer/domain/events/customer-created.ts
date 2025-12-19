@@ -1,8 +1,8 @@
 /**
  * Domain Event: CustomerCreated
- * 
+ *
  * Published when a new customer is created (anonymous or registered)
- * 
+ *
  * This event is used by:
  * - Conversation BC to track customer interactions
  * - Booking BC to associate appointments with customers
