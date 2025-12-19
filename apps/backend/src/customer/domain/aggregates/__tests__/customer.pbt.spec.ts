@@ -19,9 +19,7 @@ describe('Customer Aggregate - Property-Based Tests', () => {
     .integer({ min: 10000000, max: 999999999999 })
     .map((num) => WhatsAppPhone.fromString(`+1${num}`));
 
-  const nameArb = fc
-    .string({ minLength: 1, maxLength: 100 })
-    .filter((s) => s.trim().length > 0);
+  const nameArb = fc.string({ minLength: 1, maxLength: 100 }).filter((s) => s.trim().length > 0);
 
   /**
    * Property 3: Customer name update preserves identity
@@ -94,9 +92,7 @@ describe('Customer Aggregate - Property-Based Tests', () => {
             customer.updateName(newName);
 
             // Assert
-            expect(customer.getVersion().getValue()).toBe(
-              versionBeforeUpdate + 1,
-            );
+            expect(customer.getVersion().getValue()).toBe(versionBeforeUpdate + 1);
           },
         ),
         { numRuns: 50 },
@@ -113,21 +109,14 @@ describe('Customer Aggregate - Property-Based Tests', () => {
           fc.option(nameArb, { nil: null }),
           (customerId, businessId, userId, whatsappPhone, name) => {
             // Arrange
-            const customer = Customer.createAnonymous(
-              customerId,
-              businessId,
-              whatsappPhone,
-              name,
-            );
+            const customer = Customer.createAnonymous(customerId, businessId, whatsappPhone, name);
             const versionBeforeLink = customer.getVersion().getValue();
 
             // Act
             customer.linkToUser(userId);
 
             // Assert
-            expect(customer.getVersion().getValue()).toBe(
-              versionBeforeLink + 1,
-            );
+            expect(customer.getVersion().getValue()).toBe(versionBeforeLink + 1);
           },
         ),
         { numRuns: 50 },
@@ -144,12 +133,7 @@ describe('Customer Aggregate - Property-Based Tests', () => {
           fc.option(nameArb, { nil: null }),
           (customerId, businessId, userId, whatsappPhone, name) => {
             // Arrange
-            const customer = Customer.createAnonymous(
-              customerId,
-              businessId,
-              whatsappPhone,
-              name,
-            );
+            const customer = Customer.createAnonymous(customerId, businessId, whatsappPhone, name);
             customer.linkToUser(userId);
             const versionBeforeUnlink = customer.getVersion().getValue();
 
@@ -157,9 +141,7 @@ describe('Customer Aggregate - Property-Based Tests', () => {
             customer.unlinkFromUser();
 
             // Assert
-            expect(customer.getVersion().getValue()).toBe(
-              versionBeforeUnlink + 1,
-            );
+            expect(customer.getVersion().getValue()).toBe(versionBeforeUnlink + 1);
           },
         ),
         { numRuns: 50 },
@@ -184,12 +166,7 @@ describe('Customer Aggregate - Property-Based Tests', () => {
           fc.option(nameArb, { nil: null }),
           (customerId, businessId, userId, whatsappPhone, name) => {
             // Arrange
-            const customer = Customer.createAnonymous(
-              customerId,
-              businessId,
-              whatsappPhone,
-              name,
-            );
+            const customer = Customer.createAnonymous(customerId, businessId, whatsappPhone, name);
 
             const originalId = customer.getId();
             const originalBusinessId = customer.getBusinessId();
@@ -228,12 +205,7 @@ describe('Customer Aggregate - Property-Based Tests', () => {
           fc.option(nameArb, { nil: null }),
           (customerId, businessId, userId, whatsappPhone, name) => {
             // Arrange
-            const customer = Customer.createAnonymous(
-              customerId,
-              businessId,
-              whatsappPhone,
-              name,
-            );
+            const customer = Customer.createAnonymous(customerId, businessId, whatsappPhone, name);
             customer.linkToUser(userId);
 
             const originalId = customer.getId();
@@ -272,12 +244,7 @@ describe('Customer Aggregate - Property-Based Tests', () => {
           fc.option(nameArb, { nil: null }),
           (customerId, businessId, whatsappPhone, name) => {
             // Act
-            const customer = Customer.createAnonymous(
-              customerId,
-              businessId,
-              whatsappPhone,
-              name,
-            );
+            const customer = Customer.createAnonymous(customerId, businessId, whatsappPhone, name);
 
             // Assert
             expect(customer.getUserId()).toBeNull();
@@ -307,12 +274,7 @@ describe('Customer Aggregate - Property-Based Tests', () => {
           fc.option(nameArb, { nil: null }),
           (customerId, businessId, userId, whatsappPhone, name) => {
             // Arrange
-            const customer = Customer.createAnonymous(
-              customerId,
-              businessId,
-              whatsappPhone,
-              name,
-            );
+            const customer = Customer.createAnonymous(customerId, businessId, whatsappPhone, name);
 
             // Act
             customer.linkToUser(userId);
@@ -395,22 +357,9 @@ describe('Customer Aggregate - Property-Based Tests', () => {
           nameArb,
           nameArb,
           nameArb,
-          (
-            customerId,
-            businessId,
-            userId,
-            whatsappPhone,
-            name1,
-            name2,
-            name3,
-          ) => {
+          (customerId, businessId, userId, whatsappPhone, name1, name2, name3) => {
             // Arrange
-            const customer = Customer.createAnonymous(
-              customerId,
-              businessId,
-              whatsappPhone,
-              name1,
-            );
+            const customer = Customer.createAnonymous(customerId, businessId, whatsappPhone, name1);
             const initialVersion = customer.getVersion().getValue();
 
             // Act - Perform 4 operations
