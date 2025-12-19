@@ -38,7 +38,8 @@ describe('IdentifyCustomerHandler - Concurrency Tests', () => {
           password: process.env.DB_PASSWORD || 'postgres',
           database: process.env.DB_DATABASE || 'bookings_test',
           entities: [CustomerModel],
-          synchronize: false,
+          synchronize: true, // Enable synchronize for test database
+          dropSchema: false,
         }),
         TypeOrmModule.forFeature([CustomerModel]),
       ],
