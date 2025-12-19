@@ -86,19 +86,14 @@ jobs:
       - name: Lint Frontend
         run: pnpm --filter frontend lint
 
-  # Job 3: Auto-Format and Check
+  # Job 3: Format Check (no auto-push on feature branches)
   format:
-    name: Auto-Format Code
+    name: Check Code Formatting
     runs-on: ubuntu-latest
     needs: setup
-    permissions:
-      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-        with:
-          ref: ${{ github.head_ref }}
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -120,10 +115,10 @@ jobs:
             packages/*/node_modules
           key: ${{ runner.os }}-pnpm-v2-${{ hashFiles('**/pnpm-lock.yaml') }}
 
-      - name: Format Backend Code
+      - name: Check Backend Formatting
         run: pnpm --filter backend format
 
-      - name: Format Frontend Code
+      - name: Check Frontend Formatting
         run: pnpm --filter frontend format
 
       - name: Check for formatting changes
@@ -131,21 +126,17 @@ jobs:
         run: |
           if git diff --quiet; then
             echo "changed=false" >> $GITHUB_OUTPUT
-            echo "✅ No formatting changes needed"
+            echo "✅ Code is properly formatted"
           else
             echo "changed=true" >> $GITHUB_OUTPUT
-            echo "📝 Formatting changes detected"
+            echo "❌ Code formatting issues detected"
+            echo ""
+            echo "The following files need formatting:"
             git diff --name-only
+            echo ""
+            echo "To fix locally, run: pnpm format"
+            exit 1
           fi
-
-      - name: Commit formatting changes
-        if: steps.verify-changed-files.outputs.changed == 'true'
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add -A
-          git commit -m "style: auto-format code with Prettier [skip ci]"
-          git push
 
   # Job 4: Type Checking
   typecheck:
