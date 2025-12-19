@@ -93,7 +93,7 @@ Este documento proporciona un checklist de implementación paso a paso para las 
 - [x] 2.2 Implement SearchCustomersHandler
   - Create `apps/backend/src/customer/app/queries/search-customers/handler.ts`
   - Use TypeORM QueryBuilder with LIKE for text search
-  - Escape special characters (%, _, \) to prevent SQL injection
+  - Escape special characters (%, \_, \) to prevent SQL injection
   - Implement pagination with OFFSET and LIMIT
   - Support sorting by name, createdAt, appointmentCount
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
@@ -170,7 +170,7 @@ Este documento proporciona un checklist de implementación paso a paso para las 
   - _Requirements: 2.1_
   - **Commit:** `feat(customer): add search indexes migration`
 
-- [ ] 2.12 Phase 2 Checkpoint
+- [x] 2.12 Phase 2 Checkpoint
   - Run migrations: `pnpm --filter backend migration:run`
   - Run tests: `pnpm test:backend -- --testPathPattern=search-customers`
   - Verify search performance < 200ms
@@ -303,7 +303,7 @@ Este documento proporciona un checklist de implementación paso a paso para las 
   - Create `apps/backend/src/customer/app/commands/delete-customer/handler.ts`
   - Load customer using Factory
   - Verify no future appointments exist
-  - Anonymize data: name → null, whatsappPhone → "DELETED_[timestamp]"
+  - Anonymize data: name → null, whatsappPhone → "DELETED\_[timestamp]"
   - Unlink from User if linked
   - Publish CustomerDeleted event
   - Use transaction for atomicity
@@ -543,18 +543,19 @@ Este documento proporciona un checklist de implementación paso a paso para las 
 
 ## Summary
 
-| Phase | Tasks | Description | Duration |
-|-------|-------|-------------|----------|
-| 1 | 10 | Frontend Customer Entity Layer | 1 week |
-| 2 | 12 | Backend Search and Filtering | 1 week |
-| 3 | 12 | Deduplication and Merge | 3 days |
-| 4 | 10 | GDPR Compliance | 2 days |
-| 5 | 10 | Frontend Customer Management UI | 1 week |
-| 6 | 6 | Testing and Validation | 2 days |
-| 7 | 5 | Final Validation and Documentation | 1 day |
+| Phase     | Tasks  | Description                           | Duration      |
+| --------- | ------ | ------------------------------------- | ------------- |
+| 1         | 10     | Frontend Customer Entity Layer        | 1 week        |
+| 2         | 12     | Backend Search and Filtering          | 1 week        |
+| 3         | 12     | Deduplication and Merge               | 3 days        |
+| 4         | 10     | GDPR Compliance                       | 2 days        |
+| 5         | 10     | Frontend Customer Management UI       | 1 week        |
+| 6         | 6      | Testing and Validation                | 2 days        |
+| 7         | 5      | Final Validation and Documentation    | 1 day         |
 | **Total** | **65** | **Complete Customer BC Enhancements** | **2-3 weeks** |
 
 **Order of Implementation:**
+
 1. Phase 1 (Frontend Entity) → Foundation for UI
 2. Phase 2 (Backend Search) → Core functionality
 3. Phase 3 (Deduplication) → Data quality
