@@ -1,7 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
-import type { CustomerReadModel } from '@packages/shared-types';
-import { apiClient } from '@shared/api/client';
-import { customerKeys } from './useCustomer';
+import { useQuery } from "@tanstack/react-query";
+import type { CustomerReadModel } from "@packages/shared-types";
+import { apiClient } from "@shared/api/client";
+import { customerKeys } from "./useCustomer";
 
 /**
  * Hook to fetch all customers linked to a specific user
@@ -13,7 +13,9 @@ export function useCustomersByUserId(userId: string) {
   return useQuery({
     queryKey: customerKeys.byUserId(userId),
     queryFn: async () => {
-      const { data } = await apiClient.get<CustomerReadModel[]>(`/customers/by-user/${userId}`);
+      const { data } = await apiClient.get<CustomerReadModel[]>(
+        `/customers/by-user/${userId}`,
+      );
       return data;
     },
     enabled: !!userId,
