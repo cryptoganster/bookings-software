@@ -5,11 +5,13 @@ import { CreateAppointmentCommand } from '@booking/app/commands/create-appointme
 import { IAppointmentWriteRepository } from '@booking/domain/interfaces/repositories/appointment-write';
 import { ICapacityFactory } from '@availability/domain/interfaces/factories/capacity-factory';
 import { ICapacityWriteRepository } from '@availability/domain/interfaces/repositories/capacity-write';
+import { ICustomerReadRepository } from '@customer/domain/interfaces/repositories/customer-read';
 import { IUnitOfWork } from '@shared/kernel/uow';
 import { Appointment } from '@booking/domain/aggregates/appointment';
 import { UUID } from '@shared/vo/uuid';
 import { DateTime } from '@booking/domain/vo/date-time';
 import { NoAvailableSlotsException } from '@booking/domain/exceptions/no-available-slots';
+import { CustomerNotFoundException } from '@customer/domain/exceptions/customer-not-found';
 
 @CommandHandler(CreateAppointmentCommand)
 export class CreateAppointmentHandler implements ICommandHandler<CreateAppointmentCommand> {
@@ -20,6 +22,8 @@ export class CreateAppointmentHandler implements ICommandHandler<CreateAppointme
     private readonly capacityFactory: ICapacityFactory,
     @Inject('ICapacityWriteRepository')
     private readonly capacityWriteRepository: ICapacityWriteRepository,
+    @Inject('ICustomerReadRepository')
+    private readonly customerReadRepository: ICustomerReadRepository,
     @Inject('IUnitOfWork')
     private readonly uow: IUnitOfWork,
     private readonly logger: PinoLogger,
@@ -45,6 +49,12 @@ export class CreateAppointmentHandler implements ICommandHandler<CreateAppointme
 
     try {
       await this.uow.transaction(async () => {
+        // Validate customer exists before creating appointment
+        const customer = await this.customerReadRepository.findById(command.customerId);
+        if (!customer) {
+          throw new CustomerNotFoundException(command.customerId);
+        }
+
         // Load capacity aggregate using factory (not repository)
         const capacity = await this.capacityFactory.loadByOfferingAndDate(
           command.offeringId,

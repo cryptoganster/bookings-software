@@ -301,12 +301,12 @@ Este documento proporciona un checklist de implementación paso a paso para el C
 
 ### Phase 6: Integration with Booking BC
 
-- [ ] 6.1 Update AppointmentReadModel
+- [x] 6.1 Update AppointmentReadModel
   - Add customerName (string | null) and customerPhone (string) fields
   - _Requirements: 7.3, 7.4_
-  - **Commit:** `feat(booking): add customer fields to AppointmentReadModel`
+  - **Commit:** `feat(booking): add customer fields to AppointmentReadModel` (already existed)
 
-- [ ] 6.2 Update AppointmentReadRepository
+- [x] 6.2 Update AppointmentReadRepository
   - Add JOIN with customers table in queries
   - Map customerName and customerPhone to read model
   - _Requirements: 7.1, 7.5_
