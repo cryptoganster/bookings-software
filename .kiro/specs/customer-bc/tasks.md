@@ -293,7 +293,7 @@ Este documento proporciona un checklist de implementación paso a paso para el C
   - _Requirements: 9.5_
   - **Commit:** `feat(customer): update appointment seeds with customer references`
 
-- [ ] 5.4 Phase 5 Checkpoint
+- [x] 5.4 Phase 5 Checkpoint
   - Run migrations: `pnpm --filter backend migration:run`
   - Run seeds: `pnpm --filter backend seed`
   - Verify data integrity
