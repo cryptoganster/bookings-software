@@ -10,11 +10,13 @@
  * - Conversation BC to display customer info in conversations
  */
 export class CustomerReadModel {
-  id: string;
-  userId: string | null; // ← null = anonymous, UUID = registered
-  businessId: string;
-  whatsappPhone: string;
-  name: string | null;
-  createdAt: Date;
-  updatedAt: Date;
+  constructor(
+    public readonly id: string,
+    public readonly userId: string | null, // ← null = anonymous, UUID = registered
+    public readonly businessId: string,
+    public readonly whatsappPhone: string,
+    public readonly name: string | null,
+    public readonly createdAt: Date,
+    public readonly updatedAt: Date,
+  ) {}
 }
