@@ -72,7 +72,7 @@ export class WhatsAppPhone extends ValueObject {
    * Returns components for equality comparison
    * @returns Array with phone number value
    */
-  protected getEqualityComponents(): any[] {
+  protected getEqualityComponents(): unknown[] {
     return [this.value];
   }
 }
