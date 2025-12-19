@@ -1,3 +1,6 @@
+# Run file size check
+bash scripts/pre-commit-filesize.sh
+
 # Run secret scanning
 bash scripts/pre-commit-secrets.sh
 
