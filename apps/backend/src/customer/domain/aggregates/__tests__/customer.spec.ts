@@ -47,12 +47,7 @@ describe('Customer Aggregate', () => {
     });
 
     it('should create an anonymous customer without name', () => {
-      const customer = Customer.createAnonymous(
-        customerId,
-        businessId,
-        whatsappPhone,
-        null,
-      );
+      const customer = Customer.createAnonymous(customerId, businessId, whatsappPhone, null);
 
       expect(customer.getName()).toBeNull();
       expect(customer.isAnonymous()).toBe(true);
@@ -88,69 +83,44 @@ describe('Customer Aggregate', () => {
 
     it('should throw InvalidCustomerDataException if id is missing', () => {
       expect(() =>
-        Customer.createAnonymous(
-          null as any,
-          businessId,
-          whatsappPhone,
-          'Juan Pérez',
-        ),
+        Customer.createAnonymous(null as any, businessId, whatsappPhone, 'Juan Pérez'),
       ).toThrow(InvalidCustomerDataException);
     });
 
     it('should throw InvalidCustomerDataException if businessId is missing', () => {
       expect(() =>
-        Customer.createAnonymous(
-          customerId,
-          null as any,
-          whatsappPhone,
-          'Juan Pérez',
-        ),
+        Customer.createAnonymous(customerId, null as any, whatsappPhone, 'Juan Pérez'),
       ).toThrow(InvalidCustomerDataException);
     });
 
     it('should throw InvalidCustomerDataException if whatsappPhone is missing', () => {
       expect(() =>
-        Customer.createAnonymous(
-          customerId,
-          businessId,
-          null as any,
-          'Juan Pérez',
-        ),
+        Customer.createAnonymous(customerId, businessId, null as any, 'Juan Pérez'),
       ).toThrow(InvalidCustomerDataException);
     });
 
     it('should throw InvalidCustomerNameException if name is empty string', () => {
-      expect(() =>
-        Customer.createAnonymous(customerId, businessId, whatsappPhone, ''),
-      ).toThrow(InvalidCustomerNameException);
+      expect(() => Customer.createAnonymous(customerId, businessId, whatsappPhone, '')).toThrow(
+        InvalidCustomerNameException,
+      );
     });
 
     it('should throw InvalidCustomerNameException if name is only whitespace', () => {
-      expect(() =>
-        Customer.createAnonymous(customerId, businessId, whatsappPhone, '   '),
-      ).toThrow(InvalidCustomerNameException);
+      expect(() => Customer.createAnonymous(customerId, businessId, whatsappPhone, '   ')).toThrow(
+        InvalidCustomerNameException,
+      );
     });
 
     it('should throw InvalidCustomerNameException if name exceeds 100 characters', () => {
       const longName = 'a'.repeat(101);
       expect(() =>
-        Customer.createAnonymous(
-          customerId,
-          businessId,
-          whatsappPhone,
-          longName,
-        ),
+        Customer.createAnonymous(customerId, businessId, whatsappPhone, longName),
       ).toThrow(InvalidCustomerNameException);
     });
 
     it('should accept name with exactly 100 characters', () => {
       const maxName = 'a'.repeat(100);
-      const customer = Customer.createAnonymous(
-        customerId,
-        businessId,
-        whatsappPhone,
-        maxName,
-      );
+      const customer = Customer.createAnonymous(customerId, businessId, whatsappPhone, maxName);
 
       expect(customer.getName()).toBe(maxName);
     });
@@ -160,12 +130,7 @@ describe('Customer Aggregate', () => {
     let customer: Customer;
 
     beforeEach(() => {
-      customer = Customer.createAnonymous(
-        customerId,
-        businessId,
-        whatsappPhone,
-        'Juan Pérez',
-      );
+      customer = Customer.createAnonymous(customerId, businessId, whatsappPhone, 'Juan Pérez');
       customer.commit(); // Clear uncommitted events
     });
 
@@ -193,22 +158,16 @@ describe('Customer Aggregate', () => {
     });
 
     it('should throw InvalidCustomerNameException if name is empty', () => {
-      expect(() => customer.updateName('')).toThrow(
-        InvalidCustomerNameException,
-      );
+      expect(() => customer.updateName('')).toThrow(InvalidCustomerNameException);
     });
 
     it('should throw InvalidCustomerNameException if name is only whitespace', () => {
-      expect(() => customer.updateName('   ')).toThrow(
-        InvalidCustomerNameException,
-      );
+      expect(() => customer.updateName('   ')).toThrow(InvalidCustomerNameException);
     });
 
     it('should throw InvalidCustomerNameException if name exceeds 100 characters', () => {
       const longName = 'a'.repeat(101);
-      expect(() => customer.updateName(longName)).toThrow(
-        InvalidCustomerNameException,
-      );
+      expect(() => customer.updateName(longName)).toThrow(InvalidCustomerNameException);
     });
 
     it('should update name from null', () => {
@@ -231,12 +190,7 @@ describe('Customer Aggregate', () => {
     let customer: Customer;
 
     beforeEach(() => {
-      customer = Customer.createAnonymous(
-        customerId,
-        businessId,
-        whatsappPhone,
-        'Juan Pérez',
-      );
+      customer = Customer.createAnonymous(customerId, businessId, whatsappPhone, 'Juan Pérez');
       customer.commit();
     });
 
@@ -274,12 +228,7 @@ describe('Customer Aggregate', () => {
     let customer: Customer;
 
     beforeEach(() => {
-      customer = Customer.createAnonymous(
-        customerId,
-        businessId,
-        whatsappPhone,
-        'Juan Pérez',
-      );
+      customer = Customer.createAnonymous(customerId, businessId, whatsappPhone, 'Juan Pérez');
       customer.linkToUser(userId);
       customer.commit();
     });
@@ -311,9 +260,7 @@ describe('Customer Aggregate', () => {
         'Juan Pérez',
       );
 
-      expect(() => anonymousCustomer.unlinkFromUser()).toThrow(
-        CustomerNotLinkedToUserException,
-      );
+      expect(() => anonymousCustomer.unlinkFromUser()).toThrow(CustomerNotLinkedToUserException);
     });
   });
 

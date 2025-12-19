@@ -3,15 +3,15 @@ import { InvalidWhatsAppPhoneException } from '../exceptions/invalid-whatsapp-ph
 
 /**
  * WhatsAppPhone Value Object
- * 
+ *
  * Represents a WhatsApp phone number in E.164 format (+[country code][number])
- * 
+ *
  * E.164 format rules:
  * - Must start with '+'
  * - Country code: 1-3 digits (cannot start with 0)
  * - Total length: 8-15 digits (including country code)
  * - No spaces, dashes, or other characters
- * 
+ *
  * Examples:
  * - +18095551234 (Dominican Republic)
  * - +12025551234 (USA)
@@ -45,7 +45,7 @@ export class WhatsAppPhone extends ValueObject {
 
     if (!WhatsAppPhone.E164_REGEX.test(value)) {
       throw new InvalidWhatsAppPhoneException(
-        `Invalid WhatsApp phone format: ${value}. Expected E.164 format (+[country code][number])`
+        `Invalid WhatsApp phone format: ${value}. Expected E.164 format (+[country code][number])`,
       );
     }
   }
