@@ -8,16 +8,16 @@ import {
   Popover,
   Text,
   TextInput,
-} from "@mantine/core"
-import { Notification, SearchNormal1, Setting2 } from "iconsax-react"
-import { MantineLogoRounded } from "~/components/MantineLogoRounded"
-import User from "../assets/avatars/avatar-3.jpg"
-import ThemeSwitch from "../components/ThemeSwitch"
-import classes from "./Header.module.css"
+} from "@mantine/core";
+import { Notification, SearchNormal1, Setting2 } from "iconsax-react";
+import { MantineLogoRounded } from "~/components/MantineLogoRounded";
+import User from "../assets/avatars/avatar-3.jpg";
+import ThemeSwitch from "../components/ThemeSwitch";
+import classes from "./Header.module.css";
 
 interface Props {
-  opened: boolean
-  toggle: () => void
+  opened: boolean;
+  toggle: () => void;
 }
 
 export default function Header({ opened, toggle }: Props) {
@@ -102,5 +102,5 @@ export default function Header({ opened, toggle }: Props) {
         </Popover>
       </Flex>
     </Group>
-  )
+  );
 }

@@ -1,10 +1,10 @@
 import { Paper, Group, Text, ThemeIcon } from "@mantine/core";
-import type { TablerIconsProps } from "@tabler/icons-react";
+import type { Icon as TablerIcon } from "@tabler/icons-react";
 
 interface StatCardProps {
   title: string;
   value: number;
-  icon: React.ComponentType<TablerIconsProps>;
+  icon: TablerIcon;
   color?: string;
 }
 

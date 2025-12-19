@@ -31,8 +31,22 @@ export function DateRangeFilter() {
 
   // Handler para convertir DatesRangeValue de vuelta a nuestro formato
   const handleDateRangeChange = (value: DatesRangeValue) => {
-    if (value[0] && value[1]) {
-      setDateRange([value[0], value[1]]);
+    // Convertir string a Date si es necesario (Mantine 8 puede retornar strings)
+    const start =
+      value[0] instanceof Date
+        ? value[0]
+        : value[0]
+          ? new Date(value[0])
+          : null;
+    const end =
+      value[1] instanceof Date
+        ? value[1]
+        : value[1]
+          ? new Date(value[1])
+          : null;
+
+    if (start && end) {
+      setDateRange([start, end]);
     } else {
       setDateRange(null);
     }

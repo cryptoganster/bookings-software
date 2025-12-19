@@ -7,10 +7,12 @@
 ### 1. ✅ Probar login con credenciales válidas
 
 **Credenciales de prueba:**
+
 - Email: `test@example.com`
 - Password: `Test123!`
 
 **Prueba 1: Backend directo**
+
 ```bash
 curl -X POST http://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \
@@ -18,6 +20,7 @@ curl -X POST http://localhost:3000/api/auth/login \
 ```
 
 **Respuesta:**
+
 ```json
 {
   "user": {
@@ -34,6 +37,7 @@ curl -X POST http://localhost:3000/api/auth/login \
 ✅ **Login exitoso** - El backend retorna el usuario y el token JWT correctamente.
 
 **Prueba 2: A través del proxy del frontend**
+
 ```bash
 curl -X POST http://localhost:5173/api/auth/login \
   -H "Content-Type: application/json" \
@@ -43,6 +47,7 @@ curl -X POST http://localhost:5173/api/auth/login \
 ✅ **Proxy funcionando** - El frontend puede comunicarse con el backend correctamente.
 
 **Prueba 3: Credenciales incorrectas**
+
 ```bash
 curl -X POST http://localhost:5173/api/auth/login \
   -H "Content-Type: application/json" \
@@ -50,6 +55,7 @@ curl -X POST http://localhost:5173/api/auth/login \
 ```
 
 **Respuesta:**
+
 ```json
 {
   "message": "Invalid credentials",
@@ -63,6 +69,7 @@ curl -X POST http://localhost:5173/api/auth/login \
 ### 2. ⏳ Verificar redirección a dashboard
 
 **Pasos para probar manualmente:**
+
 1. Abrir `http://localhost:5173` en el navegador
 2. Ingresar credenciales: `test@example.com` / `Test123!`
 3. Click en "Iniciar Sesión"
@@ -73,6 +80,7 @@ curl -X POST http://localhost:5173/api/auth/login \
 ### 3. ⏳ Verificar que token se guarda en localStorage
 
 **Pasos para verificar:**
+
 1. Después del login exitoso
 2. Abrir DevTools → Application → Local Storage
 3. Verificar que existe la key `auth-storage`
@@ -83,6 +91,7 @@ curl -X POST http://localhost:5173/api/auth/login \
 ### 4. ⏳ Probar logout y verificar limpieza
 
 **Pasos para verificar:**
+
 1. Estando logueado, hacer click en botón de logout
 2. Verificar redirección a `/login`
 3. Verificar que `auth-storage` fue eliminado de localStorage
@@ -93,6 +102,7 @@ curl -X POST http://localhost:5173/api/auth/login \
 ### 5. ⏳ Probar acceso a ruta protegida sin auth
 
 **Pasos para verificar:**
+
 1. Abrir navegador en modo incógnito
 2. Intentar acceder directamente a `http://localhost:5173/`
 3. Verificar redirección automática a `/login`
@@ -102,25 +112,30 @@ curl -X POST http://localhost:5173/api/auth/login \
 ## Servidores
 
 ### Backend
+
 - **URL:** `http://localhost:3000`
 - **Estado:** ✅ Corriendo
 - **Health Check:** ✅ OK
 
 ### Frontend
+
 - **URL:** `http://localhost:5173`
 - **Estado:** ✅ Corriendo
 
 ## Problemas Resueltos
 
 ### 1. Error de compilación del backend
+
 **Problema:** TypeScript compilaba todo el monorepo generando estructura incorrecta en `dist/`
 
-**Solución:** 
+**Solución:**
+
 - Agregado script `postbuild` en `package.json` que copia archivos al lugar correcto
 - Cambiado script `dev` para usar `nodemon` en lugar de `nest start --watch`
 - Creado `nodemon.json` para configurar watch mode
 
 **Archivos modificados:**
+
 - `apps/backend/package.json`
 - `apps/backend/nodemon.json` (nuevo)
 - `apps/backend/nest-cli.json`

@@ -1,11 +1,11 @@
-import { AppShell } from "@mantine/core"
-import { useDisclosure } from "@mantine/hooks"
-import Header from "./Header"
-import Navbar from "./Navbar"
-import classes from "./App.module.css"
+import { AppShell } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
+import Header from "./Header";
+import Navbar from "./Navbar";
+import classes from "./App.module.css";
 
 export default function App({ children }: Children) {
-  const [opened, { toggle }] = useDisclosure()
+  const [opened, { toggle }] = useDisclosure();
 
   return (
     <AppShell
@@ -27,5 +27,5 @@ export default function App({ children }: Children) {
       </AppShell.Navbar>
       <AppShell.Main>{children}</AppShell.Main>
     </AppShell>
-  )
+  );
 }
