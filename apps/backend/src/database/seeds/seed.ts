@@ -1,5 +1,6 @@
 import { AppDataSource } from '@config/database';
 import { seedAuth } from '@database/seeds/auth.seed';
+import { seedCustomer } from '@database/seeds/customer.seed';
 import { seedOffering } from '@database/seeds/offering.seed';
 import { seedAvailability } from '@database/seeds/availability.seed';
 import { seedBooking } from '@database/seeds/booking.seed';
@@ -14,12 +15,20 @@ async function seed() {
     console.log('🧹 Cleaning existing data...');
     await AppDataSource.query('TRUNCATE TABLE appointments CASCADE');
     await AppDataSource.query('TRUNCATE TABLE capacities CASCADE');
+    await AppDataSource.query('TRUNCATE TABLE customers CASCADE');
     await AppDataSource.query('TRUNCATE TABLE offerings CASCADE');
     await AppDataSource.query('TRUNCATE TABLE users CASCADE');
     console.log('✅ Data cleaned\n');
 
     // Seed por Bounded Context
-    const { businessId } = await seedAuth(AppDataSource);
+    const { userId, businessId } = await seedAuth(AppDataSource);
+    console.log('');
+
+    const { customerId1, customerId2, customerId3 } = await seedCustomer(
+      AppDataSource,
+      businessId,
+      userId,
+    );
     console.log('');
 
     const { offering1Id, offering2Id, offering3Id } = await seedOffering(AppDataSource, businessId);
@@ -28,12 +37,21 @@ async function seed() {
     await seedAvailability(AppDataSource, offering1Id, offering2Id, offering3Id);
     console.log('');
 
-    await seedBooking(AppDataSource, businessId, offering1Id, offering2Id);
+    await seedBooking(
+      AppDataSource,
+      businessId,
+      offering1Id,
+      offering2Id,
+      customerId1,
+      customerId2,
+      customerId3,
+    );
     console.log('');
 
     console.log('📊 Seeding Summary:');
     console.log('==================');
     console.log('✅ Auth BC: 1 user');
+    console.log('✅ Customer BC: 3 customers (2 anonymous, 1 registered)');
     console.log('✅ Offering BC: 3 offerings');
     console.log('✅ Availability BC: 90 capacity records (30 days × 3 offerings)');
     console.log('✅ Booking BC: 5 appointments (3 CONFIRMED, 1 CANCELLED, 1 COMPLETED)');

@@ -14,22 +14,54 @@ export class AppointmentReadRepository implements IAppointmentReadRepository {
   ) {}
 
   async findById(id: string): Promise<AppointmentReadModel | null> {
-    const model = await this.repository.findOne({
-      where: { id },
-    });
+    const result = await this.repository
+      .createQueryBuilder('appointment')
+      .leftJoin('customers', 'customer', 'customer.id = appointment.customerId')
+      .leftJoin('offerings', 'offering', 'offering.id = appointment.offeringId')
+      .select([
+        'appointment.id as id',
+        'appointment.businessId as "businessId"',
+        'appointment.customerId as "customerId"',
+        'customer.name as "customerName"',
+        'customer.whatsapp_phone as "customerPhone"',
+        'appointment.offeringId as "offeringId"',
+        'offering.name as "offeringName"',
+        'appointment.dateTime as "dateTime"',
+        'appointment.status as status',
+        'appointment.createdAt as "createdAt"',
+        'appointment.cancelledAt as "cancelledAt"',
+      ])
+      .where('appointment.id = :id', { id })
+      .getRawOne();
 
-    if (!model) return null;
+    if (!result) return null;
 
-    return AppointmentReadMapper.toReadModel(model);
+    return AppointmentReadMapper.toReadModel(result);
   }
 
   async findByCustomerId(customerId: string): Promise<AppointmentReadModel[]> {
-    const models = await this.repository.find({
-      where: { customerId },
-      order: { dateTime: 'ASC' },
-    });
+    const results = await this.repository
+      .createQueryBuilder('appointment')
+      .leftJoin('customers', 'customer', 'customer.id = appointment.customerId')
+      .leftJoin('offerings', 'offering', 'offering.id = appointment.offeringId')
+      .select([
+        'appointment.id as id',
+        'appointment.businessId as "businessId"',
+        'appointment.customerId as "customerId"',
+        'customer.name as "customerName"',
+        'customer.whatsapp_phone as "customerPhone"',
+        'appointment.offeringId as "offeringId"',
+        'offering.name as "offeringName"',
+        'appointment.dateTime as "dateTime"',
+        'appointment.status as status',
+        'appointment.createdAt as "createdAt"',
+        'appointment.cancelledAt as "cancelledAt"',
+      ])
+      .where('appointment.customerId = :customerId', { customerId })
+      .orderBy('appointment.dateTime', 'ASC')
+      .getRawMany();
 
-    return models.map((model) => AppointmentReadMapper.toReadModel(model));
+    return results.map((result) => AppointmentReadMapper.toReadModel(result));
   }
 
   async findByBusinessId(
@@ -44,6 +76,21 @@ export class AppointmentReadRepository implements IAppointmentReadRepository {
   ): Promise<AppointmentReadModel[]> {
     const queryBuilder = this.repository
       .createQueryBuilder('appointment')
+      .leftJoin('customers', 'customer', 'customer.id = appointment.customerId')
+      .leftJoin('offerings', 'offering', 'offering.id = appointment.offeringId')
+      .select([
+        'appointment.id as id',
+        'appointment.businessId as "businessId"',
+        'appointment.customerId as "customerId"',
+        'customer.name as "customerName"',
+        'customer.whatsapp_phone as "customerPhone"',
+        'appointment.offeringId as "offeringId"',
+        'offering.name as "offeringName"',
+        'appointment.dateTime as "dateTime"',
+        'appointment.status as status',
+        'appointment.createdAt as "createdAt"',
+        'appointment.cancelledAt as "cancelledAt"',
+      ])
       .where('appointment.businessId = :businessId', { businessId });
 
     // Aplicar filtros opcionales
@@ -73,22 +120,37 @@ export class AppointmentReadRepository implements IAppointmentReadRepository {
 
     queryBuilder.orderBy('appointment.dateTime', 'ASC');
 
-    const models = await queryBuilder.getMany();
+    const results = await queryBuilder.getRawMany();
 
-    return models.map((model) => AppointmentReadMapper.toReadModel(model));
+    return results.map((result) => AppointmentReadMapper.toReadModel(result));
   }
 
   async findUpcoming(businessId: string): Promise<AppointmentReadModel[]> {
     const now = new Date();
-    const models = await this.repository
+    const results = await this.repository
       .createQueryBuilder('appointment')
+      .leftJoin('customers', 'customer', 'customer.id = appointment.customerId')
+      .leftJoin('offerings', 'offering', 'offering.id = appointment.offeringId')
+      .select([
+        'appointment.id as id',
+        'appointment.businessId as "businessId"',
+        'appointment.customerId as "customerId"',
+        'customer.name as "customerName"',
+        'customer.whatsapp_phone as "customerPhone"',
+        'appointment.offeringId as "offeringId"',
+        'offering.name as "offeringName"',
+        'appointment.dateTime as "dateTime"',
+        'appointment.status as status',
+        'appointment.createdAt as "createdAt"',
+        'appointment.cancelledAt as "cancelledAt"',
+      ])
       .where('appointment.businessId = :businessId', { businessId })
       .andWhere('appointment.dateTime >= :now', { now })
       .andWhere('appointment.status != :cancelled', { cancelled: 'CANCELLED' })
       .orderBy('appointment.dateTime', 'ASC')
-      .getMany();
+      .getRawMany();
 
-    return models.map((model) => AppointmentReadMapper.toReadModel(model));
+    return results.map((result) => AppointmentReadMapper.toReadModel(result));
   }
 
   async findByBusinessAndDateRange(
@@ -96,15 +158,30 @@ export class AppointmentReadRepository implements IAppointmentReadRepository {
     startDate: Date,
     endDate: Date,
   ): Promise<AppointmentReadModel[]> {
-    const models = await this.repository
+    const results = await this.repository
       .createQueryBuilder('appointment')
+      .leftJoin('customers', 'customer', 'customer.id = appointment.customerId')
+      .leftJoin('offerings', 'offering', 'offering.id = appointment.offeringId')
+      .select([
+        'appointment.id as id',
+        'appointment.businessId as "businessId"',
+        'appointment.customerId as "customerId"',
+        'customer.name as "customerName"',
+        'customer.whatsapp_phone as "customerPhone"',
+        'appointment.offeringId as "offeringId"',
+        'offering.name as "offeringName"',
+        'appointment.dateTime as "dateTime"',
+        'appointment.status as status',
+        'appointment.createdAt as "createdAt"',
+        'appointment.cancelledAt as "cancelledAt"',
+      ])
       .where('appointment.businessId = :businessId', { businessId })
       .andWhere('appointment.dateTime >= :startDate', { startDate })
       .andWhere('appointment.dateTime <= :endDate', { endDate })
       .andWhere('appointment.status != :cancelled', { cancelled: 'CANCELLED' })
       .orderBy('appointment.dateTime', 'ASC')
-      .getMany();
+      .getRawMany();
 
-    return models.map((model) => AppointmentReadMapper.toReadModel(model));
+    return results.map((result) => AppointmentReadMapper.toReadModel(result));
   }
 }

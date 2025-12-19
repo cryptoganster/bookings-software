@@ -11,6 +11,7 @@ describe('CreateAppointmentHandler Concurrency', () => {
   let appointmentRepository: jest.Mocked<IAppointmentWriteRepository>;
   let capacityFactory: any;
   let capacityWriteRepository: any;
+  let customerReadRepository: any;
   let uow: jest.Mocked<IUnitOfWork>;
 
   beforeEach(async () => {
@@ -27,6 +28,14 @@ describe('CreateAppointmentHandler Concurrency', () => {
 
     capacityWriteRepository = {
       save: jest.fn(),
+    };
+
+    customerReadRepository = {
+      findById: jest.fn().mockResolvedValue({ id: 'mock-customer-id' }), // Mock customer exists for all tests
+      findByWhatsAppPhone: jest.fn(),
+      findByBusinessId: jest.fn(),
+      findByUserId: jest.fn(),
+      findAnonymousByBusinessId: jest.fn(),
     };
 
     uow = {
@@ -56,6 +65,10 @@ describe('CreateAppointmentHandler Concurrency', () => {
         {
           provide: 'ICapacityWriteRepository',
           useValue: capacityWriteRepository,
+        },
+        {
+          provide: 'ICustomerReadRepository',
+          useValue: customerReadRepository,
         },
         {
           provide: PinoLogger,

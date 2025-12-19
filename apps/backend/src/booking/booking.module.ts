@@ -7,6 +7,7 @@ import { AppointmentModel } from '@booking/infra/persistence/models/appointment'
 
 // Modules
 import { AvailabilityModule } from '@availability/availability.module';
+import { CustomerModule } from '@customer/customer.module';
 
 // Command Handlers
 import { CreateAppointmentHandler } from '@booking/app/commands/create-appointment/handler';
@@ -56,7 +57,12 @@ const EventHandlers = [OnAppointmentCreatedHandler, OnAppointmentCancelledHandle
 const Sagas = [AppointmentNotificationSaga];
 
 @Module({
-  imports: [CqrsModule, TypeOrmModule.forFeature([AppointmentModel]), AvailabilityModule],
+  imports: [
+    CqrsModule,
+    TypeOrmModule.forFeature([AppointmentModel]),
+    AvailabilityModule,
+    CustomerModule,
+  ],
   controllers: [AppointmentController],
   providers: [
     // Command Handlers

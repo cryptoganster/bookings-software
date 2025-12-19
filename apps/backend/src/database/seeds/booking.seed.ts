@@ -7,12 +7,12 @@ export async function seedBooking(
   businessId: string,
   offering1Id: string,
   offering2Id: string,
+  customerId1: string,
+  customerId2: string,
+  customerId3: string,
 ): Promise<void> {
   console.log('📝 Seeding Booking BC...');
 
-  const customerId1 = uuidv4();
-  const customerId2 = uuidv4();
-  const customerId3 = uuidv4();
   const today = new Date();
 
   // Cita 1 - Mañana a las 10:00 - CONFIRMED
