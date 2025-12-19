@@ -1,4 +1,8 @@
 import { CustomerReadModel } from '@customer/domain/read-models/customer';
+import {
+  SearchCustomersFilters,
+  SearchCustomersResult,
+} from '@customer/app/queries/search-customers/query';
 
 /**
  * Read Repository Interface for Customer Queries
@@ -9,6 +13,13 @@ import { CustomerReadModel } from '@customer/domain/read-models/customer';
  * - Optimized queries with joins when needed
  */
 export interface ICustomerReadRepository {
+  /**
+   * Search customers with filters
+   * Supports text search, type filtering, date range, pagination, and sorting
+   *
+   * Requirements: 2.1, 2.2, 2.3, 2.4, 2.5
+   */
+  search(filters: SearchCustomersFilters): Promise<SearchCustomersResult>;
   /**
    * Find customer by ID
    * @throws CustomerNotFoundException if not found
