@@ -12,6 +12,7 @@ import { Entity, Column, PrimaryColumn, CreateDateColumn, UpdateDateColumn, Inde
  * @property {string} whatsapp_phone - WhatsApp phone in E.164 format
  * @property {string | null} name - Customer name (can be null initially)
  * @property {number} version - Optimistic locking version
+ * @property {string | null} merged_into - ID of target customer if this customer was merged (soft delete)
  * @property {Date} created_at - Creation timestamp
  * @property {Date} updated_at - Last update timestamp
  */
@@ -37,6 +38,9 @@ export class CustomerModel {
 
   @Column('int', { default: 0 })
   version!: number;
+
+  @Column('uuid', { nullable: true })
+  merged_into!: string | null;
 
   @CreateDateColumn()
   created_at!: Date;

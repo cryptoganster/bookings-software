@@ -178,7 +178,7 @@ Este documento proporciona un checklist de implementación paso a paso para las 
 
 ### Phase 3: Deduplication and Merge (3 days)
 
-- [ ] 3.1 Create DetectDuplicateCustomersQuery
+- [x] 3.1 Create DetectDuplicateCustomersQuery
   - Create `apps/backend/src/customer/app/queries/detect-duplicate-customers/query.ts`
   - Query extends `Query<DuplicateCustomerPair[]>`
   - Include businessId and threshold (default 0.8)
@@ -186,7 +186,7 @@ Este documento proporciona un checklist de implementación paso a paso para las 
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
   - **Commit:** `feat(customer): add DetectDuplicateCustomersQuery`
 
-- [ ] 3.2 Implement Deduplication Algorithm
+- [x] 3.2 Implement Deduplication Algorithm
   - Create `apps/backend/src/customer/domain/services/customer-deduplication.service.ts`
   - Implement phone normalization (remove +, spaces, dashes)
   - Implement Levenshtein distance for name similarity
@@ -196,7 +196,7 @@ Este documento proporciona un checklist de implementación paso a paso para las 
   - _Edge Cases: 5_
   - **Commit:** `feat(customer): implement deduplication algorithm`
 
-- [ ] 3.3 Implement DetectDuplicateCustomersHandler
+- [x] 3.3 Implement DetectDuplicateCustomersHandler
   - Create `apps/backend/src/customer/app/queries/detect-duplicate-customers/handler.ts`
   - Load all customers for business
   - Use deduplication service to compare pairs
@@ -207,7 +207,7 @@ Este documento proporciona un checklist de implementación paso a paso para las 
   - _Edge Cases: 5_
   - **Commit:** `feat(customer): implement DetectDuplicateCustomersHandler`
 
-- [ ] 3.4 Write Unit Tests for Deduplication Service
+- [x] 3.4 Write Unit Tests for Deduplication Service
   - Test phone normalization
   - Test Levenshtein distance calculation
   - Test similarity score calculation
@@ -217,7 +217,7 @@ Este documento proporciona un checklist de implementación paso a paso para las 
   - _Edge Cases: 5_
   - **Commit:** `test(customer): add unit tests for deduplication service`
 
-- [ ] 3.5 Write Unit Tests for DetectDuplicateCustomersHandler
+- [x] 3.5 Write Unit Tests for DetectDuplicateCustomersHandler
   - Test duplicate detection
   - Test threshold filtering
   - Test symmetry (A duplicate of B = B duplicate of A)
@@ -225,14 +225,14 @@ Este documento proporciona un checklist de implementación paso a paso para las 
   - _Properties: 2_
   - **Commit:** `test(customer): add unit tests for DetectDuplicateCustomersHandler`
 
-- [ ] 3.6 Create MergeCustomersCommand
+- [x] 3.6 Create MergeCustomersCommand
   - Create `apps/backend/src/customer/app/commands/merge-customers/command.ts`
   - Command extends `Command<void>`
   - Include sourceCustomerId, targetCustomerId, mergedBy
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7_
   - **Commit:** `feat(customer): add MergeCustomersCommand`
 
-- [ ] 3.7 Implement MergeCustomersHandler
+- [x] 3.7 Implement MergeCustomersHandler
   - Create `apps/backend/src/customer/app/commands/merge-customers/handler.ts`
   - Load both customers using Factory
   - Validate they belong to same business
@@ -248,20 +248,20 @@ Este documento proporciona un checklist de implementación paso a paso para las 
   - _Edge Cases: 1, 6, 8_
   - **Commit:** `feat(customer): implement MergeCustomersHandler`
 
-- [ ] 3.8 Create CustomersMerged Event
+- [x] 3.8 Create CustomersMerged Event
   - Create `apps/backend/src/customer/domain/events/customers-merged.ts`
   - Include sourceCustomerId, targetCustomerId, mergedBy, occurredAt
   - _Requirements: 5.6_
   - **Commit:** `feat(customer): add CustomersMerged event`
 
-- [ ] 3.9 Create Database Migration for merged_into Column
+- [x] 3.9 Create Database Migration for merged_into Column
   - Create migration `apps/backend/src/database/migrations/XXXXXX-add-merged-into-to-customers.ts`
   - Add merged_into column (UUID, nullable)
   - Add index on merged_into WHERE merged_into IS NOT NULL
   - _Requirements: 5.5_
   - **Commit:** `feat(customer): add merged_into column migration`
 
-- [ ] 3.10 Write Unit Tests for MergeCustomersHandler
+- [x] 3.10 Write Unit Tests for MergeCustomersHandler
   - Test successful merge
   - Test validation (same business, source !== target)
   - Test appointments update
