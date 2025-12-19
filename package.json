@@ -32,9 +32,14 @@
     "format:backend": "pnpm --filter backend run format",
     "format:frontend": "pnpm --filter frontend run format",
     "format:check": "prettier --check \"**/*.{ts,tsx,json,md}\"",
-    "clean": "pnpm --recursive run clean && rm -rf node_modules"
+    "clean": "pnpm --recursive run clean && rm -rf node_modules",
+    "prepare": "husky"
   },
   "devDependencies": {
+    "@commitlint/cli": "^20.2.0",
+    "@commitlint/config-conventional": "^20.2.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "playwright": "^1.57.0",
     "prettier": "^3.1.0"
   },
