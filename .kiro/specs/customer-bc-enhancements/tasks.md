@@ -83,14 +83,14 @@ Este documento proporciona un checklist de implementación paso a paso para las 
 
 ### Phase 2: Backend Search and Filtering (1 week)
 
-- [ ] 2.1 Create SearchCustomersQuery
+- [x] 2.1 Create SearchCustomersQuery
   - Create `apps/backend/src/customer/app/queries/search-customers/query.ts`
   - Query extends `Query<SearchCustomersResult>`
   - Include filters: businessId, searchText, type, dateRange, page, limit, sortBy, sortOrder
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
   - **Commit:** `feat(customer): add SearchCustomersQuery`
 
-- [ ] 2.2 Implement SearchCustomersHandler
+- [x] 2.2 Implement SearchCustomersHandler
   - Create `apps/backend/src/customer/app/queries/search-customers/handler.ts`
   - Use TypeORM QueryBuilder with LIKE for text search
   - Escape special characters (%, _, \) to prevent SQL injection
@@ -101,12 +101,12 @@ Este documento proporciona un checklist de implementación paso a paso para las 
   - _Edge Cases: 2, 7, 9_
   - **Commit:** `feat(customer): implement SearchCustomersHandler`
 
-- [ ] 2.3 Update ICustomerReadRepository
+- [x] 2.3 Update ICustomerReadRepository
   - Add `search(filters: SearchCustomersFilters): Promise<SearchCustomersResult>` method
   - _Requirements: 2.1_
   - **Commit:** `feat(customer): add search method to ICustomerReadRepository`
 
-- [ ] 2.4 Implement CustomerReadRepository.search
+- [x] 2.4 Implement CustomerReadRepository.search
   - Implement search method in `apps/backend/src/customer/infra/persistence/repositories/customer-read.repository.ts`
   - Use QueryBuilder with proper escaping
   - Add LOWER() for case-insensitive search
