@@ -261,7 +261,7 @@ Este documento proporciona un checklist de implementación paso a paso para las 
   - _Requirements: 5.5_
   - **Commit:** `feat(customer): add merged_into column migration`
 
-- [ ] 3.10 Write Unit Tests for MergeCustomersHandler
+- [x] 3.10 Write Unit Tests for MergeCustomersHandler
   - Test successful merge
   - Test validation (same business, source !== target)
   - Test appointments update
