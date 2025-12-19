@@ -92,7 +92,9 @@ describe('CreateAppointmentHandler Integration', () => {
     };
 
     capacityFactory.loadByOfferingAndDate.mockResolvedValue(mockCapacity);
-    customerReadRepository.findById.mockResolvedValue({ id: '550e8400-e29b-41d4-a716-446655440001' });
+    customerReadRepository.findById.mockResolvedValue({
+      id: '550e8400-e29b-41d4-a716-446655440001',
+    });
 
     // Use a future date
     const futureDate = new Date();
@@ -123,7 +125,9 @@ describe('CreateAppointmentHandler Integration', () => {
     };
 
     capacityFactory.loadByOfferingAndDate.mockResolvedValue(mockCapacity);
-    customerReadRepository.findById.mockResolvedValue({ id: '550e8400-e29b-41d4-a716-446655440001' });
+    customerReadRepository.findById.mockResolvedValue({
+      id: '550e8400-e29b-41d4-a716-446655440001',
+    });
 
     // Use a future date
     const futureDate = new Date();
@@ -144,7 +148,9 @@ describe('CreateAppointmentHandler Integration', () => {
   it('should throw NoAvailableSlotsException if capacity is null', async () => {
     // Arrange
     capacityFactory.loadByOfferingAndDate.mockResolvedValue(null);
-    customerReadRepository.findById.mockResolvedValue({ id: '550e8400-e29b-41d4-a716-446655440001' });
+    customerReadRepository.findById.mockResolvedValue({
+      id: '550e8400-e29b-41d4-a716-446655440001',
+    });
 
     // Use a future date
     const futureDate = new Date();

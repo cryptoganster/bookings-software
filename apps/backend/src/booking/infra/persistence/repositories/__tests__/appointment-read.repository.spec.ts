@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { AppointmentReadRepository } from '../appointment-read';
 import { AppointmentModel } from '../../models/appointment';
+import { CustomerModel } from '@customer/infra/persistence/models/customer.model';
 import { UUID } from '@shared/vo/uuid';
 
 describe('AppointmentReadRepository Integration Tests', () => {
@@ -20,7 +21,7 @@ describe('AppointmentReadRepository Integration Tests', () => {
           username: process.env.DB_USERNAME || 'postgres',
           password: process.env.DB_PASSWORD || 'postgres',
           database: process.env.DB_DATABASE || 'bookings_test',
-          entities: [AppointmentModel],
+          entities: [AppointmentModel, CustomerModel],
           synchronize: true,
           dropSchema: false, // No eliminar el schema en cada test
         }),
@@ -39,7 +40,9 @@ describe('AppointmentReadRepository Integration Tests', () => {
   });
 
   afterEach(async () => {
+    // Clear in correct order due to foreign keys
     await dataSource.getRepository(AppointmentModel).clear();
+    await dataSource.getRepository(CustomerModel).clear();
   });
 
   describe('findById', () => {
@@ -49,6 +52,18 @@ describe('AppointmentReadRepository Integration Tests', () => {
       const businessId = UUID.generate().getValue();
       const customerId = UUID.generate().getValue();
       const offeringId = UUID.generate().getValue();
+
+      // Create customer first
+      await dataSource.getRepository(CustomerModel).insert({
+        id: customerId,
+        user_id: null,
+        business_id: businessId,
+        whatsapp_phone: '+18095551234',
+        name: 'Test Customer',
+        version: 1,
+        created_at: new Date(),
+        updated_at: new Date(),
+      });
 
       await dataSource.getRepository(AppointmentModel).insert({
         id,
@@ -71,6 +86,8 @@ describe('AppointmentReadRepository Integration Tests', () => {
       expect(readModel!.id).toBe(id);
       expect(readModel!.businessId).toBe(businessId);
       expect(readModel!.status).toBe('CONFIRMED');
+      expect(readModel!.customerName).toBe('Test Customer');
+      expect(readModel!.customerPhone).toBe('+18095551234');
     });
   });
 
@@ -79,6 +96,18 @@ describe('AppointmentReadRepository Integration Tests', () => {
       // Arrange
       const customerId = UUID.generate().getValue();
       const businessId = UUID.generate().getValue();
+
+      // Create customer first
+      await dataSource.getRepository(CustomerModel).insert({
+        id: customerId,
+        user_id: null,
+        business_id: businessId,
+        whatsapp_phone: '+18095555678',
+        name: 'Test Customer 2',
+        version: 1,
+        created_at: new Date(),
+        updated_at: new Date(),
+      });
 
       await dataSource.getRepository(AppointmentModel).insert([
         {
@@ -114,6 +143,8 @@ describe('AppointmentReadRepository Integration Tests', () => {
       expect(appointments).toHaveLength(2);
       expect(appointments[0].customerId).toBe(customerId);
       expect(appointments[1].customerId).toBe(customerId);
+      expect(appointments[0].customerName).toBe('Test Customer 2');
+      expect(appointments[0].customerPhone).toBe('+18095555678');
     });
   });
 
@@ -122,12 +153,49 @@ describe('AppointmentReadRepository Integration Tests', () => {
       // Arrange
       const businessId = UUID.generate().getValue();
       const now = new Date();
+      const customer1Id = UUID.generate().getValue();
+      const customer2Id = UUID.generate().getValue();
+      const customer3Id = UUID.generate().getValue();
+
+      // Create customers first
+      await dataSource.getRepository(CustomerModel).insert([
+        {
+          id: customer1Id,
+          user_id: null,
+          business_id: businessId,
+          whatsapp_phone: '+18095559001',
+          name: 'Customer 1',
+          version: 1,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+        {
+          id: customer2Id,
+          user_id: null,
+          business_id: businessId,
+          whatsapp_phone: '+18095559002',
+          name: 'Customer 2',
+          version: 1,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+        {
+          id: customer3Id,
+          user_id: null,
+          business_id: businessId,
+          whatsapp_phone: '+18095559003',
+          name: 'Customer 3',
+          version: 1,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+      ]);
 
       await dataSource.getRepository(AppointmentModel).insert([
         {
           id: UUID.generate().getValue(),
           businessId,
-          customerId: UUID.generate().getValue(),
+          customerId: customer1Id,
           offeringId: UUID.generate().getValue(),
           dateTime: new Date(now.getTime() + 86400000), // Futuro
           status: 'CONFIRMED',
@@ -139,7 +207,7 @@ describe('AppointmentReadRepository Integration Tests', () => {
         {
           id: UUID.generate().getValue(),
           businessId,
-          customerId: UUID.generate().getValue(),
+          customerId: customer2Id,
           offeringId: UUID.generate().getValue(),
           dateTime: new Date(now.getTime() - 86400000), // Pasado
           status: 'CONFIRMED',
@@ -151,7 +219,7 @@ describe('AppointmentReadRepository Integration Tests', () => {
         {
           id: UUID.generate().getValue(),
           businessId,
-          customerId: UUID.generate().getValue(),
+          customerId: customer3Id,
           offeringId: UUID.generate().getValue(),
           dateTime: new Date(now.getTime() + 172800000), // Futuro
           status: 'CANCELLED',
