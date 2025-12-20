@@ -1,6 +1,9 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { TypeOrmModule } from '@nestjs/typeorm';
+
+// External Modules
+import { BookingModule } from '@booking/booking.module';
 
 // Models
 import { CustomerModel } from '@customer/infra/persistence/models';
@@ -87,7 +90,11 @@ const repositories = [
  * @see .kiro/steering/user-customer-businessowner-architecture.md
  */
 @Module({
-  imports: [CqrsModule, TypeOrmModule.forFeature([CustomerModel])],
+  imports: [
+    CqrsModule,
+    TypeOrmModule.forFeature([CustomerModel]),
+    forwardRef(() => BookingModule), // ← Use forwardRef to avoid circular dependency
+  ],
   providers: [
     ...commandHandlers,
     ...queryHandlers,
