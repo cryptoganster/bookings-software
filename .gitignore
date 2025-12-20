@@ -49,3 +49,6 @@ test-results/
 # Kiro IDE settings (contains secrets)
 .kiro/settings/
 
+# Backup files from refactoring
+*.backup
+dtos.backup/
