@@ -378,7 +378,7 @@ Este documento proporciona un checklist de implementación paso a paso para las 
 
 ### Phase 5: Frontend Customer Management UI (1 week)
 
-- [ ] 5.1 Create Customers API Service
+- [x] 5.1 Create Customers API Service
   - Create `apps/frontend/src/shared/api/customers.ts`
   - Implement: getById, search, getByUserId, getStats, merge, delete, exportData
   - Use apiClient from `@shared/api/client`
