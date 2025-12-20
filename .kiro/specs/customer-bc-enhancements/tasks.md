@@ -385,7 +385,7 @@ Este documento proporciona un checklist de implementación paso a paso para las 
   - _Requirements: 8.1-8.6, 9.1-9.6, 10.1-10.5_
   - **Commit:** `feat(frontend): add customers API service`
 
-- [ ] 5.2 Create SearchCustomersForm Feature
+- [x] 5.2 Create SearchCustomersForm Feature
   - Create `apps/frontend/src/features/customer/search/`
   - Create `ui/SearchCustomersForm.tsx` with TextInput and debounce
   - Create `ui/CustomerFilters.tsx` with filter dropdowns
