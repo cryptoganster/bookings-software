@@ -20,6 +20,7 @@ import {
   ApiParam,
   ApiBody,
 } from '@nestjs/swagger';
+import { PinoLogger } from 'nestjs-pino';
 import { JwtAuthGuard } from '@auth/infra/guards/jwt-auth';
 import { CurrentUser, UserPayload } from '@auth/presentation/decorators/current-user';
 import { CustomerReadModel } from '@packages/shared-types';
@@ -66,7 +67,10 @@ export class CustomerController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
-  ) {}
+    private readonly logger: PinoLogger,
+  ) {
+    this.logger.setContext(CustomerController.name);
+  }
 
   /**
    * Search customers with filters
@@ -137,44 +141,106 @@ export class CustomerController {
     @Query() dto: SearchCustomersDto,
     @CurrentUser() user: UserPayload,
   ): Promise<SearchCustomersResponseDto> {
-    // Extract businessId from authenticated user
-    const businessId = user.businessId;
+    const startTime = Date.now();
 
-    if (!businessId) {
-      throw new ForbiddenException('User does not have a business');
+    this.logger.info(
+      {
+        action: 'search_customers_start',
+        userId: user.userId,
+        businessId: user.businessId,
+        filters: {
+          searchText: dto.searchText,
+          type: dto.type,
+          page: dto.page,
+          limit: dto.limit,
+          sortBy: dto.sortBy,
+          sortOrder: dto.sortOrder,
+        },
+      },
+      'Starting customer search',
+    );
+
+    try {
+      // Extract businessId from authenticated user
+      const businessId = user.businessId;
+
+      if (!businessId) {
+        this.logger.warn(
+          {
+            action: 'search_customers_forbidden',
+            userId: user.userId,
+            reason: 'no_business_id',
+          },
+          'User does not have a business',
+        );
+        throw new ForbiddenException('User does not have a business');
+      }
+
+      // Build filters from DTO
+      const filters: SearchCustomersFilters = {
+        businessId,
+        searchText: dto.searchText,
+        type: dto.type || 'all',
+        page: dto.page || 1,
+        limit: dto.limit || 10,
+        sortBy: dto.sortBy as 'name' | 'createdAt' | 'appointmentCount',
+        sortOrder: dto.sortOrder === 'asc' ? 'ASC' : 'DESC',
+      };
+
+      // Dispatch query
+      const result = await this.queryBus.execute(new SearchCustomersQuery(filters));
+
+      const duration = Date.now() - startTime;
+
+      this.logger.info(
+        {
+          action: 'search_customers_complete',
+          userId: user.userId,
+          businessId: user.businessId,
+          resultCount: result.total,
+          page: result.page,
+          totalPages: result.totalPages,
+          duration,
+        },
+        'Customer search completed',
+      );
+
+      // Transform to response DTO
+      // Note: result.customers already has appointmentCount from the query
+      return {
+        customers: result.customers.map((c) => ({
+          id: c.id,
+          businessId: c.businessId,
+          userId: c.userId,
+          whatsappPhone: c.whatsappPhone,
+          name: c.name,
+          appointmentCount: c.appointmentCount,
+          createdAt: c.createdAt.toISOString(),
+        })),
+        total: result.total,
+        page: result.page,
+        limit: result.limit,
+        totalPages: result.totalPages,
+      };
+    } catch (error: unknown) {
+      const duration = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorStack = error instanceof Error ? error.stack : undefined;
+
+      this.logger.error(
+        {
+          action: 'search_customers_error',
+          userId: user.userId,
+          businessId: user.businessId,
+          error: errorMessage,
+          stack: errorStack,
+          duration,
+        },
+        'Customer search failed',
+      );
+
+      throw error;
     }
-
-    // Build filters from DTO
-    const filters: SearchCustomersFilters = {
-      businessId,
-      searchText: dto.searchText,
-      type: dto.type || 'all',
-      page: dto.page || 1,
-      limit: dto.limit || 10,
-      sortBy: dto.sortBy as 'name' | 'createdAt' | 'appointmentCount',
-      sortOrder: dto.sortOrder === 'asc' ? 'ASC' : 'DESC',
-    };
-
-    // Dispatch query
-    const result = await this.queryBus.execute(new SearchCustomersQuery(filters));
-
-    // Transform to response DTO
-    // Note: result.customers already has appointmentCount from the query
-    return {
-      customers: result.customers.map((c) => ({
-        id: c.id,
-        businessId: c.businessId,
-        userId: c.userId,
-        whatsappPhone: c.whatsappPhone,
-        name: c.name,
-        appointmentCount: c.appointmentCount,
-        createdAt: c.createdAt.toISOString(),
-      })),
-      total: result.total,
-      page: result.page,
-      limit: result.limit,
-      totalPages: result.totalPages,
-    };
   }
 
   /**
@@ -204,28 +270,82 @@ export class CustomerController {
   @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing JWT token' })
   @ApiResponse({ status: 403, description: 'Forbidden - User does not have a business' })
   async getStats(@CurrentUser() user: UserPayload): Promise<CustomerStatsResponseDto> {
-    const businessId = user.businessId;
+    const startTime = Date.now();
 
-    if (!businessId) {
-      throw new ForbiddenException('User does not have a business');
+    this.logger.info(
+      {
+        action: 'get_customer_stats_start',
+        userId: user.userId,
+        businessId: user.businessId,
+      },
+      'Starting customer stats retrieval',
+    );
+
+    try {
+      const businessId = user.businessId;
+
+      if (!businessId) {
+        this.logger.warn(
+          {
+            action: 'get_customer_stats_forbidden',
+            userId: user.userId,
+            reason: 'no_business_id',
+          },
+          'User does not have a business',
+        );
+        throw new ForbiddenException('User does not have a business');
+      }
+
+      // Dispatch query
+      const stats = await this.queryBus.execute(new GetCustomerStatsQuery(businessId));
+
+      const duration = Date.now() - startTime;
+
+      this.logger.info(
+        {
+          action: 'get_customer_stats_complete',
+          userId: user.userId,
+          businessId: user.businessId,
+          totalCustomers: stats.totalCustomers,
+          anonymousCount: stats.anonymousCount,
+          registeredCount: stats.registeredCount,
+          duration,
+        },
+        'Customer stats retrieved successfully',
+      );
+
+      // Return stats (already in correct format)
+      return {
+        totalCustomers: stats.totalCustomers,
+        anonymousCount: stats.anonymousCount,
+        registeredCount: stats.registeredCount,
+        newThisWeek: stats.newThisWeek,
+        newThisMonth: stats.newThisMonth,
+        topCustomers: stats.topCustomers.map((c) => ({
+          id: c.id,
+          name: c.name || 'Unknown',
+          appointmentCount: c.appointmentCount,
+        })),
+      };
+    } catch (error: unknown) {
+      const duration = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorStack = error instanceof Error ? error.stack : undefined;
+
+      this.logger.error(
+        {
+          action: 'get_customer_stats_error',
+          userId: user.userId,
+          businessId: user.businessId,
+          error: errorMessage,
+          stack: errorStack,
+          duration,
+        },
+        'Customer stats retrieval failed',
+      );
+
+      throw error;
     }
-
-    // Dispatch query
-    const stats = await this.queryBus.execute(new GetCustomerStatsQuery(businessId));
-
-    // Return stats (already in correct format)
-    return {
-      totalCustomers: stats.totalCustomers,
-      anonymousCount: stats.anonymousCount,
-      registeredCount: stats.registeredCount,
-      newThisWeek: stats.newThisWeek,
-      newThisMonth: stats.newThisMonth,
-      topCustomers: stats.topCustomers.map((c) => ({
-        id: c.id,
-        name: c.name || 'Unknown',
-        appointmentCount: c.appointmentCount,
-      })),
-    };
   }
 
   /**
@@ -259,23 +379,80 @@ export class CustomerController {
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() user: UserPayload,
   ): Promise<CustomerReadModel> {
-    // Dispatch query
-    const customer = await this.queryBus.execute(new GetCustomerQuery(id));
+    const startTime = Date.now();
 
-    // Validate business ownership
-    if (customer.businessId !== user.businessId) {
-      throw new ForbiddenException('Access denied');
+    this.logger.info(
+      {
+        action: 'get_customer_by_id_start',
+        userId: user.userId,
+        businessId: user.businessId,
+        customerId: id,
+      },
+      'Starting customer retrieval by ID',
+    );
+
+    try {
+      // Dispatch query
+      const customer = await this.queryBus.execute(new GetCustomerQuery(id));
+
+      // Validate business ownership
+      if (customer.businessId !== user.businessId) {
+        this.logger.warn(
+          {
+            action: 'get_customer_by_id_forbidden',
+            userId: user.userId,
+            businessId: user.businessId,
+            customerId: id,
+            customerBusinessId: customer.businessId,
+            reason: 'different_business',
+          },
+          'Access denied - customer belongs to different business',
+        );
+        throw new ForbiddenException('Access denied');
+      }
+
+      const duration = Date.now() - startTime;
+
+      this.logger.info(
+        {
+          action: 'get_customer_by_id_complete',
+          userId: user.userId,
+          businessId: user.businessId,
+          customerId: id,
+          duration,
+        },
+        'Customer retrieved successfully',
+      );
+
+      // Return customer (transform to API format)
+      return {
+        id: customer.id,
+        businessId: customer.businessId,
+        userId: customer.userId,
+        whatsappPhone: customer.whatsappPhone,
+        name: customer.name,
+        createdAt: customer.createdAt.toISOString(),
+      };
+    } catch (error: unknown) {
+      const duration = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorStack = error instanceof Error ? error.stack : undefined;
+
+      this.logger.error(
+        {
+          action: 'get_customer_by_id_error',
+          userId: user.userId,
+          businessId: user.businessId,
+          customerId: id,
+          error: errorMessage,
+          stack: errorStack,
+          duration,
+        },
+        'Customer retrieval failed',
+      );
+
+      throw error;
     }
-
-    // Return customer (transform to API format)
-    return {
-      id: customer.id,
-      businessId: customer.businessId,
-      userId: customer.userId,
-      whatsappPhone: customer.whatsappPhone,
-      name: customer.name,
-      createdAt: customer.createdAt.toISOString(),
-    };
   }
 
   /**
@@ -314,40 +491,94 @@ export class CustomerController {
     @Query() dto: DetectDuplicatesDto,
     @CurrentUser() user: UserPayload,
   ): Promise<DuplicatePairsResponseDto> {
-    const businessId = user.businessId;
+    const startTime = Date.now();
 
-    if (!businessId) {
-      throw new ForbiddenException('User does not have a business');
-    }
-
-    // Dispatch query
-    const pairs = await this.queryBus.execute(
-      new DetectDuplicateCustomersQuery(businessId, dto.threshold || 0.8),
+    this.logger.info(
+      {
+        action: 'detect_duplicates_start',
+        userId: user.userId,
+        businessId: user.businessId,
+        threshold: dto.threshold || 0.8,
+      },
+      'Starting duplicate detection',
     );
 
-    // Transform to response DTO
-    return {
-      pairs: pairs.map((pair) => ({
-        customer1: {
-          id: pair.customer1.id,
-          businessId: pair.customer1.businessId,
-          userId: pair.customer1.userId,
-          whatsappPhone: pair.customer1.whatsappPhone,
-          name: pair.customer1.name,
-          createdAt: pair.customer1.createdAt.toISOString(),
+    try {
+      const businessId = user.businessId;
+
+      if (!businessId) {
+        this.logger.warn(
+          {
+            action: 'detect_duplicates_forbidden',
+            userId: user.userId,
+            reason: 'no_business_id',
+          },
+          'User does not have a business',
+        );
+        throw new ForbiddenException('User does not have a business');
+      }
+
+      // Dispatch query
+      const pairs = await this.queryBus.execute(
+        new DetectDuplicateCustomersQuery(businessId, dto.threshold || 0.8),
+      );
+
+      const duration = Date.now() - startTime;
+
+      this.logger.info(
+        {
+          action: 'detect_duplicates_complete',
+          userId: user.userId,
+          businessId: user.businessId,
+          pairsFound: pairs.length,
+          threshold: dto.threshold || 0.8,
+          duration,
         },
-        customer2: {
-          id: pair.customer2.id,
-          businessId: pair.customer2.businessId,
-          userId: pair.customer2.userId,
-          whatsappPhone: pair.customer2.whatsappPhone,
-          name: pair.customer2.name,
-          createdAt: pair.customer2.createdAt.toISOString(),
+        'Duplicate detection completed',
+      );
+
+      // Transform to response DTO
+      return {
+        pairs: pairs.map((pair) => ({
+          customer1: {
+            id: pair.customer1.id,
+            businessId: pair.customer1.businessId,
+            userId: pair.customer1.userId,
+            whatsappPhone: pair.customer1.whatsappPhone,
+            name: pair.customer1.name,
+            createdAt: pair.customer1.createdAt.toISOString(),
+          },
+          customer2: {
+            id: pair.customer2.id,
+            businessId: pair.customer2.businessId,
+            userId: pair.customer2.userId,
+            whatsappPhone: pair.customer2.whatsappPhone,
+            name: pair.customer2.name,
+            createdAt: pair.customer2.createdAt.toISOString(),
+          },
+          similarityScore: pair.similarityScore,
+          reasons: pair.reasons,
+        })),
+      };
+    } catch (error: unknown) {
+      const duration = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorStack = error instanceof Error ? error.stack : undefined;
+
+      this.logger.error(
+        {
+          action: 'detect_duplicates_error',
+          userId: user.userId,
+          businessId: user.businessId,
+          error: errorMessage,
+          stack: errorStack,
+          duration,
         },
-        similarityScore: pair.similarityScore,
-        reasons: pair.reasons,
-      })),
-    };
+        'Duplicate detection failed',
+      );
+
+      throw error;
+    }
   }
 
   /**
@@ -379,24 +610,77 @@ export class CustomerController {
     @Param('userId', ParseUUIDPipe) userId: string,
     @CurrentUser() user: UserPayload,
   ): Promise<CustomerReadModel[]> {
-    // Validate user can access this data
-    // Only allow users to access their own customers (or admins in future)
-    if (userId !== user.userId) {
-      throw new ForbiddenException('Access denied');
+    const startTime = Date.now();
+
+    this.logger.info(
+      {
+        action: 'get_customers_by_user_id_start',
+        userId: user.userId,
+        targetUserId: userId,
+      },
+      'Starting customer retrieval by user ID',
+    );
+
+    try {
+      // Validate user can access this data
+      // Only allow users to access their own customers (or admins in future)
+      if (userId !== user.userId) {
+        this.logger.warn(
+          {
+            action: 'get_customers_by_user_id_forbidden',
+            userId: user.userId,
+            targetUserId: userId,
+            reason: 'different_user',
+          },
+          'Access denied - cannot access other users customers',
+        );
+        throw new ForbiddenException('Access denied');
+      }
+
+      // Dispatch query
+      const customers = await this.queryBus.execute(new GetCustomersByUserIdQuery(userId));
+
+      const duration = Date.now() - startTime;
+
+      this.logger.info(
+        {
+          action: 'get_customers_by_user_id_complete',
+          userId: user.userId,
+          targetUserId: userId,
+          customersFound: customers.length,
+          duration,
+        },
+        'Customers retrieved successfully by user ID',
+      );
+
+      // Transform to response
+      return customers.map((c) => ({
+        id: c.id,
+        businessId: c.businessId,
+        userId: c.userId,
+        whatsappPhone: c.whatsappPhone,
+        name: c.name,
+        createdAt: c.createdAt.toISOString(),
+      }));
+    } catch (error: unknown) {
+      const duration = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorStack = error instanceof Error ? error.stack : undefined;
+
+      this.logger.error(
+        {
+          action: 'get_customers_by_user_id_error',
+          userId: user.userId,
+          targetUserId: userId,
+          error: errorMessage,
+          stack: errorStack,
+          duration,
+        },
+        'Customer retrieval by user ID failed',
+      );
+
+      throw error;
     }
-
-    // Dispatch query
-    const customers = await this.queryBus.execute(new GetCustomersByUserIdQuery(userId));
-
-    // Transform to response
-    return customers.map((c) => ({
-      id: c.id,
-      businessId: c.businessId,
-      userId: c.userId,
-      whatsappPhone: c.whatsappPhone,
-      name: c.name,
-      createdAt: c.createdAt.toISOString(),
-    }));
   }
 
   /**
@@ -434,19 +718,78 @@ export class CustomerController {
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() user: UserPayload,
   ): Promise<CustomerDataExport> {
-    // First get customer to validate business ownership
-    const customer = await this.queryBus.execute(new GetCustomerQuery(id));
+    const startTime = Date.now();
 
-    // Validate business ownership
-    if (customer.businessId !== user.businessId) {
-      throw new ForbiddenException('Access denied');
+    this.logger.info(
+      {
+        action: 'export_customer_data_start',
+        userId: user.userId,
+        businessId: user.businessId,
+        customerId: id,
+      },
+      'Starting customer data export (GDPR)',
+    );
+
+    try {
+      // First get customer to validate business ownership
+      const customer = await this.queryBus.execute(new GetCustomerQuery(id));
+
+      // Validate business ownership
+      if (customer.businessId !== user.businessId) {
+        this.logger.warn(
+          {
+            action: 'export_customer_data_forbidden',
+            userId: user.userId,
+            businessId: user.businessId,
+            customerId: id,
+            customerBusinessId: customer.businessId,
+            reason: 'different_business',
+          },
+          'Access denied - customer belongs to different business',
+        );
+        throw new ForbiddenException('Access denied');
+      }
+
+      // Dispatch export query
+      const exportData = await this.queryBus.execute(new ExportCustomerDataQuery(id));
+
+      const duration = Date.now() - startTime;
+
+      this.logger.info(
+        {
+          action: 'export_customer_data_complete',
+          userId: user.userId,
+          businessId: user.businessId,
+          customerId: id,
+          appointmentsCount: exportData.appointments?.length || 0,
+          conversationsCount: exportData.conversations?.length || 0,
+          duration,
+        },
+        'Customer data exported successfully',
+      );
+
+      // Return export data (already in correct format)
+      return exportData;
+    } catch (error: unknown) {
+      const duration = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorStack = error instanceof Error ? error.stack : undefined;
+
+      this.logger.error(
+        {
+          action: 'export_customer_data_error',
+          userId: user.userId,
+          businessId: user.businessId,
+          customerId: id,
+          error: errorMessage,
+          stack: errorStack,
+          duration,
+        },
+        'Customer data export failed',
+      );
+
+      throw error;
     }
-
-    // Dispatch export query
-    const exportData = await this.queryBus.execute(new ExportCustomerDataQuery(id));
-
-    // Return export data (already in correct format)
-    return exportData;
   }
 
   /**
@@ -496,18 +839,64 @@ export class CustomerController {
     @Body() dto: MergeCustomersDto,
     @CurrentUser() user: UserPayload,
   ): Promise<MessageResponseDto> {
-    // Extract userId for audit trail
-    const userId = user.userId;
+    const startTime = Date.now();
 
-    // Dispatch command
-    await this.commandBus.execute(
-      new MergeCustomersCommand(dto.sourceCustomerId, dto.targetCustomerId, userId),
+    this.logger.info(
+      {
+        action: 'merge_customers_start',
+        userId: user.userId,
+        sourceCustomerId: dto.sourceCustomerId,
+        targetCustomerId: dto.targetCustomerId,
+      },
+      'Starting customer merge',
     );
 
-    // Return success message
-    return {
-      message: 'Customers merged successfully',
-    };
+    try {
+      // Extract userId for audit trail
+      const userId = user.userId;
+
+      // Dispatch command
+      await this.commandBus.execute(
+        new MergeCustomersCommand(dto.sourceCustomerId, dto.targetCustomerId, userId),
+      );
+
+      const duration = Date.now() - startTime;
+
+      this.logger.info(
+        {
+          action: 'merge_customers_complete',
+          userId: user.userId,
+          sourceCustomerId: dto.sourceCustomerId,
+          targetCustomerId: dto.targetCustomerId,
+          duration,
+        },
+        'Customers merged successfully',
+      );
+
+      // Return success message
+      return {
+        message: 'Customers merged successfully',
+      };
+    } catch (error: unknown) {
+      const duration = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorStack = error instanceof Error ? error.stack : undefined;
+
+      this.logger.error(
+        {
+          action: 'merge_customers_error',
+          userId: user.userId,
+          sourceCustomerId: dto.sourceCustomerId,
+          targetCustomerId: dto.targetCustomerId,
+          error: errorMessage,
+          stack: errorStack,
+          duration,
+        },
+        'Customer merge failed',
+      );
+
+      throw error;
+    }
   }
 
   /**
@@ -554,23 +943,80 @@ export class CustomerController {
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() user: UserPayload,
   ): Promise<MessageResponseDto> {
-    // First get customer to validate business ownership
-    const customer = await this.queryBus.execute(new GetCustomerQuery(id));
+    const startTime = Date.now();
 
-    // Validate business ownership
-    if (customer.businessId !== user.businessId) {
-      throw new ForbiddenException('Access denied');
+    this.logger.info(
+      {
+        action: 'delete_customer_start',
+        userId: user.userId,
+        businessId: user.businessId,
+        customerId: id,
+      },
+      'Starting customer deletion (GDPR anonymization)',
+    );
+
+    try {
+      // First get customer to validate business ownership
+      const customer = await this.queryBus.execute(new GetCustomerQuery(id));
+
+      // Validate business ownership
+      if (customer.businessId !== user.businessId) {
+        this.logger.warn(
+          {
+            action: 'delete_customer_forbidden',
+            userId: user.userId,
+            businessId: user.businessId,
+            customerId: id,
+            customerBusinessId: customer.businessId,
+            reason: 'different_business',
+          },
+          'Access denied - customer belongs to different business',
+        );
+        throw new ForbiddenException('Access denied');
+      }
+
+      // Extract userId for audit trail
+      const userId = user.userId;
+
+      // Dispatch command
+      await this.commandBus.execute(new DeleteCustomerCommand(id, userId));
+
+      const duration = Date.now() - startTime;
+
+      this.logger.info(
+        {
+          action: 'delete_customer_complete',
+          userId: user.userId,
+          businessId: user.businessId,
+          customerId: id,
+          duration,
+        },
+        'Customer deleted (anonymized) successfully',
+      );
+
+      // Return success message
+      return {
+        message: 'Customer deleted successfully',
+      };
+    } catch (error: unknown) {
+      const duration = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorStack = error instanceof Error ? error.stack : undefined;
+
+      this.logger.error(
+        {
+          action: 'delete_customer_error',
+          userId: user.userId,
+          businessId: user.businessId,
+          customerId: id,
+          error: errorMessage,
+          stack: errorStack,
+          duration,
+        },
+        'Customer deletion failed',
+      );
+
+      throw error;
     }
-
-    // Extract userId for audit trail
-    const userId = user.userId;
-
-    // Dispatch command
-    await this.commandBus.execute(new DeleteCustomerCommand(id, userId));
-
-    // Return success message
-    return {
-      message: 'Customer deleted successfully',
-    };
   }
 }

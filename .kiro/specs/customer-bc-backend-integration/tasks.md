@@ -328,15 +328,16 @@ Este documento proporciona un checklist de implementación paso a paso para comp
 
 ### Phase 8: Documentation and Cleanup (1 day)
 
-- [ ] 8.1 Add Swagger Documentation
+- [x] 8.1 Add Swagger Documentation
   - Add @ApiTags('customers') to controller
   - Add @ApiOperation() to each endpoint
   - Add @ApiResponse() for success and error cases
   - Add @ApiBearerAuth() for authentication
   - _Requirements: All_
-  - **Commit:** `docs(customer): add Swagger/OpenAPI documentation`
+  - **Commit:** `docs(customer): add Swagger/OpenAPI documentation (Phase 8.1)`
+  - **Status:** ✅ Complete - All 8 endpoints documented with Swagger decorators
 
-- [ ] 8.2 Update API Documentation
+- [x] 8.2 Update API Documentation
   - Create `apps/backend/docs/customer-api.md`
   - Document all endpoints with examples
   - Document request/response formats
@@ -344,6 +345,7 @@ Este documento proporciona un checklist de implementación paso a paso para comp
   - Document authentication requirements
   - _Requirements: All_
   - **Commit:** `docs(customer): add API documentation`
+  - **Status:** ✅ Pre-existing - Comprehensive API docs already exist
 
 - [ ] 8.3 Add Logging
   - Add Pino logger to controller
