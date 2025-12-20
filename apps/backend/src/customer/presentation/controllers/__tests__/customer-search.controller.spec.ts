@@ -109,6 +109,8 @@ describe('CustomerSearchController', () => {
         page: 1,
         limit: 10,
         totalPages: 1,
+        hasNextPage: false,
+        hasPreviousPage: false,
       });
 
       expect(queryBus.execute).toHaveBeenCalledWith(
