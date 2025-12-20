@@ -402,7 +402,7 @@ Este documento proporciona un checklist de implementación paso a paso para las 
   - _Requirements: 8.1-8.6_
   - **Commit:** `feat(frontend): add CustomersPage with search and pagination`
 
-- [ ] 5.4 Create CustomerDetailPage
+- [x] 5.4 Create CustomerDetailPage
   - Create `apps/frontend/src/pages/CustomerDetailPage/`
   - Display customer info, badge, appointment history
   - Show conversations
@@ -410,20 +410,20 @@ Este documento proporciona un checklist de implementación paso a paso para las 
   - _Requirements: 9.1-9.6_
   - **Commit:** `feat(frontend): add CustomerDetailPage`
 
-- [ ] 5.5 Create MergeCustomersModal Feature
+- [x] 5.5 Create MergeCustomersModal Feature
   - Create `apps/frontend/src/features/customer/merge/`
   - Create `ui/MergeCustomersModal.tsx` with preview
   - Create `ui/CustomerComparisonCard.tsx` for side-by-side comparison
   - Create `model/useMergeCustomers.ts` mutation hook
   - _Requirements: 10.1-10.5_
-  - **Commit:** `feat(frontend): add merge customers feature`
+  - **Commit:** `feat(frontend): add merge and delete customer features`
 
-- [ ] 5.6 Create DeleteCustomerModal Feature
+- [x] 5.6 Create DeleteCustomerModal Feature
   - Create `apps/frontend/src/features/customer/delete/`
   - Create `ui/DeleteCustomerModal.tsx` with GDPR warning
   - Create `model/useDeleteCustomer.ts` mutation hook
   - _Requirements: 10.1-10.5_
-  - **Commit:** `feat(frontend): add delete customer feature`
+  - **Commit:** `feat(frontend): add merge and delete customer features`
 
 - [ ] 5.7 Create CustomerAnalyticsWidget
   - Create `apps/frontend/src/widgets/CustomerAnalytics/`
