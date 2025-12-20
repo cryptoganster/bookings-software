@@ -37,6 +37,9 @@ import { ExportCustomerDataHandler } from '@customer/app/queries/export-customer
 // Domain Services
 import { CustomerDeduplicationService } from '@customer/domain/services/customer-deduplication.service';
 
+// Controllers
+import { CustomerController } from '@customer/presentation/controllers/customer.controller';
+
 const commandHandlers = [
   IdentifyCustomerHandler,
   UpdateCustomerNameHandler,
@@ -95,6 +98,7 @@ const repositories = [
     TypeOrmModule.forFeature([CustomerModel]),
     forwardRef(() => BookingModule), // ← Use forwardRef to avoid circular dependency
   ],
+  controllers: [CustomerController],
   providers: [
     ...commandHandlers,
     ...queryHandlers,
