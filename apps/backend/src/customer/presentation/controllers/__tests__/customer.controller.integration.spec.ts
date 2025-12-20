@@ -6,6 +6,7 @@ import { CustomerModule } from '../../../customer.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+import { SharedModule } from '@shared/shared.module';
 
 describe('CustomerController (Integration)', () => {
   let app: INestApplication;
@@ -35,6 +36,7 @@ describe('CustomerController (Integration)', () => {
           signOptions: { expiresIn: '1h' },
         }),
         CqrsModule,
+        SharedModule, // ← Provides IUnitOfWork
         CustomerModule,
       ],
     }).compile();

@@ -39,6 +39,10 @@ import { CustomerDeduplicationService } from '@customer/domain/services/customer
 
 // Controllers
 import { CustomerController } from '@customer/presentation/controllers/customer.controller';
+import { CustomerCrudController } from '@customer/presentation/controllers/customer-crud';
+import { CustomerSearchController } from '@customer/presentation/controllers/customer-search';
+import { CustomerDuplicatesController } from '@customer/presentation/controllers/customer-duplicates';
+import { CustomerMergeController } from '@customer/presentation/controllers/customer-merge';
 
 const commandHandlers = [
   IdentifyCustomerHandler,
@@ -98,7 +102,13 @@ const repositories = [
     TypeOrmModule.forFeature([CustomerModel]),
     forwardRef(() => BookingModule), // ← Use forwardRef to avoid circular dependency
   ],
-  controllers: [CustomerController],
+  controllers: [
+    CustomerController,
+    CustomerCrudController,
+    CustomerSearchController,
+    CustomerDuplicatesController,
+    CustomerMergeController,
+  ],
   providers: [
     ...commandHandlers,
     ...queryHandlers,
