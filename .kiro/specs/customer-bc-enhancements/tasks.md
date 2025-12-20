@@ -425,7 +425,7 @@ Este documento proporciona un checklist de implementación paso a paso para las 
   - _Requirements: 10.1-10.5_
   - **Commit:** `feat(frontend): add merge and delete customer features`
 
-- [ ] 5.7 Create CustomerAnalyticsWidget
+- [x] 5.7 Create CustomerAnalyticsWidget
   - Create `apps/frontend/src/widgets/CustomerAnalytics/`
   - Display totalCustomers, newThisMonth, registeredPercentage
   - Show evolution chart (last 6 months)
@@ -433,7 +433,7 @@ Este documento proporciona un checklist de implementación paso a paso para las 
   - _Requirements: 11.1-11.5_
   - **Commit:** `feat(frontend): add CustomerAnalyticsWidget`
 
-- [ ] 5.8 Create CustomerDuplicatesPage
+- [x] 5.8 Create CustomerDuplicatesPage
   - Create `apps/frontend/src/pages/CustomerDuplicatesPage/`
   - Display list of duplicate pairs
   - Show similarity score
@@ -441,14 +441,14 @@ Este documento proporciona un checklist de implementación paso a paso para las 
   - _Requirements: 12.1-12.5_
   - **Commit:** `feat(frontend): add CustomerDuplicatesPage`
 
-- [ ] 5.9 Add Customer Routes
+- [x] 5.9 Add Customer Routes
   - Update `apps/frontend/src/app/router/routes.tsx`
   - Add routes: /customers, /customers/:id, /customers/duplicates
   - Add navigation links in sidebar
   - _Requirements: 8.1, 9.1, 12.1_
-  - **Commit:** `feat(frontend): add customer routes`
+  - **Commit:** `feat(frontend): add customer routes and navigation`
 
-- [ ] 5.10 Phase 5 Checkpoint
+- [x] 5.10 Phase 5 Checkpoint
   - Run validations: `pnpm lint:frontend && pnpm typecheck:frontend`
   - Test UI manually
   - Verify loading states work correctly
