@@ -19,6 +19,7 @@ describe('DetectDuplicateCustomersHandler', () => {
       findByBusinessId: jest.fn(),
       findByUserId: jest.fn(),
       findAnonymousByBusinessId: jest.fn(),
+      getFullData: jest.fn(),
     } as jest.Mocked<ICustomerReadRepository>;
 
     const module: TestingModule = await Test.createTestingModule({

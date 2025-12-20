@@ -36,6 +36,7 @@ describe('CreateAppointmentHandler Integration', () => {
       findByBusinessId: jest.fn(),
       findByUserId: jest.fn(),
       findAnonymousByBusinessId: jest.fn(),
+      getFullData: jest.fn(),
     };
 
     uow = {

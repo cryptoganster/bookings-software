@@ -20,6 +20,7 @@ import { UpdateCustomerNameHandler } from '@customer/app/commands/update-custome
 import { LinkCustomerToUserHandler } from '@customer/app/commands/link-customer-to-user/handler';
 import { UnlinkCustomerFromUserHandler } from '@customer/app/commands/unlink-customer-from-user/handler';
 import { MergeCustomersHandler } from '@customer/app/commands/merge-customers/handler';
+import { DeleteCustomerHandler } from '@customer/app/commands/delete-customer/handler';
 
 // Query Handlers
 import { GetCustomerHandler } from '@customer/app/queries/get-customer/handler';
@@ -28,6 +29,7 @@ import { GetCustomersByUserIdHandler } from '@customer/app/queries/get-customers
 import { SearchCustomersHandler } from '@customer/app/queries/search-customers/handler';
 import { GetCustomerStatsHandler } from '@customer/app/queries/get-customer-stats/handler';
 import { DetectDuplicateCustomersHandler } from '@customer/app/queries/detect-duplicate-customers/handler';
+import { ExportCustomerDataHandler } from '@customer/app/queries/export-customer-data/handler';
 
 // Domain Services
 import { CustomerDeduplicationService } from '@customer/domain/services/customer-deduplication.service';
@@ -38,6 +40,7 @@ const commandHandlers = [
   LinkCustomerToUserHandler,
   UnlinkCustomerFromUserHandler,
   MergeCustomersHandler,
+  DeleteCustomerHandler,
 ];
 
 const queryHandlers = [
@@ -47,6 +50,7 @@ const queryHandlers = [
   SearchCustomersHandler,
   GetCustomerStatsHandler,
   DetectDuplicateCustomersHandler,
+  ExportCustomerDataHandler,
 ];
 
 const domainServices = [CustomerDeduplicationService];

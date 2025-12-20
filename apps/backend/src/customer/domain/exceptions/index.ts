@@ -6,3 +6,5 @@ export * from './customer-already-linked-to-user';
 export * from './customer-not-linked-to-user';
 export * from './cannot-merge-customer-with-itself';
 export * from './customers-from-different-businesses';
+export * from './customer-has-future-appointments';
+export * from './customer-already-deleted';

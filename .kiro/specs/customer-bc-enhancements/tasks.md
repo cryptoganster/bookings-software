@@ -275,7 +275,7 @@ Este documento proporciona un checklist de implementación paso a paso para las 
   - _Edge Cases: 1, 6, 8_
   - **Commit:** `test(customer): add unit tests for MergeCustomersHandler`
 
-- [ ] 3.11 Write Integration Tests for Merge
+- [x] 3.11 Write Integration Tests for Merge
   - Test merge with real database
   - Test appointments are updated
   - Test conversations are updated
@@ -284,7 +284,7 @@ Este documento proporciona un checklist de implementación paso a paso para las 
   - _Properties: 3_
   - **Commit:** `test(customer): add integration tests for merge`
 
-- [ ] 3.12 Phase 3 Checkpoint
+- [x] 3.12 Phase 3 Checkpoint
   - Run migrations: `pnpm --filter backend migration:run`
   - Run tests: `pnpm test:backend -- --testPathPattern=merge`
   - Verify merge completes in < 2 seconds
@@ -292,18 +292,18 @@ Este documento proporciona un checklist de implementación paso a paso para las 
 
 ### Phase 4: GDPR Compliance (2 days)
 
-- [ ] 4.1 Create DeleteCustomerCommand
+- [x] 4.1 Create DeleteCustomerCommand
   - Create `apps/backend/src/customer/app/commands/delete-customer/command.ts`
   - Command extends `Command<void>`
   - Include customerId, deletedBy
   - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6_
   - **Commit:** `feat(customer): add DeleteCustomerCommand`
 
-- [ ] 4.2 Implement DeleteCustomerHandler
+- [x] 4.2 Implement DeleteCustomerHandler
   - Create `apps/backend/src/customer/app/commands/delete-customer/handler.ts`
   - Load customer using Factory
   - Verify no future appointments exist
-  - Anonymize data: name → null, whatsappPhone → "DELETED\_[timestamp]"
+  - Anonymize data: name → null, whatsappPhone → "+999{timestamp}"
   - Unlink from User if linked
   - Publish CustomerDeleted event
   - Use transaction for atomicity
@@ -312,13 +312,13 @@ Este documento proporciona un checklist de implementación paso a paso para las 
   - _Edge Cases: 3, 10_
   - **Commit:** `feat(customer): implement DeleteCustomerHandler`
 
-- [ ] 4.3 Create CustomerDeleted Event
+- [x] 4.3 Create CustomerDeleted Event
   - Create `apps/backend/src/customer/domain/events/customer-deleted.ts`
   - Include customerId, deletedBy, occurredAt
   - _Requirements: 6.5_
   - **Commit:** `feat(customer): add CustomerDeleted event`
 
-- [ ] 4.4 Write Unit Tests for DeleteCustomerHandler
+- [x] 4.4 Write Unit Tests for DeleteCustomerHandler
   - Test successful deletion (anonymization)
   - Test validation (no future appointments)
   - Test unlink from User
@@ -329,14 +329,14 @@ Este documento proporciona un checklist de implementación paso a paso para las 
   - _Edge Cases: 3, 10_
   - **Commit:** `test(customer): add unit tests for DeleteCustomerHandler`
 
-- [ ] 4.5 Create ExportCustomerDataQuery
+- [x] 4.5 Create ExportCustomerDataQuery
   - Create `apps/backend/src/customer/app/queries/export-customer-data/query.ts`
   - Query extends `Query<CustomerDataExport>`
   - Define `CustomerDataExport` interface with customer, appointments, conversations
   - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5_
   - **Commit:** `feat(customer): add ExportCustomerDataQuery`
 
-- [ ] 4.6 Implement ExportCustomerDataHandler
+- [x] 4.6 Implement ExportCustomerDataHandler
   - Create `apps/backend/src/customer/app/queries/export-customer-data/handler.ts`
   - Load customer with all related data (appointments, conversations, messages)
   - Format dates in ISO 8601
@@ -347,12 +347,12 @@ Este documento proporciona un checklist de implementación paso a paso para las 
   - _Edge Cases: 4_
   - **Commit:** `feat(customer): implement ExportCustomerDataHandler`
 
-- [ ] 4.7 Update ICustomerReadRepository for Export
+- [x] 4.7 Update ICustomerReadRepository for Export
   - Add `getFullData(customerId: string): Promise<CustomerDataExport>` method
   - _Requirements: 7.1_
   - **Commit:** `feat(customer): add getFullData method to ICustomerReadRepository`
 
-- [ ] 4.8 Implement CustomerReadRepository.getFullData
+- [x] 4.8 Implement CustomerReadRepository.getFullData
   - Implement getFullData method with joins
   - Include appointments, conversations, messages
   - Format dates in ISO 8601
@@ -360,7 +360,7 @@ Este documento proporciona un checklist de implementación paso a paso para las 
   - _Edge Cases: 4_
   - **Commit:** `feat(customer): implement getFullData in CustomerReadRepository`
 
-- [ ] 4.9 Write Unit Tests for ExportCustomerDataHandler
+- [x] 4.9 Write Unit Tests for ExportCustomerDataHandler
   - Test export with data
   - Test export with no data (empty arrays)
   - Test date formatting
@@ -370,7 +370,7 @@ Este documento proporciona un checklist de implementación paso a paso para las 
   - _Edge Cases: 4_
   - **Commit:** `test(customer): add unit tests for ExportCustomerDataHandler`
 
-- [ ] 4.10 Phase 4 Checkpoint
+- [x] 4.10 Phase 4 Checkpoint
   - Run tests: `pnpm test:backend -- --testPathPattern=delete|export`
   - Verify deletion completes in < 5 seconds
   - Verify export completes in < 3 seconds
