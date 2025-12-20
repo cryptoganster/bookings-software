@@ -4,6 +4,7 @@ import {
   SearchCustomersResult,
 } from '@customer/app/queries/search-customers/query';
 import { CustomerStats } from '@customer/app/queries/get-customer-stats/query';
+import { CustomerDataExport } from '@customer/app/queries/export-customer-data/query';
 
 /**
  * Read Repository Interface for Customer Queries
@@ -65,4 +66,12 @@ export interface ICustomerReadRepository {
    * @returns empty array if no anonymous customers found
    */
   findAnonymousByBusinessId(businessId: string): Promise<CustomerReadModel[]>;
+
+  /**
+   * Get full customer data for export (GDPR compliance)
+   * Includes customer info, appointments, and conversations
+   *
+   * Requirements: 7.1, 7.2, 7.3, 7.4, 7.5
+   */
+  getFullData(customerId: string): Promise<CustomerDataExport>;
 }

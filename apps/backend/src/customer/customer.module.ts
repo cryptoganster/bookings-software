@@ -29,6 +29,7 @@ import { GetCustomersByUserIdHandler } from '@customer/app/queries/get-customers
 import { SearchCustomersHandler } from '@customer/app/queries/search-customers/handler';
 import { GetCustomerStatsHandler } from '@customer/app/queries/get-customer-stats/handler';
 import { DetectDuplicateCustomersHandler } from '@customer/app/queries/detect-duplicate-customers/handler';
+import { ExportCustomerDataHandler } from '@customer/app/queries/export-customer-data/handler';
 
 // Domain Services
 import { CustomerDeduplicationService } from '@customer/domain/services/customer-deduplication.service';
@@ -49,6 +50,7 @@ const queryHandlers = [
   SearchCustomersHandler,
   GetCustomerStatsHandler,
   DetectDuplicateCustomersHandler,
+  ExportCustomerDataHandler,
 ];
 
 const domainServices = [CustomerDeduplicationService];
