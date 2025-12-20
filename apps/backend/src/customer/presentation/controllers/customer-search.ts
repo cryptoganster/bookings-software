@@ -189,6 +189,8 @@ export class CustomerSearchController {
         page: result.page,
         limit: result.limit,
         totalPages: result.totalPages,
+        hasNextPage: result.page < result.totalPages,
+        hasPreviousPage: result.page > 1,
       };
     } catch (error: unknown) {
       const duration = Date.now() - startTime;

@@ -24,7 +24,7 @@ export interface RegisterDto {
   email: string;
   password: string;
   name: string;
-  role: UserRole;
+  initialRole?: UserRole; // Cambiado de role a initialRole y hecho opcional
 }
 
 export interface CreateBusinessDto {
@@ -47,7 +47,7 @@ export interface CreateTestUserOptions {
 }
 
 export interface LoginResponse {
-  accessToken: string;
+  accessToken: string; // Revertido a accessToken
   user: {
     id: string;
     email: string;
@@ -57,11 +57,6 @@ export interface LoginResponse {
 }
 
 export interface RegisterResponse {
-  accessToken: string;
-  user: {
-    id: string;
-    email: string;
-    name: string;
-    roles: UserRole[];
-  };
+  userId: string; // El registro devuelve userId directamente
+  accessToken: string; // Y accessToken
 }

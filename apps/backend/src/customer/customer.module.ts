@@ -102,10 +102,10 @@ const repositories = [
     forwardRef(() => BookingModule), // ← Use forwardRef to avoid circular dependency
   ],
   controllers: [
-    CustomerCrudController,
-    CustomerSearchController,
-    CustomerDuplicatesController,
-    CustomerMergeController,
+    CustomerSearchController, // ← Must come BEFORE CustomerCrudController
+    CustomerDuplicatesController, // ← Must come BEFORE CustomerCrudController
+    CustomerMergeController, // ← Must come BEFORE CustomerCrudController
+    CustomerCrudController, // ← Has :id param, must come LAST
   ],
   providers: [
     ...commandHandlers,

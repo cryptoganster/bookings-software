@@ -36,7 +36,7 @@ export class E2EAuthHelper {
       const response = await request(this.app.getHttpServer())
         .post('/api/auth/login')
         .send({ email, password })
-        .expect(200);
+        .expect(201); // Login devuelve 201 Created
 
       const body = response.body as LoginResponse;
       return body.accessToken;
@@ -63,13 +63,24 @@ export class E2EAuthHelper {
         .expect(201);
 
       const body = response.body as RegisterResponse;
+
+      if (!body.accessToken || !body.userId) {
+        console.error('Invalid registration response:', JSON.stringify(body, null, 2));
+        throw new Error(
+          `Registration failed: Invalid response format. Got: ${JSON.stringify(body)}`,
+        );
+      }
+
       return {
         token: body.accessToken,
-        userId: body.user.id,
+        userId: body.userId,
       };
     } catch (error: any) {
       if (error.status === 400) {
-        throw new Error(`Registration failed: ${error.body?.message || 'Invalid data'}`);
+        console.error('Registration 400 error:', error.body);
+        throw new Error(
+          `Registration failed: ${JSON.stringify(error.body?.message || error.body || 'Invalid data')}`,
+        );
       }
       if (error.status === 409) {
         throw new Error('Registration failed: Email already exists');
@@ -110,7 +121,7 @@ export class E2EAuthHelper {
       email,
       password,
       name,
-      role,
+      initialRole: role, // Cambiado de role a initialRole
     });
 
     const testUser: TestUser = {

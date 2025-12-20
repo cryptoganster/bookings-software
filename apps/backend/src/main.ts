@@ -4,6 +4,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { Logger } from 'nestjs-pino';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { DomainExceptionFilter } from '@shared/infra/filters/domain-exception';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -43,6 +44,9 @@ async function bootstrap() {
       },
     }),
   );
+
+  // Configurar Exception Filter global
+  app.useGlobalFilters(new DomainExceptionFilter());
 
   // Configurar Swagger/OpenAPI
   const config = new DocumentBuilder()

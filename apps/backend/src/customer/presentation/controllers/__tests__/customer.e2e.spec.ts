@@ -46,6 +46,9 @@ describe('Customer Controllers E2E', () => {
       }),
     );
 
+    // Set global prefix like in main.ts
+    app.setGlobalPrefix('api');
+
     await app.init();
 
     dataSource = app.get(DataSource);
