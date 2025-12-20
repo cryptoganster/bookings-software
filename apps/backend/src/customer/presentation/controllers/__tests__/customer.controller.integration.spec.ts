@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { SharedModule } from '@shared/shared.module';
+import { LoggerModule } from 'nestjs-pino';
 
 // Mock BookingModule to avoid loading its dependencies in tests
 @Module({
@@ -39,6 +40,11 @@ describe('CustomerController (Integration)', () => {
         ConfigModule.forRoot({
           isGlobal: true,
           envFilePath: '.env.test',
+        }),
+        LoggerModule.forRoot({
+          pinoHttp: {
+            level: 'silent', // Disable logging in tests
+          },
         }),
         TypeOrmModule.forRoot({
           type: 'postgres',
@@ -84,7 +90,8 @@ describe('CustomerController (Integration)', () => {
     queryBus = moduleFixture.get<QueryBus>(QueryBus);
 
     // Generate test JWT token
-    const jwtService = moduleFixture.get('JwtService');
+    const { JwtService } = require('@nestjs/jwt');
+    const jwtService = moduleFixture.get(JwtService);
     businessId = '123e4567-e89b-12d3-a456-426614174000';
     userId = '123e4567-e89b-12d3-a456-426614174001';
 

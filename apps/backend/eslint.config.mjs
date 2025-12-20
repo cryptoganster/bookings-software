@@ -5,7 +5,18 @@ import localRules from './eslint-local-rules.cjs';
 export default [
   {
     files: ['src/**/*.ts'],
-    ignores: ['**/*.spec.ts', '**/*.test.ts', '**/*.e2e-spec.ts', 'dist/**', 'node_modules/**'],
+    ignores: [
+      '**/*.spec.ts',
+      '**/*.test.ts',
+      '**/*.e2e-spec.ts',
+      'dist/**',
+      'node_modules/**',
+      '**/*.backup',
+      '**/*.backup.*',
+      '**/*.backup/**',
+      '**/dtos.backup/**',
+      '**/__tests__.backup/**',
+    ],
     languageOptions: {
       parser: tsParser,
       parserOptions: {

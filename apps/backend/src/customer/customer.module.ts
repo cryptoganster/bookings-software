@@ -38,7 +38,6 @@ import { ExportCustomerDataHandler } from '@customer/app/queries/export-customer
 import { CustomerDeduplicationService } from '@customer/domain/services/customer-deduplication.service';
 
 // Controllers
-import { CustomerController } from '@customer/presentation/controllers/customer.controller';
 import { CustomerCrudController } from '@customer/presentation/controllers/customer-crud';
 import { CustomerSearchController } from '@customer/presentation/controllers/customer-search';
 import { CustomerDuplicatesController } from '@customer/presentation/controllers/customer-duplicates';
@@ -103,7 +102,6 @@ const repositories = [
     forwardRef(() => BookingModule), // ← Use forwardRef to avoid circular dependency
   ],
   controllers: [
-    CustomerController,
     CustomerCrudController,
     CustomerSearchController,
     CustomerDuplicatesController,

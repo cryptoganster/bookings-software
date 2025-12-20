@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+dist/
+build/
+coverage/
+
+# Backup files
+*.backup
+*.backup.*
+**/*.backup
+**/*.backup.*
+**/dtos.backup/
+**/__tests__.backup/
+
+# Generated files
+*.js.map
+*.d.ts
+
+# Test files (handled separately)
+**/*.spec.ts
+**/*.test.ts
+**/*.e2e-spec.ts
