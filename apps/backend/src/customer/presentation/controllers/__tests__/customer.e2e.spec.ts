@@ -5,6 +5,7 @@ import * as request from 'supertest';
 import { AppModule } from '../../../../app.module';
 import { CustomerModel } from '@customer/infra/persistence/models/customer.model';
 import { UUID } from '@shared/vo/uuid';
+import { E2EAuthHelper, TestUser } from '@test-utils/e2e';
 
 /**
  * E2E Tests for Customer Controllers
@@ -19,6 +20,8 @@ import { UUID } from '@shared/vo/uuid';
 describe('Customer Controllers E2E', () => {
   let app: INestApplication;
   let dataSource: DataSource;
+  let authHelper: E2EAuthHelper;
+  let testUser: TestUser;
   let authToken: string;
   let testBusinessId: string;
   let testUserId: string;
@@ -47,16 +50,17 @@ describe('Customer Controllers E2E', () => {
 
     dataSource = app.get(DataSource);
 
-    // Generate test IDs
-    testBusinessId = UUID.generate().getValue();
-    testUserId = UUID.generate().getValue();
-
-    // TODO: Get real auth token from login endpoint
-    // For now, we'll use a mock token (this will need to be updated)
-    authToken = 'mock-jwt-token';
+    // Create auth helper and test user with real authentication
+    authHelper = new E2EAuthHelper(app);
+    testUser = await authHelper.createBusinessOwner();
+    authToken = testUser.token;
+    testBusinessId = testUser.businessId!;
+    testUserId = testUser.id;
   });
 
   afterAll(async () => {
+    // Clean up test users and associated data
+    await authHelper.cleanupTestUsers();
     await dataSource.destroy();
     await app.close();
   });
