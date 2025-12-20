@@ -184,21 +184,21 @@ This implementation plan breaks down the customer controller refactoring into di
 
 ## Phase 8: Integration Testing
 
-- [ ] 8. Update and expand integration tests
+- [x] 8. Update and expand integration tests
   - Update existing `customer.controller.integration.spec.ts`
   - Test all endpoints with real CommandBus/QueryBus
   - Verify commands/queries are dispatched correctly
   - Verify response transformation
   - _Requirements: 5.2_
 
-- [ ] 8.1 Write integration test for search operations
+- [x] 8.1 Write integration test for search operations
   - Test search endpoint with real QueryBus
   - Test stats endpoint with real QueryBus
   - Verify SearchCustomersQuery is dispatched with correct filters
   - Verify GetCustomerStatsQuery is dispatched with correct businessId
   - _Requirements: 5.2_
 
-- [ ] 8.2 Write integration test for CRUD operations
+- [x] 8.2 Write integration test for CRUD operations
   - Test getById with real QueryBus
   - Test getByUserId with real QueryBus
   - Test exportData with real QueryBus
@@ -206,12 +206,12 @@ This implementation plan breaks down the customer controller refactoring into di
   - Verify correct queries/commands are dispatched
   - _Requirements: 5.2_
 
-- [ ] 8.3 Write integration test for merge operations
+- [x] 8.3 Write integration test for merge operations
   - Test merge with real CommandBus
   - Verify MergeCustomersCommand is dispatched with correct parameters
   - _Requirements: 5.2_
 
-- [ ] 8.4 Write integration test for duplicate detection
+- [x] 8.4 Write integration test for duplicate detection
   - Test duplicates with real QueryBus
   - Verify DetectDuplicateCustomersQuery is dispatched with correct threshold
   - _Requirements: 5.2_
