@@ -9,6 +9,9 @@ import { createBrowserRouter } from "react-router-dom";
 import { LoginPage } from "@pages/LoginPage";
 import { DashboardPage } from "@pages/DashboardPage";
 import { AppointmentsPage } from "@pages/AppointmentsPage";
+import { CustomersPage } from "@pages/CustomersPage";
+import { CustomerDetailPage } from "@pages/CustomerDetailPage";
+import { CustomerDuplicatesPage } from "@pages/CustomerDuplicatesPage";
 import { DashboardLayout } from "@app/layouts/DashboardLayout";
 import { ProtectedRoute } from "./ProtectedRoute";
 
@@ -19,6 +22,9 @@ import { ProtectedRoute } from "./ProtectedRoute";
  * - /login (pública) - Página de inicio de sesión
  * - / (protegida) - Dashboard principal con DashboardLayout
  * - /appointments (protegida) - Gestión de citas
+ * - /customers (protegida) - Gestión de clientes
+ * - /customers/:id (protegida) - Detalle de cliente
+ * - /customers/duplicates (protegida) - Clientes duplicados
  *
  * Las rutas protegidas requieren autenticación y redirigen a /login
  * si el usuario no está autenticado. Todas las rutas protegidas
@@ -61,6 +67,18 @@ export const router = createBrowserRouter([
           {
             path: "/appointments",
             element: <AppointmentsPage />,
+          },
+          {
+            path: "/customers",
+            element: <CustomersPage />,
+          },
+          {
+            path: "/customers/duplicates",
+            element: <CustomerDuplicatesPage />,
+          },
+          {
+            path: "/customers/:id",
+            element: <CustomerDetailPage />,
           },
           // Aquí se agregarán más rutas protegidas en el futuro:
           // - /offerings

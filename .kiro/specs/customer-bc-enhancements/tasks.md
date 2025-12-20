@@ -378,14 +378,14 @@ Este documento proporciona un checklist de implementación paso a paso para las 
 
 ### Phase 5: Frontend Customer Management UI (1 week)
 
-- [ ] 5.1 Create Customers API Service
+- [x] 5.1 Create Customers API Service
   - Create `apps/frontend/src/shared/api/customers.ts`
   - Implement: getById, search, getByUserId, getStats, merge, delete, exportData
   - Use apiClient from `@shared/api/client`
   - _Requirements: 8.1-8.6, 9.1-9.6, 10.1-10.5_
   - **Commit:** `feat(frontend): add customers API service`
 
-- [ ] 5.2 Create SearchCustomersForm Feature
+- [x] 5.2 Create SearchCustomersForm Feature
   - Create `apps/frontend/src/features/customer/search/`
   - Create `ui/SearchCustomersForm.tsx` with TextInput and debounce
   - Create `ui/CustomerFilters.tsx` with filter dropdowns
@@ -393,16 +393,16 @@ Este documento proporciona un checklist de implementación paso a paso para las 
   - _Requirements: 8.1, 8.2, 8.3_
   - **Commit:** `feat(frontend): add search customers feature`
 
-- [ ] 5.3 Create CustomersPage (List)
+- [x] 5.3 Create CustomersPage (List)
   - Create `apps/frontend/src/pages/CustomersPage/`
   - Use SearchCustomersForm, CustomerCard, Pagination
   - Implement debounced search (300ms)
   - Implement pagination
   - Implement sorting
   - _Requirements: 8.1-8.6_
-  - **Commit:** `feat(frontend): add CustomersPage`
+  - **Commit:** `feat(frontend): add CustomersPage with search and pagination`
 
-- [ ] 5.4 Create CustomerDetailPage
+- [x] 5.4 Create CustomerDetailPage
   - Create `apps/frontend/src/pages/CustomerDetailPage/`
   - Display customer info, badge, appointment history
   - Show conversations
@@ -410,22 +410,22 @@ Este documento proporciona un checklist de implementación paso a paso para las 
   - _Requirements: 9.1-9.6_
   - **Commit:** `feat(frontend): add CustomerDetailPage`
 
-- [ ] 5.5 Create MergeCustomersModal Feature
+- [x] 5.5 Create MergeCustomersModal Feature
   - Create `apps/frontend/src/features/customer/merge/`
   - Create `ui/MergeCustomersModal.tsx` with preview
   - Create `ui/CustomerComparisonCard.tsx` for side-by-side comparison
   - Create `model/useMergeCustomers.ts` mutation hook
   - _Requirements: 10.1-10.5_
-  - **Commit:** `feat(frontend): add merge customers feature`
+  - **Commit:** `feat(frontend): add merge and delete customer features`
 
-- [ ] 5.6 Create DeleteCustomerModal Feature
+- [x] 5.6 Create DeleteCustomerModal Feature
   - Create `apps/frontend/src/features/customer/delete/`
   - Create `ui/DeleteCustomerModal.tsx` with GDPR warning
   - Create `model/useDeleteCustomer.ts` mutation hook
   - _Requirements: 10.1-10.5_
-  - **Commit:** `feat(frontend): add delete customer feature`
+  - **Commit:** `feat(frontend): add merge and delete customer features`
 
-- [ ] 5.7 Create CustomerAnalyticsWidget
+- [x] 5.7 Create CustomerAnalyticsWidget
   - Create `apps/frontend/src/widgets/CustomerAnalytics/`
   - Display totalCustomers, newThisMonth, registeredPercentage
   - Show evolution chart (last 6 months)
@@ -433,7 +433,7 @@ Este documento proporciona un checklist de implementación paso a paso para las 
   - _Requirements: 11.1-11.5_
   - **Commit:** `feat(frontend): add CustomerAnalyticsWidget`
 
-- [ ] 5.8 Create CustomerDuplicatesPage
+- [x] 5.8 Create CustomerDuplicatesPage
   - Create `apps/frontend/src/pages/CustomerDuplicatesPage/`
   - Display list of duplicate pairs
   - Show similarity score
@@ -441,14 +441,14 @@ Este documento proporciona un checklist de implementación paso a paso para las 
   - _Requirements: 12.1-12.5_
   - **Commit:** `feat(frontend): add CustomerDuplicatesPage`
 
-- [ ] 5.9 Add Customer Routes
+- [x] 5.9 Add Customer Routes
   - Update `apps/frontend/src/app/router/routes.tsx`
   - Add routes: /customers, /customers/:id, /customers/duplicates
   - Add navigation links in sidebar
   - _Requirements: 8.1, 9.1, 12.1_
-  - **Commit:** `feat(frontend): add customer routes`
+  - **Commit:** `feat(frontend): add customer routes and navigation`
 
-- [ ] 5.10 Phase 5 Checkpoint
+- [x] 5.10 Phase 5 Checkpoint
   - Run validations: `pnpm lint:frontend && pnpm typecheck:frontend`
   - Test UI manually
   - Verify loading states work correctly

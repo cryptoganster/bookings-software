@@ -7,7 +7,7 @@
  * Changes:
  * - Replaced title with "Bienvenido a Skeda"
  * - Removed UsersChat component (out of MVP scope)
- * - Created navlinks array: Dashboard (IconHome2), Appointments (IconCalendar)
+ * - Created navlinks array: Dashboard (IconHome2), Appointments (IconCalendar), Customers (IconUsers)
  * - Using @tabler/icons-react instead of iconsax-react
  * - Using Link from react-router-dom instead of @remix-run/react
  * - Implemented highlight with data-active using useLocation
@@ -21,7 +21,7 @@
 
 import { Flex, ScrollArea, Text } from "@mantine/core";
 import { Link, useLocation } from "react-router-dom";
-import { IconHome2, IconCalendar } from "@tabler/icons-react";
+import { IconHome2, IconCalendar, IconUsers } from "@tabler/icons-react";
 import classes from "./Navbar.module.css";
 
 interface NavLink {
@@ -43,6 +43,12 @@ const navlinks: NavLink[] = [
     name: "Appointments",
     link: "/appointments",
     icon: IconCalendar,
+  },
+  {
+    id: 3,
+    name: "Customers",
+    link: "/customers",
+    icon: IconUsers,
   },
 ];
 
