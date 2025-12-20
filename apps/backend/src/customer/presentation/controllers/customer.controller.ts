@@ -11,6 +11,15 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiQuery,
+  ApiParam,
+  ApiBody,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '@auth/infra/guards/jwt-auth';
 import { CurrentUser, UserPayload } from '@auth/presentation/decorators/current-user';
 import { CustomerReadModel } from '@packages/shared-types';
@@ -49,6 +58,8 @@ import { DeleteCustomerCommand } from '@customer/app/commands/delete-customer/co
  * Authentication: All endpoints require valid JWT token
  * Authorization: Business-level isolation (users can only access their business customers)
  */
+@ApiTags('customers')
+@ApiBearerAuth()
 @Controller('customers')
 @UseGuards(JwtAuthGuard)
 export class CustomerController {
@@ -75,6 +86,53 @@ export class CustomerController {
    * Requirements: 1
    */
   @Get('search')
+  @ApiOperation({
+    summary: 'Search customers',
+    description:
+      'Search and filter customers with pagination. Supports text search, type filtering, and sorting.',
+  })
+  @ApiQuery({ name: 'searchText', required: false, description: 'Search by name or phone number' })
+  @ApiQuery({
+    name: 'type',
+    required: false,
+    enum: ['anonymous', 'registered'],
+    description: 'Filter by customer type',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (min: 1)',
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page (min: 1, max: 100)',
+    example: 10,
+  })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    enum: ['name', 'createdAt', 'appointmentCount'],
+    description: 'Sort field',
+    example: 'createdAt',
+  })
+  @ApiQuery({
+    name: 'sortOrder',
+    required: false,
+    enum: ['asc', 'desc'],
+    description: 'Sort order',
+    example: 'desc',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Customers found successfully',
+    type: SearchCustomersResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing JWT token' })
+  @ApiResponse({ status: 403, description: 'Forbidden - User does not have a business' })
   async search(
     @Query() dto: SearchCustomersDto,
     @CurrentUser() user: UserPayload,
@@ -133,6 +191,18 @@ export class CustomerController {
    * Requirements: 2
    */
   @Get('stats')
+  @ApiOperation({
+    summary: 'Get customer statistics',
+    description:
+      'Get aggregated statistics for business customers including counts, new customers, and top customers.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Statistics retrieved successfully',
+    type: CustomerStatsResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing JWT token' })
+  @ApiResponse({ status: 403, description: 'Forbidden - User does not have a business' })
   async getStats(@CurrentUser() user: UserPayload): Promise<CustomerStatsResponseDto> {
     const businessId = user.businessId;
 
@@ -175,6 +245,16 @@ export class CustomerController {
    * Requirements: 3
    */
   @Get(':id')
+  @ApiOperation({
+    summary: 'Get customer by ID',
+    description: 'Retrieve detailed information for a specific customer.',
+  })
+  @ApiParam({ name: 'id', description: 'Customer ID (UUID)', type: String })
+  @ApiResponse({ status: 200, description: 'Customer found successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request - Invalid UUID format' })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing JWT token' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Customer belongs to different business' })
+  @ApiResponse({ status: 404, description: 'Not Found - Customer not found' })
   async getById(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() user: UserPayload,
@@ -211,6 +291,25 @@ export class CustomerController {
    * Requirements: 4
    */
   @Get('duplicates')
+  @ApiOperation({
+    summary: 'Detect duplicate customers',
+    description:
+      'Find potential duplicate customers based on name similarity. Returns pairs with similarity scores.',
+  })
+  @ApiQuery({
+    name: 'threshold',
+    required: false,
+    type: Number,
+    description: 'Similarity threshold (0-1)',
+    example: 0.8,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Duplicates detected successfully',
+    type: DuplicatePairsResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing JWT token' })
+  @ApiResponse({ status: 403, description: 'Forbidden - User does not have a business' })
   async getDuplicates(
     @Query() dto: DetectDuplicatesDto,
     @CurrentUser() user: UserPayload,
@@ -267,6 +366,15 @@ export class CustomerController {
    * Requirements: 8
    */
   @Get('by-user/:userId')
+  @ApiOperation({
+    summary: 'Get customers by user ID',
+    description: 'Get all customers linked to a specific user (registered customers only).',
+  })
+  @ApiParam({ name: 'userId', description: 'User ID (UUID)', type: String })
+  @ApiResponse({ status: 200, description: 'Customers found successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request - Invalid UUID format' })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing JWT token' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Cannot access other users customers' })
   async getByUserId(
     @Param('userId', ParseUUIDPipe) userId: string,
     @CurrentUser() user: UserPayload,
@@ -311,6 +419,17 @@ export class CustomerController {
    * Requirements: 7
    */
   @Get(':id/export')
+  @ApiOperation({
+    summary: 'Export customer data (GDPR)',
+    description:
+      'Export complete customer data including appointments and conversations for GDPR compliance.',
+  })
+  @ApiParam({ name: 'id', description: 'Customer ID (UUID)', type: String })
+  @ApiResponse({ status: 200, description: 'Data exported successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request - Invalid UUID format' })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing JWT token' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Customer belongs to different business' })
+  @ApiResponse({ status: 404, description: 'Not Found - Customer not found' })
   async exportData(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() user: UserPayload,
@@ -356,6 +475,23 @@ export class CustomerController {
    * Requirements: 5
    */
   @Post('merge')
+  @ApiOperation({
+    summary: 'Merge customers',
+    description:
+      'Merge two customer records. Source customer is marked as merged and all data is transferred to target.',
+  })
+  @ApiBody({ type: MergeCustomersDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Customers merged successfully',
+    type: MessageResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request - Invalid UUIDs, same customer, or different business',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing JWT token' })
+  @ApiResponse({ status: 404, description: 'Not Found - One or both customers not found' })
   async merge(
     @Body() dto: MergeCustomersDto,
     @CurrentUser() user: UserPayload,
@@ -399,6 +535,21 @@ export class CustomerController {
    * Requirements: 6
    */
   @Delete(':id')
+  @ApiOperation({
+    summary: 'Delete customer (GDPR)',
+    description:
+      'Anonymize customer data for GDPR compliance. Customer is soft-deleted (data anonymized, not physically removed).',
+  })
+  @ApiParam({ name: 'id', description: 'Customer ID (UUID)', type: String })
+  @ApiResponse({
+    status: 200,
+    description: 'Customer deleted successfully',
+    type: MessageResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Bad Request - Customer has future appointments' })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing JWT token' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Customer belongs to different business' })
+  @ApiResponse({ status: 404, description: 'Not Found - Customer not found' })
   async delete(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() user: UserPayload,
