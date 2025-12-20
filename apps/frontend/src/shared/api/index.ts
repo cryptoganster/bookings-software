@@ -21,7 +21,7 @@
 
 export { apiClient } from "./client";
 export { ENDPOINTS } from "./endpoints";
-export { customersApi } from "./customers";
+export * as customersApi from "./customers";
 
 // Solo tipos específicos del frontend (NO DTOs del backend)
 export type {

@@ -8,7 +8,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@shared/hooks";
-import { customersApi } from "@shared/api";
+import { searchCustomers } from "@shared/api/customers";
 import { customerKeys } from "@entities/customer/model/useCustomer";
 import type { CustomerFilters } from "@entities/customer/model/types";
 
@@ -59,7 +59,7 @@ export function useSearchCustomers(initialFilters?: Partial<CustomerFilters>) {
       searchText: debouncedSearchText,
     }),
     queryFn: () =>
-      customersApi.search({
+      searchCustomers({
         ...filters,
         searchText: debouncedSearchText,
       }),

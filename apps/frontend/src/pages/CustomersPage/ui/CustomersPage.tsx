@@ -26,6 +26,7 @@ import {
 import { IconAlertCircle } from "@tabler/icons-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import type { CustomerReadModel } from "@packages/shared-types";
 import { PageHeader } from "@shared/ui/PageHeader/PageHeader";
 import {
   SearchCustomersForm,
@@ -116,7 +117,7 @@ export function CustomersPage() {
         {!isLoading && !isError && data && data.customers.length > 0 && (
           <>
             <Grid gutter="md">
-              {data.customers.map((customer) => (
+              {data.customers.map((customer: CustomerReadModel) => (
                 <Grid.Col
                   key={customer.id}
                   span={{ base: 12, sm: 6, md: 4, lg: 3 }}
