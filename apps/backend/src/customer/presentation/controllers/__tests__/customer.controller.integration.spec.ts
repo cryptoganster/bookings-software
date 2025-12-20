@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { SharedModule } from '@shared/shared.module';
+import { AuthModule } from '@auth/auth.module';
 import { LoggerModule } from 'nestjs-pino';
 
 // Mock BookingModule to avoid loading its dependencies in tests
@@ -56,12 +57,9 @@ describe('CustomerController (Integration)', () => {
           autoLoadEntities: true,
           synchronize: true, // Only for tests
         }),
-        JwtModule.register({
-          secret: process.env.JWT_SECRET || 'test-secret',
-          signOptions: { expiresIn: '1h' },
-        }),
         CqrsModule,
         SharedModule, // ← Provides IUnitOfWork
+        AuthModule, // ← Provides JwtStrategy and PassportModule
         CustomerModule,
       ],
     })
@@ -89,7 +87,7 @@ describe('CustomerController (Integration)', () => {
     commandBus = moduleFixture.get<CommandBus>(CommandBus);
     queryBus = moduleFixture.get<QueryBus>(QueryBus);
 
-    // Generate test JWT token
+    // Generate test JWT token using JwtService from AuthModule
     const { JwtService } = require('@nestjs/jwt');
     const jwtService = moduleFixture.get(JwtService);
     businessId = '123e4567-e89b-12d3-a456-426614174000';
