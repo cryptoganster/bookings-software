@@ -8,7 +8,7 @@ This implementation plan breaks down the customer controller refactoring into di
 
 ## Phase 1: Preparation and Setup
 
-- [ ] 1. Prepare workspace and create backups
+- [x] 1. Prepare workspace and create backups
   - Create `.gitignore` entry for `*.backup` and `dtos.backup/`
   - Verify current tests pass before starting refactoring
   - Document current API response formats for comparison
@@ -16,9 +16,9 @@ This implementation plan breaks down the customer controller refactoring into di
 
 ---
 
-## Phase 2: Refactor DTOs
+## Phase 2: Refactor DTOs ✅ COMPLETE
 
-- [ ] 2. Create new DTO structure without suffixes
+- [x] 2. Create new DTO structure without suffixes
   - Create `apps/backend/src/customer/presentation/dtos/search-customer.ts`
   - Create `apps/backend/src/customer/presentation/dtos/merge-customer.ts`
   - Create `apps/backend/src/customer/presentation/dtos/detect-duplicates.ts`
@@ -26,25 +26,25 @@ This implementation plan breaks down the customer controller refactoring into di
   - Update `apps/backend/src/customer/presentation/dtos/index.ts` barrel export
   - _Requirements: 2.1, 2.2, 2.3, 2.4_
 
-- [ ] 2.1 Write unit tests for search-customer DTO
+- [x] 2.1 Write unit tests for search-customer DTO
   - Test validation decorators (page, limit, sortBy, sortOrder)
   - Test edge cases (min/max values)
   - Test invalid inputs
   - _Requirements: 5.4_
 
-- [ ] 2.2 Write unit tests for merge-customer DTO
+- [x] 2.2 Write unit tests for merge-customer DTO
   - Test UUID validation
   - Test required fields
   - Test invalid inputs
   - _Requirements: 5.4_
 
-- [ ] 2.3 Write unit tests for detect-duplicates DTO
+- [x] 2.3 Write unit tests for detect-duplicates DTO
   - Test threshold validation (0-1 range)
   - Test default value
   - Test invalid inputs
   - _Requirements: 5.4_
 
-- [ ] 2.4 Write unit tests for response-types DTOs
+- [x] 2.4 Write unit tests for response-types DTOs
   - Test MessageResponseDto structure
   - Test SearchCustomersResponseDto structure
   - Test CustomerStatsResponseDto structure
@@ -55,7 +55,7 @@ This implementation plan breaks down the customer controller refactoring into di
 
 ## Phase 3: Create Search Controller
 
-- [ ] 3. Implement customer-search.ts controller
+- [x] 3. Implement customer-search.ts controller
   - Create `apps/backend/src/customer/presentation/controllers/customer-search.ts`
   - Implement `GET /api/customers/search` endpoint
   - Implement `GET /api/customers/stats` endpoint
@@ -63,7 +63,7 @@ This implementation plan breaks down the customer controller refactoring into di
   - Update imports to use new DTOs
   - _Requirements: 1.1, 1.2, 1.5, 4.1, 4.2, 4.4_
 
-- [ ] 3.1 Write unit tests for customer-search controller
+- [x] 3.1 Write unit tests for customer-search controller
   - Test search endpoint with valid filters
   - Test search endpoint with missing businessId (ForbiddenException)
   - Test stats endpoint success case
@@ -72,7 +72,7 @@ This implementation plan breaks down the customer controller refactoring into di
   - Test error handling and duration tracking
   - _Requirements: 5.1, 4.3_
 
-- [ ] 3.2 Write property test for search pagination
+- [x] 3.2 Write property test for search pagination
   - **Property 2: DTO Validation Equivalence**
   - **Validates: Requirements 2.2**
   - Test that any valid page/limit combination produces valid pagination
@@ -83,14 +83,14 @@ This implementation plan breaks down the customer controller refactoring into di
 
 ## Phase 4: Create Duplicates Controller
 
-- [ ] 4. Implement customer-duplicates.ts controller
+- [x] 4. Implement customer-duplicates.ts controller
   - Create `apps/backend/src/customer/presentation/controllers/customer-duplicates.ts`
   - Implement `GET /api/customers/duplicates` endpoint
   - Copy all decorators, guards, and logging from original
   - Update imports to use new DTOs
   - _Requirements: 1.1, 1.2, 1.5, 4.1, 4.2, 4.4_
 
-- [ ] 4.1 Write unit tests for customer-duplicates controller
+- [x] 4.1 Write unit tests for customer-duplicates controller
   - Test duplicates endpoint with valid threshold
   - Test duplicates endpoint with default threshold
   - Test duplicates endpoint with missing businessId (ForbiddenException)
@@ -102,14 +102,14 @@ This implementation plan breaks down the customer controller refactoring into di
 
 ## Phase 5: Create Merge Controller
 
-- [ ] 5. Implement customer-merge.ts controller
+- [x] 5. Implement customer-merge.ts controller
   - Create `apps/backend/src/customer/presentation/controllers/customer-merge.ts`
   - Implement `POST /api/customers/merge` endpoint
   - Copy all decorators, guards, and logging from original
   - Update imports to use new DTOs
   - _Requirements: 1.1, 1.2, 1.5, 4.1, 4.2, 4.4_
 
-- [ ] 5.1 Write unit tests for customer-merge controller
+- [x] 5.1 Write unit tests for customer-merge controller
   - Test merge endpoint success case
   - Test merge endpoint with invalid UUIDs
   - Test logging calls (start, complete, error)
