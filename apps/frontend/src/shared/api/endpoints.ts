@@ -56,4 +56,16 @@ export const ENDPOINTS = {
     APPOINTMENTS: "/analytics/appointments",
     OFFERINGS: "/analytics/offerings",
   },
+
+  CUSTOMERS: {
+    LIST: "/customers",
+    DETAIL: (id: string) => `/customers/${id}`,
+    SEARCH: "/customers/search",
+    BY_USER_ID: (userId: string) => `/customers/user/${userId}`,
+    STATS: "/customers/stats",
+    MERGE: "/customers/merge",
+    DELETE: (id: string) => `/customers/${id}`,
+    EXPORT: (id: string) => `/customers/${id}/export`,
+    DUPLICATES: "/customers/duplicates",
+  },
 } as const;
