@@ -1,8 +1,11 @@
 import {
   Controller,
   Get,
+  Post,
+  Delete,
   Query,
   Param,
+  Body,
   UseGuards,
   ParseUUIDPipe,
   ForbiddenException,
@@ -15,6 +18,8 @@ import { CustomerReadModel } from '@packages/shared-types';
 import {
   SearchCustomersDto,
   DetectDuplicatesDto,
+  MergeCustomersDto,
+  MessageResponseDto,
   SearchCustomersResponseDto,
   CustomerStatsResponseDto,
   DuplicatePairsResponseDto,
@@ -32,6 +37,8 @@ import {
   ExportCustomerDataQuery,
   CustomerDataExport,
 } from '@customer/app/queries/export-customer-data/query';
+import { MergeCustomersCommand } from '@customer/app/commands/merge-customers/command';
+import { DeleteCustomerCommand } from '@customer/app/commands/delete-customer/command';
 
 /**
  * CustomerController
@@ -323,5 +330,96 @@ export class CustomerController {
     return exportData;
   }
 
-  // Command endpoints will be implemented in Phase 3
+  /**
+   * Merge two customers
+   *
+   * POST /api/customers/merge
+   *
+   * Body:
+   * - sourceCustomerId: string (UUID) - Customer to be merged (will be marked as merged)
+   * - targetCustomerId: string (UUID) - Customer to merge into (will receive all data)
+   *
+   * Returns: Success message
+   *
+   * Throws:
+   * - 400 if source and target are the same customer
+   * - 400 if customers belong to different businesses
+   * - 404 if either customer not found
+   *
+   * Business Rules:
+   * - Both customers must belong to the same business
+   * - Source customer is soft-deleted (marked as merged)
+   * - All appointments transferred to target
+   * - All conversations transferred to target
+   * - Operation is atomic (transaction)
+   *
+   * Requirements: 5
+   */
+  @Post('merge')
+  async merge(
+    @Body() dto: MergeCustomersDto,
+    @CurrentUser() user: UserPayload,
+  ): Promise<MessageResponseDto> {
+    // Extract userId for audit trail
+    const userId = user.userId;
+
+    // Dispatch command
+    await this.commandBus.execute(
+      new MergeCustomersCommand(dto.sourceCustomerId, dto.targetCustomerId, userId),
+    );
+
+    // Return success message
+    return {
+      message: 'Customers merged successfully',
+    };
+  }
+
+  /**
+   * Delete customer (GDPR compliance)
+   *
+   * DELETE /api/customers/:id
+   *
+   * Params:
+   * - id: string (UUID) - Customer ID
+   *
+   * Returns: Success message
+   *
+   * Throws:
+   * - 400 if customer has future appointments
+   * - 403 if customer belongs to different business
+   * - 404 if customer not found
+   *
+   * Business Rules:
+   * - Customer data is anonymized (not physically deleted)
+   * - Name set to null
+   * - Phone set to +999{timestamp}
+   * - Cannot delete if customer has future appointments
+   * - Preserves referential integrity
+   *
+   * Requirements: 6
+   */
+  @Delete(':id')
+  async delete(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: UserPayload,
+  ): Promise<MessageResponseDto> {
+    // First get customer to validate business ownership
+    const customer = await this.queryBus.execute(new GetCustomerQuery(id));
+
+    // Validate business ownership
+    if (customer.businessId !== user.businessId) {
+      throw new ForbiddenException('Access denied');
+    }
+
+    // Extract userId for audit trail
+    const userId = user.userId;
+
+    // Dispatch command
+    await this.commandBus.execute(new DeleteCustomerCommand(id, userId));
+
+    // Return success message
+    return {
+      message: 'Customer deleted successfully',
+    };
+  }
 }
