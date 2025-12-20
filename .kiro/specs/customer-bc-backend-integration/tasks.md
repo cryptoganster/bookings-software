@@ -347,13 +347,14 @@ Este documento proporciona un checklist de implementación paso a paso para comp
   - **Commit:** `docs(customer): add API documentation`
   - **Status:** ✅ Pre-existing - Comprehensive API docs already exist
 
-- [ ] 8.3 Add Logging
+- [x] 8.3 Add Logging
   - Add Pino logger to controller
   - Log all requests with userId and businessId
   - Log errors with stack traces
   - Log performance metrics (response time)
   - _Requirements: 12_
-  - **Commit:** `feat(customer): add request logging`
+  - **Commit:** `feat(customer): add Pino logging and enable Swagger UI (Phase 8.3)`
+  - **Status:** ✅ Complete - Structured logging added to all 8 endpoints with performance metrics
 
 - [ ] 8.4 Performance Testing
   - Test search endpoint < 200ms (p95)
