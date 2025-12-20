@@ -393,14 +393,14 @@ Este documento proporciona un checklist de implementación paso a paso para las 
   - _Requirements: 8.1, 8.2, 8.3_
   - **Commit:** `feat(frontend): add search customers feature`
 
-- [ ] 5.3 Create CustomersPage (List)
+- [x] 5.3 Create CustomersPage (List)
   - Create `apps/frontend/src/pages/CustomersPage/`
   - Use SearchCustomersForm, CustomerCard, Pagination
   - Implement debounced search (300ms)
   - Implement pagination
   - Implement sorting
   - _Requirements: 8.1-8.6_
-  - **Commit:** `feat(frontend): add CustomersPage`
+  - **Commit:** `feat(frontend): add CustomersPage with search and pagination`
 
 - [ ] 5.4 Create CustomerDetailPage
   - Create `apps/frontend/src/pages/CustomerDetailPage/`
