@@ -280,12 +280,13 @@ git commit [hash]
   - Test GetBusinessByWhatsAppPhoneHandler (found and not found) ✅
   - _Requirements: 14.4, 10.4, 10.5, 12.4_
 
-- [ ] 8.8 Write Integration Tests for Repositories
-  - Test BusinessWriteRepository.save() with Optimistic Locking
-  - Test BusinessWriteRepository.save() with ConcurrencyException
-  - Test BusinessFactory.loadById() (found and not found)
-  - Test BusinessFactory.loadById() preserves version
-  - Test BusinessReadRepository queries with real database
+- [x] 8.8 Write Integration Tests for Repositories ✅
+  - Test BusinessWriteRepository.save() with Optimistic Locking ✅
+  - Test BusinessWriteRepository.save() with ConcurrencyException ✅
+  - Test BusinessFactory.loadById() (found and not found) ✅
+  - Test BusinessFactory.loadById() preserves version ✅
+  - Test BusinessReadRepository queries with real database ✅
+  - **Total: 23 tests passing (8 factory + 9 read + 6 write)**
   - _Requirements: 14.4, 9.4, 9.5_
 
 - [ ] 8.9 Write E2E Tests for Business Flow
