@@ -289,11 +289,13 @@ git commit [hash]
   - **Total: 23 tests passing (8 factory + 9 read + 6 write)**
   - _Requirements: 14.4, 9.4, 9.5_
 
-- [ ] 8.9 Write E2E Tests for Business Flow
+- [ ] 8.9 Write E2E Tests for Business Flow ⏸️ BLOCKED
+  - **BLOCKED:** Requires Account BC (BusinessOwner) to be implemented first
   - Test complete flow: User → BusinessOwner → Create Business
   - Test WhatsAppPhone uniqueness across businesses
   - Test business count limits per subscription plan
   - Test business activation/deactivation flow
+  - **Will be implemented after Account BC is complete**
   - _Requirements: 14.4, 1.1-1.5, 2.1-2.5, 6.1-6.5_
 
 - [ ] 8.10 Run all validations
