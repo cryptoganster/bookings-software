@@ -250,7 +250,7 @@ git commit [hash]
   - Test Business.fromPersistence() (reconstruction with version)
   - _Requirements: 14.1-14.3_
 
-- [ ] 8.5 Write Property-Based Tests
+- [x] 8.5 Write Property-Based Tests
   - **Property 1: Timezone round-trip**
   - For any valid IANA timezone string, creating Timezone VO and calling getValue() should return the same string
   - **Validates: Requirements 4.1, 4.3**
