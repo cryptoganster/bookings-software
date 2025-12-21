@@ -235,13 +235,13 @@ git commit [hash]
   - Export type for frontend consumption
   - _Requirements: Note in Introduction_
 
-- [ ] 8.3 Write Unit Tests for Value Objects
+- [x] 8.3 Write Unit Tests for Value Objects
   - Test Timezone VO (IANA validation, invalid timezones)
   - Test BusinessAddress VO (required fields, optional fields, validation)
   - Note: WhatsAppPhone VO already tested in Customer BC (reused from @shared/vo)
   - _Requirements: 14.1-14.3_
 
-- [ ] 8.4 Write Unit Tests for Business Aggregate
+- [x] 8.4 Write Unit Tests for Business Aggregate
   - Test Business.create() (factory method, validation, events)
   - Test Business.updateInfo() (validation, version increment, events)
   - Test Business.configureWhatsApp() (validation, events)
