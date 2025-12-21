@@ -45,3 +45,15 @@ Los tests de integración del backend están fallando debido a problemas de cone
 2. WHEN se ejecuta TypeORM THEN el sistema SHALL poder crear instancias de Pool correctamente
 3. WHEN se ejecutan múltiples tests THEN el sistema SHALL manejar correctamente el pool de conexiones
 4. WHEN se finalizan los tests THEN el sistema SHALL cerrar todas las conexiones abiertas
+
+### Requirement 4
+
+**User Story:** Como desarrollador, quiero que todas las entidades del sistema estén registradas en el DataSource de pruebas, para que los tests de integración puedan hacer joins y queries correctamente.
+
+#### Acceptance Criteria
+
+1. WHEN se crea el DataSource de pruebas THEN el sistema SHALL incluir todas las entidades del sistema (Appointment, Capacity, Offering, Customer, Business, BusinessOwner, User)
+2. WHEN se ejecutan tests que hacen joins con otras tablas THEN el sistema SHALL encontrar las tablas correspondientes en la base de datos
+3. WHEN se ejecutan tests de AppointmentReadRepository THEN el sistema SHALL poder hacer joins con la tabla `offerings`
+4. WHEN se ejecutan tests de AppointmentReadRepository THEN el sistema SHALL poder hacer joins con la tabla `customers`
+5. WHEN se ejecutan tests que usan cualquier entidad THEN el sistema SHALL tener acceso a todas las tablas necesarias

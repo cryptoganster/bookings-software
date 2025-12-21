@@ -2,11 +2,61 @@
 
 ## Status: ✅ COMPLETED
 
-All integration tests are now passing successfully.
+All integration tests are now passing successfully, including CI pipeline.
 
 ## Problems Identified and Fixed
 
-### 1. PostgreSQL Driver Compatibility Issue
+### 1. CI Failure: Missing Entity Registration (PR #81)
+
+**Problem:**
+
+```
+QueryFailedError: relation "offerings" does not exist
+```
+
+**Root Cause:**
+
+- `apps/backend/test/setup-db.ts` only registered 2 entities: `AppointmentModel` and `CapacityModel`
+- Missing entities: `OfferingModel`, `CustomerModel`, `BusinessModel`, `BusinessOwnerModel`, `UserModel`, etc.
+- Integration tests that perform joins with `offerings` table failed in CI
+- Tests passed locally because migrations were run manually, but CI uses clean database
+
+**Affected Tests:**
+
+- `AppointmentReadRepository › findById › should return read model with denormalized data`
+- `AppointmentReadRepository › findByCustomerId › should return all appointments for customer`
+- `AppointmentReadRepository › findUpcoming › should return only future non-cancelled appointments`
+
+**Solution:**
+
+- Replaced hardcoded entities array with glob pattern for auto-discovery:
+
+```typescript
+// Before
+entities: [AppointmentModel, CapacityModel],
+
+// After
+entities: ['src/**/infra/persistence/models/*.ts'], // Auto-discover all entities
+```
+
+**Benefits:**
+
+- ✅ Auto-discovers all entities automatically
+- ✅ No manual maintenance required when adding new entities
+- ✅ Standard TypeORM pattern
+- ✅ Works in both local and CI environments
+
+**Files Modified:**
+
+- `apps/backend/test/setup-db.ts`
+
+**Documentation Created:**
+
+- `.kiro/specs/fix-integration-tests/ci-failure-analysis.md` - Complete analysis of CI failure
+- `.kiro/specs/fix-integration-tests/requirements.md` - Added Requirement 4 for entity registration
+- `.kiro/specs/fix-integration-tests/tasks.md` - Implementation tasks
+
+### 2. PostgreSQL Driver Compatibility Issue (Initial Fix)
 
 **Problem:**
 
@@ -29,7 +79,7 @@ TypeError: this.postgres.Pool is not a constructor
 
 - `apps/backend/package.json`
 
-### 2. Missing Dependency Injection Provider
+### 3. Missing Dependency Injection Provider (Initial Fix)
 
 **Problem:**
 
@@ -57,7 +107,7 @@ Nest can't resolve dependencies of the CreateBusinessOwnerHandler (?, IBusinessO
 
 - `apps/backend/src/account/app/commands/create-business-owner/__tests__/handler.integration.spec.ts`
 
-### 3. Missing @Inject Decorator for IUnitOfWork
+### 4. Missing @Inject Decorator for IUnitOfWork (Initial Fix)
 
 **Problem:**
 
@@ -88,7 +138,7 @@ constructor(
 
 - `apps/backend/src/account/infra/persistence/repositories/business-owner-write.repository.ts`
 
-### 4. Optimistic Locking Version Mismatch
+### 5. Optimistic Locking Version Mismatch (Initial Fix)
 
 **Problem:**
 
@@ -231,9 +281,16 @@ providers: [
 
 ## Files Changed
 
-1. `apps/backend/package.json` - Downgraded pg to 8.11.5
-2. `apps/backend/src/account/app/commands/create-business-owner/__tests__/handler.integration.spec.ts` - Added IBusinessOwnerFactory provider
-3. `apps/backend/src/account/infra/persistence/repositories/business-owner-write.repository.ts` - Added @Inject decorator and fixed optimistic locking
+1. `apps/backend/test/setup-db.ts` - **[NEW]** Replaced hardcoded entities with glob pattern for auto-discovery
+2. `apps/backend/package.json` - Downgraded pg to 8.11.5
+3. `apps/backend/src/account/app/commands/create-business-owner/__tests__/handler.integration.spec.ts` - Added IBusinessOwnerFactory provider
+4. `apps/backend/src/account/infra/persistence/repositories/business-owner-write.repository.ts` - Added @Inject decorator and fixed optimistic locking
+
+## Documentation Created
+
+1. `.kiro/specs/fix-integration-tests/ci-failure-analysis.md` - Complete analysis of PR #81 CI failure
+2. `.kiro/specs/fix-integration-tests/requirements.md` - Added Requirement 4 for entity registration
+3. `.kiro/specs/fix-integration-tests/tasks.md` - Implementation tasks and success criteria
 
 ## Verification Commands
 

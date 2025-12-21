@@ -1,6 +1,4 @@
 import { DataSource } from 'typeorm';
-import { AppointmentModel } from '@booking/infra/persistence/models/appointment';
-import { CapacityModel } from '@availability/infra/persistence/models/capacity';
 
 /**
  * Helper para limpiar la base de datos entre tests
@@ -42,7 +40,7 @@ export function createTestDataSource(): DataSource {
     username: process.env.DB_USERNAME || 'postgres',
     password: process.env.DB_PASSWORD || 'postgres',
     database,
-    entities: [AppointmentModel, CapacityModel],
+    entities: ['src/**/infra/persistence/models/*.ts'], // Auto-discover all entities
     synchronize: true, // Auto-crear schema en tests
     logging: false,
   });
