@@ -11,15 +11,14 @@ export class BusinessReadModel {
   ownerId!: string;
   name!: string;
   whatsappPhone!: string;
-  address!: {
-    street: string;
-    city: string;
-    state: string | null;
-    country: string;
-    postalCode: string | null;
-  };
+  addressStreet!: string;
+  addressCity!: string;
+  addressState!: string | null;
+  addressCountry!: string;
+  addressPostalCode!: string | null;
   timezone!: string;
   isActive!: boolean;
   createdAt!: Date;
+  updatedAt!: Date;
   version!: number;
 }

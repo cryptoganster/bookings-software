@@ -150,44 +150,44 @@ git commit [hash]
 "feat(business): implement query handlers for Business"
 ```
 
-## Phase 6: Infrastructure Layer - Persistence
+## Phase 6: Infrastructure Layer - Persistence ✅ COMPLETE
 
-- [ ] 6.1 Create BusinessModel (TypeORM Entity)
+- [x] 6.1 Create BusinessModel (TypeORM Entity)
   - Map all fields to database columns
   - Define indexes (whatsapp_number unique, owner_id)
   - FK: owner_id → users(id)
   - _Requirements: 13.1-13.3_
 
-- [ ] 6.2 Create BusinessWriteMapper
+- [x] 6.2 Create BusinessWriteMapper
   - toModel(aggregate): BusinessModel
   - _Requirements: 9.1_
 
-- [ ] 6.3 Create BusinessReadMapper
+- [x] 6.3 Create BusinessReadMapper
   - toReadModel(model): BusinessReadModel
   - _Requirements: 9.3_
 
-- [ ] 6.4 Implement BusinessFactory
+- [x] 6.4 Implement BusinessFactory
   - Implements IBusinessFactory
   - Uses TypeORM Repository
   - Calls Business.fromPersistence()
   - _Requirements: 9.2_
 
-- [ ] 6.5 Implement BusinessWriteRepository
+- [x] 6.5 Implement BusinessWriteRepository
   - Implements IBusinessWriteRepository
   - Uses Optimistic Locking with version field
   - Throws ConcurrencyException on conflict
   - _Requirements: 9.1, 9.4, 9.5_
 
-- [ ] 6.6 Implement BusinessReadRepository
+- [x] 6.6 Implement BusinessReadRepository
   - Implements IBusinessReadRepository
   - Optimized queries for read models
   - _Requirements: 9.3_
 
-### ✅ Commit Checkpoint 6
+### ✅ Commit Checkpoint 6 - DONE
 
 ```bash
-git add src/business/infra/persistence
-git commit -m "feat(business): implement persistence layer with repositories, factory and mappers"
+git commit [hash]
+"feat(business): implement persistence layer with repositories, factory and mappers"
 ```
 
 ## Phase 7: Infrastructure Layer - Database
