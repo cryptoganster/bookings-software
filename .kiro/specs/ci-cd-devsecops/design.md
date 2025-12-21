@@ -5,6 +5,7 @@
 Sistema de CI/CD y DevSecOps implementado con GitHub Actions, optimizado para un solo desarrollador. El diseño prioriza automatización, feedback rápido y seguridad sin fricción, utilizando herramientas gratuitas y open source.
 
 **Filosofía de Diseño:**
+
 - **Shift Left Security**: Detectar problemas temprano en el ciclo de desarrollo
 - **Fail Fast**: Fallar rápido en problemas críticos, warnings en menores
 - **Automation First**: Automatizar todo lo repetitivo
@@ -49,32 +50,32 @@ graph TD
     A[Push to Branch] --> B{Branch Type?}
     B -->|feature/*| C[CI Workflow]
     B -->|main| D[CI + CD Workflow]
-    
+
     C --> E[Code Quality]
     C --> F[Security Scan]
     C --> G[Tests]
     C --> H[Build]
-    
+
     D --> E
     D --> F
     D --> G
     D --> H
     D --> I[Docker Build]
     D --> J[Deploy]
-    
+
     E --> K{All Pass?}
     F --> K
     G --> K
     H --> K
-    
+
     K -->|Yes| L[Success ✓]
     K -->|No| M[Fail ✗]
-    
+
     I --> N[Container Scan]
     N --> O{Vulnerabilities?}
     O -->|Critical| M
     O -->|None/Low| J
-    
+
     J --> P[Health Check]
     P --> Q{Healthy?}
     Q -->|Yes| L
@@ -90,12 +91,14 @@ graph TD
 **Trigger:** Push a cualquier rama, Pull Request a main
 
 **Jobs:**
+
 - `code-quality`: Linting, formatting, type checking
 - `security`: SAST (CodeQL), SCA (npm audit), secret scanning
 - `test`: Unit tests, integration tests, coverage
 - `build`: Compilar backend y frontend
 
 **Paralelización:**
+
 ```yaml
 jobs:
   code-quality:
@@ -114,6 +117,7 @@ jobs:
 **Trigger:** Push a main (después de CI exitoso)
 
 **Jobs:**
+
 - `docker-build`: Construir imagen Docker
 - `docker-scan`: Escanear vulnerabilidades con Trivy
 - `deploy`: Deployment a staging/producción
@@ -125,6 +129,7 @@ jobs:
 **Trigger:** Automático (diario)
 
 **Configuración:**
+
 - Escanear npm dependencies
 - Crear PRs automáticos para actualizaciones
 - Agrupar actualizaciones menores
@@ -135,6 +140,7 @@ jobs:
 **Trigger:** Push a main, Pull Request, Schedule (semanal)
 
 **Configuración:**
+
 - Lenguajes: TypeScript, JavaScript
 - Queries: security-extended
 - Fail on: critical, high
@@ -147,13 +153,14 @@ jobs:
 **Tool:** GitHub CodeQL
 
 **Configuration:**
+
 ```yaml
 - name: Initialize CodeQL
   uses: github/codeql-action/init@v2
   with:
     languages: typescript, javascript
     queries: security-extended
-    
+
 - name: Perform CodeQL Analysis
   uses: github/codeql-action/analyze@v2
   with:
@@ -161,6 +168,7 @@ jobs:
 ```
 
 **Detection Rules:**
+
 - SQL Injection
 - XSS (Cross-Site Scripting)
 - Path Traversal
@@ -172,17 +180,19 @@ jobs:
 #### 2.2 SCA (Software Composition Analysis)
 
 **Tools:**
+
 - `npm audit` (vulnerabilities)
 - `license-checker` (license compliance)
 - GitHub Dependabot (automated updates)
 
 **Configuration:**
+
 ```yaml
 - name: Audit Dependencies
   run: |
     npm audit --audit-level=high
     npm audit --json > audit-report.json
-    
+
 - name: Check Licenses
   run: |
     npx license-checker --summary
@@ -190,6 +200,7 @@ jobs:
 ```
 
 **Fail Conditions:**
+
 - Critical vulnerabilities in dependencies
 - High vulnerabilities in direct dependencies
 - Incompatible licenses (GPL, AGPL)
@@ -197,11 +208,13 @@ jobs:
 #### 2.3 Secret Scanning
 
 **Tools:**
+
 - GitHub Secret Scanning (native)
 - `trufflehog` (additional scanning)
 - `gitleaks` (pre-commit hook)
 
 **Configuration:**
+
 ```yaml
 - name: Scan for Secrets
   uses: trufflesecurity/trufflehog@main
@@ -212,6 +225,7 @@ jobs:
 ```
 
 **Detection Patterns:**
+
 - AWS Keys
 - API Tokens
 - Private Keys
@@ -224,6 +238,7 @@ jobs:
 #### 3.1 Test Execution
 
 **Backend Tests:**
+
 ```yaml
 - name: Run Backend Tests
   run: |
@@ -233,6 +248,7 @@ jobs:
 ```
 
 **Frontend Tests:**
+
 ```yaml
 - name: Run Frontend Tests
   run: |
@@ -246,6 +262,7 @@ jobs:
 **Tool:** Codecov (opcional) o GitHub Actions artifacts
 
 **Configuration:**
+
 ```yaml
 - name: Upload Coverage
   uses: codecov/codecov-action@v3
@@ -256,6 +273,7 @@ jobs:
 ```
 
 **Thresholds:**
+
 - Minimum: 70% overall
 - Warning: < 80%
 - Target: > 85%
@@ -265,6 +283,7 @@ jobs:
 #### 4.1 Backend Build
 
 **Steps:**
+
 ```yaml
 - name: Build Backend
   run: |
@@ -274,6 +293,7 @@ jobs:
 ```
 
 **Validation:**
+
 - TypeScript compilation successful
 - No type errors
 - Dist folder generated
@@ -281,6 +301,7 @@ jobs:
 #### 4.2 Frontend Build
 
 **Steps:**
+
 ```yaml
 - name: Build Frontend
   run: |
@@ -290,6 +311,7 @@ jobs:
 ```
 
 **Validation:**
+
 - Vite build successful
 - No type errors
 - Dist folder generated
@@ -300,12 +322,14 @@ jobs:
 #### 5.1 Docker Build
 
 **Dockerfile Strategy:**
+
 - Multi-stage build
 - Minimal base image (node:20-alpine)
 - Non-root user
 - Health check included
 
 **Build Configuration:**
+
 ```yaml
 - name: Build Docker Image
   run: |
@@ -318,18 +342,20 @@ jobs:
 **Tool:** Trivy
 
 **Configuration:**
+
 ```yaml
 - name: Scan Docker Image
   uses: aquasecurity/trivy-action@master
   with:
     image-ref: ${{ env.IMAGE_NAME }}:${{ github.sha }}
-    format: 'sarif'
-    output: 'trivy-results.sarif'
-    severity: 'CRITICAL,HIGH'
-    exit-code: '1'
+    format: "sarif"
+    output: "trivy-results.sarif"
+    severity: "CRITICAL,HIGH"
+    exit-code: "1"
 ```
 
 **Scan Targets:**
+
 - OS packages
 - Application dependencies
 - Known vulnerabilities (CVEs)
@@ -342,6 +368,7 @@ jobs:
 **Approach:** Blue-Green Deployment (simplified)
 
 **Steps:**
+
 1. Build new version
 2. Deploy to staging slot
 3. Run health checks
@@ -350,15 +377,16 @@ jobs:
 6. Rollback if needed
 
 **Configuration:**
+
 ```yaml
 - name: Deploy to Production
   run: |
     # Deploy new version
     docker-compose up -d --no-deps backend
-    
+
     # Wait for health check
     sleep 10
-    
+
     # Verify health
     curl -f http://localhost:3000/health || exit 1
 ```
@@ -368,6 +396,7 @@ jobs:
 **Endpoint:** `/health`
 
 **Checks:**
+
 - Database connectivity
 - Redis connectivity (if applicable)
 - External API availability
@@ -375,6 +404,7 @@ jobs:
 - Disk space
 
 **Response Format:**
+
 ```json
 {
   "status": "healthy",
@@ -390,11 +420,13 @@ jobs:
 #### 6.3 Rollback Mechanism
 
 **Trigger Conditions:**
+
 - Health check fails after deployment
 - Error rate > 5% in first 5 minutes
 - Manual trigger
 
 **Rollback Steps:**
+
 ```yaml
 - name: Rollback on Failure
   if: failure()
@@ -417,19 +449,19 @@ protection_rules:
       - "security"
       - "test"
       - "build"
-  
+
   required_pull_request_reviews:
-    required_approving_review_count: 0  # Solo dev
+    required_approving_review_count: 0 # Solo dev
     dismiss_stale_reviews: true
-  
-  enforce_admins: false  # Permitir bypass para solo dev
-  
-  restrictions: null  # Sin restricciones de push
-  
+
+  enforce_admins: false # Permitir bypass para solo dev
+
+  restrictions: null # Sin restricciones de push
+
   required_linear_history: true
-  
+
   allow_force_pushes: false
-  
+
   allow_deletions: false
 ```
 
@@ -442,13 +474,13 @@ protection_rules:
 name: CI Pipeline
 on:
   push:
-    branches: ['**']
+    branches: ["**"]
   pull_request:
     branches: [main]
 
 env:
-  NODE_VERSION: '20'
-  PNPM_VERSION: '8'
+  NODE_VERSION: "20"
+  PNPM_VERSION: "8"
 
 jobs:
   code-quality:
@@ -531,54 +563,66 @@ jobs:
 
 ## Correctness Properties
 
-*A property is a characteristic or behavior that should hold true across all valid executions of a system-essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
+_A property is a characteristic or behavior that should hold true across all valid executions of a system-essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees._
 
 ### Property 1: CI Pipeline Execution on Push
-*For any* push to any branch, the CI pipeline should execute automatically within 5 minutes
+
+_For any_ push to any branch, the CI pipeline should execute automatically within 5 minutes
 **Validates: Requirements 1.1**
 
 ### Property 2: PR Validation Completeness
-*For any* Pull Request to main, all required checks (code-quality, security, test, build) must pass before merge is allowed
+
+_For any_ Pull Request to main, all required checks (code-quality, security, test, build) must pass before merge is allowed
 **Validates: Requirements 1.2, 9.2**
 
 ### Property 3: Critical Vulnerability Blocking
-*For any* security scan that detects critical vulnerabilities, the pipeline should fail immediately and prevent merge
+
+_For any_ security scan that detects critical vulnerabilities, the pipeline should fail immediately and prevent merge
 **Validates: Requirements 2.2, 3.2**
 
 ### Property 4: Secret Detection Blocking
-*For any* commit containing secrets (API keys, tokens, credentials), the pipeline should fail immediately and notify the developer
+
+_For any_ commit containing secrets (API keys, tokens, credentials), the pipeline should fail immediately and notify the developer
 **Validates: Requirements 4.2, 4.3**
 
 ### Property 5: Test Execution Completeness
-*For any* CI pipeline execution, all unit tests and integration tests should run and report results
+
+_For any_ CI pipeline execution, all unit tests and integration tests should run and report results
 **Validates: Requirements 5.1, 5.2**
 
 ### Property 6: Code Quality Enforcement
-*For any* code that violates linting rules or has type errors, the pipeline should fail and prevent merge
+
+_For any_ code that violates linting rules or has type errors, the pipeline should fail and prevent merge
 **Validates: Requirements 6.4**
 
 ### Property 7: Branch Protection Enforcement
-*For any* attempt to push directly to main, the system should reject the push and require a Pull Request
+
+_For any_ attempt to push directly to main, the system should reject the push and require a Pull Request
 **Validates: Requirements 9.1**
 
 ### Property 8: Health Check Validation
-*For any* deployment, the health check endpoint should return 200 status with valid response before marking deployment as successful
+
+_For any_ deployment, the health check endpoint should return 200 status with valid response before marking deployment as successful
 **Validates: Requirements 12.3, 12.5**
 
 ### Property 9: Deployment Rollback on Failure
-*For any* deployment that fails health checks, the system should automatically rollback to the previous version
+
+_For any_ deployment that fails health checks, the system should automatically rollback to the previous version
 **Validates: Requirements 1.5**
 
 ### Property 10: SBOM Generation
-*For any* successful CI pipeline execution, a Software Bill of Materials (SBOM) should be generated listing all dependencies
+
+_For any_ successful CI pipeline execution, a Software Bill of Materials (SBOM) should be generated listing all dependencies
 **Validates: Requirements 3.5**
 
 ### Property 11: Coverage Threshold Warning
-*For any* test execution where coverage is below 70%, the system should generate a warning (but not fail the pipeline)
+
+_For any_ test execution where coverage is below 70%, the system should generate a warning (but not fail the pipeline)
 **Validates: Requirements 5.5**
 
 ### Property 12: Dependabot PR Creation
-*For any* dependency update detected by Dependabot, an automated Pull Request should be created within 24 hours
+
+_For any_ dependency update detected by Dependabot, an automated Pull Request should be created within 24 hours
 **Validates: Requirements 3.3**
 
 ## Error Handling
@@ -588,12 +632,14 @@ jobs:
 **Strategy:** Fail fast, provide clear feedback
 
 **Error Categories:**
+
 - **Critical**: Block merge, require fix (security vulnerabilities, test failures)
 - **High**: Block merge, allow bypass with justification (linting errors)
 - **Medium**: Warning, don't block (coverage below target)
 - **Low**: Informational only (minor code smells)
 
 **Error Response:**
+
 ```yaml
 - name: Handle Failure
   if: failure()
@@ -606,6 +652,7 @@ jobs:
 ### 2. Security Scan Failures
 
 **Critical Vulnerabilities:**
+
 ```yaml
 - name: Fail on Critical
   run: |
@@ -617,6 +664,7 @@ jobs:
 ```
 
 **Medium/Low Vulnerabilities:**
+
 ```yaml
 - name: Warn on Medium/Low
   run: |
@@ -628,6 +676,7 @@ jobs:
 ### 3. Deployment Failures
 
 **Health Check Failure:**
+
 ```yaml
 - name: Check Health
   run: |
@@ -644,6 +693,7 @@ jobs:
 ```
 
 **Automatic Rollback:**
+
 ```yaml
 - name: Rollback on Failure
   if: failure()
@@ -658,6 +708,7 @@ jobs:
 ### 4. Retry Logic
 
 **Network Failures:**
+
 ```yaml
 - name: Install Dependencies
   uses: nick-invision/retry@v2
@@ -668,6 +719,7 @@ jobs:
 ```
 
 **Flaky Tests:**
+
 ```yaml
 - name: Run Tests
   run: |
@@ -696,16 +748,19 @@ act push -W .github/workflows/ci.yml -s GITHUB_TOKEN=xxx
 ### 2. Security Testing
 
 **SAST Testing:**
+
 - Run CodeQL locally with CodeQL CLI
 - Test with intentionally vulnerable code
 - Verify detection of common vulnerabilities
 
 **SCA Testing:**
+
 - Add vulnerable dependency
 - Verify npm audit detects it
 - Verify pipeline fails
 
 **Secret Scanning:**
+
 - Commit test secret
 - Verify detection
 - Verify pipeline fails
@@ -713,6 +768,7 @@ act push -W .github/workflows/ci.yml -s GITHUB_TOKEN=xxx
 ### 3. Integration Testing
 
 **End-to-End Pipeline Test:**
+
 1. Create feature branch
 2. Make code change
 3. Push to GitHub
@@ -728,6 +784,7 @@ act push -W .github/workflows/ci.yml -s GITHUB_TOKEN=xxx
 **Scenario:** Deploy broken version
 
 **Steps:**
+
 1. Deploy version with failing health check
 2. Verify automatic rollback
 3. Verify previous version restored
@@ -736,6 +793,7 @@ act push -W .github/workflows/ci.yml -s GITHUB_TOKEN=xxx
 ### 5. Performance Testing
 
 **Metrics to Track:**
+
 - Pipeline duration (target: < 10 minutes)
 - Cache hit rate (target: > 80%)
 - Deployment time (target: < 5 minutes)
@@ -746,6 +804,7 @@ act push -W .github/workflows/ci.yml -s GITHUB_TOKEN=xxx
 ### 1. Caching Strategy
 
 **Node Modules Cache:**
+
 ```yaml
 - name: Cache Dependencies
   uses: actions/cache@v3
@@ -760,6 +819,7 @@ act push -W .github/workflows/ci.yml -s GITHUB_TOKEN=xxx
 ```
 
 **Build Cache:**
+
 ```yaml
 - name: Cache Build
   uses: actions/cache@v3
@@ -773,6 +833,7 @@ act push -W .github/workflows/ci.yml -s GITHUB_TOKEN=xxx
 ### 2. Parallel Execution
 
 **Job Parallelization:**
+
 ```yaml
 jobs:
   code-quality:
@@ -785,6 +846,7 @@ jobs:
 ```
 
 **Matrix Strategy:**
+
 ```yaml
 strategy:
   matrix:
@@ -795,6 +857,7 @@ strategy:
 ### 3. Conditional Execution
 
 **Skip Unnecessary Steps:**
+
 ```yaml
 - name: Run Backend Tests
   if: contains(github.event.head_commit.modified, 'apps/backend/')
@@ -802,6 +865,7 @@ strategy:
 ```
 
 **Skip on Draft PRs:**
+
 ```yaml
 on:
   pull_request:
@@ -815,6 +879,7 @@ jobs:
 ### 4. Resource Optimization
 
 **Use Smaller Runners:**
+
 ```yaml
 runs-on: ubuntu-latest  # 2-core, 7GB RAM (free)
 # vs
@@ -822,6 +887,7 @@ runs-on: ubuntu-latest-4-cores  # 4-core, 16GB RAM (paid)
 ```
 
 **Optimize Docker Builds:**
+
 ```dockerfile
 # Use build cache
 FROM node:20-alpine AS builder
@@ -842,11 +908,13 @@ COPY --from=builder /app/node_modules ./node_modules
 ### 1. Secrets Management
 
 **GitHub Secrets:**
+
 - Store sensitive values in GitHub Secrets
 - Never log secrets
 - Use environment-specific secrets
 
 **Secret Rotation:**
+
 - Rotate secrets every 90 days
 - Use short-lived tokens when possible
 - Audit secret usage
@@ -854,6 +922,7 @@ COPY --from=builder /app/node_modules ./node_modules
 ### 2. Permissions
 
 **Workflow Permissions:**
+
 ```yaml
 permissions:
   contents: read
@@ -862,6 +931,7 @@ permissions:
 ```
 
 **Principle of Least Privilege:**
+
 - Only grant necessary permissions
 - Use read-only tokens when possible
 - Limit scope of access tokens
@@ -869,12 +939,14 @@ permissions:
 ### 3. Supply Chain Security
 
 **Dependency Pinning:**
+
 ```yaml
-- uses: actions/checkout@v4  # Pinned to major version
-- uses: actions/setup-node@v4.0.0  # Pinned to exact version
+- uses: actions/checkout@v4 # Pinned to major version
+- uses: actions/setup-node@v4.0.0 # Pinned to exact version
 ```
 
 **Verify Checksums:**
+
 ```yaml
 - name: Verify Integrity
   run: |
@@ -884,12 +956,14 @@ permissions:
 ### 4. Audit Logging
 
 **Track All Actions:**
+
 - Who triggered workflow
 - What changes were made
 - When deployment occurred
 - Why rollback was triggered
 
 **Retention:**
+
 - Keep logs for 90 days
 - Archive critical events
 - Enable GitHub audit log
@@ -899,12 +973,14 @@ permissions:
 ### 1. Pipeline Metrics
 
 **Key Metrics:**
+
 - Success rate (target: > 95%)
 - Average duration (target: < 10 min)
 - Failure rate by stage
 - Time to recovery
 
 **Dashboard:**
+
 - GitHub Actions insights
 - Custom badges in README
 - Slack notifications (optional)
@@ -912,6 +988,7 @@ permissions:
 ### 2. Security Metrics
 
 **Track:**
+
 - Vulnerabilities detected per week
 - Time to remediation
 - False positive rate
@@ -920,6 +997,7 @@ permissions:
 ### 3. Deployment Metrics
 
 **Track:**
+
 - Deployment frequency
 - Lead time for changes
 - Mean time to recovery (MTTR)
@@ -928,12 +1006,14 @@ permissions:
 ### 4. Alerting
 
 **Critical Alerts:**
+
 - Pipeline failure on main
 - Critical vulnerability detected
 - Deployment failure
 - Health check failure
 
 **Warning Alerts:**
+
 - Coverage below threshold
 - Medium vulnerabilities
 - Slow pipeline (> 15 min)
@@ -953,6 +1033,7 @@ permissions:
 **Location:** `.github/workflows/README.md`
 
 **Content:**
+
 - Purpose of each workflow
 - Trigger conditions
 - Required secrets
@@ -963,6 +1044,7 @@ permissions:
 **Location:** `docs/runbook.md`
 
 **Sections:**
+
 - How to trigger manual deployment
 - How to rollback
 - How to bypass checks (emergency)
@@ -971,24 +1053,28 @@ permissions:
 ## Migration Plan
 
 ### Phase 1: Foundation (Week 1)
+
 - Setup GitHub Actions
 - Configure branch protection
 - Enable Dependabot
 - Enable GitHub Secret Scanning
 
 ### Phase 2: CI Pipeline (Week 2)
+
 - Implement code quality checks
 - Implement security scanning (CodeQL)
 - Implement testing
 - Implement build validation
 
 ### Phase 3: CD Pipeline (Week 3)
+
 - Implement Docker build
 - Implement container scanning
 - Implement deployment automation
 - Implement health checks
 
 ### Phase 4: Optimization (Week 4)
+
 - Add caching
 - Optimize parallel execution
 - Add monitoring

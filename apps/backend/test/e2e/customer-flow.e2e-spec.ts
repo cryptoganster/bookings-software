@@ -142,10 +142,10 @@ describe('Customer Flow E2E', () => {
 
   describe('Requirement 7.2: Customer Info in Appointment Queries', () => {
     it('should include customer name and phone in appointment read model', async () => {
-      // Arrange: Create capacity
+      // Arrange: Create capacity for tomorrow
       const tomorrow = new Date();
       tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
-      tomorrow.setUTCHours(0, 0, 0, 0);
+      tomorrow.setUTCHours(10, 0, 0, 0); // 10 AM tomorrow
 
       const capacity = new CapacityModel();
       capacity.id = UUID.generate().getValue();
@@ -212,13 +212,17 @@ describe('Customer Flow E2E', () => {
       customer.user_id = null;
       await dataSource.getRepository(CustomerModel).save(customer);
 
-      // Create appointment
+      // Create appointment with future date
+      const tomorrow = new Date();
+      tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+      tomorrow.setUTCHours(14, 0, 0, 0); // 2 PM tomorrow
+
       const appointment = new AppointmentModel();
       appointment.id = UUID.generate().getValue();
       appointment.businessId = testBusinessId;
       appointment.customerId = customer.id;
       appointment.offeringId = testOfferingId;
-      appointment.dateTime = new Date();
+      appointment.dateTime = tomorrow;
       appointment.status = 'CONFIRMED';
       appointment.version = 0;
       await dataSource.getRepository(AppointmentModel).save(appointment);
@@ -282,10 +286,10 @@ describe('Customer Flow E2E', () => {
 
   describe('Requirement 7.4: Anonymous Customer Flow', () => {
     it('should allow anonymous customer to complete booking', async () => {
-      // Arrange: Create capacity
+      // Arrange: Create capacity for tomorrow
       const tomorrow = new Date();
       tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
-      tomorrow.setUTCHours(0, 0, 0, 0);
+      tomorrow.setUTCHours(10, 0, 0, 0); // 10 AM tomorrow
 
       const capacity = new CapacityModel();
       capacity.id = UUID.generate().getValue();
