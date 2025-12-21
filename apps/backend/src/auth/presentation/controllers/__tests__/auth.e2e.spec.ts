@@ -1,10 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
+import { DataSource } from 'typeorm';
 import { AppModule } from '../../../../app.module';
+import { E2EDatabaseHelper } from '@test-utils/e2e';
 
 describe('Auth Controller E2E', () => {
   let app: INestApplication;
+  let dbHelper: E2EDatabaseHelper;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -30,23 +33,25 @@ describe('Auth Controller E2E', () => {
 
     await app.init();
 
-    // Debug: List all routes
-    const server = app.getHttpServer();
-    const router = server._events.request._router;
-    console.log('Registered routes:');
-    if (router && router.stack) {
-      router.stack.forEach((layer: any) => {
-        if (layer.route) {
-          const path = layer.route.path;
-          const methods = Object.keys(layer.route.methods);
-          console.log(`  ${methods.join(', ').toUpperCase()} ${path}`);
-        }
-      });
-    }
+    // Setup database
+    const dataSource = app.get(DataSource);
+    dbHelper = new E2EDatabaseHelper(dataSource);
+    await dbHelper.setup();
   });
 
   afterAll(async () => {
+    // Cleanup database
+    if (dbHelper) {
+      await dbHelper.cleanup();
+    }
     await app.close();
+  });
+
+  afterEach(async () => {
+    // Clear data between tests
+    if (dbHelper) {
+      await dbHelper.clearData();
+    }
   });
 
   describe('POST /api/auth/register', () => {

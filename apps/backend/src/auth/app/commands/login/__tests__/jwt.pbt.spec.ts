@@ -1,6 +1,7 @@
 import * as fc from 'fast-check';
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
+import { QueryBus } from '@nestjs/cqrs';
 import { PinoLogger } from 'nestjs-pino';
 import { LoginHandler } from '../handler';
 import { LoginCommand } from '../command';
@@ -114,7 +115,7 @@ describe('Property 5: JWT tokens contain valid user data with roles', () => {
           }),
         },
         {
-          provide: 'QueryBus',
+          provide: QueryBus,
           useValue: mockQueryBus,
         },
         {

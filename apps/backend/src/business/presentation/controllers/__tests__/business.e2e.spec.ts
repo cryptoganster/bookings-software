@@ -1,13 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
+import { DataSource } from 'typeorm';
 import { AppModule } from '../../../../app.module';
-import { E2EAuthHelper } from '@test-utils/e2e/auth-helper';
-import { UserRole } from '@test-utils/e2e/types';
+import { E2EAuthHelper, E2EDatabaseHelper, UserRole } from '@test-utils/e2e';
 
 describe('Business Controller E2E', () => {
   let app: INestApplication;
   let authHelper: E2EAuthHelper;
+  let dbHelper: E2EDatabaseHelper;
   let authToken: string;
   let userId: string;
 
@@ -30,6 +31,11 @@ describe('Business Controller E2E', () => {
 
     await app.init();
 
+    // Setup database
+    const dataSource = app.get(DataSource);
+    dbHelper = new E2EDatabaseHelper(dataSource);
+    await dbHelper.setup();
+
     authHelper = new E2EAuthHelper(app);
 
     // Create test user with BUSINESS_OWNER role
@@ -43,6 +49,9 @@ describe('Business Controller E2E', () => {
 
   afterAll(async () => {
     await authHelper.cleanupTestUsers();
+    if (dbHelper) {
+      await dbHelper.cleanup();
+    }
     await app.close();
   });
 

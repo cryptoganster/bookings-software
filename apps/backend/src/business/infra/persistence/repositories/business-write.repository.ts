@@ -49,6 +49,13 @@ export class BusinessWriteRepository implements IBusinessWriteRepository {
         return;
       }
 
+      // Check if this is an idempotent operation (version didn't change)
+      if (existing.version === currentVersion) {
+        // No changes, skip update (idempotent operation)
+        // This happens when aggregate methods return early (e.g., deactivate when already inactive)
+        return;
+      }
+
       // For updates, the aggregate should have already incremented its version
       // We need to check against the previous version (currentVersion - 1)
       const previousVersion = currentVersion - 1;

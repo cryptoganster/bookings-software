@@ -119,7 +119,7 @@ describe('Property 7: initialRole propagates correctly through registration', ()
 
           // Verify user was created
           expect(result).toHaveProperty('userId');
-          expect(result).toHaveProperty('accessToken');
+          expect(result).toHaveProperty('token');
 
           // Get the saved user from repository
           const savedUser = userRepository.get(userData.email.toLowerCase());
