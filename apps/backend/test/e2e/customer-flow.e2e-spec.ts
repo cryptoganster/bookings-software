@@ -25,7 +25,7 @@ describe('Customer Flow E2E', () => {
   let sentMessages: Array<{ phone: string; message: string; buttons?: Button[] }> = [];
   let testBusinessId: string;
   let testOfferingId: string;
-  const testCustomerPhone = '+1234567890';
+  const testCustomerPhone = '+1234567891'; // Unique phone number for this test suite
 
   beforeAll(async () => {
     // Create mock WhatsApp client

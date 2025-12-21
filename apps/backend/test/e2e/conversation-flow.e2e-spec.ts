@@ -23,7 +23,7 @@ describe('Conversational Booking Flow (e2e)', () => {
   let testBusinessId: string;
   let testCustomerId: string;
   let testOfferingId: string;
-  const testCustomerPhone = '+1234567890';
+  const testCustomerPhone = '+1234567892'; // Unique phone number for this test suite
 
   beforeAll(async () => {
     // Crear mock del WhatsApp client
