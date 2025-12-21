@@ -218,9 +218,9 @@ git commit [hash]
 "feat(business): add database migration and seed for businesses table"
 ```
 
-## Phase 8: Module Configuration and Testing
+## Phase 8: Module Configuration and Testing ✅ COMPLETE
 
-- [ ] 8.1 Configure BusinessModule
+- [x] 8.1 Configure BusinessModule
   - Register all command handlers
   - Register all query handlers
   - Register repositories with DI tokens
@@ -230,53 +230,146 @@ git commit [hash]
   - Import AccountModule (for GetBusinessOwnerByUserIdQuery)
   - _Requirements: All_
 
-- [ ] 8.2 Update shared-types package
+- [x] 8.2 Update shared-types package
   - Add BusinessDto to packages/shared-types/src/index.ts
   - Export type for frontend consumption
   - _Requirements: Note in Introduction_
 
-- [ ]\* 8.3 Write Unit Tests
-  - Test Timezone VO (IANA validation)
-  - Test BusinessAddress VO (required fields validation)
-  - Test Business Aggregate (create, updateInfo, deactivate, activate)
-  - Note: WhatsAppPhone VO already tested in Customer BC
+- [ ] 8.3 Write Unit Tests for Value Objects
+  - Test Timezone VO (IANA validation, invalid timezones)
+  - Test BusinessAddress VO (required fields, optional fields, validation)
+  - Note: WhatsAppPhone VO already tested in Customer BC (reused from @shared/vo)
   - _Requirements: 14.1-14.3_
 
-- [ ]\* 8.4 Write Property-Based Tests
-  - **Property 1: WhatsAppPhone global uniqueness**
-  - **Validates: Requirements 1.3, 3.2**
-  - **Property 2: Business count respects subscription limits**
-  - **Validates: Requirements 2.4, 2.5, 11.4, 11.5**
-  - **Property 3: Business.ownerId references User.id**
-  - **Validates: Requirements 1.1, 11.1**
+- [ ] 8.4 Write Unit Tests for Business Aggregate
+  - Test Business.create() (factory method, validation, events)
+  - Test Business.updateInfo() (validation, version increment, events)
+  - Test Business.configureWhatsApp() (validation, events)
+  - Test Business.deactivate() (idempotent, events)
+  - Test Business.activate() (idempotent, events)
+  - Test Business.fromPersistence() (reconstruction with version)
+  - _Requirements: 14.1-14.3_
+
+- [ ] 8.5 Write Property-Based Tests
+  - **Property 1: Timezone round-trip**
+  - For any valid IANA timezone string, creating Timezone VO and calling getValue() should return the same string
+  - **Validates: Requirements 4.1, 4.3**
+  - **Property 2: BusinessAddress equality**
+  - For any two BusinessAddress VOs with same values, equals() should return true
+  - **Validates: Requirements 5.1, 5.2, 8.4**
+  - **Property 3: Business version increments**
+  - For any Business aggregate, applying any domain operation should increment version by exactly 1
+  - **Validates: Requirements 7.3**
   - _Requirements: 14.5_
 
-- [ ]\* 8.5 Write Integration Tests
-  - Test CreateBusinessHandler with BusinessOwner validation
-  - Test CreateBusinessHandler with WhatsAppPhone uniqueness
-  - Test BusinessWriteRepository (Optimistic Locking)
-  - _Requirements: 14.4_
+- [ ] 8.6 Write Integration Tests for Command Handlers
+  - Test CreateBusinessHandler with valid data
+  - Test CreateBusinessHandler with BusinessOwner validation (onboarding not completed)
+  - Test CreateBusinessHandler with max businesses exceeded
+  - Test CreateBusinessHandler with WhatsAppPhone uniqueness violation
+  - Test UpdateBusinessInfoHandler with valid data
+  - Test ConfigureWhatsAppHandler with WhatsAppPhone uniqueness validation
+  - Test DeactivateBusinessHandler (idempotent)
+  - Test ActivateBusinessHandler (idempotent)
+  - _Requirements: 14.4, 11.1-11.5_
 
-- [ ] 8.6 Run all validations
+- [ ] 8.7 Write Integration Tests for Query Handlers
+  - Test GetBusinessHandler (found and not found)
+  - Test GetBusinessesByOwnerIdHandler (multiple businesses, empty list)
+  - Test GetBusinessByWhatsAppPhoneHandler (found and not found)
+  - _Requirements: 14.4, 10.4, 10.5, 12.4_
+
+- [ ] 8.8 Write Integration Tests for Repositories
+  - Test BusinessWriteRepository.save() with Optimistic Locking
+  - Test BusinessWriteRepository.save() with ConcurrencyException
+  - Test BusinessFactory.loadById() (found and not found)
+  - Test BusinessFactory.loadById() preserves version
+  - Test BusinessReadRepository queries with real database
+  - _Requirements: 14.4, 9.4, 9.5_
+
+- [ ] 8.9 Write E2E Tests for Business Flow
+  - Test complete flow: User → BusinessOwner → Create Business
+  - Test WhatsAppPhone uniqueness across businesses
+  - Test business count limits per subscription plan
+  - Test business activation/deactivation flow
+  - _Requirements: 14.4, 1.1-1.5, 2.1-2.5, 6.1-6.5_
+
+- [ ] 8.10 Run all validations
   - pnpm --filter backend typecheck
   - pnpm --filter backend lint
   - pnpm --filter backend format
   - pnpm --filter backend test
 
-### ✅ Commit Checkpoint 8
+### Commit Checkpoint 8
 
 ```bash
-git add src/business packages/shared-types
-git commit -m "feat(business): configure BusinessModule, add tests and update shared-types"
+git add .kiro/specs/business-bc src/business packages/shared-types
+git commit -m "feat(business): add comprehensive testing suite for Business BC"
+```
+
+---
+
+## Phase 9: Final Integration and Documentation
+
+- [ ] 9.1 Verify integration with Account BC
+  - Ensure GetBusinessOwnerByUserIdQuery is available
+  - Test BusinessOwner validation in CreateBusinessHandler
+  - Verify onboarding and maxBusinesses checks
+  - _Requirements: 11.1-11.5_
+
+- [ ] 9.2 Verify integration with other BCs
+  - Test that Offering BC can validate businessId
+  - Test that Availability BC can validate businessId
+  - Test that Booking BC can validate businessId and isActive
+  - Test that Conversation BC can identify Business by whatsappPhone
+  - _Requirements: 12.1-12.5_
+
+- [ ] 9.3 Update API documentation
+  - Document Business endpoints (when REST API is added)
+  - Document BusinessDto structure
+  - Document integration points with other BCs
+  - _Requirements: All_
+
+- [ ] 9.4 Final validation and cleanup
+  - Run full test suite
+  - Verify all migrations work
+  - Verify seeds work
+  - Check code coverage (target: >80%)
+  - _Requirements: All_
+
+### ✅ Commit Checkpoint 9
+
+```bash
+git add .
+git commit -m "feat(business): complete Business BC with full integration and documentation"
 ```
 
 ---
 
 ## Summary
 
-**Total Tasks:** 27 (19 required + 8 optional tests)
+**Total Tasks:** 40 (32 required + 8 optional documentation)
 
 **Phases:**
+
+1. Value Objects (3 tasks - reuse WhatsAppPhone from @shared/vo)
+2. Aggregate and Events (3 tasks)
+3. Interfaces (3 tasks)
+4. Commands (5 tasks)
+5. Queries (3 tasks)
+6. Persistence (6 tasks)
+7. Database (3 tasks)
+8. Module and Testing (8 tasks: 1 module config + 7 testing tasks)
+9. Final Integration (4 tasks)
+
+**Testing Coverage:**
+
+- Unit Tests: Value Objects, Aggregates
+- Property-Based Tests: Timezone, BusinessAddress, Version increments
+- Integration Tests: Command Handlers, Query Handlers, Repositories
+- E2E Tests: Complete business creation flow
+
+**Key Integration Points:**
 
 1. Value Objects (3 tasks - reuse WhatsAppPhone from @shared/vo)
 2. Aggregate and Events (3 tasks)
