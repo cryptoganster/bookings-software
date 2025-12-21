@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, HttpCode } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { PinoLogger } from 'nestjs-pino';
@@ -58,6 +58,7 @@ export class CustomerMergeController {
    * Requirements: 5
    */
   @Post('merge')
+  @HttpCode(200) // Explicitly set status code to 200 instead of default 201
   @ApiOperation({
     summary: 'Merge customers',
     description:

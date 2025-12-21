@@ -82,6 +82,7 @@ describe('ExportCustomerDataHandler', () => {
             ],
           },
         ],
+        exportedAt: '2024-01-01T00:00:00.000Z',
       };
 
       customerReadRepository.getFullData.mockResolvedValue(mockExportData);
@@ -112,6 +113,7 @@ describe('ExportCustomerDataHandler', () => {
         },
         appointments: [], // Empty array
         conversations: [], // Empty array
+        exportedAt: '2024-01-15T12:00:00.000Z',
       };
 
       customerReadRepository.getFullData.mockResolvedValue(mockExportData);
@@ -148,6 +150,7 @@ describe('ExportCustomerDataHandler', () => {
           },
         ],
         conversations: [],
+        exportedAt: '2024-01-10T08:00:00.000Z',
       };
 
       customerReadRepository.getFullData.mockResolvedValue(mockExportData);
@@ -193,6 +196,7 @@ describe('ExportCustomerDataHandler', () => {
             ],
           },
         ],
+        exportedAt: '2024-01-20T10:00:00.000Z',
       };
 
       customerReadRepository.getFullData.mockResolvedValue(mockExportData);
@@ -237,6 +241,7 @@ describe('ExportCustomerDataHandler', () => {
           },
         ],
         conversations: [],
+        exportedAt: '2024-01-20T09:00:00.000Z',
       };
 
       customerReadRepository.getFullData.mockResolvedValue(mockExportData);
@@ -321,6 +326,7 @@ describe('ExportCustomerDataHandler', () => {
           },
         ],
         conversations: [],
+        exportedAt: '2024-02-01T08:00:00.000Z',
       };
 
       customerReadRepository.getFullData.mockResolvedValue(mockExportData);
@@ -385,6 +391,7 @@ describe('ExportCustomerDataHandler', () => {
             ],
           },
         ],
+        exportedAt: '2024-01-15T14:02:00.000Z',
       };
 
       customerReadRepository.getFullData.mockResolvedValue(mockExportData);
@@ -422,6 +429,7 @@ describe('ExportCustomerDataHandler', () => {
           },
         ],
         conversations: [],
+        exportedAt: '2024-02-01T15:00:00.000Z',
       };
 
       customerReadRepository.getFullData.mockResolvedValue(mockExportData);

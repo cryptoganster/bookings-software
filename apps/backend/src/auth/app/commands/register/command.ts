@@ -1,7 +1,7 @@
 import { Command } from '@nestjs/cqrs';
 import { UserRole } from '@auth/domain/vo/user-role';
 
-export class RegisterCommand extends Command<{ userId: string; accessToken: string }> {
+export class RegisterCommand extends Command<{ userId: string; token: string }> {
   constructor(
     public readonly email: string,
     public readonly password: string,

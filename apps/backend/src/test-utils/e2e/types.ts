@@ -47,7 +47,7 @@ export interface CreateTestUserOptions {
 }
 
 export interface LoginResponse {
-  accessToken: string; // Revertido a accessToken
+  token: string; // Changed from accessToken to token to match shared-types
   user: {
     id: string;
     email: string;
@@ -58,5 +58,5 @@ export interface LoginResponse {
 
 export interface RegisterResponse {
   userId: string; // El registro devuelve userId directamente
-  accessToken: string; // Y accessToken
+  token: string; // Changed from accessToken to token to match shared-types
 }

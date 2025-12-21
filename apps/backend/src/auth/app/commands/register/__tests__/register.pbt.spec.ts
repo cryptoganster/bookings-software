@@ -150,7 +150,7 @@ describe('Property 7: initialRole propagates correctly through registration', ()
           );
 
           // Decode JWT token
-          const payload = jwtService.verify(result.accessToken);
+          const payload = jwtService.verify(result.token);
 
           // Property: JWT should contain the initialRole in roles array
           expect(payload).toHaveProperty('roles');
@@ -228,7 +228,7 @@ describe('Property 7: initialRole propagates correctly through registration', ()
           expect(savedUser).toBeDefined();
 
           // Decode JWT
-          const jwtPayload = jwtService.verify(result.accessToken);
+          const jwtPayload = jwtService.verify(result.token);
 
           // Property: Role should be consistent between user aggregate and JWT
           const userRoles = savedUser!.getRoles();

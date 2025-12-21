@@ -143,7 +143,7 @@ describe('Property 5: JWT tokens contain valid user data with roles', () => {
           );
 
           // Verify token from registration contains roles
-          const registerPayload = jwtService.verify(registerResult.accessToken);
+          const registerPayload = jwtService.verify(registerResult.token);
           expect(registerPayload).toHaveProperty('sub');
           expect(registerPayload).toHaveProperty('email');
           expect(registerPayload).toHaveProperty('roles');
@@ -209,7 +209,7 @@ describe('Property 5: JWT tokens contain valid user data with roles', () => {
                 UserRole.BUSINESS_OWNER,
               ),
             );
-            tokens.push(result.accessToken);
+            tokens.push(result.token);
           }
 
           // Verify all tokens are unique

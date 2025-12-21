@@ -39,7 +39,7 @@ export class E2EAuthHelper {
         .expect(201); // Login devuelve 201 Created
 
       const body = response.body as LoginResponse;
-      return body.accessToken;
+      return body.token; // Changed from accessToken to token
     } catch (error: any) {
       if (error.status === 401) {
         throw new Error('Authentication failed: Invalid credentials');
@@ -64,7 +64,7 @@ export class E2EAuthHelper {
 
       const body = response.body as RegisterResponse;
 
-      if (!body.accessToken || !body.userId) {
+      if (!body.token || !body.userId) {
         console.error('Invalid registration response:', JSON.stringify(body, null, 2));
         throw new Error(
           `Registration failed: Invalid response format. Got: ${JSON.stringify(body)}`,
@@ -72,7 +72,7 @@ export class E2EAuthHelper {
       }
 
       return {
-        token: body.accessToken,
+        token: body.token,
         userId: body.userId,
       };
     } catch (error: any) {
@@ -99,7 +99,7 @@ export class E2EAuthHelper {
         .send({ refreshToken })
         .expect(200);
 
-      return response.body.accessToken;
+      return response.body.token; // Changed from accessToken to token
     } catch (error: any) {
       if (error.status === 401) {
         throw new Error('Token refresh failed: Invalid refresh token');
@@ -136,6 +136,10 @@ export class E2EAuthHelper {
     if (role === UserRole.BUSINESS_OWNER) {
       const business = await this.createTestBusiness(token, options?.businessData);
       testUser.businessId = business.id;
+
+      // Login again to get updated token with businessId
+      const updatedToken = await this.login(email, password);
+      testUser.token = updatedToken;
     }
 
     // If CUSTOMER, create associated Customer
@@ -186,8 +190,8 @@ export class E2EAuthHelper {
           await dataSource.query('DELETE FROM customers WHERE id = $1', [testUser.customerId]);
         }
 
-        // Delete business_owners if exists
-        await dataSource.query('DELETE FROM business_owners WHERE user_id = $1', [testUser.id]);
+        // Delete business_owners if exists (using camelCase column name)
+        await dataSource.query('DELETE FROM business_owners WHERE "userId" = $1', [testUser.id]);
 
         // Delete user
         await dataSource.query('DELETE FROM users WHERE id = $1', [testUser.id]);

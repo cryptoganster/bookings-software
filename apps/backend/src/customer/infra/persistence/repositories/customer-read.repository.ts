@@ -344,6 +344,7 @@ export class CustomerReadRepository implements ICustomerReadRepository {
       },
       appointments,
       conversations,
+      exportedAt: new Date().toISOString(), // Timestamp when data was exported
     };
   }
 }

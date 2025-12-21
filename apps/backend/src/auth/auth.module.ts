@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
@@ -6,6 +6,7 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import type { StringValue } from 'ms';
 import { SharedModule } from '@shared/shared.module';
+import { BusinessModule } from '@business/business.module';
 import { JwtStrategy } from '@auth/infra/strategies/jwt';
 import { UserModel } from '@auth/infra/persistence/models/user';
 import { UserWriteRepository } from '@auth/infra/persistence/repositories/user-write';
@@ -26,6 +27,7 @@ import { AuthController } from '@auth/presentation/controllers/auth';
     ConfigModule,
     CqrsModule,
     SharedModule,
+    forwardRef(() => BusinessModule),
     TypeOrmModule.forFeature([UserModel]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({

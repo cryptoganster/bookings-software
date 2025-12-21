@@ -22,7 +22,7 @@ export class RegisterHandler implements ICommandHandler<RegisterCommand> {
     this.logger.setContext(RegisterHandler.name);
   }
 
-  async execute(command: RegisterCommand): Promise<{ userId: string; accessToken: string }> {
+  async execute(command: RegisterCommand): Promise<{ userId: string; token: string }> {
     const startTime = Date.now();
 
     this.logger.info(
@@ -70,7 +70,7 @@ export class RegisterHandler implements ICommandHandler<RegisterCommand> {
         email: email.getValue(),
         roles: user.getRoles(),
       };
-      const accessToken = this.jwtService.sign(payload);
+      const token = this.jwtService.sign(payload);
 
       const duration = Date.now() - startTime;
       this.logger.info(
@@ -86,7 +86,7 @@ export class RegisterHandler implements ICommandHandler<RegisterCommand> {
 
       return {
         userId: userId.getValue(),
-        accessToken,
+        token,
       };
     } catch (error) {
       const duration = Date.now() - startTime;

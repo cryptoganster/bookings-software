@@ -1,10 +1,12 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler, ICommandHandler, QueryBus } from '@nestjs/cqrs';
 import { UnauthorizedException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PinoLogger } from 'nestjs-pino';
 import type { LoginResponseDto } from '@packages/shared-types';
 import { LoginCommand } from '@auth/app/commands/login/command';
 import { IUserFactory } from '@auth/domain/interfaces/factories/user-factory';
+import { UserRole } from '@auth/domain/vo/user-role';
+import { GetBusinessesByOwnerIdQuery } from '@business/app/queries/get-businesses-by-owner-id/query';
 
 @CommandHandler(LoginCommand)
 export class LoginHandler implements ICommandHandler<LoginCommand> {
@@ -12,6 +14,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     @Inject('IUserFactory')
     private readonly userFactory: IUserFactory,
     private readonly jwtService: JwtService,
+    private readonly queryBus: QueryBus,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(LoginHandler.name);
@@ -59,12 +62,43 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
         throw new UnauthorizedException('Invalid credentials');
       }
 
-      // Generar JWT token con roles
-      const payload = {
+      // Generar JWT token con roles y businessId (si es BUSINESS_OWNER)
+      const payload: any = {
         sub: user.getId().getValue(),
         email: user.getEmail().getValue(),
         roles: user.getRoles(),
       };
+
+      // Si el usuario es BUSINESS_OWNER, agregar businessId al payload
+      if (user.getRoles().includes(UserRole.BUSINESS_OWNER)) {
+        try {
+          const businesses = await this.queryBus.execute(
+            new GetBusinessesByOwnerIdQuery(user.getId().getValue()),
+          );
+          if (businesses && businesses.length > 0) {
+            payload.businessId = businesses[0].id;
+            this.logger.info(
+              {
+                commandName: 'LoginCommand',
+                userId: user.getId().getValue(),
+                businessId: businesses[0].id,
+              },
+              'Added businessId to JWT payload',
+            );
+          }
+        } catch (error) {
+          // Log error but don't fail login if business query fails
+          this.logger.warn(
+            {
+              commandName: 'LoginCommand',
+              userId: user.getId().getValue(),
+              error: error instanceof Error ? error.message : 'Unknown error',
+            },
+            'Failed to fetch business for BUSINESS_OWNER',
+          );
+        }
+      }
+
       const token = this.jwtService.sign(payload);
 
       const duration = Date.now() - startTime;
