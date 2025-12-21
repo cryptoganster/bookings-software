@@ -2,28 +2,20 @@
 
 ## Phase 1: Domain Layer - Value Objects
 
-- [ ] 1.1 Create WhatsAppNumber Value Object
-  - Implement static create() factory method
-  - Implement E.164 normalization
-  - Implement E.164 validation
-  - Implement getValue() method
-  - _Requirements: 3.1, 8.1_
-
-- [ ] 1.2 Create Timezone Value Object
+- [ ] 1.1 Create Timezone Value Object
   - Implement static create() factory method
   - Validate against IANA timezone list
   - Implement getValue() method
   - _Requirements: 4.1, 4.2, 8.2_
 
-- [ ] 1.3 Create BusinessAddress Value Object
+- [ ] 1.2 Create BusinessAddress Value Object
   - Implement static create() factory method
   - Validate required fields (street, city)
   - Implement toObject() method
   - _Requirements: 5.1, 5.2, 8.3_
 
-- [ ] 1.4 Create Domain Exceptions
-  - WhatsAppNumberAlreadyExistsException
-  - InvalidWhatsAppNumberException
+- [ ] 1.3 Create Domain Exceptions
+  - WhatsAppPhoneAlreadyExistsException (reuse WhatsAppPhone from @shared/vo)
   - InvalidTimezoneException
   - InvalidBusinessNameException
   - InvalidBusinessAddressException
@@ -36,25 +28,26 @@
 
 ```bash
 git add src/business/domain/vo src/business/domain/exceptions
-git commit -m "feat(business): implement WhatsAppNumber, Timezone, BusinessAddress VOs and domain exceptions"
+git commit -m "feat(business): implement Timezone, BusinessAddress VOs and domain exceptions (reuse WhatsAppPhone from shared)"
 ```
 
 ## Phase 2: Domain Layer - Aggregate and Events
 
 - [ ] 2.1 Create Business Aggregate
   - Extend VersionedAggregateRoot
+  - Import WhatsAppPhone from @shared/vo/whatsapp-phone
   - Implement static create() factory method with ownerId → User.id
   - Implement updateInfo() method
-  - Implement configureWhatsApp() method
+  - Implement configureWhatsApp() method (validates WhatsAppPhone uniqueness)
   - Implement deactivate() and activate() methods (idempotent)
   - Implement static fromPersistence() method
   - Implement all getters
   - _Requirements: 1.1-1.5, 6.1-6.5, 7.1-7.5_
 
 - [ ] 2.2 Create Domain Events
-  - BusinessCreated (businessId, ownerId, name, whatsappNumber)
+  - BusinessCreated (businessId, ownerId, name, whatsappPhone: string)
   - BusinessInfoUpdated (businessId, name)
-  - BusinessWhatsAppConfigured (businessId, whatsappNumber)
+  - BusinessWhatsAppConfigured (businessId, whatsappPhone: string)
   - BusinessDeactivated (businessId)
   - BusinessActivated (businessId)
   - _Requirements: 1.5, 3.3, 6.3, 6.5_
@@ -84,7 +77,7 @@ git commit -m "feat(business): implement Business aggregate with domain events a
 - [ ] 3.3 Create IBusinessReadRepository interface
   - findById(id: string): Promise<BusinessReadModel | null>
   - findByOwnerId(ownerId: string): Promise<BusinessReadModel[]>
-  - findByWhatsAppNumber(whatsappNumber: string): Promise<BusinessReadModel | null>
+  - findByWhatsAppPhone(whatsappPhone: string): Promise<BusinessReadModel | null>
   - _Requirements: 9.3, 10.5, 12.4_
 
 ### ✅ Commit Checkpoint 3
@@ -101,7 +94,7 @@ git commit -m "feat(business): define repository and factory interfaces for Busi
   - Handler validates BusinessOwner via GetBusinessOwnerByUserIdQuery
   - Handler validates onboardingCompleted=true
   - Handler validates business count < maxBusinesses
-  - Handler validates WhatsApp number uniqueness
+  - Handler validates WhatsAppPhone uniqueness via findByWhatsAppPhone
   - Handler creates Business with ownerId = User.id
   - _Requirements: 1.1-1.5, 2.1-2.5, 10.1, 11.1-11.5_
 
@@ -112,7 +105,7 @@ git commit -m "feat(business): define repository and factory interfaces for Busi
 
 - [ ] 4.3 Implement ConfigureWhatsAppCommand and Handler
   - Command extends Command<void>
-  - Handler validates WhatsApp uniqueness before update
+  - Handler validates WhatsAppPhone uniqueness via findByWhatsAppPhone before update
   - _Requirements: 3.1-3.5, 10.3_
 
 - [ ] 4.4 Implement DeactivateBusinessCommand and Handler
@@ -144,7 +137,7 @@ git commit -m "feat(business): implement all command handlers for Business"
   - Handler uses ReadRepository
   - _Requirements: 10.5_
 
-- [ ] 5.3 Implement GetBusinessByWhatsAppNumberQuery and Handler
+- [ ] 5.3 Implement GetBusinessByWhatsAppPhoneQuery and Handler
   - Query extends Query<BusinessReadModel | null>
   - Handler uses ReadRepository
   - Used by Conversation BC to identify business
@@ -201,14 +194,14 @@ git commit -m "feat(business): implement persistence layer with repositories, fa
 
 - [ ] 7.1 Create Migration: CreateBusinessesTable
   - Create businesses table with all columns
-  - Add unique index on whatsapp_number
+  - Add unique index on whatsapp_phone (reuse column name from Customer BC)
   - Add index on owner_id
   - Add foreign key to users(id) (NOT business_owners)
   - _Requirements: 13.1-13.3_
 
 - [ ] 7.2 Create Seed: BusinessesSeed
   - Create 2 businesses linked to existing users
-  - Use unique, valid WhatsApp numbers
+  - Use unique, valid WhatsAppPhone numbers (E.164 format)
   - Use valid IANA timezones
   - _Requirements: 13.4-13.5_
 
@@ -243,14 +236,14 @@ git commit -m "feat(business): add database migration and seed for businesses ta
   - _Requirements: Note in Introduction_
 
 - [ ]\* 8.3 Write Unit Tests
-  - Test WhatsAppNumber VO (E.164 validation, normalization)
   - Test Timezone VO (IANA validation)
   - Test BusinessAddress VO (required fields validation)
   - Test Business Aggregate (create, updateInfo, deactivate, activate)
+  - Note: WhatsAppPhone VO already tested in Customer BC
   - _Requirements: 14.1-14.3_
 
 - [ ]\* 8.4 Write Property-Based Tests
-  - **Property 1: WhatsAppNumber global uniqueness**
+  - **Property 1: WhatsAppPhone global uniqueness**
   - **Validates: Requirements 1.3, 3.2**
   - **Property 2: Business count respects subscription limits**
   - **Validates: Requirements 2.4, 2.5, 11.4, 11.5**
@@ -260,7 +253,7 @@ git commit -m "feat(business): add database migration and seed for businesses ta
 
 - [ ]\* 8.5 Write Integration Tests
   - Test CreateBusinessHandler with BusinessOwner validation
-  - Test CreateBusinessHandler with WhatsApp uniqueness
+  - Test CreateBusinessHandler with WhatsAppPhone uniqueness
   - Test BusinessWriteRepository (Optimistic Locking)
   - _Requirements: 14.4_
 
@@ -281,11 +274,11 @@ git commit -m "feat(business): configure BusinessModule, add tests and update sh
 
 ## Summary
 
-**Total Tasks:** 28 (20 required + 8 optional tests)
+**Total Tasks:** 27 (19 required + 8 optional tests)
 
 **Phases:**
 
-1. Value Objects (4 tasks)
+1. Value Objects (3 tasks - reuse WhatsAppPhone from @shared/vo)
 2. Aggregate and Events (3 tasks)
 3. Interfaces (3 tasks)
 4. Commands (5 tasks)
@@ -297,6 +290,7 @@ git commit -m "feat(business): configure BusinessModule, add tests and update sh
 **Key Integration Points:**
 
 - Account BC: Queries BusinessOwner for validation (onboarding, limits)
+- Shared VO: Reuses WhatsAppPhone from @shared/vo/whatsapp-phone
 - Other BCs: Validate businessId exists before creating related entities
 
 **Critical Relationship:**
@@ -306,7 +300,8 @@ git commit -m "feat(business): configure BusinessModule, add tests and update sh
 
 **Testing Focus:**
 
-- WhatsApp number E.164 validation and uniqueness (PBT)
+- WhatsAppPhone E.164 validation already tested in Customer BC (reuse)
+- WhatsAppPhone global uniqueness (PBT)
 - Business count limits (PBT)
 - ownerId references User.id (PBT)
 - Optimistic Locking (Integration)

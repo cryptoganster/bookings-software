@@ -1,5 +1,5 @@
 import { ValueObject } from '@shared/kernel/value-object';
-import { InvalidTimezoneException } from '../exceptions/invalid-timezone';
+import { InvalidTimezoneException } from '@business/domain/exceptions/invalid-timezone';
 
 /**
  * Timezone Value Object
@@ -28,7 +28,7 @@ export class Timezone extends ValueObject {
     return this.value;
   }
 
-  protected getEqualityComponents(): any[] {
+  protected getEqualityComponents(): unknown[] {
     return [this.value];
   }
 }

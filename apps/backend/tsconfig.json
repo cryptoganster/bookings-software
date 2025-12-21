@@ -24,6 +24,7 @@
       "@availability/*": ["src/availability/*"],
       "@offering/*": ["src/offering/*"],
       "@customer/*": ["src/customer/*"],
+      "@business/*": ["src/business/*"],
       "@test-utils/*": ["src/test-utils/*"],
       "@database/*": ["src/database/*"],
       "@config/*": ["src/config/*"]
