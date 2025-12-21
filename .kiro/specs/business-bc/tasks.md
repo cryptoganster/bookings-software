@@ -57,39 +57,39 @@ git commit ff97e45
   - Include computed fields if needed
   - _Requirements: 9.3, 10.4, 10.5_
 
-### ✅ Commit Checkpoint 2
+### ✅ Commit Checkpoint 2 - DONE
 
 ```bash
-git add src/business/domain/aggregates src/business/domain/events src/business/domain/read_models
-git commit -m "feat(business): implement Business aggregate with domain events and read model"
+git commit 0472826
+"feat(business): implement Business aggregate with domain events"
 ```
 
-## Phase 3: Domain Layer - Interfaces
+## Phase 3: Domain Layer - Interfaces ✅ COMPLETE
 
-- [ ] 3.1 Create IBusinessFactory interface
+- [x] 3.1 Create IBusinessFactory interface
   - loadById(id: string): Promise<Business | null>
   - _Requirements: 9.2_
 
-- [ ] 3.2 Create IBusinessWriteRepository interface
+- [x] 3.2 Create IBusinessWriteRepository interface
   - save(business: Business): Promise<void>
   - _Requirements: 9.1_
 
-- [ ] 3.3 Create IBusinessReadRepository interface
+- [x] 3.3 Create IBusinessReadRepository interface
   - findById(id: string): Promise<BusinessReadModel | null>
   - findByOwnerId(ownerId: string): Promise<BusinessReadModel[]>
   - findByWhatsAppPhone(whatsappPhone: string): Promise<BusinessReadModel | null>
   - _Requirements: 9.3, 10.5, 12.4_
 
-### ✅ Commit Checkpoint 3
+### ✅ Commit Checkpoint 3 - DONE
 
 ```bash
-git add src/business/domain/interfaces
-git commit -m "feat(business): define repository and factory interfaces for Business"
+git commit 67e15bc
+"feat(business): define repository and factory interfaces for Business"
 ```
 
 ## Phase 4: Application Layer - Commands
 
-- [ ] 4.1 Implement CreateBusinessCommand and Handler
+- [x] 4.1 Implement CreateBusinessCommand and Handler
   - Command extends Command<{ businessId: string }>
   - Handler validates BusinessOwner via GetBusinessOwnerByUserIdQuery
   - Handler validates onboardingCompleted=true
@@ -98,22 +98,22 @@ git commit -m "feat(business): define repository and factory interfaces for Busi
   - Handler creates Business with ownerId = User.id
   - _Requirements: 1.1-1.5, 2.1-2.5, 10.1, 11.1-11.5_
 
-- [ ] 4.2 Implement UpdateBusinessInfoCommand and Handler
+- [x] 4.2 Implement UpdateBusinessInfoCommand and Handler
   - Command extends Command<void>
   - Handler loads via Factory, updates info, saves
   - _Requirements: 10.2_
 
-- [ ] 4.3 Implement ConfigureWhatsAppCommand and Handler
+- [x] 4.3 Implement ConfigureWhatsAppCommand and Handler
   - Command extends Command<void>
   - Handler validates WhatsAppPhone uniqueness via findByWhatsAppPhone before update
   - _Requirements: 3.1-3.5, 10.3_
 
-- [ ] 4.4 Implement DeactivateBusinessCommand and Handler
+- [x] 4.4 Implement DeactivateBusinessCommand and Handler
   - Command extends Command<void>
   - Handler loads via Factory, deactivates, saves
   - _Requirements: 6.1, 6.3_
 
-- [ ] 4.5 Implement ActivateBusinessCommand and Handler
+- [x] 4.5 Implement ActivateBusinessCommand and Handler
   - Command extends Command<void>
   - Handler loads via Factory, activates, saves
   - _Requirements: 6.4, 6.5_
