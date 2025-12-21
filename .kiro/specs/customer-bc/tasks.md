@@ -9,10 +9,12 @@ Este documento proporciona un checklist de implementación paso a paso para el C
 > **📖 Referencia Completa:** Ver `.kiro/steering/user-customer-businessowner-architecture.md`
 
 **User (Auth BC)** - Identidad Universal:
+
 - Autenticación con roles múltiples: `['BUSINESS_OWNER', 'CUSTOMER', 'ADMIN']`
 - Un User puede tener ambos roles simultáneamente (marketplace)
 
 **Customer (Customer BC)** - Perfil de Cliente por Negocio:
+
 - `userId` opcional: null = anónimo, UUID = registrado
 - Multi-tenant: único por (businessId, whatsappPhone)
 
@@ -25,6 +27,7 @@ Este documento proporciona un checklist de implementación paso a paso para el C
 **Flujo MVP:** Cliente envía WhatsApp → `IdentifyCustomerCommand` → Customer anónimo (userId=null)
 
 **Flujo Futuro (Marketplace):**
+
 1. Customer anónimo creado al primer mensaje
 2. En primera agenda, bot solicita nombre y email vía WhatsApp
 3. Sistema crea User con role=['CUSTOMER']
@@ -37,7 +40,6 @@ Este documento proporciona un checklist de implementación paso a paso para el C
 ## Task List
 
 ### Phase 1: Domain Layer
-
 
 - [x] 1.1 Create Value Object - WhatsAppPhone
   - Create `apps/backend/src/customer/domain/vo/whatsapp-phone.ts`
@@ -254,7 +256,6 @@ Este documento proporciona un checklist de implementación paso a paso para el C
   - Infrastructure layer complete with proper optimistic locking
   - **Commit:** `feat(customer): complete infrastructure layer implementation`
 
-
 ### Phase 4: Module Configuration
 
 - [x] 4.1 Create Customer Module
@@ -437,6 +438,7 @@ Este documento proporciona un checklist de implementación paso a paso para el C
 ## 🎉 Implementation Complete
 
 **Summary:**
+
 - ✅ All 10 phases completed
 - ✅ 625 tests passing (87 test suites)
 - ✅ 100% requirements coverage
@@ -445,6 +447,7 @@ Este documento proporciona un checklist de implementación paso a paso para el C
 - ✅ All validation commands passing
 
 **Test Coverage:**
+
 - Unit tests: 17 test suites
 - Integration tests: 4 test suites
 - Property-based tests: 3 test suites
@@ -452,6 +455,7 @@ Este documento proporciona un checklist de implementación paso a paso para el C
 - E2E tests: 8 tests (customer flow)
 
 **Key Features Implemented:**
+
 1. Customer aggregate with anonymous/registered support
 2. Multi-tenant isolation (businessId + whatsappPhone unique)
 3. Customer identification from WhatsApp messages
@@ -461,7 +465,8 @@ Este documento proporciona un checklist de implementación paso a paso para el C
 7. Comprehensive test suite with 100% coverage
 
 **PR:** #70 - Ready for review and merge
-  - **Commit:** `chore(customer): run full validation suite`
+
+- **Commit:** `chore(customer): run full validation suite`
 
 - [ ] 10.2 Update Documentation
   - Update README with Customer BC information
@@ -488,23 +493,24 @@ Este documento proporciona un checklist de implementación paso a paso para el C
 
 ## Summary
 
-| Phase | Tasks | Description |
-|-------|-------|-------------|
-| 1 | 10 | Domain Layer (VOs, Exceptions, Events, Aggregate, Interfaces) |
-| 2 | 17 | Application Layer (Commands, Queries, Handlers) |
-| 3 | 9 | Infrastructure Layer (Model, Mappers, Factory, Repositories) |
-| 4 | 4 | Module Configuration |
-| 5 | 4 | Database (Migration, Seeds) |
-| 6 | 4 | Integration with Booking BC |
-| 7 | 4 | Integration with Conversation BC |
-| 8 | 3 | Event Handler for Auth BC Integration |
-| 9 | 6 | Testing (Integration, Concurrency, E2E) |
-| 10 | 4 | Final Validation |
-| **Total** | **65** | **Complete Customer BC Implementation** |
+| Phase     | Tasks  | Description                                                   |
+| --------- | ------ | ------------------------------------------------------------- |
+| 1         | 10     | Domain Layer (VOs, Exceptions, Events, Aggregate, Interfaces) |
+| 2         | 17     | Application Layer (Commands, Queries, Handlers)               |
+| 3         | 9      | Infrastructure Layer (Model, Mappers, Factory, Repositories)  |
+| 4         | 4      | Module Configuration                                          |
+| 5         | 4      | Database (Migration, Seeds)                                   |
+| 6         | 4      | Integration with Booking BC                                   |
+| 7         | 4      | Integration with Conversation BC                              |
+| 8         | 3      | Event Handler for Auth BC Integration                         |
+| 9         | 6      | Testing (Integration, Concurrency, E2E)                       |
+| 10        | 4      | Final Validation                                              |
+| **Total** | **65** | **Complete Customer BC Implementation**                       |
 
 **Estimated Time:** 3-4 days
 
 **Order of Implementation:**
+
 1. Phase 1 (Domain) → Foundation
 2. Phase 2 (Application) → Business logic
 3. Phase 3 (Infrastructure) → Persistence
@@ -521,22 +527,22 @@ Este documento proporciona un checklist de implementación paso a paso para el C
 
 ### User vs Customer Separation
 
-| Aspecto | User (Auth BC) | Customer (Customer BC) |
-|---------|----------------|------------------------|
-| **Propósito** | Identidad universal | Perfil de cliente por negocio |
-| **Autenticación** | ✅ Email/password | ❌ No (usa User si vinculado) |
-| **Roles** | Múltiples: BUSINESS_OWNER, CUSTOMER, ADMIN | N/A |
-| **Vinculación** | Independiente | Opcional a User (userId) |
-| **Alcance** | Global | Por business (multi-tenant) |
-| **Panel Web** | ✅ Sí | ❌ Anónimo / ✅ Registrado |
-| **WhatsApp** | ❌ No | ✅ Sí |
+| Aspecto           | User (Auth BC)                             | Customer (Customer BC)        |
+| ----------------- | ------------------------------------------ | ----------------------------- |
+| **Propósito**     | Identidad universal                        | Perfil de cliente por negocio |
+| **Autenticación** | ✅ Email/password                          | ❌ No (usa User si vinculado) |
+| **Roles**         | Múltiples: BUSINESS_OWNER, CUSTOMER, ADMIN | N/A                           |
+| **Vinculación**   | Independiente                              | Opcional a User (userId)      |
+| **Alcance**       | Global                                     | Por business (multi-tenant)   |
+| **Panel Web**     | ✅ Sí                                      | ❌ Anónimo / ✅ Registrado    |
+| **WhatsApp**      | ❌ No                                      | ✅ Sí                         |
 
 ### Customer Types
 
-| Tipo | userId | Capacidades |
-|------|--------|-------------|
-| **Anónimo** | null | WhatsApp, notificaciones WhatsApp |
-| **Registrado** | UUID | WhatsApp + Panel web + Historial + Email |
+| Tipo           | userId | Capacidades                              |
+| -------------- | ------ | ---------------------------------------- |
+| **Anónimo**    | null   | WhatsApp, notificaciones WhatsApp        |
+| **Registrado** | UUID   | WhatsApp + Panel web + Historial + Email |
 
 ### Marketplace Scenario (Futuro)
 

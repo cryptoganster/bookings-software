@@ -88,6 +88,7 @@ git log --all --grep="--no-verify" --oneline
 #### 3. Update Documentation
 
 Review and update `.kiro/steering/husky-precommit.md`:
+
 - Add new troubleshooting scenarios
 - Update examples
 - Add new FAQs
@@ -161,6 +162,7 @@ git commit -m "test: new check"
 ### 5. Document New Check
 
 Update `.kiro/steering/husky-precommit.md`:
+
 - Add to "Pre-Commit Checks" section
 - Add troubleshooting section
 - Add examples
@@ -220,6 +222,7 @@ rm test-secret.txt
 ### Issue: Hooks Not Running
 
 **Diagnosis:**
+
 ```bash
 # Check if hooks are installed
 ls -la .git/hooks/
@@ -228,6 +231,7 @@ ls -la .git/hooks/
 ```
 
 **Fix:**
+
 ```bash
 # Reinstall hooks
 pnpm install
@@ -236,6 +240,7 @@ pnpm install
 ### Issue: Hooks Running Slowly
 
 **Diagnosis:**
+
 ```bash
 # Profile each check
 time bash scripts/pre-commit-filesize.sh
@@ -244,6 +249,7 @@ time pnpm exec lint-staged
 ```
 
 **Fix:**
+
 - Optimize slow scripts
 - Reduce number of files checked
 - Use caching where possible
@@ -251,6 +257,7 @@ time pnpm exec lint-staged
 ### Issue: False Positives in Secret Scanning
 
 **Fix:**
+
 ```bash
 # Add to .secretsignore
 echo "path/to/file" >> .secretsignore
@@ -260,6 +267,7 @@ echo "specific-pattern-to-ignore" >> .secretsignore
 ### Issue: Lint-Staged Not Running on Some Files
 
 **Diagnosis:**
+
 ```bash
 # Check .lintstagedrc.json patterns
 cat .lintstagedrc.json
@@ -269,6 +277,7 @@ pnpm exec lint-staged --debug
 ```
 
 **Fix:**
+
 - Update patterns in `.lintstagedrc.json`
 - Ensure file extensions are included
 
@@ -350,13 +359,14 @@ Edit `.husky/pre-commit` and comment out the check:
 
 ## Version History
 
-| Version | Date | Changes |
-|---------|------|---------|
-| 1.0 | 2025-12-19 | Initial maintenance guide |
+| Version | Date       | Changes                   |
+| ------- | ---------- | ------------------------- |
+| 1.0     | 2025-12-19 | Initial maintenance guide |
 
 ## Contact
 
 For issues or questions:
+
 - GitHub Issues: Create issue with `[husky]` tag
 - Team Lead: Direct message
 - Slack: #dev-help

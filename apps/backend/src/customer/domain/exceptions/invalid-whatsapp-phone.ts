@@ -1,17 +1,8 @@
 /**
- * Exception thrown when a WhatsApp phone number format is invalid
+ * @deprecated This file has been moved to @shared/kernel/exceptions/invalid-whatsapp-phone
+ * This barrel export is temporary for backwards compatibility.
+ * Please update your imports to use: import { InvalidWhatsAppPhoneException } from '@shared/kernel/exceptions/invalid-whatsapp-phone';
  *
- * Expected format: E.164 (+[country code][number])
- * Examples: +18095551234, +442071234567
+ * This file will be removed in a future version.
  */
-export class InvalidWhatsAppPhoneException extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'InvalidWhatsAppPhoneException';
-
-    // Maintains proper stack trace for where our error was thrown (only available on V8)
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, InvalidWhatsAppPhoneException);
-    }
-  }
-}
+export { InvalidWhatsAppPhoneException } from '@shared/kernel/exceptions/invalid-whatsapp-phone';
