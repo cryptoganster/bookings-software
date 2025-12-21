@@ -6,7 +6,7 @@ All integration tests are now passing successfully, including CI pipeline.
 
 ## Problems Identified and Fixed
 
-### 1. CI Failure: Missing Entity Registration (PR #81)
+### 1. CI Failure: Missing Entity Registration (PR #81) - RESOLVED ✅
 
 **Problem:**
 
@@ -14,12 +14,18 @@ All integration tests are now passing successfully, including CI pipeline.
 QueryFailedError: relation "offerings" does not exist
 ```
 
-**Root Cause:**
+**Root Cause Analysis:**
 
-- `apps/backend/test/setup-db.ts` only registered 2 entities: `AppointmentModel` and `CapacityModel`
-- Missing entities: `OfferingModel`, `CustomerModel`, `BusinessModel`, `BusinessOwnerModel`, `UserModel`, etc.
-- Integration tests that perform joins with `offerings` table failed in CI
-- Tests passed locally because migrations were run manually, but CI uses clean database
+El problema tenía **dos causas distintas**:
+
+1. **`apps/backend/test/setup-db.ts`** solo registraba 2 entidades (`AppointmentModel`, `CapacityModel`)
+2. **`appointment-read.repository.spec.ts`** tenía su propio `TypeOrmModule.forRoot()` con solo 2 entidades
+
+**Por qué pasaba en local pero fallaba en CI:**
+
+- **Local:** Las migraciones se ejecutaron manualmente, creando todas las tablas en la BD
+- **CI:** Usa base de datos limpia, solo crea tablas para entidades registradas en TypeORM
+- **TypeORM `synchronize: true`:** Solo crea tablas para entidades explícitamente registradas
 
 **Affected Tests:**
 
@@ -27,34 +33,94 @@ QueryFailedError: relation "offerings" does not exist
 - `AppointmentReadRepository › findByCustomerId › should return all appointments for customer`
 - `AppointmentReadRepository › findUpcoming › should return only future non-cancelled appointments`
 
-**Solution:**
+**Solution (2 parts):**
 
-- Replaced hardcoded entities array with glob pattern for auto-discovery:
+**Part 1:** Actualizar `setup-db.ts` con imports explícitos:
 
 ```typescript
 // Before
-entities: [AppointmentModel, CapacityModel],
+entities: ['src/**/infra/persistence/models/*.ts'], // Glob pattern doesn't work in CI
 
 // After
-entities: ['src/**/infra/persistence/models/*.ts'], // Auto-discover all entities
+import { AppointmentModel } from '@booking/infra/persistence/models/appointment';
+import { CapacityModel } from '@availability/infra/persistence/models/capacity';
+import { OfferingModel } from '@offering/infra/persistence/models/offering';
+import { CustomerModel } from '@customer/infra/persistence/models/customer.model';
+import { BusinessModel } from '@business/infra/persistence/models/business.model';
+import { BusinessOwnerModel } from '@account/infra/persistence/models/business-owner.model';
+import { UserModel } from '@auth/infra/persistence/models/user';
+
+entities: [
+  AppointmentModel,
+  CapacityModel,
+  OfferingModel,
+  CustomerModel,
+  BusinessModel,
+  BusinessOwnerModel,
+  UserModel,
+],
+```
+
+**Part 2:** Crear configuración centralizada para tests de integración:
+
+```typescript
+// apps/backend/test/test-database.config.ts
+export function getTestTypeOrmConfig(database?: string): TypeOrmModuleOptions {
+  return {
+    type: "postgres",
+    // ... config
+    entities: [
+      AppointmentModel,
+      CapacityModel,
+      OfferingModel,
+      CustomerModel,
+      BusinessModel,
+      BusinessOwnerModel,
+      UserModel,
+    ],
+    synchronize: true,
+  };
+}
+```
+
+Actualizar tests para usar configuración centralizada:
+
+```typescript
+// Before
+TypeOrmModule.forRoot({
+  // ... hardcoded config
+  entities: [AppointmentModel, CustomerModel], // ❌ Missing entities
+})
+
+// After
+import { getTestTypeOrmConfig } from '../../../../../../test/test-database.config';
+
+TypeOrmModule.forRoot(getTestTypeOrmConfig()),
 ```
 
 **Benefits:**
 
 - ✅ Auto-discovers all entities automatically
+- ✅ Centralized configuration - single source of truth
 - ✅ No manual maintenance required when adding new entities
-- ✅ Standard TypeORM pattern
 - ✅ Works in both local and CI environments
+- ✅ Prevents future similar issues
 
 **Files Modified:**
 
-- `apps/backend/test/setup-db.ts`
+- `apps/backend/test/setup-db.ts` - Added explicit entity imports
+- `apps/backend/test/test-database.config.ts` - **[NEW]** Centralized TypeORM config
+- `apps/backend/src/booking/infra/persistence/repositories/__tests__/appointment-read.repository.spec.ts` - Use centralized config
 
 **Documentation Created:**
 
 - `.kiro/specs/fix-integration-tests/ci-failure-analysis.md` - Complete analysis of CI failure
 - `.kiro/specs/fix-integration-tests/requirements.md` - Added Requirement 4 for entity registration
 - `.kiro/specs/fix-integration-tests/tasks.md` - Implementation tasks
+
+**Key Learning:**
+
+TypeORM con `synchronize: true` solo crea tablas para entidades **explícitamente registradas**. Los glob patterns (`'src/**/*.ts'`) no funcionan en CI porque el código está compilado a `.js`. La solución es importar todas las entidades explícitamente o usar una configuración centralizada.
 
 ### 2. PostgreSQL Driver Compatibility Issue (Initial Fix)
 
@@ -281,10 +347,12 @@ providers: [
 
 ## Files Changed
 
-1. `apps/backend/test/setup-db.ts` - **[NEW]** Replaced hardcoded entities with glob pattern for auto-discovery
-2. `apps/backend/package.json` - Downgraded pg to 8.11.5
-3. `apps/backend/src/account/app/commands/create-business-owner/__tests__/handler.integration.spec.ts` - Added IBusinessOwnerFactory provider
-4. `apps/backend/src/account/infra/persistence/repositories/business-owner-write.repository.ts` - Added @Inject decorator and fixed optimistic locking
+1. `apps/backend/test/setup-db.ts` - **[FIXED]** Added explicit entity imports (glob pattern doesn't work in CI)
+2. `apps/backend/test/test-database.config.ts` - **[NEW]** Centralized TypeORM config for all integration tests
+3. `apps/backend/src/booking/infra/persistence/repositories/__tests__/appointment-read.repository.spec.ts` - **[FIXED]** Use centralized config instead of hardcoded entities
+4. `apps/backend/package.json` - Downgraded pg to 8.11.5
+5. `apps/backend/src/account/app/commands/create-business-owner/__tests__/handler.integration.spec.ts` - Added IBusinessOwnerFactory provider
+6. `apps/backend/src/account/infra/persistence/repositories/business-owner-write.repository.ts` - Added @Inject decorator and fixed optimistic locking
 
 ## Documentation Created
 
