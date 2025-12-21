@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { IBusinessOwnerWriteRepository } from '@account/domain/interfaces/repositories/business-owner-write.interface';
@@ -13,6 +13,7 @@ export class BusinessOwnerWriteRepository implements IBusinessOwnerWriteReposito
   constructor(
     @InjectRepository(BusinessOwnerModel)
     private readonly repository: Repository<BusinessOwnerModel>,
+    @Inject('IUnitOfWork')
     private readonly uow: IUnitOfWork,
   ) {}
 
@@ -30,6 +31,8 @@ export class BusinessOwnerWriteRepository implements IBusinessOwnerWriteReposito
         await this.repository.save(model);
       } else {
         // Update existing entity with optimistic locking
+        // Check against the OLD version (before increment in domain method)
+        const oldVersion = currentVersion - 1;
         const result = await this.repository
           .createQueryBuilder()
           .update(BusinessOwnerModel)
@@ -38,11 +41,11 @@ export class BusinessOwnerWriteRepository implements IBusinessOwnerWriteReposito
             subscriptionPlan: model.subscriptionPlan,
             subscriptionStatus: model.subscriptionStatus,
             onboardingCompleted: model.onboardingCompleted,
-            version: currentVersion + 1,
+            version: currentVersion, // Set to current (already incremented in domain)
             updatedAt: new Date(),
           })
           .where('id = :id', { id })
-          .andWhere('version = :version', { version: currentVersion })
+          .andWhere('version = :version', { version: oldVersion }) // Check against old version
           .execute();
 
         if (result.affected === 0) {

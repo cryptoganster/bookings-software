@@ -63,26 +63,18 @@ describe('Appointment Event Publishing - Property Tests', () => {
           futureDate.setHours(10, 0, 0, 0);
           const dateTime = DateTime.fromDate(futureDate);
 
-          // Crear appointment - con autoCommit=true, el evento debe publicarse automáticamente
+          // Crear appointment sin fusionar primero
           const appointment = Appointment.create(id, businessId, customerId, offeringId, dateTime);
 
-          // Fusionar el aggregate con el EventBus para que publique eventos
+          // Fusionar el aggregate con el EventBus DESPUÉS de crear
+          // Esto permite que los eventos ya aplicados se publiquen
           const mergedAppointment = eventPublisher.mergeObjectContext(appointment);
 
-          // Aplicar el evento manualmente para simular el comportamiento real
-          // En producción, esto sucede dentro del aggregate
-          mergedAppointment.apply(
-            new AppointmentCreated(
-              id.getValue(),
-              businessId.getValue(),
-              customerId.getValue(),
-              offeringId.getValue(),
-              dateTime.toDate(),
-            ),
-          );
+          // Llamar a commit() para publicar los eventos pendientes
+          // Aunque autoCommit=true, los eventos se aplican antes de fusionar con EventBus
+          mergedAppointment.commit();
 
-          // Con autoCommit=true, el evento debe haberse publicado automáticamente
-          // sin necesidad de llamar a commit()
+          // Con autoCommit=true, el evento debe haberse publicado
           const hasAppointmentCreatedEvent = publishedEvents.some(
             (event) => event instanceof AppointmentCreated,
           );
@@ -125,10 +117,13 @@ describe('Appointment Event Publishing - Property Tests', () => {
           // Limpiar eventos de creación
           publishedEvents = [];
 
-          // Cancelar appointment
+          // Cancelar appointment - esto llama a apply() internamente
           mergedAppointment.cancel();
 
-          // Con autoCommit=true, el evento debe haberse publicado automáticamente
+          // Commit para publicar eventos (autoCommit=false en VersionedAggregateRoot)
+          mergedAppointment.commit();
+
+          // El evento debe haberse publicado después de commit()
           const hasAppointmentCancelledEvent = publishedEvents.some(
             (event) => event instanceof AppointmentCancelled,
           );
@@ -168,16 +163,8 @@ describe('Appointment Event Publishing - Property Tests', () => {
           // Fusionar con EventBus
           const mergedAppointment = eventPublisher.mergeObjectContext(appointment);
 
-          // Aplicar evento de creación
-          mergedAppointment.apply(
-            new AppointmentCreated(
-              id.getValue(),
-              businessId.getValue(),
-              customerId.getValue(),
-              offeringId.getValue(),
-              dateTime.toDate(),
-            ),
-          );
+          // Commit para publicar evento de creación
+          mergedAppointment.commit();
 
           const createdEventCount = publishedEvents.filter(
             (e) => e instanceof AppointmentCreated,
@@ -185,6 +172,9 @@ describe('Appointment Event Publishing - Property Tests', () => {
 
           // Cancelar
           mergedAppointment.cancel();
+
+          // Commit para publicar evento de cancelación
+          mergedAppointment.commit();
 
           const cancelledEventCount = publishedEvents.filter(
             (e) => e instanceof AppointmentCancelled,

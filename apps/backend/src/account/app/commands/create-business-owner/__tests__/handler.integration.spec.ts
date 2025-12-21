@@ -50,6 +50,10 @@ describe('CreateBusinessOwnerHandler - Integration Test', () => {
           useClass: BusinessOwnerWriteRepository,
         },
         {
+          provide: 'IBusinessOwnerFactory',
+          useClass: BusinessOwnerFactory,
+        },
+        {
           provide: 'IUnitOfWork',
           useClass: TypeOrmUnitOfWork,
         },
