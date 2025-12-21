@@ -207,7 +207,7 @@ git commit -m "feat(account): add database migration and seed for business_owner
 
 ## Phase 8: Module Configuration and Testing
 
-- [ ] 8.1 Configure AccountModule
+- [x] 8.1 Configure AccountModule
   - Register all command handlers
   - Register all query handlers
   - Register event handlers
@@ -217,7 +217,7 @@ git commit -m "feat(account): add database migration and seed for business_owner
   - Import TypeOrmModule.forFeature([BusinessOwnerModel])
   - _Requirements: All_
 
-- [ ] 8.2 Update shared-types package
+- [x] 8.2 Update shared-types package
   - Add BusinessOwnerDto to packages/shared-types/src/index.ts
   - Export type for frontend consumption
   - _Requirements: Note in Introduction_
@@ -241,7 +241,7 @@ git commit -m "feat(account): add database migration and seed for business_owner
   - Test BusinessOwnerWriteRepository (Optimistic Locking)
   - _Requirements: 13.4-13.5_
 
-- [ ] 8.6 Run all validations
+- [x] 8.6 Run all validations
   - pnpm --filter backend typecheck
   - pnpm --filter backend lint
   - pnpm --filter backend format
