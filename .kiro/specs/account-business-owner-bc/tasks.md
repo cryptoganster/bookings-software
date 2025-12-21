@@ -222,20 +222,20 @@ git commit -m "feat(account): add database migration and seed for business_owner
   - Export type for frontend consumption
   - _Requirements: Note in Introduction_
 
-- [ ]\* 8.3 Write Unit Tests
+- [x]\* 8.3 Write Unit Tests
   - Test SubscriptionPlan VO (factory methods, canUpgradeTo)
   - Test SubscriptionStatus VO (factory methods, query methods)
   - Test BusinessOwner Aggregate (create, completeOnboarding, upgradeSubscription)
   - _Requirements: 13.1-13.3_
 
-- [ ]\* 8.4 Write Property-Based Tests
+- [x]\* 8.4 Write Property-Based Tests
   - **Property 1: Subscription upgrade is monotonic**
   - **Validates: Requirements 4.1, 4.4**
   - **Property 2: Version increments on state changes**
   - **Validates: Requirements 6.4**
   - _Requirements: 13.3_
 
-- [ ]\* 8.5 Write Integration Tests
+- [x]\* 8.5 Write Integration Tests
   - Test CreateBusinessOwnerHandler
   - Test OnUserRegisteredHandler (mock event)
   - Test BusinessOwnerWriteRepository (Optimistic Locking)

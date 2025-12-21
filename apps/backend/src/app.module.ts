@@ -7,6 +7,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { SharedModule } from '@shared/shared.module';
 import { WebSocketModule } from '@shared/infra/websocket/websocket.module';
+import { AccountModule } from '@account/account.module';
 import { AuthModule } from '@auth/auth.module';
 import { AvailabilityModule } from '@availability/availability.module';
 import { BookingModule } from '@booking/booking.module';
@@ -33,6 +34,7 @@ import { OfferingModule } from '@offering/offering.module';
     CqrsModule.forRoot(),
     SharedModule,
     WebSocketModule, // WebSocket para actualizaciones en tiempo real
+    AccountModule,
     AuthModule,
     AvailabilityModule,
     BookingModule,
