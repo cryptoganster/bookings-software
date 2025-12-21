@@ -8,10 +8,11 @@ import { GetAppointmentQuery } from '@booking/app/queries/get-appointment';
 import { GetCustomerByPhoneQuery } from '@customer/app/queries/get-customer-by-phone';
 import { IWhatsAppClient, Button } from '@conversation/domain/interfaces/external/whatsapp-client';
 import { UUID } from '@shared/vo/uuid';
-import { CapacityModel } from '@availability/infra/persistence/models/capacity';
 import { AppointmentModel } from '@booking/infra/persistence/models/appointment';
 import { CustomerModel } from '@customer/infra/persistence/models/customer.model';
 import { conversationsStore } from '@conversation/conversation.module';
+import { createCapacityForTomorrow } from './helpers/capacity-helper';
+import { createActiveOffering } from './helpers/offering-helper';
 
 describe('Customer Flow E2E', () => {
   let app: INestApplication;
@@ -76,6 +77,7 @@ describe('Customer Flow E2E', () => {
     await dataSource.query('DELETE FROM appointments');
     await dataSource.query('DELETE FROM customers');
     await dataSource.query('DELETE FROM capacities');
+    await dataSource.query('DELETE FROM offerings');
 
     // Clear in-memory conversations
     conversationsStore.clear();
@@ -142,19 +144,9 @@ describe('Customer Flow E2E', () => {
 
   describe('Requirement 7.2: Customer Info in Appointment Queries', () => {
     it('should include customer name and phone in appointment read model', async () => {
-      // Arrange: Create capacity for tomorrow
-      const tomorrow = new Date();
-      tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
-      tomorrow.setUTCHours(10, 0, 0, 0); // 10 AM tomorrow
-
-      const capacity = new CapacityModel();
-      capacity.id = UUID.generate().getValue();
-      capacity.offeringId = testOfferingId;
-      capacity.date = tomorrow;
-      capacity.totalSlots = 10;
-      capacity.availableSlots = 5;
-      capacity.version = 0;
-      await dataSource.getRepository(CapacityModel).save(capacity);
+      // Arrange: Create offering and capacity
+      await createActiveOffering(dataSource, testBusinessId, testOfferingId);
+      await createCapacityForTomorrow(dataSource, testOfferingId, 5, 10);
 
       // Act: Complete booking flow
       await commandBus.execute(
@@ -286,19 +278,9 @@ describe('Customer Flow E2E', () => {
 
   describe('Requirement 7.4: Anonymous Customer Flow', () => {
     it('should allow anonymous customer to complete booking', async () => {
-      // Arrange: Create capacity for tomorrow
-      const tomorrow = new Date();
-      tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
-      tomorrow.setUTCHours(10, 0, 0, 0); // 10 AM tomorrow
-
-      const capacity = new CapacityModel();
-      capacity.id = UUID.generate().getValue();
-      capacity.offeringId = testOfferingId;
-      capacity.date = tomorrow;
-      capacity.totalSlots = 10;
-      capacity.availableSlots = 5;
-      capacity.version = 0;
-      await dataSource.getRepository(CapacityModel).save(capacity);
+      // Arrange: Create offering and capacity
+      await createActiveOffering(dataSource, testBusinessId, testOfferingId);
+      await createCapacityForTomorrow(dataSource, testOfferingId, 5, 10);
 
       // Act: Complete booking flow as anonymous customer
       await commandBus.execute(
