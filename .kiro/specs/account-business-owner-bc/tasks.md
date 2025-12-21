@@ -143,32 +143,32 @@ git commit -m "feat(account): implement queries and OnUserRegisteredHandler"
 
 ## Phase 6: Infrastructure Layer - Persistence
 
-- [ ] 6.1 Create BusinessOwnerModel (TypeORM Entity)
+- [x] 6.1 Create BusinessOwnerModel (TypeORM Entity)
   - Map all fields to database columns
   - Define relationships and indexes
   - _Requirements: 12.1-12.3_
 
-- [ ] 6.2 Create BusinessOwnerWriteMapper
+- [x] 6.2 Create BusinessOwnerWriteMapper
   - toModel(aggregate): BusinessOwnerModel
   - _Requirements: 8.1, 8.4_
 
-- [ ] 6.3 Create BusinessOwnerReadMapper
+- [x] 6.3 Create BusinessOwnerReadMapper
   - toReadModel(model): BusinessOwnerReadModel
   - _Requirements: 8.3_
 
-- [ ] 6.4 Implement BusinessOwnerFactory
+- [x] 6.4 Implement BusinessOwnerFactory
   - Implements IBusinessOwnerFactory
   - Uses TypeORM Repository
   - Calls BusinessOwner.fromPersistence()
   - _Requirements: 8.2_
 
-- [ ] 6.5 Implement BusinessOwnerWriteRepository
+- [x] 6.5 Implement BusinessOwnerWriteRepository
   - Implements IBusinessOwnerWriteRepository
   - Uses Optimistic Locking with version field
   - Throws ConcurrencyException on conflict
   - _Requirements: 8.1, 8.4, 8.5_
 
-- [ ] 6.6 Implement BusinessOwnerReadRepository
+- [x] 6.6 Implement BusinessOwnerReadRepository
   - Implements IBusinessOwnerReadRepository
   - Optimized queries for read models
   - _Requirements: 8.3_
@@ -182,18 +182,18 @@ git commit -m "feat(account): implement persistence layer with repositories, fac
 
 ## Phase 7: Infrastructure Layer - Database
 
-- [ ] 7.1 Create Migration: CreateBusinessOwnersTable
+- [x] 7.1 Create Migration: CreateBusinessOwnersTable
   - Create business_owners table with all columns
   - Add unique index on user_id
   - Add foreign key to users(id)
   - _Requirements: 12.1-12.3_
 
-- [ ] 7.2 Create Seed: BusinessOwnersSeed
+- [x] 7.2 Create Seed: BusinessOwnersSeed
   - Create 2 business owners (FREE and PRO plans)
   - Link to existing users
   - _Requirements: 12.4-12.5_
 
-- [ ] 7.3 Run migrations and verify schema
+- [x] 7.3 Run migrations and verify schema
   - Execute migration
   - Verify table structure
   - _Requirements: 12.1-12.3_
