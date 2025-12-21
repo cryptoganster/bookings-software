@@ -54,9 +54,10 @@ describe('Conversational Booking Flow (e2e)', () => {
     commandBus = app.get(CommandBus);
     dataSource = app.get(DataSource);
 
-    // Limpiar base de datos
+    // Limpiar base de datos (order matters due to foreign keys)
     await dataSource.query('DELETE FROM appointments');
     await dataSource.query('DELETE FROM capacities');
+    await dataSource.query('DELETE FROM customers');
 
     // Generar IDs de prueba
     testBusinessId = UUID.generate().getValue();
@@ -75,10 +76,11 @@ describe('Conversational Booking Flow (e2e)', () => {
     mockWhatsAppClient.sendMessage.mockClear();
     mockWhatsAppClient.sendInteractiveButtons.mockClear();
 
-    // Limpiar base de datos
+    // Limpiar base de datos (order matters due to foreign keys)
     await dataSource.query('DELETE FROM appointments');
     await dataSource.query('DELETE FROM capacities');
     await dataSource.query('DELETE FROM offerings');
+    await dataSource.query('DELETE FROM customers');
 
     // Limpiar conversaciones en memoria
     conversationsStore.clear();
@@ -93,11 +95,11 @@ describe('Conversational Booking Flow (e2e)', () => {
       // Create capacity for tomorrow at midnight
       const capacity = await createCapacityForTomorrow(dataSource, offeringId, 5, 10);
 
-      // Paso 1: Cliente envía mensaje inicial
+      // Paso 1: Cliente envía mensaje inicial (sin customerId, se creará automáticamente)
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified/created
           testCustomerPhone,
           'Hola',
           undefined,
@@ -118,7 +120,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           '',
           offeringId, // Usar el UUID del offering directamente
@@ -138,7 +140,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           '',
           dateButtonId,
@@ -158,7 +160,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           '',
           timeButtonId,
@@ -179,7 +181,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           '',
           'confirm',
@@ -196,7 +198,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       const appointments = await dataSource.getRepository(AppointmentModel).find();
       expect(appointments).toHaveLength(1);
       expect(appointments[0].businessId).toBe(testBusinessId);
-      expect(appointments[0].customerId).toBe(testCustomerId);
+      // Don't check customerId - it's created by IdentifyCustomerCommand
       expect(appointments[0].offeringId).toBe(offeringId);
       expect(appointments[0].status).toBe('CONFIRMED');
 
@@ -219,7 +221,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           'Hola',
           undefined,
@@ -230,7 +232,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           '',
           offeringId,
@@ -242,7 +244,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           '',
           dateButtonId,
@@ -254,7 +256,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           '',
           timeButtonId,
@@ -267,7 +269,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           '',
           'change',
@@ -303,7 +305,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           'Hola',
           undefined,
@@ -314,7 +316,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           '',
           offeringId,
@@ -326,7 +328,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           '',
           dateButtonId,
@@ -338,7 +340,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           '',
           timeButtonId,
@@ -360,7 +362,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           '',
           'confirm',
@@ -397,7 +399,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           'Hola',
           undefined,
@@ -408,7 +410,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           '',
           offeringId,
@@ -420,7 +422,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           '',
           dateButtonId,
@@ -432,7 +434,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           '',
           timeButtonId,
@@ -453,7 +455,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           '',
           'confirm',
@@ -466,7 +468,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           '',
           newTimeButtonId,
@@ -485,7 +487,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       // await commandBus.execute(
       //   new ProcessIncomingMessageCommand(
       //     testBusinessId,
-      //     testCustomerId,
+      //     '', // Empty string - customer will be identified
       //     testCustomerPhone,
       //     '',
       //     'confirm',

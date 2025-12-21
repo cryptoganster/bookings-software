@@ -26,14 +26,12 @@ export class CapacityFactory implements ICapacityFactory {
     const normalizedDate = new Date(date);
     normalizedDate.setUTCHours(0, 0, 0, 0);
 
-    // Format date as YYYY-MM-DD for comparison
-    const dateStr = normalizedDate.toISOString().split('T')[0];
-
-    // Use query builder to compare dates properly
+    // Use direct date comparison - TypeORM will handle the conversion
+    // The 'date' column type in PostgreSQL stores only the date part
     const model = await this.repository
       .createQueryBuilder('capacity')
       .where('capacity.offeringId = :offeringId', { offeringId })
-      .andWhere('capacity.date = :date', { date: dateStr })
+      .andWhere('capacity.date = :date', { date: normalizedDate })
       .getOne();
 
     if (!model) {
