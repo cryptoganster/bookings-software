@@ -2,18 +2,18 @@
 
 ## Phase 1: Domain Layer - Value Objects
 
-- [ ] 1.1 Create SubscriptionPlan Value Object
+- [x] 1.1 Create SubscriptionPlan Value Object
   - Implement factory methods: free(), basic(), pro(), enterprise()
   - Include maxBusinesses, maxAppointmentsPerMonth, price
   - Implement canUpgradeTo() method
   - _Requirements: 2.1-2.4, 7.1-7.3_
 
-- [ ] 1.2 Create SubscriptionStatus Value Object
+- [x] 1.2 Create SubscriptionStatus Value Object
   - Implement factory methods: active(), suspended(), cancelled()
   - Implement query methods: isActive(), isSuspended(), isCancelled()
   - _Requirements: 7.4-7.5_
 
-- [ ] 1.3 Create Domain Exceptions
+- [x] 1.3 Create Domain Exceptions
   - AlreadyOnThisPlanException
   - CannotDowngradeSubscriptionException
   - OnboardingNotCompletedException
@@ -30,7 +30,7 @@ git commit -m "feat(account): implement SubscriptionPlan, SubscriptionStatus VOs
 
 ## Phase 2: Domain Layer - Aggregate and Events
 
-- [ ] 2.1 Create BusinessOwner Aggregate
+- [x] 2.1 Create BusinessOwner Aggregate
   - Extend VersionedAggregateRoot
   - Implement static create() factory method
   - Implement completeOnboarding() method
@@ -39,7 +39,7 @@ git commit -m "feat(account): implement SubscriptionPlan, SubscriptionStatus VOs
   - Implement static fromPersistence() method
   - _Requirements: 1.2-1.5, 3.1-3.5, 4.1-4.3, 5.1-5.4, 6.1-6.5_
 
-- [ ] 2.2 Create Domain Events
+- [x] 2.2 Create Domain Events
   - BusinessOwnerCreated
   - BusinessOwnerOnboardingCompleted
   - BusinessOwnerSubscriptionUpgraded
@@ -47,7 +47,7 @@ git commit -m "feat(account): implement SubscriptionPlan, SubscriptionStatus VOs
   - BusinessOwnerSubscriptionRestored
   - _Requirements: 1.5, 3.4, 4.3, 5.3, 5.5_
 
-- [ ] 2.3 Create Read Model
+- [x] 2.3 Create Read Model
   - BusinessOwnerReadModel with all fields
   - _Requirements: 8.3, 9.4_
 
@@ -60,16 +60,16 @@ git commit -m "feat(account): implement BusinessOwner aggregate with domain even
 
 ## Phase 3: Domain Layer - Interfaces
 
-- [ ] 3.1 Create IBusinessOwnerFactory interface
+- [x] 3.1 Create IBusinessOwnerFactory interface
   - loadById(id: string): Promise<BusinessOwner | null>
   - loadByUserId(userId: string): Promise<BusinessOwner | null>
   - _Requirements: 8.2_
 
-- [ ] 3.2 Create IBusinessOwnerWriteRepository interface
+- [x] 3.2 Create IBusinessOwnerWriteRepository interface
   - save(businessOwner: BusinessOwner): Promise<void>
   - _Requirements: 8.1_
 
-- [ ] 3.3 Create IBusinessOwnerReadRepository interface
+- [x] 3.3 Create IBusinessOwnerReadRepository interface
   - findById(id: string): Promise<BusinessOwnerReadModel | null>
   - findByUserId(userId: string): Promise<BusinessOwnerReadModel | null>
   - _Requirements: 8.3, 9.5_
@@ -83,28 +83,28 @@ git commit -m "feat(account): define repository and factory interfaces for Busin
 
 ## Phase 4: Application Layer - Commands
 
-- [ ] 4.1 Implement CreateBusinessOwnerCommand and Handler
+- [x] 4.1 Implement CreateBusinessOwnerCommand and Handler
   - Command extends Command<{ businessOwnerId: string }>
   - Handler creates BusinessOwner with FREE plan
   - Uses WriteRepository to persist
   - _Requirements: 1.1-1.5, 9.1_
 
-- [ ] 4.2 Implement CompleteOnboardingCommand and Handler
+- [x] 4.2 Implement CompleteOnboardingCommand and Handler
   - Command extends Command<void>
   - Handler loads via Factory, calls completeOnboarding(), saves
   - _Requirements: 3.1-3.5, 9.2_
 
-- [ ] 4.3 Implement UpgradeSubscriptionCommand and Handler
+- [x] 4.3 Implement UpgradeSubscriptionCommand and Handler
   - Command extends Command<void>
   - Handler validates upgrade, updates plan
   - _Requirements: 4.1-4.5, 9.3_
 
-- [ ] 4.4 Implement SuspendSubscriptionCommand and Handler
+- [x] 4.4 Implement SuspendSubscriptionCommand and Handler
   - Command extends Command<void>
   - Handler suspends subscription
   - _Requirements: 5.1-5.3_
 
-- [ ] 4.5 Implement RestoreSubscriptionCommand and Handler
+- [x] 4.5 Implement RestoreSubscriptionCommand and Handler
   - Command extends Command<void>
   - Handler restores subscription
   - _Requirements: 5.4-5.5_
