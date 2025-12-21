@@ -1,4 +1,11 @@
 import { DataSource } from 'typeorm';
+import { AppointmentModel } from '@booking/infra/persistence/models/appointment';
+import { CapacityModel } from '@availability/infra/persistence/models/capacity';
+import { OfferingModel } from '@offering/infra/persistence/models/offering';
+import { CustomerModel } from '@customer/infra/persistence/models/customer.model';
+import { BusinessModel } from '@business/infra/persistence/models/business.model';
+import { BusinessOwnerModel } from '@account/infra/persistence/models/business-owner.model';
+import { UserModel } from '@auth/infra/persistence/models/user';
 
 /**
  * Helper para limpiar la base de datos entre tests
@@ -40,7 +47,15 @@ export function createTestDataSource(): DataSource {
     username: process.env.DB_USERNAME || 'postgres',
     password: process.env.DB_PASSWORD || 'postgres',
     database,
-    entities: ['src/**/infra/persistence/models/*.ts'], // Auto-discover all entities
+    entities: [
+      AppointmentModel,
+      CapacityModel,
+      OfferingModel,
+      CustomerModel,
+      BusinessModel,
+      BusinessOwnerModel,
+      UserModel,
+    ],
     synchronize: true, // Auto-crear schema en tests
     logging: false,
   });
