@@ -8,6 +8,8 @@ import { UserAlreadyHasRoleException } from '@auth/domain/exceptions/user-alread
 describe('OnCustomerLinkedToUserHandler', () => {
   let handler: OnCustomerLinkedToUserHandler;
   let commandBus: CommandBus;
+  let loggerLogSpy: jest.SpyInstance;
+  let loggerErrorSpy: jest.SpyInstance;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -24,6 +26,11 @@ describe('OnCustomerLinkedToUserHandler', () => {
 
     handler = module.get<OnCustomerLinkedToUserHandler>(OnCustomerLinkedToUserHandler);
     commandBus = module.get<CommandBus>(CommandBus);
+
+    // Silence logger to avoid noise in test output
+    // This prevents expected ERROR logs from appearing during tests
+    loggerLogSpy = jest.spyOn(handler['logger'], 'log').mockImplementation();
+    loggerErrorSpy = jest.spyOn(handler['logger'], 'error').mockImplementation();
   });
 
   afterEach(() => {
@@ -101,16 +108,14 @@ describe('OnCustomerLinkedToUserHandler', () => {
       // Arrange
       const event = new CustomerLinkedToUser('customer-id', 'user-id', 'business-id');
 
-      const loggerSpy = jest.spyOn(handler['logger'], 'log');
-
       // Act
       await handler.handle(event);
 
       // Assert
-      expect(loggerSpy).toHaveBeenCalledWith(
+      expect(loggerLogSpy).toHaveBeenCalledWith(
         expect.stringContaining('Handling CustomerLinkedToUser event'),
       );
-      expect(loggerSpy).toHaveBeenCalledWith(
+      expect(loggerLogSpy).toHaveBeenCalledWith(
         expect.stringContaining('Successfully added CUSTOMER role'),
       );
     });
@@ -123,13 +128,13 @@ describe('OnCustomerLinkedToUserHandler', () => {
         new UserAlreadyHasRoleException('user-id', UserRole.CUSTOMER),
       );
 
-      const loggerSpy = jest.spyOn(handler['logger'], 'log');
-
       // Act
       await handler.handle(event);
 
       // Assert
-      expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('already has CUSTOMER role'));
+      expect(loggerLogSpy).toHaveBeenCalledWith(
+        expect.stringContaining('already has CUSTOMER role'),
+      );
     });
 
     it('should log error for unexpected exceptions', async () => {
@@ -138,8 +143,6 @@ describe('OnCustomerLinkedToUserHandler', () => {
 
       const genericError = new Error('Unexpected error');
       (commandBus.execute as jest.Mock).mockRejectedValueOnce(genericError);
-
-      const loggerErrorSpy = jest.spyOn(handler['logger'], 'error');
 
       // Act
       await handler.handle(event);
