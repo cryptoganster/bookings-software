@@ -19,11 +19,13 @@ import { BusinessAddress } from '@business/domain/vo/business-address';
 import { Timezone } from '@business/domain/vo/timezone';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
+import { E2EDatabaseHelper } from '@test-utils/e2e';
 
 describe('BusinessWriteRepository Integration Tests', () => {
   let module: TestingModule;
   let repository: BusinessWriteRepository;
   let dataSource: DataSource;
+  let dbHelper: E2EDatabaseHelper;
 
   beforeAll(async () => {
     module = await Test.createTestingModule({
@@ -51,16 +53,23 @@ describe('BusinessWriteRepository Integration Tests', () => {
 
     repository = module.get<BusinessWriteRepository>(BusinessWriteRepository);
     dataSource = module.get<DataSource>(DataSource);
+
+    // Setup database
+    dbHelper = new E2EDatabaseHelper(dataSource);
+    await dbHelper.setup();
   });
 
   afterAll(async () => {
+    if (dbHelper) {
+      await dbHelper.cleanup();
+    }
     await dataSource.destroy();
     await module.close();
   });
 
   beforeEach(async () => {
     // Clean up businesses table before each test
-    await dataSource.query('DELETE FROM businesses');
+    await dbHelper.clearData();
   });
 
   describe('save() - Optimistic Locking', () => {

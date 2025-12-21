@@ -49,10 +49,12 @@ export class BusinessWriteRepository implements IBusinessWriteRepository {
         return;
       }
 
-      // Check if this is an idempotent operation (version didn't change)
-      if (existing.version === currentVersion) {
-        // No changes, skip update (idempotent operation)
-        // This happens when aggregate methods return early (e.g., deactivate when already inactive)
+      // Check if aggregate has uncommitted events (real changes)
+      const hasChanges = business.getUncommittedEvents().length > 0;
+
+      if (!hasChanges) {
+        // Idempotent operation - aggregate didn't change (e.g., deactivate when already inactive)
+        // Version didn't increment, so no need to update
         return;
       }
 
@@ -83,6 +85,7 @@ export class BusinessWriteRepository implements IBusinessWriteRepository {
         .execute();
 
       if (result.affected === 0) {
+        // Update failed - this is a concurrency conflict
         throw new ConcurrencyException(
           `Business ${business.getId().getValue()} was modified by another transaction`,
         );
