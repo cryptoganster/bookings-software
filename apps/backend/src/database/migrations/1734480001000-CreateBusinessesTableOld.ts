@@ -11,7 +11,7 @@ import { MigrationInterface, QueryRunner, Table, TableForeignKey, TableIndex } f
  *
  * Requirements: 13.1-13.3
  */
-export class CreateBusinessesTable1221123057 implements MigrationInterface {
+export class CreateBusinessesTableOld1734480001000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Create businesses table
     await queryRunner.createTable(

@@ -226,7 +226,7 @@ export interface BusinessDto {
   timezone: string; // IANA timezone (e.g., America/Santo_Domingo)
   isActive: boolean;
   createdAt: string; // ISO 8601 string
-  updatedAt: string; // ISO 8601 string
+  updatedAt: string; // ISO 8601 string;
 }
 
 /**
@@ -272,6 +272,63 @@ export interface UpdateBusinessInfoRequestDto {
  */
 export interface ConfigureWhatsAppRequestDto {
   whatsappPhone: string;
+}
+
+// ============================================================================
+// ACCOUNT (BUSINESS OWNER)
+// ============================================================================
+
+/**
+ * Subscription Plan types
+ */
+export type SubscriptionPlanType = "FREE" | "BASIC" | "PRO" | "ENTERPRISE";
+
+/**
+ * Subscription Status types
+ */
+export type SubscriptionStatusType = "ACTIVE" | "SUSPENDED" | "CANCELLED";
+
+/**
+ * BusinessOwner DTO - Representa el perfil de cuenta de un dueño de negocio
+ *
+ * @remarks
+ * - userId references User.id (always required)
+ * - subscriptionPlan determines limits (maxBusinesses, maxAppointmentsPerMonth)
+ * - onboardingCompleted must be true before creating first Business
+ */
+export interface BusinessOwnerDto {
+  id: string;
+  userId: string; // References User.id
+  subscriptionPlan: SubscriptionPlanType;
+  subscriptionStatus: SubscriptionStatusType;
+  maxBusinesses: number;
+  maxAppointmentsPerMonth: number;
+  price: number;
+  onboardingCompleted: boolean;
+  createdAt: string; // ISO 8601 string
+  updatedAt: string; // ISO 8601 string
+}
+
+/**
+ * DTO para crear un BusinessOwner
+ */
+export interface CreateBusinessOwnerRequestDto {
+  userId: string;
+  subscriptionPlan?: SubscriptionPlanType; // Defaults to FREE
+}
+
+/**
+ * DTO para respuesta de creación de BusinessOwner
+ */
+export interface CreateBusinessOwnerResponseDto {
+  businessOwnerId: string;
+}
+
+/**
+ * DTO para mejorar suscripción
+ */
+export interface UpgradeSubscriptionRequestDto {
+  newPlan: SubscriptionPlanType;
 }
 
 // ============================================================================
