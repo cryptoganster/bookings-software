@@ -125,29 +125,29 @@ git commit 341bbf5
 "feat(business): implement all command handlers for Business"
 ```
 
-## Phase 5: Application Layer - Queries
+## Phase 5: Application Layer - Queries ✅ COMPLETE
 
-- [ ] 5.1 Implement GetBusinessQuery and Handler
+- [x] 5.1 Implement GetBusinessQuery and Handler
   - Query extends Query<BusinessReadModel>
   - Handler uses ReadRepository
   - _Requirements: 10.4_
 
-- [ ] 5.2 Implement GetBusinessesByOwnerIdQuery and Handler
+- [x] 5.2 Implement GetBusinessesByOwnerIdQuery and Handler
   - Query extends Query<BusinessReadModel[]>
   - Handler uses ReadRepository
   - _Requirements: 10.5_
 
-- [ ] 5.3 Implement GetBusinessByWhatsAppPhoneQuery and Handler
+- [x] 5.3 Implement GetBusinessByWhatsAppPhoneQuery and Handler
   - Query extends Query<BusinessReadModel | null>
   - Handler uses ReadRepository
   - Used by Conversation BC to identify business
   - _Requirements: 12.4_
 
-### ✅ Commit Checkpoint 5
+### ✅ Commit Checkpoint 5 - DONE
 
 ```bash
-git add src/business/app/queries
-git commit -m "feat(business): implement queries for Business"
+git commit [hash]
+"feat(business): implement query handlers for Business"
 ```
 
 ## Phase 6: Infrastructure Layer - Persistence
