@@ -10,7 +10,7 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
  *
  * Requirements: 13.4-13.5
  */
-export class BusinessesSeed1766334505000 implements MigrationInterface {
+export class BusinessesSeed implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Get existing users to link businesses to
     const users = await queryRunner.query(`
