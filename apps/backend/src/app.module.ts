@@ -10,6 +10,7 @@ import { WebSocketModule } from '@shared/infra/websocket/websocket.module';
 import { AuthModule } from '@auth/auth.module';
 import { AvailabilityModule } from '@availability/availability.module';
 import { BookingModule } from '@booking/booking.module';
+import { BusinessModule } from '@business/business.module';
 import { ConversationModule } from '@conversation/conversation.module';
 import { CustomerModule } from '@customer/customer.module';
 import { OfferingModule } from '@offering/offering.module';
@@ -36,6 +37,7 @@ import { OfferingModule } from '@offering/offering.module';
     AuthModule,
     AvailabilityModule,
     BookingModule,
+    BusinessModule,
     ConversationModule,
     CustomerModule,
     OfferingModule,

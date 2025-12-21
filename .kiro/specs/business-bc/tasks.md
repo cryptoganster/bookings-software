@@ -314,35 +314,90 @@ git commit -m "chore(business): mark Phase 8 complete - all validations passing"
 
 ---
 
-## Phase 9: Final Integration and Documentation
+## Phase 9: Presentation Layer - REST Controllers
 
-- [ ] 9.1 Verify integration with Account BC
+- [ ] 9.1 Create CreateBusinessDto
+  - name: string (required, min 3, max 100)
+  - whatsappNumber: string (required, E.164 format)
+  - address: string (required, min 5, max 200)
+  - timezone: string (required, IANA timezone)
+  - _Requirements: 1.1-1.5_
+
+- [ ] 9.2 Create UpdateBusinessInfoDto
+  - name: string (optional, min 3, max 100)
+  - address: string (optional, min 5, max 200)
+  - timezone: string (optional, IANA timezone)
+  - _Requirements: 10.2_
+
+- [ ] 9.3 Create ConfigureWhatsAppDto
+  - whatsappNumber: string (required, E.164 format)
+  - _Requirements: 3.1-3.5_
+
+- [ ] 9.4 Create BusinessController
+  - POST /api/businesses - Create business (authenticated, BUSINESS_OWNER role)
+  - GET /api/businesses/:id - Get business by ID (authenticated)
+  - GET /api/businesses - Get businesses by owner (authenticated, uses userId from JWT)
+  - PUT /api/businesses/:id - Update business info (authenticated, owner only)
+  - PUT /api/businesses/:id/whatsapp - Configure WhatsApp (authenticated, owner only)
+  - DELETE /api/businesses/:id - Deactivate business (authenticated, owner only)
+  - POST /api/businesses/:id/activate - Activate business (authenticated, owner only)
+  - _Requirements: 1.1-1.5, 3.1-3.5, 6.1-6.5, 10.1-10.5_
+
+- [ ] 9.5 Add BusinessController to BusinessModule
+  - Register controller in module
+  - Ensure all dependencies are available
+  - _Requirements: All_
+
+- [ ] 9.6 Write E2E Tests for Business Endpoints
+  - Test POST /api/businesses with valid data
+  - Test POST /api/businesses with duplicate WhatsApp
+  - Test GET /api/businesses/:id (found and not found)
+  - Test GET /api/businesses (multiple businesses)
+  - Test PUT /api/businesses/:id with valid data
+  - Test PUT /api/businesses/:id/whatsapp with uniqueness validation
+  - Test DELETE /api/businesses/:id (deactivate)
+  - Test POST /api/businesses/:id/activate
+  - Test authentication and authorization
+  - _Requirements: 14.4, 1.1-1.5, 3.1-3.5, 6.1-6.5, 10.1-10.5_
+
+### ✅ Commit Checkpoint 9
+
+```bash
+git add .
+git commit -m "feat(business): add REST controllers and E2E tests for Business endpoints"
+```
+
+---
+
+## Phase 10: Final Integration and Documentation
+
+- [ ] 10.1 Verify integration with Account BC
   - Ensure GetBusinessOwnerByUserIdQuery is available
   - Test BusinessOwner validation in CreateBusinessHandler
   - Verify onboarding and maxBusinesses checks
   - _Requirements: 11.1-11.5_
 
-- [ ] 9.2 Verify integration with other BCs
+- [ ] 10.2 Verify integration with other BCs
   - Test that Offering BC can validate businessId
   - Test that Availability BC can validate businessId
   - Test that Booking BC can validate businessId and isActive
   - Test that Conversation BC can identify Business by whatsappPhone
   - _Requirements: 12.1-12.5_
 
-- [ ] 9.3 Update API documentation
-  - Document Business endpoints (when REST API is added)
+- [ ] 10.3 Update API documentation
+  - Document Business endpoints
   - Document BusinessDto structure
   - Document integration points with other BCs
   - _Requirements: All_
 
-- [ ] 9.4 Final validation and cleanup
+- [ ] 10.4 Final validation and cleanup
   - Run full test suite
   - Verify all migrations work
   - Verify seeds work
   - Check code coverage (target: >80%)
   - _Requirements: All_
 
-### ✅ Commit Checkpoint 9
+### ✅ Commit Checkpoint 10
 
 ```bash
 git add .
@@ -353,37 +408,27 @@ git commit -m "feat(business): complete Business BC with full integration and do
 
 ## Summary
 
-**Total Tasks:** 40 (32 required + 8 optional documentation)
+**Total Tasks:** 46 (38 required + 8 optional documentation)
 
 **Phases:**
 
-1. Value Objects (3 tasks - reuse WhatsAppPhone from @shared/vo)
-2. Aggregate and Events (3 tasks)
-3. Interfaces (3 tasks)
-4. Commands (5 tasks)
-5. Queries (3 tasks)
-6. Persistence (6 tasks)
-7. Database (3 tasks)
-8. Module and Testing (8 tasks: 1 module config + 7 testing tasks)
-9. Final Integration (4 tasks)
+1. Value Objects (3 tasks - reuse WhatsAppPhone from @shared/vo) ✅
+2. Aggregate and Events (3 tasks) ✅
+3. Interfaces (3 tasks) ✅
+4. Commands (5 tasks) ✅
+5. Queries (3 tasks) ✅
+6. Persistence (6 tasks) ✅
+7. Database (3 tasks) ✅
+8. Module and Testing (10 tasks: 1 module config + 9 testing tasks) ✅
+9. Presentation Layer - REST Controllers (6 tasks) 🔄 IN PROGRESS
+10. Final Integration (4 tasks)
 
 **Testing Coverage:**
 
-- Unit Tests: Value Objects, Aggregates
-- Property-Based Tests: Timezone, BusinessAddress, Version increments
-- Integration Tests: Command Handlers, Query Handlers, Repositories
-- E2E Tests: Complete business creation flow
-
-**Key Integration Points:**
-
-1. Value Objects (3 tasks - reuse WhatsAppPhone from @shared/vo)
-2. Aggregate and Events (3 tasks)
-3. Interfaces (3 tasks)
-4. Commands (5 tasks)
-5. Queries (3 tasks)
-6. Persistence (6 tasks)
-7. Database (3 tasks)
-8. Module and Testing (6 tasks)
+- Unit Tests: Value Objects, Aggregates ✅
+- Property-Based Tests: Timezone, BusinessAddress, Version increments ✅
+- Integration Tests: Command Handlers, Query Handlers, Repositories ✅
+- E2E Tests: REST API endpoints (Phase 9)
 
 **Key Integration Points:**
 
@@ -396,6 +441,16 @@ git commit -m "feat(business): complete Business BC with full integration and do
 - `Business.ownerId → User.id` (NOT BusinessOwner.id)
 - FK in database: `owner_id REFERENCES users(id)`
 
+**REST API Endpoints (Phase 9):**
+
+- POST /api/businesses - Create business
+- GET /api/businesses/:id - Get business by ID
+- GET /api/businesses - Get businesses by owner
+- PUT /api/businesses/:id - Update business info
+- PUT /api/businesses/:id/whatsapp - Configure WhatsApp
+- DELETE /api/businesses/:id - Deactivate business
+- POST /api/businesses/:id/activate - Activate business
+
 **Testing Focus:**
 
 - WhatsAppPhone E.164 validation already tested in Customer BC (reuse)
@@ -404,3 +459,4 @@ git commit -m "feat(business): complete Business BC with full integration and do
 - ownerId references User.id (PBT)
 - Optimistic Locking (Integration)
 - BusinessOwner validation (Integration)
+- REST API E2E tests (Phase 9)
