@@ -220,13 +220,23 @@ export class E2EAuthHelper {
     token: string,
     businessData?: Partial<CreateBusinessDto>,
   ): Promise<{ id: string }> {
+    // Generate unique WhatsApp number for each test business
+    const uniqueWhatsApp =
+      businessData?.whatsappNumber || `+1809555${Math.floor(1000 + Math.random() * 9000)}`;
+
     const response = await request(this.app.getHttpServer())
       .post('/api/businesses')
       .set('Authorization', `Bearer ${token}`)
       .send({
         name: businessData?.name || 'Test Business',
-        whatsappNumber: businessData?.whatsappNumber || '+18095551234',
-        address: businessData?.address || '123 Test St',
+        whatsappNumber: uniqueWhatsApp,
+        address: businessData?.address || {
+          street: '123 Test St',
+          city: 'Santo Domingo',
+          state: null,
+          country: 'Dominican Republic',
+          postalCode: null,
+        },
         timezone: businessData?.timezone || 'America/Santo_Domingo',
       })
       .expect(201);

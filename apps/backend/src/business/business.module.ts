@@ -25,6 +25,9 @@ import { BusinessFactory } from '@business/infra/persistence/factories/business.
 // Shared
 import { SharedModule } from '@shared/shared.module';
 
+// Controllers
+import { BusinessController } from '@business/presentation/controllers/business.controller';
+
 const commandHandlers = [
   CreateBusinessHandler,
   UpdateBusinessInfoHandler,
@@ -76,6 +79,7 @@ const factories = [
     // TODO: Import AccountModule when implemented for BusinessOwner validation
     // AccountModule,
   ],
+  controllers: [BusinessController],
   providers: [...commandHandlers, ...queryHandlers, ...repositories, ...factories],
   exports: [
     'IBusinessReadRepository', // Export for other BCs to query businesses
