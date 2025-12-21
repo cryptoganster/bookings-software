@@ -190,32 +190,32 @@ git commit [hash]
 "feat(business): implement persistence layer with repositories, factory and mappers"
 ```
 
-## Phase 7: Infrastructure Layer - Database
+## Phase 7: Infrastructure Layer - Database ✅ COMPLETE
 
-- [ ] 7.1 Create Migration: CreateBusinessesTable
+- [x] 7.1 Create Migration: CreateBusinessesTable
   - Create businesses table with all columns
   - Add unique index on whatsapp_phone (reuse column name from Customer BC)
   - Add index on owner_id
   - Add foreign key to users(id) (NOT business_owners)
   - _Requirements: 13.1-13.3_
 
-- [ ] 7.2 Create Seed: BusinessesSeed
+- [x] 7.2 Create Seed: BusinessesSeed
   - Create 2 businesses linked to existing users
   - Use unique, valid WhatsAppPhone numbers (E.164 format)
   - Use valid IANA timezones
   - _Requirements: 13.4-13.5_
 
-- [ ] 7.3 Run migrations and verify schema
+- [x] 7.3 Run migrations and verify schema
   - Execute migration
   - Verify table structure
   - Verify FK constraint
   - _Requirements: 13.1-13.3_
 
-### ✅ Commit Checkpoint 7
+### ✅ Commit Checkpoint 7 - DONE
 
 ```bash
-git add src/business/infra/migrations
-git commit -m "feat(business): add database migration and seed for businesses table"
+git commit [hash]
+"feat(business): add database migration and seed for businesses table"
 ```
 
 ## Phase 8: Module Configuration and Testing
