@@ -1,7 +1,9 @@
 /**
  * BusinessDeactivated Domain Event
  *
- * Published when a business is deactivated
+ * Published when a business is deactivated.
+ *
+ * Requirements: 6.3
  */
 export class BusinessDeactivated {
   constructor(

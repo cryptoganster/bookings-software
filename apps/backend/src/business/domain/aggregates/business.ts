@@ -3,27 +3,21 @@ import { UUID } from '@shared/vo/uuid';
 import { WhatsAppPhone } from '@shared/vo/whatsapp-phone';
 import { Timezone } from '@business/domain/vo/timezone';
 import { BusinessAddress } from '@business/domain/vo/business-address';
-import {
-  BusinessCreated,
-  BusinessInfoUpdated,
-  BusinessWhatsAppConfigured,
-  BusinessDeactivated,
-  BusinessActivated,
-} from '@business/domain/events';
+import { BusinessCreated } from '@business/domain/events/business-created';
+import { BusinessInfoUpdated } from '@business/domain/events/business-info-updated';
+import { BusinessWhatsAppConfigured } from '@business/domain/events/business-whatsapp-configured';
+import { BusinessDeactivated } from '@business/domain/events/business-deactivated';
+import { BusinessActivated } from '@business/domain/events/business-activated';
 import { InvalidBusinessNameException } from '@business/domain/exceptions/invalid-business-name';
 
 /**
- * Business Aggregate Root
+ * Business Aggregate
  *
- * Represents a specific business with its configuration and contact information.
- * A User can own multiple Business entities according to their subscription plan.
+ * Represents a business entity in the system.
+ * Each business is owned by a User (ownerId → User.id).
+ * A User can own multiple businesses (limited by subscription plan).
  *
- * Business Rules:
- * - Business name must be between 3 and 100 characters
- * - WhatsApp number must be globally unique
- * - Business is owned by a User (ownerId → User.id, NOT BusinessOwner.id)
- * - Business can be activated/deactivated
- * - Inactive businesses cannot accept new appointments
+ * Requirements: 1.1-1.5, 6.1-6.5, 7.1-7.5
  */
 export class Business extends VersionedAggregateRoot {
   private id!: UUID;
@@ -34,18 +28,11 @@ export class Business extends VersionedAggregateRoot {
   private timezone!: Timezone;
   private isActive!: boolean;
   private createdAt!: Date;
-  private updatedAt!: Date;
 
   /**
-   * Factory method to create a new business
-   * @param id Business ID
-   * @param ownerId User ID of the business owner
-   * @param name Business name
-   * @param whatsappPhone WhatsApp Business phone
-   * @param address Business address
-   * @param timezone Business timezone (IANA format)
-   * @returns New Business instance
-   * @throws InvalidBusinessNameException if name is invalid
+   * Factory method to create a new Business
+   *
+   * Requirements: 1.1-1.5
    */
   static create(
     id: UUID,
@@ -55,8 +42,18 @@ export class Business extends VersionedAggregateRoot {
     address: BusinessAddress,
     timezone: Timezone,
   ): Business {
-    // Validate name
-    this.validateName(name);
+    // Validate business name
+    if (!name || name.trim().length === 0) {
+      throw new InvalidBusinessNameException('Business name cannot be empty');
+    }
+
+    if (name.trim().length < 3) {
+      throw new InvalidBusinessNameException('Business name must be at least 3 characters');
+    }
+
+    if (name.trim().length > 100) {
+      throw new InvalidBusinessNameException('Business name cannot exceed 100 characters');
+    }
 
     const business = new Business();
     business.id = id;
@@ -65,121 +62,23 @@ export class Business extends VersionedAggregateRoot {
     business.whatsappPhone = whatsappPhone;
     business.address = address;
     business.timezone = timezone;
-    business.isActive = true; // Active by default
+    business.isActive = true;
     business.createdAt = new Date();
-    business.updatedAt = new Date();
 
-    // Publish event
+    // Apply domain event
     business.apply(
-      new BusinessCreated(
-        id.getValue(),
-        ownerId.getValue(),
-        business.name,
-        whatsappPhone.getValue(),
-      ),
+      new BusinessCreated(id.getValue(), ownerId.getValue(), name.trim(), whatsappPhone.getValue()),
     );
+
     business.incrementVersion();
 
     return business;
   }
 
   /**
-   * Validates business name
-   * @param name Name to validate
-   * @throws InvalidBusinessNameException if name is invalid
-   */
-  private static validateName(name: string): void {
-    if (!name || name.trim().length === 0) {
-      throw new InvalidBusinessNameException('Business name cannot be empty');
-    }
-    if (name.trim().length < 3) {
-      throw new InvalidBusinessNameException('Business name must be at least 3 characters');
-    }
-    if (name.length > 100) {
-      throw new InvalidBusinessNameException('Business name cannot exceed 100 characters');
-    }
-  }
-
-  /**
-   * Updates business information
-   * @param name New business name
-   * @param address New business address
-   * @param timezone New business timezone
-   * @throws InvalidBusinessNameException if name is invalid
-   */
-  updateInfo(name: string, address: BusinessAddress, timezone: Timezone): void {
-    Business.validateName(name);
-
-    this.name = name.trim();
-    this.address = address;
-    this.timezone = timezone;
-    this.updatedAt = new Date();
-    this.incrementVersion();
-
-    // Publish event
-    this.apply(new BusinessInfoUpdated(this.id.getValue(), this.name));
-  }
-
-  /**
-   * Configures or updates WhatsApp Business phone
-   * @param whatsappPhone New WhatsApp phone
-   */
-  configureWhatsApp(whatsappPhone: WhatsAppPhone): void {
-    this.whatsappPhone = whatsappPhone;
-    this.updatedAt = new Date();
-    this.incrementVersion();
-
-    // Publish event
-    this.apply(new BusinessWhatsAppConfigured(this.id.getValue(), whatsappPhone.getValue()));
-  }
-
-  /**
-   * Deactivates the business (prevents new appointments)
-   * Idempotent operation - does nothing if already inactive
-   */
-  deactivate(): void {
-    if (!this.isActive) {
-      return; // Already inactive, idempotent
-    }
-
-    this.isActive = false;
-    this.updatedAt = new Date();
-    this.incrementVersion();
-
-    // Publish event
-    this.apply(new BusinessDeactivated(this.id.getValue()));
-  }
-
-  /**
-   * Activates the business (allows new appointments)
-   * Idempotent operation - does nothing if already active
-   */
-  activate(): void {
-    if (this.isActive) {
-      return; // Already active, idempotent
-    }
-
-    this.isActive = true;
-    this.updatedAt = new Date();
-    this.incrementVersion();
-
-    // Publish event
-    this.apply(new BusinessActivated(this.id.getValue()));
-  }
-
-  /**
-   * Factory method to reconstruct business from persistence
-   * @param id Business ID
-   * @param ownerId User ID of the owner
-   * @param name Business name
-   * @param whatsappPhone WhatsApp phone
-   * @param address Business address
-   * @param timezone Business timezone
-   * @param isActive Active status
-   * @param createdAt Creation timestamp
-   * @param updatedAt Last update timestamp
-   * @param version Aggregate version
-   * @returns Reconstructed Business instance
+   * Factory method to reconstruct Business from persistence
+   *
+   * Requirements: 9.2
    */
   static fromPersistence(
     id: UUID,
@@ -190,7 +89,6 @@ export class Business extends VersionedAggregateRoot {
     timezone: Timezone,
     isActive: boolean,
     createdAt: Date,
-    updatedAt: Date,
     version: number,
   ): Business {
     const business = new Business();
@@ -202,9 +100,80 @@ export class Business extends VersionedAggregateRoot {
     business.timezone = timezone;
     business.isActive = isActive;
     business.createdAt = createdAt;
-    business.updatedAt = updatedAt;
-    business.setVersion(version); // ← Restore version for optimistic locking
+    business.setVersion(version);
+
     return business;
+  }
+
+  /**
+   * Update business information
+   *
+   * Requirements: 10.2
+   */
+  updateInfo(name: string, address: BusinessAddress, timezone: Timezone): void {
+    // Validate business name
+    if (!name || name.trim().length === 0) {
+      throw new InvalidBusinessNameException('Business name cannot be empty');
+    }
+
+    if (name.trim().length < 3) {
+      throw new InvalidBusinessNameException('Business name must be at least 3 characters');
+    }
+
+    if (name.trim().length > 100) {
+      throw new InvalidBusinessNameException('Business name cannot exceed 100 characters');
+    }
+
+    this.name = name.trim();
+    this.address = address;
+    this.timezone = timezone;
+
+    this.incrementVersion();
+    this.apply(new BusinessInfoUpdated(this.id.getValue(), name.trim()));
+  }
+
+  /**
+   * Configure WhatsApp phone number
+   *
+   * Requirements: 3.1-3.5, 10.3
+   */
+  configureWhatsApp(whatsappPhone: WhatsAppPhone): void {
+    this.whatsappPhone = whatsappPhone;
+
+    this.incrementVersion();
+    this.apply(new BusinessWhatsAppConfigured(this.id.getValue(), whatsappPhone.getValue()));
+  }
+
+  /**
+   * Deactivate business (idempotent)
+   *
+   * Requirements: 6.1, 6.3
+   */
+  deactivate(): void {
+    if (!this.isActive) {
+      return; // Already deactivated, idempotent
+    }
+
+    this.isActive = false;
+
+    this.incrementVersion();
+    this.apply(new BusinessDeactivated(this.id.getValue()));
+  }
+
+  /**
+   * Activate business (idempotent)
+   *
+   * Requirements: 6.4, 6.5
+   */
+  activate(): void {
+    if (this.isActive) {
+      return; // Already active, idempotent
+    }
+
+    this.isActive = true;
+
+    this.incrementVersion();
+    this.apply(new BusinessActivated(this.id.getValue()));
   }
 
   // Getters
@@ -238,9 +207,5 @@ export class Business extends VersionedAggregateRoot {
 
   getCreatedAt(): Date {
     return this.createdAt;
-  }
-
-  getUpdatedAt(): Date {
-    return this.updatedAt;
   }
 }

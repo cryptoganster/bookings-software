@@ -1,7 +1,9 @@
 /**
  * BusinessInfoUpdated Domain Event
  *
- * Published when business information is updated
+ * Published when business information is updated.
+ *
+ * Requirements: 3.3
  */
 export class BusinessInfoUpdated {
   constructor(

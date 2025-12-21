@@ -1,7 +1,9 @@
 /**
  * BusinessWhatsAppConfigured Domain Event
  *
- * Published when WhatsApp Business phone is configured or updated
+ * Published when business WhatsApp phone is configured.
+ *
+ * Requirements: 6.3
  */
 export class BusinessWhatsAppConfigured {
   constructor(

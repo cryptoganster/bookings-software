@@ -33,7 +33,7 @@ git commit ff97e45
 
 ## Phase 2: Domain Layer - Aggregate and Events
 
-- [ ] 2.1 Create Business Aggregate
+- [x] 2.1 Create Business Aggregate
   - Extend VersionedAggregateRoot
   - Import WhatsAppPhone from @shared/vo/whatsapp-phone
   - Implement static create() factory method with ownerId → User.id
@@ -44,7 +44,7 @@ git commit ff97e45
   - Implement all getters
   - _Requirements: 1.1-1.5, 6.1-6.5, 7.1-7.5_
 
-- [ ] 2.2 Create Domain Events
+- [x] 2.2 Create Domain Events
   - BusinessCreated (businessId, ownerId, name, whatsappPhone: string)
   - BusinessInfoUpdated (businessId, name)
   - BusinessWhatsAppConfigured (businessId, whatsappPhone: string)
@@ -52,7 +52,7 @@ git commit ff97e45
   - BusinessActivated (businessId)
   - _Requirements: 1.5, 3.3, 6.3, 6.5_
 
-- [ ] 2.3 Create Read Model
+- [x] 2.3 Create Read Model
   - BusinessReadModel with all fields
   - Include computed fields if needed
   - _Requirements: 9.3, 10.4, 10.5_

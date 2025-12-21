@@ -1,7 +1,9 @@
 /**
  * BusinessActivated Domain Event
  *
- * Published when a business is activated
+ * Published when a business is activated.
+ *
+ * Requirements: 6.5
  */
 export class BusinessActivated {
   constructor(

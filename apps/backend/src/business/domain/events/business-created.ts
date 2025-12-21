@@ -1,7 +1,9 @@
 /**
  * BusinessCreated Domain Event
  *
- * Published when a new business is created
+ * Published when a new business is created.
+ *
+ * Requirements: 1.5
  */
 export class BusinessCreated {
   constructor(
