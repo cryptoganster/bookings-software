@@ -2,18 +2,18 @@
 
 ## Phase 1: Domain Layer - Value Objects
 
-- [ ] 1.1 Create SubscriptionPlan Value Object
+- [x] 1.1 Create SubscriptionPlan Value Object
   - Implement factory methods: free(), basic(), pro(), enterprise()
   - Include maxBusinesses, maxAppointmentsPerMonth, price
   - Implement canUpgradeTo() method
   - _Requirements: 2.1-2.4, 7.1-7.3_
 
-- [ ] 1.2 Create SubscriptionStatus Value Object
+- [x] 1.2 Create SubscriptionStatus Value Object
   - Implement factory methods: active(), suspended(), cancelled()
   - Implement query methods: isActive(), isSuspended(), isCancelled()
   - _Requirements: 7.4-7.5_
 
-- [ ] 1.3 Create Domain Exceptions
+- [x] 1.3 Create Domain Exceptions
   - AlreadyOnThisPlanException
   - CannotDowngradeSubscriptionException
   - OnboardingNotCompletedException
@@ -30,7 +30,7 @@ git commit -m "feat(account): implement SubscriptionPlan, SubscriptionStatus VOs
 
 ## Phase 2: Domain Layer - Aggregate and Events
 
-- [ ] 2.1 Create BusinessOwner Aggregate
+- [x] 2.1 Create BusinessOwner Aggregate
   - Extend VersionedAggregateRoot
   - Implement static create() factory method
   - Implement completeOnboarding() method
@@ -39,7 +39,7 @@ git commit -m "feat(account): implement SubscriptionPlan, SubscriptionStatus VOs
   - Implement static fromPersistence() method
   - _Requirements: 1.2-1.5, 3.1-3.5, 4.1-4.3, 5.1-5.4, 6.1-6.5_
 
-- [ ] 2.2 Create Domain Events
+- [x] 2.2 Create Domain Events
   - BusinessOwnerCreated
   - BusinessOwnerOnboardingCompleted
   - BusinessOwnerSubscriptionUpgraded
@@ -47,7 +47,7 @@ git commit -m "feat(account): implement SubscriptionPlan, SubscriptionStatus VOs
   - BusinessOwnerSubscriptionRestored
   - _Requirements: 1.5, 3.4, 4.3, 5.3, 5.5_
 
-- [ ] 2.3 Create Read Model
+- [x] 2.3 Create Read Model
   - BusinessOwnerReadModel with all fields
   - _Requirements: 8.3, 9.4_
 
@@ -60,16 +60,16 @@ git commit -m "feat(account): implement BusinessOwner aggregate with domain even
 
 ## Phase 3: Domain Layer - Interfaces
 
-- [ ] 3.1 Create IBusinessOwnerFactory interface
+- [x] 3.1 Create IBusinessOwnerFactory interface
   - loadById(id: string): Promise<BusinessOwner | null>
   - loadByUserId(userId: string): Promise<BusinessOwner | null>
   - _Requirements: 8.2_
 
-- [ ] 3.2 Create IBusinessOwnerWriteRepository interface
+- [x] 3.2 Create IBusinessOwnerWriteRepository interface
   - save(businessOwner: BusinessOwner): Promise<void>
   - _Requirements: 8.1_
 
-- [ ] 3.3 Create IBusinessOwnerReadRepository interface
+- [x] 3.3 Create IBusinessOwnerReadRepository interface
   - findById(id: string): Promise<BusinessOwnerReadModel | null>
   - findByUserId(userId: string): Promise<BusinessOwnerReadModel | null>
   - _Requirements: 8.3, 9.5_
@@ -83,28 +83,28 @@ git commit -m "feat(account): define repository and factory interfaces for Busin
 
 ## Phase 4: Application Layer - Commands
 
-- [ ] 4.1 Implement CreateBusinessOwnerCommand and Handler
+- [x] 4.1 Implement CreateBusinessOwnerCommand and Handler
   - Command extends Command<{ businessOwnerId: string }>
   - Handler creates BusinessOwner with FREE plan
   - Uses WriteRepository to persist
   - _Requirements: 1.1-1.5, 9.1_
 
-- [ ] 4.2 Implement CompleteOnboardingCommand and Handler
+- [x] 4.2 Implement CompleteOnboardingCommand and Handler
   - Command extends Command<void>
   - Handler loads via Factory, calls completeOnboarding(), saves
   - _Requirements: 3.1-3.5, 9.2_
 
-- [ ] 4.3 Implement UpgradeSubscriptionCommand and Handler
+- [x] 4.3 Implement UpgradeSubscriptionCommand and Handler
   - Command extends Command<void>
   - Handler validates upgrade, updates plan
   - _Requirements: 4.1-4.5, 9.3_
 
-- [ ] 4.4 Implement SuspendSubscriptionCommand and Handler
+- [x] 4.4 Implement SuspendSubscriptionCommand and Handler
   - Command extends Command<void>
   - Handler suspends subscription
   - _Requirements: 5.1-5.3_
 
-- [ ] 4.5 Implement RestoreSubscriptionCommand and Handler
+- [x] 4.5 Implement RestoreSubscriptionCommand and Handler
   - Command extends Command<void>
   - Handler restores subscription
   - _Requirements: 5.4-5.5_
@@ -118,17 +118,17 @@ git commit -m "feat(account): implement all command handlers for BusinessOwner"
 
 ## Phase 5: Application Layer - Queries and Event Handlers
 
-- [ ] 5.1 Implement GetBusinessOwnerQuery and Handler
+- [x] 5.1 Implement GetBusinessOwnerQuery and Handler
   - Query extends Query<BusinessOwnerReadModel>
   - Handler uses ReadRepository
   - _Requirements: 9.4_
 
-- [ ] 5.2 Implement GetBusinessOwnerByUserIdQuery and Handler
+- [x] 5.2 Implement GetBusinessOwnerByUserIdQuery and Handler
   - Query extends Query<BusinessOwnerReadModel | null>
   - Handler uses ReadRepository
   - _Requirements: 9.5, 11.1_
 
-- [ ] 5.3 Implement OnUserRegisteredHandler
+- [x] 5.3 Implement OnUserRegisteredHandler
   - Listens to UserRegistered event from Auth BC
   - Filters by role=BUSINESS_OWNER
   - Dispatches CreateBusinessOwnerCommand
@@ -143,32 +143,32 @@ git commit -m "feat(account): implement queries and OnUserRegisteredHandler"
 
 ## Phase 6: Infrastructure Layer - Persistence
 
-- [ ] 6.1 Create BusinessOwnerModel (TypeORM Entity)
+- [x] 6.1 Create BusinessOwnerModel (TypeORM Entity)
   - Map all fields to database columns
   - Define relationships and indexes
   - _Requirements: 12.1-12.3_
 
-- [ ] 6.2 Create BusinessOwnerWriteMapper
+- [x] 6.2 Create BusinessOwnerWriteMapper
   - toModel(aggregate): BusinessOwnerModel
   - _Requirements: 8.1, 8.4_
 
-- [ ] 6.3 Create BusinessOwnerReadMapper
+- [x] 6.3 Create BusinessOwnerReadMapper
   - toReadModel(model): BusinessOwnerReadModel
   - _Requirements: 8.3_
 
-- [ ] 6.4 Implement BusinessOwnerFactory
+- [x] 6.4 Implement BusinessOwnerFactory
   - Implements IBusinessOwnerFactory
   - Uses TypeORM Repository
   - Calls BusinessOwner.fromPersistence()
   - _Requirements: 8.2_
 
-- [ ] 6.5 Implement BusinessOwnerWriteRepository
+- [x] 6.5 Implement BusinessOwnerWriteRepository
   - Implements IBusinessOwnerWriteRepository
   - Uses Optimistic Locking with version field
   - Throws ConcurrencyException on conflict
   - _Requirements: 8.1, 8.4, 8.5_
 
-- [ ] 6.6 Implement BusinessOwnerReadRepository
+- [x] 6.6 Implement BusinessOwnerReadRepository
   - Implements IBusinessOwnerReadRepository
   - Optimized queries for read models
   - _Requirements: 8.3_
@@ -182,18 +182,18 @@ git commit -m "feat(account): implement persistence layer with repositories, fac
 
 ## Phase 7: Infrastructure Layer - Database
 
-- [ ] 7.1 Create Migration: CreateBusinessOwnersTable
+- [x] 7.1 Create Migration: CreateBusinessOwnersTable
   - Create business_owners table with all columns
   - Add unique index on user_id
   - Add foreign key to users(id)
   - _Requirements: 12.1-12.3_
 
-- [ ] 7.2 Create Seed: BusinessOwnersSeed
+- [x] 7.2 Create Seed: BusinessOwnersSeed
   - Create 2 business owners (FREE and PRO plans)
   - Link to existing users
   - _Requirements: 12.4-12.5_
 
-- [ ] 7.3 Run migrations and verify schema
+- [x] 7.3 Run migrations and verify schema
   - Execute migration
   - Verify table structure
   - _Requirements: 12.1-12.3_
@@ -207,7 +207,7 @@ git commit -m "feat(account): add database migration and seed for business_owner
 
 ## Phase 8: Module Configuration and Testing
 
-- [ ] 8.1 Configure AccountModule
+- [x] 8.1 Configure AccountModule
   - Register all command handlers
   - Register all query handlers
   - Register event handlers
@@ -217,31 +217,31 @@ git commit -m "feat(account): add database migration and seed for business_owner
   - Import TypeOrmModule.forFeature([BusinessOwnerModel])
   - _Requirements: All_
 
-- [ ] 8.2 Update shared-types package
+- [x] 8.2 Update shared-types package
   - Add BusinessOwnerDto to packages/shared-types/src/index.ts
   - Export type for frontend consumption
   - _Requirements: Note in Introduction_
 
-- [ ]\* 8.3 Write Unit Tests
+- [x]\* 8.3 Write Unit Tests
   - Test SubscriptionPlan VO (factory methods, canUpgradeTo)
   - Test SubscriptionStatus VO (factory methods, query methods)
   - Test BusinessOwner Aggregate (create, completeOnboarding, upgradeSubscription)
   - _Requirements: 13.1-13.3_
 
-- [ ]\* 8.4 Write Property-Based Tests
+- [x]\* 8.4 Write Property-Based Tests
   - **Property 1: Subscription upgrade is monotonic**
   - **Validates: Requirements 4.1, 4.4**
   - **Property 2: Version increments on state changes**
   - **Validates: Requirements 6.4**
   - _Requirements: 13.3_
 
-- [ ]\* 8.5 Write Integration Tests
+- [x]\* 8.5 Write Integration Tests
   - Test CreateBusinessOwnerHandler
   - Test OnUserRegisteredHandler (mock event)
   - Test BusinessOwnerWriteRepository (Optimistic Locking)
   - _Requirements: 13.4-13.5_
 
-- [ ] 8.6 Run all validations
+- [x] 8.6 Run all validations
   - pnpm --filter backend typecheck
   - pnpm --filter backend lint
   - pnpm --filter backend format

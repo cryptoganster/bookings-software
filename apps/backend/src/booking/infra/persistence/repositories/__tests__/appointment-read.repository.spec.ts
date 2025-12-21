@@ -5,6 +5,7 @@ import { AppointmentReadRepository } from '../appointment-read';
 import { AppointmentModel } from '../../models/appointment';
 import { CustomerModel } from '@customer/infra/persistence/models/customer.model';
 import { UUID } from '@shared/vo/uuid';
+import { getTestTypeOrmConfig } from '../../../../../../test/test-database.config';
 
 describe('AppointmentReadRepository Integration Tests', () => {
   let module: TestingModule;
@@ -14,17 +15,7 @@ describe('AppointmentReadRepository Integration Tests', () => {
   beforeAll(async () => {
     module = await Test.createTestingModule({
       imports: [
-        TypeOrmModule.forRoot({
-          type: 'postgres',
-          host: process.env.DB_HOST || 'localhost',
-          port: parseInt(process.env.DB_PORT || '5432', 10),
-          username: process.env.DB_USERNAME || 'postgres',
-          password: process.env.DB_PASSWORD || 'postgres',
-          database: process.env.DB_DATABASE || 'bookings_test',
-          entities: [AppointmentModel, CustomerModel],
-          synchronize: true,
-          dropSchema: false, // No eliminar el schema en cada test
-        }),
+        TypeOrmModule.forRoot(getTestTypeOrmConfig()),
         TypeOrmModule.forFeature([AppointmentModel]),
       ],
       providers: [AppointmentReadRepository],

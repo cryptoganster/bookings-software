@@ -12,8 +12,9 @@ export abstract class VersionedAggregateRoot extends AggregateRoot {
     super();
     this.version = new AggregateVersion(0);
     this.loadedVersion = new AggregateVersion(0);
-    // autoCommit = true para publicar eventos automáticamente
-    this.autoCommit = true;
+    // autoCommit = false para permitir testing con getUncommittedEvents()
+    // En producción, EventPublisher.mergeObjectContext() habilita la publicación
+    this.autoCommit = false;
   }
 
   getVersion(): AggregateVersion {
