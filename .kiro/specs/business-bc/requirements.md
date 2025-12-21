@@ -82,11 +82,11 @@ El `BusinessDto` necesitará ser agregado a `packages/shared-types/src/index.ts`
 
 #### Acceptance Criteria
 
-1. WHEN se crea un Business THEN el Sistema SHALL validar que whatsappNumber cumpla formato E.164
-2. WHEN se valida whatsappNumber THEN el Sistema SHALL verificar que no exista otro Business con ese número
+1. WHEN se crea un Business THEN el Sistema SHALL usar WhatsAppPhone VO de @shared/vo para validar formato E.164
+2. WHEN se valida whatsappPhone THEN el Sistema SHALL verificar que no exista otro Business con ese número
 3. WHEN se configura WhatsApp THEN el Sistema SHALL publicar BusinessWhatsAppConfigured
-4. WHEN se actualiza whatsappNumber THEN el Sistema SHALL validar unicidad antes de persistir
-5. WHEN falla la validación de unicidad THEN el Sistema SHALL lanzar WhatsAppNumberAlreadyExistsException
+4. WHEN se actualiza whatsappPhone THEN el Sistema SHALL validar unicidad antes de persistir
+5. WHEN falla la validación de unicidad THEN el Sistema SHALL lanzar WhatsAppPhoneAlreadyExistsException
 
 ### Requirement 4
 
@@ -138,11 +138,11 @@ El `BusinessDto` necesitará ser agregado a `packages/shared-types/src/index.ts`
 
 ### Requirement 8
 
-**User Story:** Como desarrollador, quiero implementar Value Objects para WhatsAppNumber, Timezone y BusinessAddress, para que la validación esté encapsulada.
+**User Story:** Como desarrollador, quiero reutilizar WhatsAppPhone de shared y crear VOs específicos para Timezone y BusinessAddress, para que la validación esté encapsulada.
 
 #### Acceptance Criteria
 
-1. WHEN se crea WhatsAppNumber THEN el Sistema SHALL validar formato E.164 y unicidad
+1. WHEN se crea Business THEN el Sistema SHALL importar WhatsAppPhone desde @shared/vo/whatsapp-phone
 2. WHEN se crea Timezone THEN el Sistema SHALL validar contra lista de zonas IANA
 3. WHEN se crea BusinessAddress THEN el Sistema SHALL validar que street y city no estén vacíos
 4. WHEN se comparan Value Objects THEN el Sistema SHALL usar comparación por valor (equals)
@@ -156,7 +156,7 @@ El `BusinessDto` necesitará ser agregado a `packages/shared-types/src/index.ts`
 
 1. WHEN se define IBusinessWriteRepository THEN el Sistema SHALL incluir solo método save(business: Business)
 2. WHEN se necesita cargar un Business THEN el Sistema SHALL usar IBusinessFactory con loadById(id: UUID)
-3. WHEN se define IBusinessReadRepository THEN el Sistema SHALL incluir findById, findByOwnerId, findByWhatsAppNumber
+3. WHEN se define IBusinessReadRepository THEN el Sistema SHALL incluir findById, findByOwnerId, findByWhatsAppPhone
 4. WHEN se persiste un Business THEN el Sistema SHALL usar Optimistic Locking verificando la versión
 5. WHEN falla por versión THEN el Sistema SHALL lanzar ConcurrencyException
 
@@ -170,7 +170,7 @@ El `BusinessDto` necesitará ser agregado a `packages/shared-types/src/index.ts`
 2. WHEN se define UpdateBusinessInfoCommand THEN el Sistema SHALL extender Command<void>
 3. WHEN se define ConfigureWhatsAppCommand THEN el Sistema SHALL extender Command<void>
 4. WHEN se define GetBusinessQuery THEN el Sistema SHALL extender Query<BusinessReadModel>
-5. WHEN se define GetBusinessesByOwnerIdQuery THEN el Sistema SHALL extender Query<BusinessReadModel[]>
+5. WHEN se define GetBusinessByWhatsAppPhoneQuery THEN el Sistema SHALL extender Query<BusinessReadModel | null>
 
 ### Requirement 11
 
@@ -193,7 +193,7 @@ El `BusinessDto` necesitará ser agregado a `packages/shared-types/src/index.ts`
 1. WHEN Offering BC crea un Offering THEN el Sistema SHALL validar que businessId exista
 2. WHEN Availability BC crea Schedule THEN el Sistema SHALL validar que businessId exista
 3. WHEN Booking BC crea Appointment THEN el Sistema SHALL validar que businessId exista
-4. WHEN Conversation BC recibe mensaje THEN el Sistema SHALL identificar Business por whatsappNumber
+4. WHEN Conversation BC recibe mensaje THEN el Sistema SHALL identificar Business por whatsappPhone usando GetBusinessByWhatsAppPhoneQuery
 5. WHEN se consulta Business THEN el Sistema SHALL retornar timezone para conversión de fechas
 
 ### Requirement 13
@@ -202,11 +202,11 @@ El `BusinessDto` necesitará ser agregado a `packages/shared-types/src/index.ts`
 
 #### Acceptance Criteria
 
-1. WHEN se ejecuta la migración THEN el Sistema SHALL crear tabla businesses con columnas id, owner_id, name, whatsapp_number, address_street, address_city, address_state, address_country, address_postal_code, timezone, is_active, version, created_at, updated_at
-2. WHEN se crea la tabla THEN el Sistema SHALL agregar índice único en whatsapp_number
+1. WHEN se ejecuta la migración THEN el Sistema SHALL crear tabla businesses con columnas id, owner_id, name, whatsapp_phone, address_street, address_city, address_state, address_country, address_postal_code, timezone, is_active, version, created_at, updated_at
+2. WHEN se crea la tabla THEN el Sistema SHALL agregar índice único en whatsapp_phone (consistente con Customer BC)
 3. WHEN se crea la tabla THEN el Sistema SHALL agregar foreign key de owner_id a users(id)
 4. WHEN se ejecuta el seed THEN el Sistema SHALL crear 2 businesses de prueba vinculados a users existentes
-5. WHEN se ejecuta el seed THEN el Sistema SHALL usar números de WhatsApp únicos y válidos
+5. WHEN se ejecuta el seed THEN el Sistema SHALL usar números de WhatsApp únicos y válidos en formato E.164
 
 ### Requirement 14
 
@@ -214,19 +214,19 @@ El `BusinessDto` necesitará ser agregado a `packages/shared-types/src/index.ts`
 
 #### Acceptance Criteria
 
-1. WHEN se testea WhatsAppNumber VO THEN el Sistema SHALL validar formato E.164 correcto e incorrecto
-2. WHEN se testea Timezone VO THEN el Sistema SHALL validar zonas IANA válidas e inválidas
+1. WHEN se testea Timezone VO THEN el Sistema SHALL validar zonas IANA válidas e inválidas
+2. WHEN se testea BusinessAddress VO THEN el Sistema SHALL validar campos requeridos (street, city)
 3. WHEN se testea Business Aggregate THEN el Sistema SHALL verificar create(), updateInfo(), deactivate()
 4. WHEN se testea CreateBusinessHandler THEN el Sistema SHALL verificar validación de límites de BusinessOwner
-5. WHEN se testea con PBT THEN el Sistema SHALL verificar que whatsappNumber sea único globalmente
+5. WHEN se testea con PBT THEN el Sistema SHALL verificar que whatsappPhone sea único globalmente (nota: WhatsAppPhone VO ya testeado en Customer BC)
 
 ## Correctness Properties
 
 _A property is a characteristic or behavior that should hold true across all valid executions of a system—essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees._
 
-### Property 1: WhatsAppNumber global uniqueness
+### Property 1: WhatsAppPhone global uniqueness
 
-_For any_ two Business entities, they should never have the same whatsappNumber.
+_For any_ two Business entities, they should never have the same whatsappPhone (using WhatsAppPhone VO from @shared/vo).
 
 **Validates: Requirements 1.3, 3.2**
 
@@ -268,9 +268,9 @@ _For any_ Business, applying any domain operation should increment the version b
 
 ## Edge Cases
 
-### Edge Case 1: WhatsApp number with international prefix variations
+### Edge Case 1: WhatsApp phone with international prefix variations
 
-WHEN WhatsAppNumber is created with different prefix formats (+1, 001, 1) THEN the Sistema SHALL normalize to E.164 format or reject invalid formats.
+WHEN WhatsAppPhone is created with different prefix formats (+1, 001, 1) THEN the Sistema SHALL normalize to E.164 format or reject invalid formats (handled by WhatsAppPhone VO from @shared/vo).
 
 ### Edge Case 2: Very long business names
 

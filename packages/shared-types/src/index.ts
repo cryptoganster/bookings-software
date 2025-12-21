@@ -207,15 +207,71 @@ export interface CustomerReadModel {
 
 /**
  * Business DTO - Representa un negocio
+ *
+ * @remarks
+ * - ownerId references User.id (NOT BusinessOwner.id)
+ * - whatsappNumber is globally unique
+ * - Address fields are flattened for easier consumption
  */
 export interface BusinessDto {
   id: string;
-  ownerId: string;
+  ownerId: string; // References User.id
   name: string;
-  whatsappNumber: string;
-  address: string | null;
-  timezone: string;
+  whatsappPhone: string; // E.164 format (e.g., +18095551111)
+  addressStreet: string;
+  addressCity: string;
+  addressState: string | null;
+  addressCountry: string | null;
+  addressPostalCode: string | null;
+  timezone: string; // IANA timezone (e.g., America/Santo_Domingo)
+  isActive: boolean;
   createdAt: string; // ISO 8601 string
+  updatedAt: string; // ISO 8601 string
+}
+
+/**
+ * DTO para crear un negocio
+ */
+export interface CreateBusinessRequestDto {
+  name: string;
+  whatsappPhone: string;
+  address: {
+    street: string;
+    city: string;
+    state?: string;
+    country?: string;
+    postalCode?: string;
+  };
+  timezone: string;
+}
+
+/**
+ * DTO para respuesta de creación de negocio
+ */
+export interface CreateBusinessResponseDto {
+  businessId: string;
+}
+
+/**
+ * DTO para actualizar información del negocio
+ */
+export interface UpdateBusinessInfoRequestDto {
+  name: string;
+  address: {
+    street: string;
+    city: string;
+    state?: string;
+    country?: string;
+    postalCode?: string;
+  };
+  timezone: string;
+}
+
+/**
+ * DTO para configurar WhatsApp
+ */
+export interface ConfigureWhatsAppRequestDto {
+  whatsappPhone: string;
 }
 
 // ============================================================================

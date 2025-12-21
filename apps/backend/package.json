@@ -132,6 +132,7 @@
       "^@availability/(.*)$": "<rootDir>/availability/$1",
       "^@offering/(.*)$": "<rootDir>/offering/$1",
       "^@customer/(.*)$": "<rootDir>/customer/$1",
+      "^@business/(.*)$": "<rootDir>/business/$1",
       "^@test-utils/(.*)$": "<rootDir>/test-utils/$1",
       "^@database/(.*)$": "<rootDir>/database/$1",
       "^@config/(.*)$": "<rootDir>/config/$1"
