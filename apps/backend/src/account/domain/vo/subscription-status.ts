@@ -63,7 +63,7 @@ export class SubscriptionStatus extends ValueObject {
     return this.value;
   }
 
-  protected getEqualityComponents(): any[] {
+  protected getEqualityComponents(): unknown[] {
     return [this.value];
   }
 }

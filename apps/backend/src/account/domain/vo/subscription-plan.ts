@@ -88,7 +88,7 @@ export class SubscriptionPlan extends ValueObject {
     return this.price;
   }
 
-  protected getEqualityComponents(): any[] {
+  protected getEqualityComponents(): unknown[] {
     return [this.name];
   }
 }
