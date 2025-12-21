@@ -314,26 +314,26 @@ git commit -m "chore(business): mark Phase 8 complete - all validations passing"
 
 ---
 
-## Phase 9: Presentation Layer - REST Controllers
+## Phase 9: Presentation Layer - REST Controllers ✅ COMPLETE
 
-- [ ] 9.1 Create CreateBusinessDto
+- [x] 9.1 Create CreateBusinessDto
   - name: string (required, min 3, max 100)
   - whatsappNumber: string (required, E.164 format)
   - address: string (required, min 5, max 200)
   - timezone: string (required, IANA timezone)
   - _Requirements: 1.1-1.5_
 
-- [ ] 9.2 Create UpdateBusinessInfoDto
+- [x] 9.2 Create UpdateBusinessInfoDto
   - name: string (optional, min 3, max 100)
   - address: string (optional, min 5, max 200)
   - timezone: string (optional, IANA timezone)
   - _Requirements: 10.2_
 
-- [ ] 9.3 Create ConfigureWhatsAppDto
+- [x] 9.3 Create ConfigureWhatsAppDto
   - whatsappNumber: string (required, E.164 format)
   - _Requirements: 3.1-3.5_
 
-- [ ] 9.4 Create BusinessController
+- [x] 9.4 Create BusinessController
   - POST /api/businesses - Create business (authenticated, BUSINESS_OWNER role)
   - GET /api/businesses/:id - Get business by ID (authenticated)
   - GET /api/businesses - Get businesses by owner (authenticated, uses userId from JWT)
@@ -343,12 +343,13 @@ git commit -m "chore(business): mark Phase 8 complete - all validations passing"
   - POST /api/businesses/:id/activate - Activate business (authenticated, owner only)
   - _Requirements: 1.1-1.5, 3.1-3.5, 6.1-6.5, 10.1-10.5_
 
-- [ ] 9.5 Add BusinessController to BusinessModule
+- [x] 9.5 Add BusinessController to BusinessModule
   - Register controller in module
   - Ensure all dependencies are available
   - _Requirements: All_
 
-- [ ] 9.6 Write E2E Tests for Business Endpoints
+- [x] 9.6 Write E2E Tests for Business Endpoints ⏸️ BLOCKED
+  - **BLOCKED:** Requires Auth BC to be implemented first (register/login endpoints)
   - Test POST /api/businesses with valid data
   - Test POST /api/businesses with duplicate WhatsApp
   - Test GET /api/businesses/:id (found and not found)
@@ -358,13 +359,14 @@ git commit -m "chore(business): mark Phase 8 complete - all validations passing"
   - Test DELETE /api/businesses/:id (deactivate)
   - Test POST /api/businesses/:id/activate
   - Test authentication and authorization
+  - **Tests written but cannot run until Auth BC is complete**
   - _Requirements: 14.4, 1.1-1.5, 3.1-3.5, 6.1-6.5, 10.1-10.5_
 
-### ✅ Commit Checkpoint 9
+### ✅ Commit Checkpoint 9 - DONE
 
 ```bash
-git add .
-git commit -m "feat(business): add REST controllers and E2E tests for Business endpoints"
+git commit c4102ed
+"feat(business): add E2E tests for Business controllers - blocked by Auth BC"
 ```
 
 ---
@@ -420,43 +422,57 @@ git commit -m "feat(business): complete Business BC with full integration and do
 6. Persistence (6 tasks) ✅
 7. Database (3 tasks) ✅
 8. Module and Testing (10 tasks: 1 module config + 9 testing tasks) ✅
-9. Presentation Layer - REST Controllers (6 tasks) 🔄 IN PROGRESS
-10. Final Integration (4 tasks)
+9. Presentation Layer - REST Controllers (6 tasks) ✅ (E2E tests blocked by Auth BC)
+10. Final Integration (4 tasks) ⏸️ BLOCKED
+
+**Current Status:** Phase 9 Complete (with E2E tests blocked), Phase 10 Blocked
+
+**Blockers:**
+
+- E2E tests require Auth BC (register/login endpoints) to be implemented
+- Phase 10 integration tests require Account BC (BusinessOwner) to be implemented
 
 **Testing Coverage:**
 
 - Unit Tests: Value Objects, Aggregates ✅
 - Property-Based Tests: Timezone, BusinessAddress, Version increments ✅
 - Integration Tests: Command Handlers, Query Handlers, Repositories ✅
-- E2E Tests: REST API endpoints (Phase 9)
+- E2E Tests: REST API endpoints ⏸️ (written but blocked by Auth BC)
 
 **Key Integration Points:**
 
-- Account BC: Queries BusinessOwner for validation (onboarding, limits)
-- Shared VO: Reuses WhatsAppPhone from @shared/vo/whatsapp-phone
-- Other BCs: Validate businessId exists before creating related entities
+- Account BC: Queries BusinessOwner for validation (onboarding, limits) ⏸️ BLOCKED
+- Shared VO: Reuses WhatsAppPhone from @shared/vo/whatsapp-phone ✅
+- Other BCs: Validate businessId exists before creating related entities ✅
 
 **Critical Relationship:**
 
-- `Business.ownerId → User.id` (NOT BusinessOwner.id)
-- FK in database: `owner_id REFERENCES users(id)`
+- `Business.ownerId → User.id` (NOT BusinessOwner.id) ✅
+- FK in database: `owner_id REFERENCES users(id)` ✅
 
-**REST API Endpoints (Phase 9):**
+**REST API Endpoints (Phase 9):** ✅
 
-- POST /api/businesses - Create business
-- GET /api/businesses/:id - Get business by ID
-- GET /api/businesses - Get businesses by owner
-- PUT /api/businesses/:id - Update business info
-- PUT /api/businesses/:id/whatsapp - Configure WhatsApp
-- DELETE /api/businesses/:id - Deactivate business
-- POST /api/businesses/:id/activate - Activate business
+- POST /api/businesses - Create business ✅
+- GET /api/businesses/:id - Get business by ID ✅
+- GET /api/businesses - Get businesses by owner ✅
+- PUT /api/businesses/:id - Update business info ✅
+- PUT /api/businesses/:id/whatsapp - Configure WhatsApp ✅
+- DELETE /api/businesses/:id - Deactivate business ✅
+- POST /api/businesses/:id/activate - Activate business ✅
 
 **Testing Focus:**
 
-- WhatsAppPhone E.164 validation already tested in Customer BC (reuse)
-- WhatsAppPhone global uniqueness (PBT)
-- Business count limits (PBT)
-- ownerId references User.id (PBT)
-- Optimistic Locking (Integration)
-- BusinessOwner validation (Integration)
-- REST API E2E tests (Phase 9)
+- WhatsAppPhone E.164 validation already tested in Customer BC (reuse) ✅
+- WhatsAppPhone global uniqueness (PBT) ✅
+- Business count limits (PBT) ⏸️ (requires Account BC)
+- ownerId references User.id (PBT) ✅
+- Optimistic Locking (Integration) ✅
+- BusinessOwner validation (Integration) ⏸️ (requires Account BC)
+- REST API E2E tests (Phase 9) ⏸️ (requires Auth BC)
+
+**Next Steps:**
+
+1. Implement Auth BC (register/login endpoints) to unblock E2E tests
+2. Implement Account BC (BusinessOwner) to unblock Phase 10 integration
+3. Run E2E tests once Auth BC is complete
+4. Complete Phase 10 integration tests once Account BC is complete
