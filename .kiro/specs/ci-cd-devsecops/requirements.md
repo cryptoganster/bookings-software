@@ -242,6 +242,7 @@ Sistema de CI/CD y DevSecOps para proyecto de reservas multi-tenant, optimizado 
 ## Priorización para Solo Dev
 
 ### Must Have (MVP)
+
 - Requirement 1: CI/CD Automatizado ⭐
 - Requirement 2: SAST (CodeQL) ⭐
 - Requirement 3: SCA (npm audit + Dependabot) ⭐
@@ -252,12 +253,14 @@ Sistema de CI/CD y DevSecOps para proyecto de reservas multi-tenant, optimizado 
 - Requirement 9: Branch Protection ⭐
 
 ### Should Have (Post-MVP)
+
 - Requirement 8: Docker Scanning
 - Requirement 10: Gestión de Secretos
 - Requirement 11: Deployment Automatizado
 - Requirement 12: Health Checks
 
 ### Nice to Have (Futuro)
+
 - Requirement 13: Logging Avanzado
 - Requirement 14: Optimización Performance
 - Requirement 15: Documentación Extendida
@@ -270,6 +273,7 @@ Sistema de CI/CD y DevSecOps para proyecto de reservas multi-tenant, optimizado 
 ## Notas de Implementación
 
 ### Herramientas Gratuitas para Solo Dev
+
 - **GitHub Actions**: CI/CD (2000 minutos/mes gratis)
 - **CodeQL**: SAST (gratis para repos públicos/privados)
 - **Dependabot**: SCA (gratis, integrado en GitHub)
@@ -279,6 +283,7 @@ Sistema de CI/CD y DevSecOps para proyecto de reservas multi-tenant, optimizado 
 - **Jest + Vitest**: Testing (open source)
 
 ### Filosofía: Shift Left pero Pragmático
+
 - Detectar problemas temprano (en PR, no en producción)
 - No bloquear desarrollo con checks excesivos
 - Automatizar todo lo repetitivo
@@ -287,12 +292,14 @@ Sistema de CI/CD y DevSecOps para proyecto de reservas multi-tenant, optimizado 
 - Warnings para problemas menores
 
 ### Estrategia de Seguridad
+
 1. **Prevención**: Secret scanning, SAST, SCA
 2. **Detección**: CodeQL, Dependabot alerts
 3. **Respuesta**: Fallar pipeline en críticos, warnings en menores
 4. **Mejora**: Dependabot PRs automáticos
 
 ### Flujo de Trabajo
+
 ```
 develop (local) → feature/* → PR → CI checks → main → deployment
                                     ↓

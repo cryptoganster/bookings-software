@@ -157,6 +157,7 @@ Plan de implementación incremental para CI/CD y DevSecOps, dividido en 4 fases.
   - _Note: Deferred to Phase 4_
 
 ### 8. Checkpoint - Verify CI Pipeline ✅
+
 - ✅ All CI checks implemented in ci.yml
 - ✅ CodeQL SAST workflow created
 - ✅ Branch protection configured (Phase 1)
@@ -251,6 +252,7 @@ Plan de implementación incremental para CI/CD y DevSecOps, dividido en 4 fases.
   - _Requirements: 13.5, 17.4_
 
 ### 13. Checkpoint - Verify CD Pipeline ✅
+
 - ✅ Docker build workflow created with multi-stage build
 - ✅ Trivy container scanning integrated
 - ✅ Deployment automation with health checks
@@ -366,6 +368,7 @@ Plan de implementación incremental para CI/CD y DevSecOps, dividido en 4 fases.
   - _Requirements: 13.1, 13.2_
 
 ### 19. Final Checkpoint - Complete System Validation
+
 - Run full CI/CD pipeline end-to-end
 - Verify all security scans work
 - Verify deployment and rollback work
@@ -377,11 +380,13 @@ Plan de implementación incremental para CI/CD y DevSecOps, dividido en 4 fases.
 ## Testing Strategy
 
 ### Unit Tests
+
 - Test health check endpoint logic
 - Test deployment scripts (if applicable)
 - Test rollback logic (if applicable)
 
 ### Integration Tests
+
 - Test full CI pipeline with test PR
 - Test CD pipeline with test deployment
 - Test rollback with intentional failure
@@ -405,6 +410,7 @@ Plan de implementación incremental para CI/CD y DevSecOps, dividido en 4 fases.
   - Generate random service states and verify correct status codes
 
 ### Manual Tests
+
 - Create test PR and verify all checks run
 - Merge to main and verify deployment
 - Trigger rollback and verify success
@@ -415,14 +421,17 @@ Plan de implementación incremental para CI/CD y DevSecOps, dividido en 4 fases.
 ## Notes
 
 ### All Tasks Required
+
 All tasks in this plan are required for a comprehensive CI/CD & DevSecOps implementation.
 
 ### Dependencies
+
 - Phase 2 must complete before Phase 3
 - Phase 3 must complete before Phase 4
 - Within each phase, tasks can be done in order or in parallel where dependencies allow
 
 ### Estimated Timeline
+
 - Phase 1: 1 day
 - Phase 2: 3-4 days
 - Phase 3: 2-3 days
@@ -430,6 +439,7 @@ All tasks in this plan are required for a comprehensive CI/CD & DevSecOps implem
 - **Total: ~2 weeks**
 
 ### Success Criteria
+
 - ✅ CI pipeline runs on every push
 - ✅ Security scans detect vulnerabilities
 - ✅ Tests run automatically
@@ -439,12 +449,14 @@ All tasks in this plan are required for a comprehensive CI/CD & DevSecOps implem
 - ✅ Documentation is complete
 
 ### Tools Required
+
 - GitHub account with Actions enabled
 - Docker (for local testing)
 - act (for local workflow testing)
 - pnpm (already in project)
 
 ### Cost
+
 - **$0** - All tools used are free for private repositories
 - GitHub Actions: 2000 minutes/month free
 - CodeQL: Free for private repos

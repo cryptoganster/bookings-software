@@ -54,6 +54,7 @@ This document specifies the requirements for implementing Husky pre-commit hooks
 5. WHEN all staged files use only permitted path aliases, THEN the pre-commit hook should proceed to the next check
 
 **Permitted Path Aliases:**
+
 - `@packages/shared-types` - Shared types package
 - `@shared/*` - Shared kernel (backend)
 - `@booking/*` - Booking BC (backend)
@@ -175,4 +176,3 @@ This document specifies the requirements for implementing Husky pre-commit hooks
 2. WHEN the Husky configuration is updated, THEN all developers should receive the update on their next `pnpm install`
 3. WHEN a developer has an outdated Husky configuration, THEN they should see a message prompting them to update
 4. WHEN all developers have the same hooks, THEN code quality should be consistent across commits
-

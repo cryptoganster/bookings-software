@@ -333,10 +333,10 @@ Este plan implementa el BC Offering en el backend siguiendo Clean Architecture, 
   - Actualizado `src/shared/infra/websocket/event-broadcaster.ts`
   - Agregados imports de eventos de Offering
   - Agregados handlers en `handleDomainEvent()` para:
-    * OfferingCreated → broadcast `offering:created` a room `business:{businessId}`
-    * OfferingUpdated → broadcast `offering:updated` a room `business:{businessId}`
-    * OfferingDeactivated → broadcast `offering:deactivated` a room `business:{businessId}`
-    * OfferingActivated → broadcast `offering:activated` a room `business:{businessId}`
+    - OfferingCreated → broadcast `offering:created` a room `business:{businessId}`
+    - OfferingUpdated → broadcast `offering:updated` a room `business:{businessId}`
+    - OfferingDeactivated → broadcast `offering:deactivated` a room `business:{businessId}`
+    - OfferingActivated → broadcast `offering:activated` a room `business:{businessId}`
   - _Requirements: 9.1, 9.2, 9.3_
 
 - [x] 26.1 Write tests for Offering event broadcasting ✅
@@ -478,6 +478,7 @@ Este plan implementa el BC Offering en el backend siguiendo Clean Architecture, 
 **Estimated Time:** 4-5 días de desarrollo
 
 **Key Milestones:**
+
 1. Domain Layer completo (Tasks 1-6)
 2. Infrastructure Layer completo (Tasks 7-11)
 3. Commands implementados (Tasks 12-19)
@@ -489,6 +490,7 @@ Este plan implementa el BC Offering en el backend siguiendo Clean Architecture, 
 9. Documentation (Tasks 38-40)
 
 **Testing Coverage:**
+
 - Unit tests: Aggregate, Value Objects (100% coverage)
 - Property-based tests: 5 properties principales
 - Integration tests: Repositories, Handlers (todos los casos)
@@ -496,6 +498,7 @@ Este plan implementa el BC Offering en el backend siguiendo Clean Architecture, 
 - E2E tests: Flujo completo
 
 **Commits:**
+
 - Commit después de cada task principal
 - Commit después de cada fase de testing
 - Commit final después de validation

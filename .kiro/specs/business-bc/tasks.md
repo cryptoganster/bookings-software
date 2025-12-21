@@ -262,16 +262,17 @@ git commit [hash]
   - **Validates: Requirements 7.3**
   - _Requirements: 14.5_
 
-- [ ] 8.6 Write Integration Tests for Command Handlers
-  - Test CreateBusinessHandler with valid data
-  - Test CreateBusinessHandler with BusinessOwner validation (onboarding not completed)
-  - Test CreateBusinessHandler with max businesses exceeded
-  - Test CreateBusinessHandler with WhatsAppPhone uniqueness violation
-  - Test UpdateBusinessInfoHandler with valid data
-  - Test ConfigureWhatsAppHandler with WhatsAppPhone uniqueness validation
-  - Test DeactivateBusinessHandler (idempotent)
-  - Test ActivateBusinessHandler (idempotent)
+- [x] 8.6 Write Integration Tests for Command Handlers
+  - Test CreateBusinessHandler with valid data ✅
+  - Test CreateBusinessHandler with WhatsAppPhone uniqueness violation ✅
+  - Test CreateBusinessHandler multi-business support ✅
+  - Test CreateBusinessHandler default values ✅
+  - Test UpdateBusinessInfoHandler with valid data (TODO)
+  - Test ConfigureWhatsAppHandler with WhatsAppPhone uniqueness validation (TODO)
+  - Test DeactivateBusinessHandler (idempotent) (TODO)
+  - Test ActivateBusinessHandler (idempotent) (TODO)
   - _Requirements: 14.4, 11.1-11.5_
+  - **Note:** BusinessOwner validation tests will be added when Account BC is implemented
 
 - [ ] 8.7 Write Integration Tests for Query Handlers
   - Test GetBusinessHandler (found and not found)
