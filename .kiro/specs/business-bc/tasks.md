@@ -274,10 +274,10 @@ git commit [hash]
   - _Requirements: 14.4, 11.1-11.5_
   - **Note:** BusinessOwner validation tests will be added when Account BC is implemented
 
-- [ ] 8.7 Write Integration Tests for Query Handlers
-  - Test GetBusinessHandler (found and not found)
-  - Test GetBusinessesByOwnerIdHandler (multiple businesses, empty list)
-  - Test GetBusinessByWhatsAppPhoneHandler (found and not found)
+- [x] 8.7 Write Integration Tests for Query Handlers
+  - Test GetBusinessHandler (found and not found) ✅
+  - Test GetBusinessesByOwnerIdHandler (multiple businesses, empty list) ✅
+  - Test GetBusinessByWhatsAppPhoneHandler (found and not found) ✅
   - _Requirements: 14.4, 10.4, 10.5, 12.4_
 
 - [ ] 8.8 Write Integration Tests for Repositories
