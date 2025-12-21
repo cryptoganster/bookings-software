@@ -118,17 +118,17 @@ git commit -m "feat(account): implement all command handlers for BusinessOwner"
 
 ## Phase 5: Application Layer - Queries and Event Handlers
 
-- [ ] 5.1 Implement GetBusinessOwnerQuery and Handler
+- [x] 5.1 Implement GetBusinessOwnerQuery and Handler
   - Query extends Query<BusinessOwnerReadModel>
   - Handler uses ReadRepository
   - _Requirements: 9.4_
 
-- [ ] 5.2 Implement GetBusinessOwnerByUserIdQuery and Handler
+- [x] 5.2 Implement GetBusinessOwnerByUserIdQuery and Handler
   - Query extends Query<BusinessOwnerReadModel | null>
   - Handler uses ReadRepository
   - _Requirements: 9.5, 11.1_
 
-- [ ] 5.3 Implement OnUserRegisteredHandler
+- [x] 5.3 Implement OnUserRegisteredHandler
   - Listens to UserRegistered event from Auth BC
   - Filters by role=BUSINESS_OWNER
   - Dispatches CreateBusinessOwnerCommand
