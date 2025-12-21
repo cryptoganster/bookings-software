@@ -8,8 +8,11 @@ import { BusinessOwnerSubscriptionUpgraded } from '@account/domain/events/busine
 import { BusinessOwnerSubscriptionSuspended } from '@account/domain/events/business-owner-subscription-suspended';
 import { BusinessOwnerSubscriptionRestored } from '@account/domain/events/business-owner-subscription-restored';
 import { OnboardingAlreadyCompletedException } from '@account/domain/exceptions/onboarding-already-completed.exception';
+import { OnboardingNotCompletedException } from '@account/domain/exceptions/onboarding-not-completed.exception';
 import { AlreadyOnThisPlanException } from '@account/domain/exceptions/already-on-this-plan.exception';
 import { CannotDowngradeSubscriptionException } from '@account/domain/exceptions/cannot-downgrade-subscription.exception';
+import { SubscriptionAlreadySuspendedException } from '@account/domain/exceptions/subscription-already-suspended.exception';
+import { SubscriptionNotActiveException } from '@account/domain/exceptions/subscription-not-active.exception';
 
 /**
  * BusinessOwner Aggregate
@@ -72,6 +75,10 @@ export class BusinessOwner extends VersionedAggregateRoot {
    * Solo permite upgrades (FREE → BASIC → PRO → ENTERPRISE)
    */
   upgradeSubscription(newPlan: SubscriptionPlan): void {
+    if (!this.onboardingCompleted) {
+      throw new OnboardingNotCompletedException(this.id.getValue());
+    }
+
     if (this.subscriptionPlan.equals(newPlan)) {
       throw new AlreadyOnThisPlanException(this.id.getValue());
     }
@@ -98,8 +105,7 @@ export class BusinessOwner extends VersionedAggregateRoot {
    */
   suspendSubscription(): void {
     if (this.subscriptionStatus.isSuspended()) {
-      // Idempotente: no hacer nada si ya está suspendido
-      return;
+      throw new SubscriptionAlreadySuspendedException(this.id.getValue());
     }
 
     this.subscriptionStatus = SubscriptionStatus.suspended();
@@ -113,8 +119,7 @@ export class BusinessOwner extends VersionedAggregateRoot {
    */
   restoreSubscription(): void {
     if (this.subscriptionStatus.isActive()) {
-      // Idempotente: no hacer nada si ya está activo
-      return;
+      throw new SubscriptionNotActiveException(this.id.getValue());
     }
 
     this.subscriptionStatus = SubscriptionStatus.active();
