@@ -61,7 +61,7 @@ describe('Auth Controller E2E', () => {
         })
         .expect(201);
 
-      expect(response.body).toHaveProperty('accessToken'); // Revertido a accessToken
+      expect(response.body).toHaveProperty('token'); // Cambiado de accessToken a token
       expect(response.body).toHaveProperty('userId'); // Register devuelve userId directamente
     });
   });
@@ -91,7 +91,7 @@ describe('Auth Controller E2E', () => {
         })
         .expect(201); // Login también devuelve 201
 
-      expect(response.body).toHaveProperty('accessToken');
+      expect(response.body).toHaveProperty('token'); // Cambiado de accessToken a token
       expect(response.body).toHaveProperty('user');
     });
   });

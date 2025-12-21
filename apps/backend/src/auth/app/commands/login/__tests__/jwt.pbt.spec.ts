@@ -86,6 +86,10 @@ describe('Property 5: JWT tokens contain valid user data with roles', () => {
       debug: jest.fn(),
     };
 
+    const mockQueryBus = {
+      execute: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         RegisterHandler,
@@ -108,6 +112,10 @@ describe('Property 5: JWT tokens contain valid user data with roles', () => {
             secret: 'test-secret',
             signOptions: { expiresIn: '1d' },
           }),
+        },
+        {
+          provide: 'QueryBus',
+          useValue: mockQueryBus,
         },
         {
           provide: PinoLogger,

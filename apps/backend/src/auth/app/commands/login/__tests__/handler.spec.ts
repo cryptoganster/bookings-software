@@ -33,6 +33,10 @@ describe('LoginHandler', () => {
       debug: jest.fn(),
     };
 
+    const mockQueryBus = {
+      execute: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         LoginHandler,
@@ -43,6 +47,10 @@ describe('LoginHandler', () => {
         {
           provide: JwtService,
           useValue: mockJwtService,
+        },
+        {
+          provide: 'QueryBus',
+          useValue: mockQueryBus,
         },
         {
           provide: PinoLogger,

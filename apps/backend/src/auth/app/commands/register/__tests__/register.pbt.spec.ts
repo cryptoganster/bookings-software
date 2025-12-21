@@ -109,6 +109,9 @@ describe('Property 7: initialRole propagates correctly through registration', ()
           role: fc.constantFrom(UserRole.BUSINESS_OWNER, UserRole.CUSTOMER, UserRole.ADMIN),
         }),
         async (userData) => {
+          // Clear repository to avoid email conflicts
+          userRepository.clear();
+
           // Register user with specific role
           const result = await registerHandler.execute(
             new RegisterCommand(userData.email, userData.password, userData.name, userData.role),
@@ -144,6 +147,9 @@ describe('Property 7: initialRole propagates correctly through registration', ()
           role: fc.constantFrom(UserRole.BUSINESS_OWNER, UserRole.CUSTOMER, UserRole.ADMIN),
         }),
         async (userData) => {
+          // Clear repository to avoid email conflicts
+          userRepository.clear();
+
           // Register user with specific role
           const result = await registerHandler.execute(
             new RegisterCommand(userData.email, userData.password, userData.name, userData.role),
