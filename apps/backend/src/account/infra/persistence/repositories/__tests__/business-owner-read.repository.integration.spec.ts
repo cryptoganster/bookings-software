@@ -86,7 +86,7 @@ describe('BusinessOwnerReadRepository (Integration)', () => {
 
     it('should return null for non-existent id', async () => {
       // Act
-      const result = await readRepository.findById('non-existent');
+      const result = await readRepository.findById('11111111-1111-1111-1111-111111111111');
 
       // Assert
       expect(result).toBeNull();
@@ -126,7 +126,7 @@ describe('BusinessOwnerReadRepository (Integration)', () => {
 
     it('should return null for non-existent userId', async () => {
       // Act
-      const result = await readRepository.findByUserId('non-existent-user');
+      const result = await readRepository.findByUserId('22222222-2222-2222-2222-222222222222');
 
       // Assert
       expect(result).toBeNull();

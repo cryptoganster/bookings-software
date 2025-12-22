@@ -89,7 +89,7 @@ describe('GetBusinessOwnerByUserIdHandler (Integration)', () => {
 
     it('should return null for non-existent userId', async () => {
       // Arrange
-      const query = new GetBusinessOwnerByUserIdQuery('non-existent-user');
+      const query = new GetBusinessOwnerByUserIdQuery('22222222-2222-2222-2222-222222222222');
 
       // Act
       const result = await handler.execute(query);

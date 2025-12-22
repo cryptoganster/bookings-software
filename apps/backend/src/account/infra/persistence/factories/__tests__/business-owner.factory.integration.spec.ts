@@ -102,7 +102,7 @@ describe('BusinessOwnerFactory (Integration)', () => {
 
     it('should return null for non-existent id', async () => {
       // Act
-      const aggregate = await factory.loadById('non-existent');
+      const aggregate = await factory.loadById('11111111-1111-1111-1111-111111111111');
 
       // Assert
       expect(aggregate).toBeNull();
@@ -134,11 +134,33 @@ describe('BusinessOwnerFactory (Integration)', () => {
 
     it('should handle all subscription plans correctly', async () => {
       // Arrange - Create business owners with different plans
-      const plans = ['FREE', 'BASIC', 'PRO', 'ENTERPRISE'];
-      for (const plan of plans) {
+      const testData = [
+        {
+          plan: 'FREE',
+          boId: '10000000-0000-0000-0000-000000000001',
+          userId: '20000000-0000-0000-0000-000000000001',
+        },
+        {
+          plan: 'BASIC',
+          boId: '10000000-0000-0000-0000-000000000002',
+          userId: '20000000-0000-0000-0000-000000000002',
+        },
+        {
+          plan: 'PRO',
+          boId: '10000000-0000-0000-0000-000000000003',
+          userId: '20000000-0000-0000-0000-000000000003',
+        },
+        {
+          plan: 'ENTERPRISE',
+          boId: '10000000-0000-0000-0000-000000000004',
+          userId: '20000000-0000-0000-0000-000000000004',
+        },
+      ];
+
+      for (const { plan, boId, userId } of testData) {
         const model = repository.create({
-          id: `bo-${plan}`,
-          userId: `user-${plan}`,
+          id: boId,
+          userId: userId,
           subscriptionPlan: plan,
           subscriptionStatus: 'ACTIVE',
           onboardingCompleted: true,
@@ -150,8 +172,8 @@ describe('BusinessOwnerFactory (Integration)', () => {
       }
 
       // Act & Assert
-      for (const plan of plans) {
-        const aggregate = await factory.loadById(`bo-${plan}`);
+      for (const { plan, boId } of testData) {
+        const aggregate = await factory.loadById(boId);
         expect(aggregate).toBeDefined();
         expect(aggregate!.getSubscriptionPlan().getName()).toBe(plan);
       }
@@ -159,11 +181,28 @@ describe('BusinessOwnerFactory (Integration)', () => {
 
     it('should handle all subscription statuses correctly', async () => {
       // Arrange - Create business owners with different statuses
-      const statuses = ['ACTIVE', 'SUSPENDED', 'CANCELLED'];
-      for (const status of statuses) {
+      const testData = [
+        {
+          status: 'ACTIVE',
+          boId: '30000000-0000-0000-0000-000000000001',
+          userId: '40000000-0000-0000-0000-000000000001',
+        },
+        {
+          status: 'SUSPENDED',
+          boId: '30000000-0000-0000-0000-000000000002',
+          userId: '40000000-0000-0000-0000-000000000002',
+        },
+        {
+          status: 'CANCELLED',
+          boId: '30000000-0000-0000-0000-000000000003',
+          userId: '40000000-0000-0000-0000-000000000003',
+        },
+      ];
+
+      for (const { status, boId, userId } of testData) {
         const model = repository.create({
-          id: `bo-${status}`,
-          userId: `user-${status}`,
+          id: boId,
+          userId: userId,
           subscriptionPlan: 'PRO',
           subscriptionStatus: status,
           onboardingCompleted: true,
@@ -175,8 +214,8 @@ describe('BusinessOwnerFactory (Integration)', () => {
       }
 
       // Act & Assert
-      for (const status of statuses) {
-        const aggregate = await factory.loadById(`bo-${status}`);
+      for (const { status, boId } of testData) {
+        const aggregate = await factory.loadById(boId);
         expect(aggregate).toBeDefined();
         expect(aggregate!.getSubscriptionStatus().getValue()).toBe(status);
       }
@@ -231,7 +270,7 @@ describe('BusinessOwnerFactory (Integration)', () => {
 
     it('should return null for non-existent userId', async () => {
       // Act
-      const aggregate = await factory.loadByUserId('non-existent-user');
+      const aggregate = await factory.loadByUserId('22222222-2222-2222-2222-222222222222');
 
       // Assert
       expect(aggregate).toBeNull();
