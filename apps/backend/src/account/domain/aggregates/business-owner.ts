@@ -12,7 +12,6 @@ import { OnboardingNotCompletedException } from '@account/domain/exceptions/onbo
 import { AlreadyOnThisPlanException } from '@account/domain/exceptions/already-on-this-plan.exception';
 import { CannotDowngradeSubscriptionException } from '@account/domain/exceptions/cannot-downgrade-subscription.exception';
 import { SubscriptionAlreadySuspendedException } from '@account/domain/exceptions/subscription-already-suspended.exception';
-import { SubscriptionNotActiveException } from '@account/domain/exceptions/subscription-not-active.exception';
 
 /**
  * BusinessOwner Aggregate
@@ -116,10 +115,12 @@ export class BusinessOwner extends VersionedAggregateRoot {
   /**
    * Restaura la suscripción
    * Permite crear nuevas citas nuevamente
+   * Idempotente: no genera error si ya está activa
    */
   restoreSubscription(): void {
+    // Idempotente: si ya está activa, no hacer nada
     if (this.subscriptionStatus.isActive()) {
-      throw new SubscriptionNotActiveException(this.id.getValue());
+      return;
     }
 
     this.subscriptionStatus = SubscriptionStatus.active();
