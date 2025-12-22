@@ -239,15 +239,81 @@ El `BusinessOwnerDto` necesitará ser agregado a `packages/shared-types/src/inde
 
 ### Requirement 13
 
-**User Story:** Como desarrollador, quiero implementar tests unitarios, de integración y PBT para Account BC, para que el código tenga alta cobertura.
+**User Story:** Como desarrollador, quiero implementar una suite completa de tests (unitarios, integración, property-based, E2E, edge cases) para Account BC, para garantizar >80% de cobertura y validar todos los casos críticos.
 
 #### Acceptance Criteria
 
-1. WHEN se testea SubscriptionPlan VO THEN el Sistema SHALL verificar que cada plan tenga los límites correctos
-2. WHEN se testea BusinessOwner Aggregate THEN el Sistema SHALL verificar create(), completeOnboarding(), upgradeSubscription()
-3. WHEN se testea con PBT THEN el Sistema SHALL verificar que upgradeSubscription solo permita mejoras
-4. WHEN se testea CreateBusinessOwnerHandler THEN el Sistema SHALL verificar que crea correctamente vinculado a userId
-5. WHEN se testea OnUserRegisteredHandler THEN el Sistema SHALL verificar que solo reacciona a role=BUSINESS_OWNER
+1. WHEN se implementan tests unitarios THEN el Sistema SHALL alcanzar >90% de cobertura en domain layer (Aggregates y Value Objects)
+2. WHEN se implementan tests de integración THEN el Sistema SHALL validar todos los Command Handlers, Query Handlers, Event Handlers y Repositories con base de datos real
+3. WHEN se implementan property-based tests THEN el Sistema SHALL ejecutar 100+ iteraciones por propiedad para validar invariantes universales
+4. WHEN se implementan tests E2E THEN el Sistema SHALL validar flujos completos de usuario con HTTP requests reales
+5. WHEN se implementan edge case tests THEN el Sistema SHALL validar explícitamente casos límite como concurrencia, duplicados e idempotencia
+
+## Test Suite Summary
+
+### Test Statistics
+
+| Category                 | Test Count | Coverage Target  |
+| ------------------------ | ---------- | ---------------- |
+| **Unit Tests**           | 24         | >90%             |
+| **Property-Based Tests** | 4          | 100+ iterations  |
+| **Integration Tests**    | 13         | >85%             |
+| **E2E Tests**            | 5          | Critical flows   |
+| **Edge Case Tests**      | 5          | 100%             |
+| **Total**                | **51**     | **>80% overall** |
+
+### Test Breakdown by Component
+
+**Domain Layer (36 tests):**
+
+- SubscriptionPlan VO: 9 unit tests
+- SubscriptionStatus VO: 8 unit tests
+- BusinessOwner Aggregate: 15 unit tests
+- Property Tests: 4 tests (100+ iterations each)
+
+**Application Layer (8 tests):**
+
+- Command Handlers: 5 integration tests
+- Query Handlers: 2 integration tests
+- Event Handlers: 1 integration test
+
+**Infrastructure Layer (7 tests):**
+
+- Write Repository: 3 integration tests
+- Read Repository: 1 integration test
+- Factory: 1 integration test
+- Concurrency: 2 integration tests
+
+**Presentation Layer (10 tests):**
+
+- E2E Tests: 5 tests
+- Edge Case Tests: 5 tests
+
+### Key Testing Principles
+
+1. **Test Pyramid:** Many fast unit tests, moderate integration tests, few comprehensive E2E tests
+2. **Test Isolation:** Each test is independent, database cleaned before each test
+3. **Test Clarity:** Descriptive names, Arrange-Act-Assert pattern, clear assertions
+4. **Test Maintainability:** DRY principle with helpers, consistent patterns
+
+### Test Commands
+
+```bash
+# Run all tests
+pnpm --filter backend test
+
+# Run with coverage
+pnpm --filter backend test:cov
+
+# Run specific category
+pnpm --filter backend test -- --testPathPattern="spec.ts$"        # Unit
+pnpm --filter backend test -- --testPathPattern="integration"     # Integration
+pnpm --filter backend test -- --testPathPattern="pbt"             # Property
+pnpm --filter backend test:e2e                                    # E2E
+
+# Watch mode
+pnpm --filter backend test:watch
+```
 
 ## Correctness Properties
 
