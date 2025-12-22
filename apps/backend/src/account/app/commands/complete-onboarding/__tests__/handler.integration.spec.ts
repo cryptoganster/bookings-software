@@ -85,8 +85,8 @@ describe('CompleteOnboardingHandler (Integration)', () => {
     it('should load BusinessOwner via factory and complete onboarding', async () => {
       // Arrange
       const businessOwnerModel = repository.create({
-        id: 'be67026b-b1e5-4104-b66c-f23d86098321',
-        userId: '65f818ad-9782-40bd-b8ed-16251f31f511',
+        id: 'bo-123',
+        userId: 'user-123',
         subscriptionPlan: 'FREE',
         subscriptionStatus: 'ACTIVE',
         onboardingCompleted: false,
@@ -95,15 +95,13 @@ describe('CompleteOnboardingHandler (Integration)', () => {
       });
       await repository.save(businessOwnerModel);
 
-      const command = new CompleteOnboardingCommand('be67026b-b1e5-4104-b66c-f23d86098321');
+      const command = new CompleteOnboardingCommand('bo-123');
 
       // Act
       await handler.execute(command);
 
       // Assert
-      const updated = await repository.findOne({
-        where: { id: 'be67026b-b1e5-4104-b66c-f23d86098321' },
-      });
+      const updated = await repository.findOne({ where: { id: 'bo-123' } });
       expect(updated).toBeDefined();
       expect(updated!.onboardingCompleted).toBe(true);
       expect(updated!.version).toBe(2); // Version incremented
@@ -111,7 +109,7 @@ describe('CompleteOnboardingHandler (Integration)', () => {
 
     it('should throw BusinessOwnerNotFoundException if not found', async () => {
       // Arrange
-      const command = new CompleteOnboardingCommand('11111111-1111-1111-1111-111111111111');
+      const command = new CompleteOnboardingCommand('non-existent');
 
       // Act & Assert
       await expect(handler.execute(command)).rejects.toThrow(BusinessOwnerNotFoundException);
@@ -120,8 +118,8 @@ describe('CompleteOnboardingHandler (Integration)', () => {
     it('should throw OnboardingAlreadyCompletedException if already completed', async () => {
       // Arrange
       const businessOwnerModel = repository.create({
-        id: 'be67026b-b1e5-4104-b66c-f23d86098321',
-        userId: '65f818ad-9782-40bd-b8ed-16251f31f511',
+        id: 'bo-123',
+        userId: 'user-123',
         subscriptionPlan: 'FREE',
         subscriptionStatus: 'ACTIVE',
         onboardingCompleted: true, // Already completed
@@ -130,7 +128,7 @@ describe('CompleteOnboardingHandler (Integration)', () => {
       });
       await repository.save(businessOwnerModel);
 
-      const command = new CompleteOnboardingCommand('be67026b-b1e5-4104-b66c-f23d86098321');
+      const command = new CompleteOnboardingCommand('bo-123');
 
       // Act & Assert
       await expect(handler.execute(command)).rejects.toThrow(OnboardingAlreadyCompletedException);
@@ -139,8 +137,8 @@ describe('CompleteOnboardingHandler (Integration)', () => {
     it('should persist changes to database', async () => {
       // Arrange
       const businessOwnerModel = repository.create({
-        id: 'be67026b-b1e5-4104-b66c-f23d86098321',
-        userId: '65f818ad-9782-40bd-b8ed-16251f31f511',
+        id: 'bo-123',
+        userId: 'user-123',
         subscriptionPlan: 'FREE',
         subscriptionStatus: 'ACTIVE',
         onboardingCompleted: false,
@@ -149,15 +147,13 @@ describe('CompleteOnboardingHandler (Integration)', () => {
       });
       await repository.save(businessOwnerModel);
 
-      const command = new CompleteOnboardingCommand('be67026b-b1e5-4104-b66c-f23d86098321');
+      const command = new CompleteOnboardingCommand('bo-123');
 
       // Act
       await handler.execute(command);
 
       // Assert - Verify persistence
-      const persisted = await repository.findOne({
-        where: { id: 'be67026b-b1e5-4104-b66c-f23d86098321' },
-      });
+      const persisted = await repository.findOne({ where: { id: 'bo-123' } });
       expect(persisted).toBeDefined();
       expect(persisted!.onboardingCompleted).toBe(true);
       expect(persisted!.version).toBe(2);
