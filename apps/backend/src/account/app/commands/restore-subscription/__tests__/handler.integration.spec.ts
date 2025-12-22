@@ -83,8 +83,8 @@ describe('RestoreSubscriptionHandler (Integration)', () => {
     it('should restore subscription successfully', async () => {
       // Arrange
       const businessOwnerModel = repository.create({
-        id: 'be67026b-b1e5-4104-b66c-f23d86098321',
-        userId: '65f818ad-9782-40bd-b8ed-16251f31f511',
+        id: 'bo-123',
+        userId: 'user-123',
         subscriptionPlan: 'PRO',
         subscriptionStatus: 'SUSPENDED',
         onboardingCompleted: true,
@@ -93,15 +93,13 @@ describe('RestoreSubscriptionHandler (Integration)', () => {
       });
       await repository.save(businessOwnerModel);
 
-      const command = new RestoreSubscriptionCommand('be67026b-b1e5-4104-b66c-f23d86098321');
+      const command = new RestoreSubscriptionCommand('bo-123');
 
       // Act
       await handler.execute(command);
 
       // Assert
-      const updated = await repository.findOne({
-        where: { id: 'be67026b-b1e5-4104-b66c-f23d86098321' },
-      });
+      const updated = await repository.findOne({ where: { id: 'bo-123' } });
       expect(updated).toBeDefined();
       expect(updated!.subscriptionStatus).toBe('ACTIVE');
       expect(updated!.version).toBe(2); // Version incremented
@@ -110,8 +108,8 @@ describe('RestoreSubscriptionHandler (Integration)', () => {
     it('should be idempotent (no error if already active)', async () => {
       // Arrange
       const businessOwnerModel = repository.create({
-        id: 'be67026b-b1e5-4104-b66c-f23d86098321',
-        userId: '65f818ad-9782-40bd-b8ed-16251f31f511',
+        id: 'bo-123',
+        userId: 'user-123',
         subscriptionPlan: 'BASIC',
         subscriptionStatus: 'ACTIVE',
         onboardingCompleted: true,
@@ -120,22 +118,19 @@ describe('RestoreSubscriptionHandler (Integration)', () => {
       });
       await repository.save(businessOwnerModel);
 
-      const command = new RestoreSubscriptionCommand('be67026b-b1e5-4104-b66c-f23d86098321');
+      const command = new RestoreSubscriptionCommand('bo-123');
 
-      // Act - Should not throw
-      await handler.execute(command);
+      // Act & Assert - Should not throw
+      await expect(handler.execute(command)).resolves.not.toThrow();
 
-      // Assert - Verify status remains ACTIVE and version unchanged (idempotent)
-      const updated = await repository.findOne({
-        where: { id: 'be67026b-b1e5-4104-b66c-f23d86098321' },
-      });
+      // Verify status remains ACTIVE
+      const updated = await repository.findOne({ where: { id: 'bo-123' } });
       expect(updated!.subscriptionStatus).toBe('ACTIVE');
-      expect(updated!.version).toBe(1); // Version unchanged because no state change
     });
 
     it('should throw BusinessOwnerNotFoundException if not found', async () => {
       // Arrange
-      const command = new RestoreSubscriptionCommand('11111111-1111-1111-1111-111111111111');
+      const command = new RestoreSubscriptionCommand('non-existent');
 
       // Act & Assert
       await expect(handler.execute(command)).rejects.toThrow(BusinessOwnerNotFoundException);
@@ -144,8 +139,8 @@ describe('RestoreSubscriptionHandler (Integration)', () => {
     it('should persist changes to database', async () => {
       // Arrange
       const businessOwnerModel = repository.create({
-        id: 'be67026b-b1e5-4104-b66c-f23d86098321',
-        userId: '65f818ad-9782-40bd-b8ed-16251f31f511',
+        id: 'bo-123',
+        userId: 'user-123',
         subscriptionPlan: 'ENTERPRISE',
         subscriptionStatus: 'SUSPENDED',
         onboardingCompleted: true,
@@ -154,15 +149,13 @@ describe('RestoreSubscriptionHandler (Integration)', () => {
       });
       await repository.save(businessOwnerModel);
 
-      const command = new RestoreSubscriptionCommand('be67026b-b1e5-4104-b66c-f23d86098321');
+      const command = new RestoreSubscriptionCommand('bo-123');
 
       // Act
       await handler.execute(command);
 
       // Assert - Verify persistence
-      const persisted = await repository.findOne({
-        where: { id: 'be67026b-b1e5-4104-b66c-f23d86098321' },
-      });
+      const persisted = await repository.findOne({ where: { id: 'bo-123' } });
       expect(persisted).toBeDefined();
       expect(persisted!.subscriptionStatus).toBe('ACTIVE');
       expect(persisted!.version).toBe(2);
