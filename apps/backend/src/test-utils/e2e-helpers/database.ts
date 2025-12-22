@@ -99,8 +99,17 @@ export class E2EDatabaseHelper {
     try {
       // Truncate all tables with CASCADE to handle foreign keys
       for (const entity of entities) {
-        const repository = dataSource.getRepository(entity.name);
-        await repository.query(`TRUNCATE TABLE "${entity.tableName}" CASCADE;`);
+        try {
+          const repository = dataSource.getRepository(entity.name);
+          await repository.query(`TRUNCATE TABLE "${entity.tableName}" CASCADE;`);
+        } catch (error) {
+          // Skip tables that don't exist (can happen when DataSource has different entities than global-setup)
+          if (error instanceof Error && error.message?.includes('does not exist')) {
+            console.warn(`⚠️  Table ${entity.tableName} does not exist, skipping...`);
+            continue;
+          }
+          throw error;
+        }
       }
     } finally {
       // Re-enable foreign key checks
