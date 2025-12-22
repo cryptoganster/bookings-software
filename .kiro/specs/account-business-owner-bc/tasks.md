@@ -346,7 +346,7 @@ git commit -m "feat(account): add database migration and seed for business_owner
     - Test with real database (test container)
     - _Requirements: 13.4, 1.1-1.5_
     - ✅ **Completed:** Integration test at `src/account/app/commands/create-business-owner/__tests__/handler.integration.spec.ts`
-  - [ ]\* 8.6.2 Test CompleteOnboardingHandler
+  - [x]\* 8.6.2 Test CompleteOnboardingHandler
     - Test loads BusinessOwner via factory
     - Test calls completeOnboarding() on aggregate
     - Test persists changes to database
@@ -355,7 +355,8 @@ git commit -m "feat(account): add database migration and seed for business_owner
     - Test throws OnboardingAlreadyCompletedException if already completed
     - Test with real database (test container)
     - _Requirements: 3.1-3.5_
-  - [ ]\* 8.6.3 Test UpgradeSubscriptionHandler
+    - ✅ **Completed:** Integration test at `src/account/app/commands/complete-onboarding/__tests__/handler.integration.spec.ts`
+  - [x]\* 8.6.3 Test UpgradeSubscriptionHandler
     - Test loads BusinessOwner via factory
     - Test upgrades subscription successfully
     - Test persists changes to database
@@ -364,14 +365,16 @@ git commit -m "feat(account): add database migration and seed for business_owner
     - Test throws CannotDowngradeSubscriptionException for downgrade
     - Test with real database (test container)
     - _Requirements: 4.1-4.5_
-  - [ ]\* 8.6.4 Test SuspendSubscriptionHandler
+    - ✅ **Completed:** Integration test at `src/account/app/commands/upgrade-subscription/__tests__/handler.integration.spec.ts`
+  - [x]\* 8.6.4 Test SuspendSubscriptionHandler
     - Test loads BusinessOwner via factory
     - Test suspends subscription successfully
     - Test persists changes to database
     - Test publishes BusinessOwnerSubscriptionSuspended event
     - Test with real database (test container)
     - _Requirements: 5.1-5.3_
-  - [ ]\* 8.6.5 Test RestoreSubscriptionHandler
+    - ✅ **Completed:** Integration test at `src/account/app/commands/suspend-subscription/__tests__/handler.integration.spec.ts`
+  - [x]\* 8.6.5 Test RestoreSubscriptionHandler
     - Test loads BusinessOwner via factory
     - Test restores subscription successfully
     - Test persists changes to database
@@ -379,6 +382,7 @@ git commit -m "feat(account): add database migration and seed for business_owner
     - Test is idempotent (no error if already active)
     - Test with real database (test container)
     - _Requirements: 5.4-5.5_
+    - ✅ **Completed:** Integration test at `src/account/app/commands/restore-subscription/__tests__/handler.integration.spec.ts`
 
 - [ ]\* 8.7 Write Integration Tests - Query Handlers
   - [ ]\* 8.7.1 Test GetBusinessOwnerHandler
