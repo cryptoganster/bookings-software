@@ -19,7 +19,7 @@ import { BusinessAddress } from '@business/domain/vo/business-address';
 import { Timezone } from '@business/domain/vo/timezone';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
-import { E2EDatabaseHelper } from '@test-utils/e2e';
+import { E2EDatabaseHelper } from '@test-utils/e2e-helpers';
 
 describe('BusinessWriteRepository Integration Tests', () => {
   let module: TestingModule;

@@ -13,7 +13,7 @@ import { DataSource } from 'typeorm';
 import { BusinessFactory } from '../business.factory';
 import { BusinessModel } from '../../models/business.model';
 import { UUID } from '@shared/vo/uuid';
-import { E2EDatabaseHelper } from '@test-utils/e2e';
+import { E2EDatabaseHelper } from '@test-utils/e2e-helpers';
 
 describe('BusinessFactory Integration Tests', () => {
   let module: TestingModule;
