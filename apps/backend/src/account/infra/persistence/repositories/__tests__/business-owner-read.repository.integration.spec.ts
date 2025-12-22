@@ -57,8 +57,8 @@ describe('BusinessOwnerReadRepository (Integration)', () => {
     it('should return correct read model', async () => {
       // Arrange
       const businessOwnerModel = repository.create({
-        id: 'bo-123',
-        userId: 'user-123',
+        id: 'be67026b-b1e5-4104-b66c-f23d86098321',
+        userId: '65f818ad-9782-40bd-b8ed-16251f31f511',
         subscriptionPlan: 'PRO',
         subscriptionStatus: 'ACTIVE',
         onboardingCompleted: true,
@@ -69,13 +69,13 @@ describe('BusinessOwnerReadRepository (Integration)', () => {
       await repository.save(businessOwnerModel);
 
       // Act
-      const result = await readRepository.findById('bo-123');
+      const result = await readRepository.findById('be67026b-b1e5-4104-b66c-f23d86098321');
 
       // Assert
       expect(result).toBeDefined();
       expect(result).not.toBeNull();
-      expect(result!.id).toBe('bo-123');
-      expect(result!.userId).toBe('user-123');
+      expect(result!.id).toBe('be67026b-b1e5-4104-b66c-f23d86098321');
+      expect(result!.userId).toBe('65f818ad-9782-40bd-b8ed-16251f31f511');
       expect(result!.subscriptionPlan).toBe('PRO');
       expect(result!.subscriptionStatus).toBe('ACTIVE');
       expect(result!.onboardingCompleted).toBe(true);
@@ -97,8 +97,8 @@ describe('BusinessOwnerReadRepository (Integration)', () => {
     it('should return correct read model', async () => {
       // Arrange
       const businessOwnerModel = repository.create({
-        id: 'bo-456',
-        userId: 'user-456',
+        id: 'cc6f68fc-eb33-4f68-8766-373718cb24fa',
+        userId: '7c956221-da3a-49db-b00e-2a25aae38ca7',
         subscriptionPlan: 'ENTERPRISE',
         subscriptionStatus: 'SUSPENDED',
         onboardingCompleted: false,
@@ -109,13 +109,13 @@ describe('BusinessOwnerReadRepository (Integration)', () => {
       await repository.save(businessOwnerModel);
 
       // Act
-      const result = await readRepository.findByUserId('user-456');
+      const result = await readRepository.findByUserId('7c956221-da3a-49db-b00e-2a25aae38ca7');
 
       // Assert
       expect(result).toBeDefined();
       expect(result).not.toBeNull();
-      expect(result!.id).toBe('bo-456');
-      expect(result!.userId).toBe('user-456');
+      expect(result!.id).toBe('cc6f68fc-eb33-4f68-8766-373718cb24fa');
+      expect(result!.userId).toBe('7c956221-da3a-49db-b00e-2a25aae38ca7');
       expect(result!.subscriptionPlan).toBe('ENTERPRISE');
       expect(result!.subscriptionStatus).toBe('SUSPENDED');
       expect(result!.onboardingCompleted).toBe(false);
@@ -137,8 +137,8 @@ describe('BusinessOwnerReadRepository (Integration)', () => {
     it('should return read models without unnecessary joins', async () => {
       // Arrange
       const businessOwnerModel = repository.create({
-        id: 'bo-789',
-        userId: 'user-789',
+        id: '9660e857-1161-47f5-bf42-ae8c0341ee71',
+        userId: '61e339a2-b501-4ca3-88e0-be8af02d9f09',
         subscriptionPlan: 'FREE',
         subscriptionStatus: 'ACTIVE',
         onboardingCompleted: true,
@@ -149,7 +149,7 @@ describe('BusinessOwnerReadRepository (Integration)', () => {
       await repository.save(businessOwnerModel);
 
       // Act
-      const result = await readRepository.findById('bo-789');
+      const result = await readRepository.findById('9660e857-1161-47f5-bf42-ae8c0341ee71');
 
       // Assert - Verify all fields are populated correctly
       expect(result).toBeDefined();
@@ -161,8 +161,8 @@ describe('BusinessOwnerReadRepository (Integration)', () => {
     it('should handle BASIC plan correctly', async () => {
       // Arrange
       const businessOwnerModel = repository.create({
-        id: 'bo-basic',
-        userId: 'user-basic',
+        id: '81c10b8c-6cbf-449f-a708-10fda607538a',
+        userId: '50254344-ff7c-4933-b50a-e66fadd31688',
         subscriptionPlan: 'BASIC',
         subscriptionStatus: 'ACTIVE',
         onboardingCompleted: true,
@@ -173,7 +173,7 @@ describe('BusinessOwnerReadRepository (Integration)', () => {
       await repository.save(businessOwnerModel);
 
       // Act
-      const result = await readRepository.findById('bo-basic');
+      const result = await readRepository.findById('81c10b8c-6cbf-449f-a708-10fda607538a');
 
       // Assert
       expect(result).toBeDefined();

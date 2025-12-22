@@ -63,8 +63,8 @@ describe('GetBusinessOwnerHandler (Integration)', () => {
     it('should return BusinessOwnerReadModel for valid id', async () => {
       // Arrange
       const businessOwnerModel = repository.create({
-        id: 'bo-123',
-        userId: 'user-123',
+        id: 'be67026b-b1e5-4104-b66c-f23d86098321',
+        userId: '65f818ad-9782-40bd-b8ed-16251f31f511',
         subscriptionPlan: 'PRO',
         subscriptionStatus: 'ACTIVE',
         onboardingCompleted: true,
@@ -73,7 +73,7 @@ describe('GetBusinessOwnerHandler (Integration)', () => {
       });
       await repository.save(businessOwnerModel);
 
-      const query = new GetBusinessOwnerQuery('bo-123');
+      const query = new GetBusinessOwnerQuery('be67026b-b1e5-4104-b66c-f23d86098321');
 
       // Act
       const result = await handler.execute(query);
@@ -81,8 +81,8 @@ describe('GetBusinessOwnerHandler (Integration)', () => {
       // Assert
       expect(result).toBeDefined();
       expect(result).not.toBeNull();
-      expect(result!.id).toBe('bo-123');
-      expect(result!.userId).toBe('user-123');
+      expect(result!.id).toBe('be67026b-b1e5-4104-b66c-f23d86098321');
+      expect(result!.userId).toBe('65f818ad-9782-40bd-b8ed-16251f31f511');
       expect(result!.subscriptionPlan).toBe('PRO');
       expect(result!.subscriptionStatus).toBe('ACTIVE');
       expect(result!.onboardingCompleted).toBe(true);
@@ -102,8 +102,8 @@ describe('GetBusinessOwnerHandler (Integration)', () => {
     it('should return read model with all expected fields', async () => {
       // Arrange
       const businessOwnerModel = repository.create({
-        id: 'bo-456',
-        userId: 'user-456',
+        id: 'cc6f68fc-eb33-4f68-8766-373718cb24fa',
+        userId: '7c956221-da3a-49db-b00e-2a25aae38ca7',
         subscriptionPlan: 'ENTERPRISE',
         subscriptionStatus: 'SUSPENDED',
         onboardingCompleted: false,
@@ -112,7 +112,7 @@ describe('GetBusinessOwnerHandler (Integration)', () => {
       });
       await repository.save(businessOwnerModel);
 
-      const query = new GetBusinessOwnerQuery('bo-456');
+      const query = new GetBusinessOwnerQuery('cc6f68fc-eb33-4f68-8766-373718cb24fa');
 
       // Act
       const result = await handler.execute(query);
