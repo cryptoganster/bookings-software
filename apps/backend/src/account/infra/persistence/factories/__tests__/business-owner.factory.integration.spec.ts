@@ -189,13 +189,13 @@ describe('BusinessOwnerFactory (Integration)', () => {
         },
         {
           status: 'SUSPENDED',
-          boId: 'f1e2d3c4-b5a6-4978-8e9f-0a1b2c3d4e5f',
-          userId: 'a1b2c3d4-e5f6-4789-0abc-def123456789',
+          boId: '3020e074-a12a-4b90-85d2-65a8dbf11e32',
+          userId: '6bb9749e-993d-46c2-8eec-6b694dfb7846',
         },
         {
           status: 'CANCELLED',
-          boId: 'b2c3d4e5-f6a7-4890-1bcd-ef2345678901',
-          userId: 'c3d4e5f6-a7b8-4901-2cde-f34567890123',
+          boId: 'b2c3d4e5-f6a7-4890-abcd-ef2345678901',
+          userId: '897c7cfe-5426-4e21-821f-3b402e9c2c2a',
         },
       ];
 
