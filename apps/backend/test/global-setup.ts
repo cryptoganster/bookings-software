@@ -1,6 +1,27 @@
 import { DataSource } from 'typeorm';
 import { config } from 'dotenv';
 import { join } from 'path';
+import { AppointmentModel } from '../src/booking/infra/persistence/models/appointment';
+import { CapacityModel } from '../src/availability/infra/persistence/models/capacity';
+import { OfferingModel } from '../src/offering/infra/persistence/models/offering';
+import { CustomerModel } from '../src/customer/infra/persistence/models/customer.model';
+import { BusinessModel } from '../src/business/infra/persistence/models/business.model';
+import { BusinessOwnerModel } from '../src/account/infra/persistence/models/business-owner.model';
+import { UserModel } from '../src/auth/infra/persistence/models/user';
+
+/**
+ * All entities in the system
+ * Must match the list in test-utils/e2e-helpers/database.ts
+ */
+const ALL_ENTITIES = [
+  AppointmentModel,
+  CapacityModel,
+  OfferingModel,
+  CustomerModel,
+  BusinessModel,
+  BusinessOwnerModel,
+  UserModel,
+];
 
 /**
  * Jest Global Setup
@@ -21,10 +42,7 @@ export default async function globalSetup() {
     username: process.env.DB_USERNAME || 'test',
     password: process.env.DB_PASSWORD || 'test',
     database: process.env.DB_DATABASE || 'bookings_test',
-    entities: [
-      join(__dirname, '..', 'src', '**', '*.model.{ts,js}'),
-      join(__dirname, '..', 'src', '**', 'models', '*.{ts,js}'),
-    ],
+    entities: ALL_ENTITIES,
     synchronize: false, // Don't auto-sync, we'll do it manually
     logging: false,
   });
