@@ -137,23 +137,23 @@ describe('BusinessOwnerFactory (Integration)', () => {
       const testData = [
         {
           plan: 'FREE',
-          boId: '10000000-0000-0000-0000-000000000001',
-          userId: '20000000-0000-0000-0000-000000000001',
+          boId: '8b7b0590-d193-4e90-9f09-1c8cad22154d',
+          userId: 'adb5db2b-4a24-43dd-bc12-b61ce009c9ab',
         },
         {
           plan: 'BASIC',
-          boId: '10000000-0000-0000-0000-000000000002',
-          userId: '20000000-0000-0000-0000-000000000002',
+          boId: '0c434b2d-5039-4267-acb1-8f1df214723e',
+          userId: 'cdb59a2c-dbb9-4c4a-b628-d1e5c1e840db',
         },
         {
           plan: 'PRO',
-          boId: '10000000-0000-0000-0000-000000000003',
-          userId: '20000000-0000-0000-0000-000000000003',
+          boId: '3b5245f9-4c13-4040-9d36-961e500de853',
+          userId: '48bf7b41-cfa8-452f-956a-9a747896554b',
         },
         {
           plan: 'ENTERPRISE',
-          boId: '10000000-0000-0000-0000-000000000004',
-          userId: '20000000-0000-0000-0000-000000000004',
+          boId: 'b0423a8d-def5-480e-80b2-2dfeec3e2eef',
+          userId: '3f77eaf1-6005-4f92-8612-0c1a14ed7531',
         },
       ];
 
@@ -184,18 +184,18 @@ describe('BusinessOwnerFactory (Integration)', () => {
       const testData = [
         {
           status: 'ACTIVE',
-          boId: '30000000-0000-0000-0000-000000000001',
-          userId: '40000000-0000-0000-0000-000000000001',
+          boId: '96c8298a-bb72-4447-8d22-57769e22dbf8',
+          userId: 'a647cfe4-3fb7-4a48-b772-4be72663198c',
         },
         {
           status: 'SUSPENDED',
-          boId: '30000000-0000-0000-0000-000000000002',
-          userId: '40000000-0000-0000-0000-000000000002',
+          boId: 'f1e2d3c4-b5a6-4978-8e9f-0a1b2c3d4e5f',
+          userId: 'a1b2c3d4-e5f6-4789-0abc-def123456789',
         },
         {
           status: 'CANCELLED',
-          boId: '30000000-0000-0000-0000-000000000003',
-          userId: '40000000-0000-0000-0000-000000000003',
+          boId: 'b2c3d4e5-f6a7-4890-1bcd-ef2345678901',
+          userId: 'c3d4e5f6-a7b8-4901-2cde-f34567890123',
         },
       ];
 
