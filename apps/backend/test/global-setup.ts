@@ -34,6 +34,13 @@ export default async function globalSetup() {
     await dataSource.initialize();
     console.log('✅ Database connection established');
 
+    // Log entities found
+    const entities = dataSource.entityMetadatas;
+    console.log(`📦 Found ${entities.length} entities:`);
+    entities.forEach((entity) => {
+      console.log(`   - ${entity.name} (${entity.tableName})`);
+    });
+
     // Drop and recreate all tables
     // This ensures a clean state for all tests
     await dataSource.synchronize(true); // dropBeforeSync = true
