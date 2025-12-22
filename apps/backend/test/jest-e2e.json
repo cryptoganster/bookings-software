@@ -3,14 +3,17 @@
   "rootDir": ".",
   "testEnvironment": "node",
   "testRegex": ".e2e-spec.ts$",
+  "maxWorkers": 1,
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
   },
   "transformIgnorePatterns": ["node_modules/(?!(uuid)/)"],
   "moduleNameMapper": {
     "^@shared/(.*)$": "<rootDir>/../src/shared/$1",
+    "^@account/(.*)$": "<rootDir>/../src/account/$1",
     "^@booking/(.*)$": "<rootDir>/../src/booking/$1",
     "^@availability/(.*)$": "<rootDir>/../src/availability/$1",
+    "^@business/(.*)$": "<rootDir>/../src/business/$1",
     "^@conversation/(.*)$": "<rootDir>/../src/conversation/$1",
     "^@auth/(.*)$": "<rootDir>/../src/auth/$1",
     "^@customer/(.*)$": "<rootDir>/../src/customer/$1",

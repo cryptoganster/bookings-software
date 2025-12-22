@@ -3,6 +3,12 @@ import { CqrsModule } from '@nestjs/cqrs';
 
 // Import AvailabilityModule to access ICapacityReadRepository
 import { AvailabilityModule } from '@availability/availability.module';
+// Import OfferingModule to access GetActiveOfferingsQuery
+import { OfferingModule } from '@offering/offering.module';
+// Import CustomerModule to access IdentifyCustomerCommand
+import { CustomerModule } from '@customer/customer.module';
+// Import BookingModule to access CreateAppointmentCommand
+import { BookingModule } from '@booking/booking.module';
 
 // Command Handlers
 import { ProcessIncomingMessageHandler } from '@conversation/app/commands/process-incoming-message/handler';
@@ -78,6 +84,9 @@ const QueryHandlers = [GetAvailableDatesHandler, GetAvailableTimeSlotsHandler];
   imports: [
     CqrsModule,
     AvailabilityModule, // Import AvailabilityModule to access ICapacityReadRepository
+    OfferingModule, // Import OfferingModule to access GetActiveOfferingsQuery
+    CustomerModule, // Import CustomerModule to access IdentifyCustomerCommand
+    BookingModule, // Import BookingModule to access CreateAppointmentCommand
   ],
   controllers: [WebhookController],
   providers: [

@@ -109,6 +109,9 @@ describe('Property 7: initialRole propagates correctly through registration', ()
           role: fc.constantFrom(UserRole.BUSINESS_OWNER, UserRole.CUSTOMER, UserRole.ADMIN),
         }),
         async (userData) => {
+          // Clear repository to avoid email conflicts
+          userRepository.clear();
+
           // Register user with specific role
           const result = await registerHandler.execute(
             new RegisterCommand(userData.email, userData.password, userData.name, userData.role),
@@ -116,7 +119,7 @@ describe('Property 7: initialRole propagates correctly through registration', ()
 
           // Verify user was created
           expect(result).toHaveProperty('userId');
-          expect(result).toHaveProperty('accessToken');
+          expect(result).toHaveProperty('token');
 
           // Get the saved user from repository
           const savedUser = userRepository.get(userData.email.toLowerCase());
@@ -144,13 +147,16 @@ describe('Property 7: initialRole propagates correctly through registration', ()
           role: fc.constantFrom(UserRole.BUSINESS_OWNER, UserRole.CUSTOMER, UserRole.ADMIN),
         }),
         async (userData) => {
+          // Clear repository to avoid email conflicts
+          userRepository.clear();
+
           // Register user with specific role
           const result = await registerHandler.execute(
             new RegisterCommand(userData.email, userData.password, userData.name, userData.role),
           );
 
           // Decode JWT token
-          const payload = jwtService.verify(result.accessToken);
+          const payload = jwtService.verify(result.token);
 
           // Property: JWT should contain the initialRole in roles array
           expect(payload).toHaveProperty('roles');
@@ -228,7 +234,7 @@ describe('Property 7: initialRole propagates correctly through registration', ()
           expect(savedUser).toBeDefined();
 
           // Decode JWT
-          const jwtPayload = jwtService.verify(result.accessToken);
+          const jwtPayload = jwtService.verify(result.token);
 
           // Property: Role should be consistent between user aggregate and JWT
           const userRoles = savedUser!.getRoles();

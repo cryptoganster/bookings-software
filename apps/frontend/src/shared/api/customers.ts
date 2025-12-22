@@ -30,12 +30,15 @@ export async function getCustomerById(id: string): Promise<CustomerReadModel> {
 export async function searchCustomers(
   filters: CustomerFilters,
 ): Promise<CustomerSearchResult> {
+  // Filter out 'all' type - backend expects undefined for all customers
+  const type = filters.type === "all" ? undefined : filters.type;
+
   const response = await apiClient.get<CustomerSearchResult>(
     ENDPOINTS.CUSTOMERS.SEARCH,
     {
       params: {
         searchText: filters.searchText,
-        type: filters.type,
+        type,
         startDate: filters.dateRange?.start.toISOString(),
         endDate: filters.dateRange?.end.toISOString(),
         page: filters.page,

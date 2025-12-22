@@ -13,11 +13,13 @@ import { DataSource } from 'typeorm';
 import { BusinessFactory } from '../business.factory';
 import { BusinessModel } from '../../models/business.model';
 import { UUID } from '@shared/vo/uuid';
+import { E2EDatabaseHelper } from '@test-utils/e2e';
 
 describe('BusinessFactory Integration Tests', () => {
   let module: TestingModule;
   let factory: BusinessFactory;
   let dataSource: DataSource;
+  let dbHelper: E2EDatabaseHelper;
 
   beforeAll(async () => {
     module = await Test.createTestingModule({
@@ -39,6 +41,10 @@ describe('BusinessFactory Integration Tests', () => {
 
     factory = module.get<BusinessFactory>(BusinessFactory);
     dataSource = module.get<DataSource>(DataSource);
+
+    // Setup database tables (creates all tables if they don't exist)
+    dbHelper = new E2EDatabaseHelper(dataSource);
+    await dbHelper.setup();
   });
 
   afterAll(async () => {

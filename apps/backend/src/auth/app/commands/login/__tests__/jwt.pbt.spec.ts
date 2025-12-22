@@ -1,6 +1,7 @@
 import * as fc from 'fast-check';
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
+import { QueryBus } from '@nestjs/cqrs';
 import { PinoLogger } from 'nestjs-pino';
 import { LoginHandler } from '../handler';
 import { LoginCommand } from '../command';
@@ -86,6 +87,10 @@ describe('Property 5: JWT tokens contain valid user data with roles', () => {
       debug: jest.fn(),
     };
 
+    const mockQueryBus = {
+      execute: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         RegisterHandler,
@@ -108,6 +113,10 @@ describe('Property 5: JWT tokens contain valid user data with roles', () => {
             secret: 'test-secret',
             signOptions: { expiresIn: '1d' },
           }),
+        },
+        {
+          provide: QueryBus,
+          useValue: mockQueryBus,
         },
         {
           provide: PinoLogger,
@@ -143,7 +152,7 @@ describe('Property 5: JWT tokens contain valid user data with roles', () => {
           );
 
           // Verify token from registration contains roles
-          const registerPayload = jwtService.verify(registerResult.accessToken);
+          const registerPayload = jwtService.verify(registerResult.token);
           expect(registerPayload).toHaveProperty('sub');
           expect(registerPayload).toHaveProperty('email');
           expect(registerPayload).toHaveProperty('roles');
@@ -209,7 +218,7 @@ describe('Property 5: JWT tokens contain valid user data with roles', () => {
                 UserRole.BUSINESS_OWNER,
               ),
             );
-            tokens.push(result.accessToken);
+            tokens.push(result.token);
           }
 
           // Verify all tokens are unique

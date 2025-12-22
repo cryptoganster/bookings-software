@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
@@ -61,7 +61,7 @@ const Sagas = [AppointmentNotificationSaga];
     CqrsModule,
     TypeOrmModule.forFeature([AppointmentModel]),
     AvailabilityModule,
-    CustomerModule,
+    forwardRef(() => CustomerModule), // ← Use forwardRef to avoid circular dependency
   ],
   controllers: [AppointmentController],
   providers: [

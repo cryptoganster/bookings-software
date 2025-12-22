@@ -49,6 +49,15 @@ export class BusinessWriteRepository implements IBusinessWriteRepository {
         return;
       }
 
+      // Check if aggregate has uncommitted events (real changes)
+      const hasChanges = business.getUncommittedEvents().length > 0;
+
+      if (!hasChanges) {
+        // Idempotent operation - aggregate didn't change (e.g., deactivate when already inactive)
+        // Version didn't increment, so no need to update
+        return;
+      }
+
       // For updates, the aggregate should have already incremented its version
       // We need to check against the previous version (currentVersion - 1)
       const previousVersion = currentVersion - 1;
@@ -76,6 +85,7 @@ export class BusinessWriteRepository implements IBusinessWriteRepository {
         .execute();
 
       if (result.affected === 0) {
+        // Update failed - this is a concurrency conflict
         throw new ConcurrencyException(
           `Business ${business.getId().getValue()} was modified by another transaction`,
         );

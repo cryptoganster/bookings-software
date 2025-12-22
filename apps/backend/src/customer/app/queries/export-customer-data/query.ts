@@ -27,6 +27,7 @@ export interface CustomerDataExport {
       sentAt: string; // ISO 8601
     }>;
   }>;
+  exportedAt: string; // ISO 8601 - Timestamp when data was exported
 }
 
 /**

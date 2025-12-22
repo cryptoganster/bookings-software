@@ -37,6 +37,12 @@ import { ExportCustomerDataHandler } from '@customer/app/queries/export-customer
 // Domain Services
 import { CustomerDeduplicationService } from '@customer/domain/services/customer-deduplication.service';
 
+// Controllers
+import { CustomerCrudController } from '@customer/presentation/controllers/customer-crud';
+import { CustomerSearchController } from '@customer/presentation/controllers/customer-search';
+import { CustomerDuplicatesController } from '@customer/presentation/controllers/customer-duplicates';
+import { CustomerMergeController } from '@customer/presentation/controllers/customer-merge';
+
 const commandHandlers = [
   IdentifyCustomerHandler,
   UpdateCustomerNameHandler,
@@ -94,6 +100,12 @@ const repositories = [
     CqrsModule,
     TypeOrmModule.forFeature([CustomerModel]),
     forwardRef(() => BookingModule), // ← Use forwardRef to avoid circular dependency
+  ],
+  controllers: [
+    CustomerSearchController, // ← Must come BEFORE CustomerCrudController
+    CustomerDuplicatesController, // ← Must come BEFORE CustomerCrudController
+    CustomerMergeController, // ← Must come BEFORE CustomerCrudController
+    CustomerCrudController, // ← Has :id param, must come LAST
   ],
   providers: [
     ...commandHandlers,

@@ -67,7 +67,7 @@ describe('RegisterHandler', () => {
     jwtService = module.get(JwtService);
   });
 
-  it('should register a new user and return userId and accessToken', async () => {
+  it('should register a new user and return userId and token', async () => {
     // Arrange
     const command = new RegisterCommand(
       'test@example.com',
@@ -83,8 +83,8 @@ describe('RegisterHandler', () => {
 
     // Assert
     expect(result).toHaveProperty('userId');
-    expect(result).toHaveProperty('accessToken');
-    expect(result.accessToken).toBe('mock-jwt-token');
+    expect(result).toHaveProperty('token');
+    expect(result.token).toBe('mock-jwt-token');
     expect(userReadRepository.findByEmail).toHaveBeenCalledWith('test@example.com');
     expect(userWriteRepository.save).toHaveBeenCalled();
     expect(jwtService.sign).toHaveBeenCalled();
@@ -193,7 +193,7 @@ describe('RegisterHandler', () => {
 
     // Assert
     expect(result).toHaveProperty('userId');
-    expect(result).toHaveProperty('accessToken');
+    expect(result).toHaveProperty('token');
     const savedUser = userWriteRepository.save.mock.calls[0][0];
     expect(savedUser.getRoles()).toContain(UserRole.CUSTOMER);
     expect(savedUser.getRoles()).toHaveLength(1);
@@ -220,7 +220,7 @@ describe('RegisterHandler', () => {
 
     // Assert
     expect(result).toHaveProperty('userId');
-    expect(result).toHaveProperty('accessToken');
+    expect(result).toHaveProperty('token');
     const savedUser = userWriteRepository.save.mock.calls[0][0];
     expect(savedUser.getRoles()).toContain(UserRole.ADMIN);
     expect(savedUser.getRoles()).toHaveLength(1);

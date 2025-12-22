@@ -146,7 +146,12 @@ export class ProcessIncomingMessageHandler implements ICommandHandler<ProcessInc
           // Combinar fecha y hora seleccionadas
           const appointmentDateTime = new Date(conversation.getSelectedDate()!);
           const selectedTime = conversation.getSelectedTime()!;
-          appointmentDateTime.setHours(selectedTime.getHours(), selectedTime.getMinutes(), 0, 0);
+          appointmentDateTime.setUTCHours(
+            selectedTime.getUTCHours(),
+            selectedTime.getUTCMinutes(),
+            0,
+            0,
+          );
 
           const result = await this.commandBus.execute(
             new CreateAppointmentCommand(
@@ -312,8 +317,9 @@ export class ProcessIncomingMessageHandler implements ICommandHandler<ProcessInc
     const timeStr = buttonId.replace('time-', '');
     const [hours, minutes] = timeStr.split(':').map(Number);
 
-    const date = new Date();
-    date.setHours(hours, minutes, 0, 0);
+    // Create a date object with just the time (use epoch date to avoid timezone issues)
+    const date = new Date(0); // Epoch: 1970-01-01T00:00:00.000Z
+    date.setUTCHours(hours, minutes, 0, 0);
     return date;
   }
 

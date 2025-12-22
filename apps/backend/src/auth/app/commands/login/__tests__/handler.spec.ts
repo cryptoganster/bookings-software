@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
 import { UnauthorizedException } from '@nestjs/common';
+import { QueryBus } from '@nestjs/cqrs';
 import { PinoLogger } from 'nestjs-pino';
 import { LoginHandler } from '../handler';
 import { LoginCommand } from '../command';
@@ -33,6 +34,10 @@ describe('LoginHandler', () => {
       debug: jest.fn(),
     };
 
+    const mockQueryBus = {
+      execute: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         LoginHandler,
@@ -43,6 +48,10 @@ describe('LoginHandler', () => {
         {
           provide: JwtService,
           useValue: mockJwtService,
+        },
+        {
+          provide: QueryBus,
+          useValue: mockQueryBus,
         },
         {
           provide: PinoLogger,

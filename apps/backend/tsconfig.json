@@ -30,5 +30,6 @@
       "@database/*": ["src/database/*"],
       "@config/*": ["src/config/*"]
     }
-  }
+  },
+  "exclude": ["node_modules", "dist", "**/*.backup", "**/dtos.backup/**"]
 }

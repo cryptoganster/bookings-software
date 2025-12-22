@@ -20,9 +20,27 @@ export class DomainExceptionFilter implements ExceptionFilter {
   }
 
   private getStatusCode(exception: DomainException): number {
+    // Handle concurrency exceptions
     if (exception instanceof ConcurrencyException) {
       return HttpStatus.CONFLICT;
     }
+
+    // Handle *NotFoundException -> 404
+    if (exception.name.endsWith('NotFoundException')) {
+      return HttpStatus.NOT_FOUND;
+    }
+
+    // Handle *AlreadyExistsException -> 409
+    if (exception.name.endsWith('AlreadyExistsException')) {
+      return HttpStatus.CONFLICT;
+    }
+
+    // Handle *ForbiddenException -> 403
+    if (exception.name.endsWith('ForbiddenException')) {
+      return HttpStatus.FORBIDDEN;
+    }
+
+    // Default to 400 Bad Request for other domain exceptions
     return HttpStatus.BAD_REQUEST;
   }
 }

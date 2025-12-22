@@ -6,9 +6,11 @@ import { CommandBus } from '@nestjs/cqrs';
 import { ProcessIncomingMessageCommand } from '@conversation/app/commands/process-incoming-message';
 import { IWhatsAppClient, Button } from '@conversation/domain/interfaces/external/whatsapp-client';
 import { UUID } from '@shared/vo/uuid';
-import { CapacityModel } from '@availability/infra/persistence/models/capacity';
 import { AppointmentModel } from '@booking/infra/persistence/models/appointment';
 import { conversationsStore } from '@conversation/conversation.module';
+import { createCapacityForTomorrow } from './helpers/capacity-helper';
+import { createActiveOffering } from './helpers/offering-helper';
+import { CapacityModel } from '@availability/infra/persistence/models/capacity';
 
 describe('Conversational Booking Flow (e2e)', () => {
   let app: INestApplication;
@@ -21,7 +23,7 @@ describe('Conversational Booking Flow (e2e)', () => {
   let testBusinessId: string;
   let testCustomerId: string;
   let testOfferingId: string;
-  const testCustomerPhone = '+1234567890';
+  const testCustomerPhone = '+1234567892'; // Unique phone number for this test suite
 
   beforeAll(async () => {
     // Crear mock del WhatsApp client
@@ -52,9 +54,10 @@ describe('Conversational Booking Flow (e2e)', () => {
     commandBus = app.get(CommandBus);
     dataSource = app.get(DataSource);
 
-    // Limpiar base de datos
+    // Limpiar base de datos (order matters due to foreign keys)
     await dataSource.query('DELETE FROM appointments');
     await dataSource.query('DELETE FROM capacities');
+    await dataSource.query('DELETE FROM customers');
 
     // Generar IDs de prueba
     testBusinessId = UUID.generate().getValue();
@@ -73,9 +76,11 @@ describe('Conversational Booking Flow (e2e)', () => {
     mockWhatsAppClient.sendMessage.mockClear();
     mockWhatsAppClient.sendInteractiveButtons.mockClear();
 
-    // Limpiar base de datos
+    // Limpiar base de datos (order matters due to foreign keys)
     await dataSource.query('DELETE FROM appointments');
     await dataSource.query('DELETE FROM capacities');
+    await dataSource.query('DELETE FROM offerings');
+    await dataSource.query('DELETE FROM customers');
 
     // Limpiar conversaciones en memoria
     conversationsStore.clear();
@@ -83,30 +88,18 @@ describe('Conversational Booking Flow (e2e)', () => {
 
   describe('Flujo completo: mensaje inicial → selección servicio → fecha → hora → confirmación', () => {
     it('debe completar el flujo de reservación exitosamente', async () => {
-      // Crear capacidad disponible para pruebas
-      // Usamos un UUID real para el offering
-      const offeringId = testOfferingId;
+      // Crear offering activo
+      const offering = await createActiveOffering(dataSource, testBusinessId, testOfferingId);
+      const offeringId = offering.id;
 
-      // Create tomorrow's date in UTC to avoid timezone issues
-      const tomorrow = new Date();
-      tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
-      tomorrow.setUTCHours(0, 0, 0, 0);
+      // Create capacity for tomorrow at midnight
+      const capacity = await createCapacityForTomorrow(dataSource, offeringId, 5, 10);
 
-      const capacity = new CapacityModel();
-      capacity.id = UUID.generate().getValue();
-      capacity.offeringId = offeringId;
-      capacity.date = tomorrow;
-      capacity.totalSlots = 10;
-      capacity.availableSlots = 5;
-      capacity.version = 0;
-
-      await dataSource.getRepository(CapacityModel).save(capacity);
-
-      // Paso 1: Cliente envía mensaje inicial
+      // Paso 1: Cliente envía mensaje inicial (sin customerId, se creará automáticamente)
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified/created
           testCustomerPhone,
           'Hola',
           undefined,
@@ -127,7 +120,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           '',
           offeringId, // Usar el UUID del offering directamente
@@ -147,7 +140,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           '',
           dateButtonId,
@@ -167,7 +160,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           '',
           timeButtonId,
@@ -188,7 +181,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           '',
           'confirm',
@@ -205,7 +198,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       const appointments = await dataSource.getRepository(AppointmentModel).find();
       expect(appointments).toHaveLength(1);
       expect(appointments[0].businessId).toBe(testBusinessId);
-      expect(appointments[0].customerId).toBe(testCustomerId);
+      // Don't check customerId - it's created by IdentifyCustomerCommand
       expect(appointments[0].offeringId).toBe(offeringId);
       expect(appointments[0].status).toBe('CONFIRMED');
 
@@ -217,29 +210,18 @@ describe('Conversational Booking Flow (e2e)', () => {
     });
 
     it('debe permitir cambiar la selección antes de confirmar', async () => {
-      // Crear capacidad disponible
-      const offeringId = testOfferingId;
+      // Crear offering activo
+      const offering = await createActiveOffering(dataSource, testBusinessId, testOfferingId);
+      const offeringId = offering.id;
 
-      // Create tomorrow's date in UTC to avoid timezone issues
-      const tomorrow = new Date();
-      tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
-      tomorrow.setUTCHours(0, 0, 0, 0);
-
-      const capacity = new CapacityModel();
-      capacity.id = UUID.generate().getValue();
-      capacity.offeringId = offeringId;
-      capacity.date = tomorrow;
-      capacity.totalSlots = 10;
-      capacity.availableSlots = 5;
-      capacity.version = 0;
-
-      await dataSource.getRepository(CapacityModel).save(capacity);
+      // Create capacity for tomorrow at midnight
+      const capacity = await createCapacityForTomorrow(dataSource, offeringId, 5, 10);
 
       // Completar flujo hasta confirmación
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           'Hola',
           undefined,
@@ -250,7 +232,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           '',
           offeringId,
@@ -262,7 +244,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           '',
           dateButtonId,
@@ -274,7 +256,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           '',
           timeButtonId,
@@ -287,7 +269,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           '',
           'change',
@@ -312,29 +294,18 @@ describe('Conversational Booking Flow (e2e)', () => {
 
   describe('Manejo de slot no disponible', () => {
     it('debe manejar cuando el slot ya no está disponible al confirmar', async () => {
-      // Crear capacidad con solo 1 slot disponible
-      const offeringId = testOfferingId;
+      // Crear offering activo
+      const offering = await createActiveOffering(dataSource, testBusinessId, testOfferingId);
+      const offeringId = offering.id;
 
-      // Create tomorrow's date in UTC to avoid timezone issues
-      const tomorrow = new Date();
-      tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
-      tomorrow.setUTCHours(0, 0, 0, 0);
-
-      const capacity = new CapacityModel();
-      capacity.id = UUID.generate().getValue();
-      capacity.offeringId = offeringId;
-      capacity.date = tomorrow;
-      capacity.totalSlots = 10;
-      capacity.availableSlots = 1; // Solo 1 slot disponible
-      capacity.version = 0;
-
-      await dataSource.getRepository(CapacityModel).save(capacity);
+      // Create capacity for tomorrow at midnight with only 1 slot
+      const capacity = await createCapacityForTomorrow(dataSource, offeringId, 1, 10);
 
       // Completar flujo hasta confirmación
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           'Hola',
           undefined,
@@ -345,7 +316,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           '',
           offeringId,
@@ -357,7 +328,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           '',
           dateButtonId,
@@ -369,7 +340,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           '',
           timeButtonId,
@@ -391,7 +362,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           '',
           'confirm',
@@ -417,29 +388,18 @@ describe('Conversational Booking Flow (e2e)', () => {
     });
 
     it('debe permitir seleccionar otro horario después de que uno no esté disponible', async () => {
-      // Crear capacidad con 2 slots disponibles
-      const offeringId = testOfferingId;
+      // Crear offering activo
+      const offering = await createActiveOffering(dataSource, testBusinessId, testOfferingId);
+      const offeringId = offering.id;
 
-      // Create tomorrow's date in UTC to avoid timezone issues
-      const tomorrow = new Date();
-      tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
-      tomorrow.setUTCHours(0, 0, 0, 0);
-
-      const capacity = new CapacityModel();
-      capacity.id = UUID.generate().getValue();
-      capacity.offeringId = offeringId;
-      capacity.date = tomorrow;
-      capacity.totalSlots = 10;
-      capacity.availableSlots = 2;
-      capacity.version = 0;
-
-      await dataSource.getRepository(CapacityModel).save(capacity);
+      // Create capacity for tomorrow at midnight with 2 slots
+      const capacity = await createCapacityForTomorrow(dataSource, offeringId, 2, 10);
 
       // Completar flujo hasta confirmación
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           'Hola',
           undefined,
@@ -450,7 +410,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           '',
           offeringId,
@@ -462,7 +422,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           '',
           dateButtonId,
@@ -474,7 +434,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           '',
           timeButtonId,
@@ -495,7 +455,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           '',
           'confirm',
@@ -508,7 +468,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
-          testCustomerId,
+          '', // Empty string - customer will be identified
           testCustomerPhone,
           '',
           newTimeButtonId,
@@ -527,7 +487,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       // await commandBus.execute(
       //   new ProcessIncomingMessageCommand(
       //     testBusinessId,
-      //     testCustomerId,
+      //     '', // Empty string - customer will be identified
       //     testCustomerPhone,
       //     '',
       //     'confirm',
