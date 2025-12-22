@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { AppModule } from '../../src/app.module';
+import { AppModule } from '../../../../app.module';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ProcessIncomingMessageCommand } from '@conversation/app/commands/process-incoming-message';
 import { GetAppointmentQuery } from '@booking/app/queries/get-appointment';
@@ -11,8 +11,7 @@ import { UUID } from '@shared/vo/uuid';
 import { AppointmentModel } from '@booking/infra/persistence/models/appointment';
 import { CustomerModel } from '@customer/infra/persistence/models/customer.model';
 import { conversationsStore } from '@conversation/conversation.module';
-import { createCapacityForTomorrow } from '@test-utils/e2e-helpers';
-import { createActiveOffering } from '@test-utils/e2e-helpers';
+import { createCapacityForTomorrow, createActiveOffering } from '@test-utils/e2e-helpers';
 
 describe('Customer Flow E2E', () => {
   let app: INestApplication;

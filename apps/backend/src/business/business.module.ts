@@ -24,6 +24,7 @@ import { BusinessFactory } from '@business/infra/persistence/factories/business.
 
 // Shared
 import { SharedModule } from '@shared/shared.module';
+import { AccountModule } from '@account/account.module';
 
 // Controllers
 import { BusinessController } from '@business/presentation/controllers/business.controller';
@@ -76,8 +77,7 @@ const factories = [
     CqrsModule,
     TypeOrmModule.forFeature([BusinessModel]),
     SharedModule,
-    // TODO: Import AccountModule when implemented for BusinessOwner validation
-    // AccountModule,
+    AccountModule, // Import AccountModule for BusinessOwner validation
   ],
   controllers: [BusinessController],
   providers: [...commandHandlers, ...queryHandlers, ...repositories, ...factories],

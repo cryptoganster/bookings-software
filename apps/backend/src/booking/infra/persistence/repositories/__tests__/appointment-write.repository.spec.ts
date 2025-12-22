@@ -9,7 +9,7 @@ import { DateTime } from '@booking/domain/vo/date-time';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { AppointmentFactory } from '../../factories/appointment-factory';
-import { cleanDatabase } from '../../../../../../test/setup-db';
+import { E2EDatabaseHelper } from '@test-utils/e2e-helpers';
 
 describe('AppointmentWriteRepository Integration Tests', () => {
   let module: TestingModule;
@@ -55,7 +55,7 @@ describe('AppointmentWriteRepository Integration Tests', () => {
 
   beforeEach(async () => {
     // Usar helper optimizado para limpiar tablas (más rápido que clear())
-    await cleanDatabase(dataSource);
+    await E2EDatabaseHelper.cleanDatabase(dataSource);
   });
 
   describe('save', () => {

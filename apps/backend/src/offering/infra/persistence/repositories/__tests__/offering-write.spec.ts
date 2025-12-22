@@ -8,7 +8,7 @@ import { UUID } from '@shared/vo/uuid';
 import { OfferingDuration } from '@offering/domain/vo/offering-duration';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
-import { cleanDatabase } from '../../../../../../test/setup-db';
+import { E2EDatabaseHelper } from '@test-utils/e2e-helpers';
 
 describe('OfferingWriteRepository Integration Tests', () => {
   let module: TestingModule;
@@ -51,7 +51,7 @@ describe('OfferingWriteRepository Integration Tests', () => {
 
   beforeEach(async () => {
     // Usar helper optimizado para limpiar tablas
-    await cleanDatabase(dataSource);
+    await E2EDatabaseHelper.cleanDatabase(dataSource);
   });
 
   describe('save', () => {

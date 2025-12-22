@@ -132,8 +132,12 @@ export class E2EAuthHelper {
       role,
     };
 
-    // If BUSINESS_OWNER, create associated Business
+    // If BUSINESS_OWNER, wait for BusinessOwner to be created by event handler, then create Business
     if (role === UserRole.BUSINESS_OWNER) {
+      // Wait for OnUserRegisteredHandler to create BusinessOwner (asynchronous event handler)
+      // Simple delay to allow event processing (event handlers are async)
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
       const business = await this.createTestBusiness(token, options?.businessData);
       testUser.businessId = business.id;
 
@@ -228,24 +232,35 @@ export class E2EAuthHelper {
     const uniqueWhatsApp =
       businessData?.whatsappNumber || `+1809555${Math.floor(1000 + Math.random() * 9000)}`;
 
-    const response = await request(this.app.getHttpServer())
-      .post('/api/businesses')
-      .set('Authorization', `Bearer ${token}`)
-      .send({
-        name: businessData?.name || 'Test Business',
-        whatsappNumber: uniqueWhatsApp,
-        address: businessData?.address || {
-          street: '123 Test St',
-          city: 'Santo Domingo',
-          state: null,
-          country: 'Dominican Republic',
-          postalCode: null,
-        },
-        timezone: businessData?.timezone || 'America/Santo_Domingo',
-      })
-      .expect(201);
+    try {
+      const response = await request(this.app.getHttpServer())
+        .post('/api/businesses')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          name: businessData?.name || 'Test Business',
+          whatsappNumber: uniqueWhatsApp,
+          address: businessData?.address || {
+            street: '123 Test St',
+            city: 'Santo Domingo',
+            state: null,
+            country: 'Dominican Republic',
+            postalCode: null,
+          },
+          timezone: businessData?.timezone || 'America/Santo_Domingo',
+        })
+        .expect(201);
 
-    return { id: response.body.id };
+      return { id: response.body.id };
+    } catch (error: any) {
+      // Log the error response for debugging
+      if (error.response) {
+        console.error('Create business failed:', {
+          status: error.response.status,
+          body: error.response.body,
+        });
+      }
+      throw error;
+    }
   }
 
   /**

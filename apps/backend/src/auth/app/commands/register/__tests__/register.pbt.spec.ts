@@ -2,6 +2,7 @@ import * as fc from 'fast-check';
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
 import { PinoLogger } from 'nestjs-pino';
+import { EventPublisher } from '@nestjs/cqrs';
 import { RegisterHandler } from '../handler';
 import { RegisterCommand } from '../command';
 import { IUserWriteRepository } from '@auth/domain/interfaces/repositories/user-write';
@@ -68,6 +69,14 @@ describe('Property 7: initialRole propagates correctly through registration', ()
       debug: jest.fn(),
     };
 
+    const mockEventPublisher = {
+      mergeObjectContext: jest.fn((obj) => {
+        // Return the original object with a mock commit method added
+        obj.commit = jest.fn();
+        return obj;
+      }),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         RegisterHandler,
@@ -85,6 +94,10 @@ describe('Property 7: initialRole propagates correctly through registration', ()
             secret: 'test-secret',
             signOptions: { expiresIn: '1d' },
           }),
+        },
+        {
+          provide: EventPublisher,
+          useValue: mockEventPublisher,
         },
         {
           provide: PinoLogger,
