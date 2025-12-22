@@ -122,14 +122,15 @@ describe('RestoreSubscriptionHandler (Integration)', () => {
 
       const command = new RestoreSubscriptionCommand('be67026b-b1e5-4104-b66c-f23d86098321');
 
-      // Act & Assert - Should not throw
-      await expect(handler.execute(command)).resolves.not.toThrow();
+      // Act - Should not throw
+      await handler.execute(command);
 
-      // Verify status remains ACTIVE
+      // Assert - Verify status remains ACTIVE and version unchanged (idempotent)
       const updated = await repository.findOne({
         where: { id: 'be67026b-b1e5-4104-b66c-f23d86098321' },
       });
       expect(updated!.subscriptionStatus).toBe('ACTIVE');
+      expect(updated!.version).toBe(1); // Version unchanged because no state change
     });
 
     it('should throw BusinessOwnerNotFoundException if not found', async () => {
