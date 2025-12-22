@@ -232,7 +232,10 @@ describe('UpgradeSubscriptionHandler (Integration)', () => {
 
     it('should throw BusinessOwnerNotFoundException if not found', async () => {
       // Arrange
-      const command = new UpgradeSubscriptionCommand('non-existent', 'BASIC');
+      const command = new UpgradeSubscriptionCommand(
+        '11111111-1111-1111-1111-111111111111',
+        'BASIC',
+      );
 
       // Act & Assert
       await expect(handler.execute(command)).rejects.toThrow(BusinessOwnerNotFoundException);

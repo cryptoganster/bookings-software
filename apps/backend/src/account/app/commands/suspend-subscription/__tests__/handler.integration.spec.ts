@@ -109,7 +109,7 @@ describe('SuspendSubscriptionHandler (Integration)', () => {
 
     it('should throw BusinessOwnerNotFoundException if not found', async () => {
       // Arrange
-      const command = new SuspendSubscriptionCommand('non-existent');
+      const command = new SuspendSubscriptionCommand('11111111-1111-1111-1111-111111111111');
 
       // Act & Assert
       await expect(handler.execute(command)).rejects.toThrow(BusinessOwnerNotFoundException);

@@ -134,7 +134,7 @@ describe('RestoreSubscriptionHandler (Integration)', () => {
 
     it('should throw BusinessOwnerNotFoundException if not found', async () => {
       // Arrange
-      const command = new RestoreSubscriptionCommand('non-existent');
+      const command = new RestoreSubscriptionCommand('11111111-1111-1111-1111-111111111111');
 
       // Act & Assert
       await expect(handler.execute(command)).rejects.toThrow(BusinessOwnerNotFoundException);
