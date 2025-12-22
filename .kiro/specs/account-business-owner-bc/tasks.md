@@ -222,8 +222,8 @@ git commit -m "feat(account): add database migration and seed for business_owner
   - Export type for frontend consumption
   - _Requirements: Note in Introduction_
 
-- [ ]\* 8.3 Write Unit Tests - Value Objects
-  - [ ]\* 8.3.1 Test SubscriptionPlan VO
+- [x]\* 8.3 Write Unit Tests - Value Objects
+  - [x]\* 8.3.1 Test SubscriptionPlan VO
     - Test free() factory method returns correct limits (maxBusinesses=1, maxAppointments=100, price=0)
     - Test basic() factory method returns correct limits (maxBusinesses=1, maxAppointments=500, price=29)
     - Test pro() factory method returns correct limits (maxBusinesses=3, maxAppointments=2000, price=79)
@@ -234,7 +234,7 @@ git commit -m "feat(account): add database migration and seed for business_owner
     - Test equals() compares by value correctly
     - Test getEqualityComponents() returns correct array
     - _Requirements: 13.1, 2.1-2.4, 7.1-7.3_
-  - [ ]\* 8.3.2 Test SubscriptionStatus VO
+  - [x]\* 8.3.2 Test SubscriptionStatus VO
     - Test active() factory method creates ACTIVE status
     - Test suspended() factory method creates SUSPENDED status
     - Test cancelled() factory method creates CANCELLED status
@@ -245,8 +245,8 @@ git commit -m "feat(account): add database migration and seed for business_owner
     - Test getEqualityComponents() returns correct array
     - _Requirements: 13.1, 7.4-7.5_
 
-- [ ]\* 8.4 Write Unit Tests - Aggregate
-  - [ ]\* 8.4.1 Test BusinessOwner.create()
+- [x]\* 8.4 Write Unit Tests - Aggregate
+  - [x]\* 8.4.1 Test BusinessOwner.create()
     - Test creates aggregate with correct initial state
     - Test sets onboardingCompleted=false by default
     - Test sets subscriptionStatus=ACTIVE by default
@@ -255,14 +255,14 @@ git commit -m "feat(account): add database migration and seed for business_owner
     - Test throws error if userId is null
     - Test throws error if subscriptionPlan is invalid
     - _Requirements: 13.2, 1.2-1.5, 6.1-6.4_
-  - [ ]\* 8.4.2 Test BusinessOwner.completeOnboarding()
+  - [x]\* 8.4.2 Test BusinessOwner.completeOnboarding()
     - Test changes onboardingCompleted to true
     - Test generates BusinessOwnerOnboardingCompleted event
     - Test increments version
     - Test throws OnboardingAlreadyCompletedException if already completed
     - Test is idempotent (calling twice throws exception)
     - _Requirements: 13.2, 3.1-3.5_
-  - [ ]\* 8.4.3 Test BusinessOwner.upgradeSubscription()
+  - [x]\* 8.4.3 Test BusinessOwner.upgradeSubscription()
     - Test upgrades from FREE to BASIC successfully
     - Test upgrades from BASIC to PRO successfully
     - Test upgrades from PRO to ENTERPRISE successfully
@@ -273,19 +273,19 @@ git commit -m "feat(account): add database migration and seed for business_owner
     - Test throws CannotDowngradeSubscriptionException for PRO→BASIC
     - Test throws CannotDowngradeSubscriptionException for ENTERPRISE→PRO
     - _Requirements: 13.2, 4.1-4.5_
-  - [ ]\* 8.4.4 Test BusinessOwner.suspendSubscription()
+  - [x]\* 8.4.4 Test BusinessOwner.suspendSubscription()
     - Test changes subscriptionStatus to SUSPENDED
     - Test generates BusinessOwnerSubscriptionSuspended event
     - Test increments version
     - Test throws error if already suspended
     - _Requirements: 5.1-5.3_
-  - [ ]\* 8.4.5 Test BusinessOwner.restoreSubscription()
+  - [x]\* 8.4.5 Test BusinessOwner.restoreSubscription()
     - Test changes subscriptionStatus to ACTIVE
     - Test generates BusinessOwnerSubscriptionRestored event
     - Test increments version
     - Test is idempotent (no error if already active)
     - _Requirements: 5.4-5.5_
-  - [ ]\* 8.4.6 Test BusinessOwner.fromPersistence()
+  - [x]\* 8.4.6 Test BusinessOwner.fromPersistence()
     - Test reconstructs aggregate with all fields
     - Test preserves version from database
     - Test does not generate events
@@ -293,8 +293,8 @@ git commit -m "feat(account): add database migration and seed for business_owner
     - Test handles all subscription statuses correctly
     - _Requirements: 6.5_
 
-- [ ]\* 8.5 Write Property-Based Tests
-  - [ ]\* 8.5.1 Property Test: Subscription upgrade is monotonic
+- [x]\* 8.5 Write Property-Based Tests
+  - [x]\* 8.5.1 Property Test: Subscription upgrade is monotonic
     - **Property 1: Subscription upgrade is monotonic**
     - **Validates: Requirements 4.1, 4.4**
     - Generate random BusinessOwner with random initial plan
@@ -303,7 +303,7 @@ git commit -m "feat(account): add database migration and seed for business_owner
     - Verify upgradeSubscription() throws for target <= current
     - Run 100+ iterations
     - _Requirements: 13.3_
-  - [ ]\* 8.5.2 Property Test: Version increments on state changes
+  - [x]\* 8.5.2 Property Test: Version increments on state changes
     - **Property 2: Version increments on state changes**
     - **Validates: Requirements 6.4**
     - Generate random BusinessOwner
@@ -312,7 +312,7 @@ git commit -m "feat(account): add database migration and seed for business_owner
     - Verify version never decreases
     - Run 100+ iterations
     - _Requirements: 13.3_
-  - [ ]\* 8.5.3 Property Test: BusinessOwner-User relationship is 1:1
+  - [x]\* 8.5.3 Property Test: BusinessOwner-User relationship is 1:1
     - **Property 1: BusinessOwner-User relationship is 1:1**
     - **Validates: Requirements 1.3, 8.3**
     - Generate random userId
@@ -320,7 +320,7 @@ git commit -m "feat(account): add database migration and seed for business_owner
     - Verify database constraint prevents duplicates
     - Run 100+ iterations
     - _Requirements: Property 1_
-  - [ ]\* 8.5.4 Property Test: Subscription plan determines limits
+  - [x]\* 8.5.4 Property Test: Subscription plan determines limits
     - **Property 2: Subscription plan determines limits**
     - **Validates: Requirements 2.1-2.4**
     - Generate random subscription plan
@@ -518,7 +518,7 @@ git commit -m "feat(account): add database migration and seed for business_owner
     - Verify no event published
     - _Requirements: Edge Case 5_
 
-- [ ] 8.13 Run all validations
+- [x] 8.13 Run all validations
   - pnpm --filter backend typecheck
   - pnpm --filter backend lint
   - pnpm --filter backend format
