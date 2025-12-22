@@ -11,8 +11,8 @@ import { UUID } from '@shared/vo/uuid';
 import { AppointmentModel } from '@booking/infra/persistence/models/appointment';
 import { CustomerModel } from '@customer/infra/persistence/models/customer.model';
 import { conversationsStore } from '@conversation/conversation.module';
-import { createCapacityForTomorrow } from './helpers/capacity-helper';
-import { createActiveOffering } from './helpers/offering-helper';
+import { createCapacityForTomorrow } from '@test-utils/e2e-helpers';
+import { createActiveOffering } from '@test-utils/e2e-helpers';
 
 describe('Customer Flow E2E', () => {
   let app: INestApplication;

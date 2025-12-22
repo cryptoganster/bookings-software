@@ -20,7 +20,7 @@ import {
   RegisterResponse,
   CreateBusinessDto,
   CreateCustomerDto,
-} from '@test-utils/e2e/types';
+} from '@test-utils/e2e-helpers/types';
 
 export class E2EAuthHelper {
   private testUsers: TestUser[] = [];

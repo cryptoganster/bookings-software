@@ -8,8 +8,8 @@ import { IWhatsAppClient, Button } from '@conversation/domain/interfaces/externa
 import { UUID } from '@shared/vo/uuid';
 import { AppointmentModel } from '@booking/infra/persistence/models/appointment';
 import { conversationsStore } from '@conversation/conversation.module';
-import { createCapacityForTomorrow } from './helpers/capacity-helper';
-import { createActiveOffering } from './helpers/offering-helper';
+import { createCapacityForTomorrow } from '@test-utils/e2e-helpers';
+import { createActiveOffering } from '@test-utils/e2e-helpers';
 import { CapacityModel } from '@availability/infra/persistence/models/capacity';
 
 describe('Conversational Booking Flow (e2e)', () => {

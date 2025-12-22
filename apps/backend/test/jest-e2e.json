@@ -18,6 +18,7 @@
     "^@auth/(.*)$": "<rootDir>/../src/auth/$1",
     "^@customer/(.*)$": "<rootDir>/../src/customer/$1",
     "^@offering/(.*)$": "<rootDir>/../src/offering/$1",
+    "^@test-utils/(.*)$": "<rootDir>/../src/test-utils/$1",
     "^uuid$": "<rootDir>/../node_modules/uuid/dist/index.js"
   }
 }
