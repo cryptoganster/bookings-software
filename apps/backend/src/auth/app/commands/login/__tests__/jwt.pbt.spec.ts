@@ -1,7 +1,7 @@
 import * as fc from 'fast-check';
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
-import { QueryBus } from '@nestjs/cqrs';
+import { QueryBus, EventPublisher } from '@nestjs/cqrs';
 import { PinoLogger } from 'nestjs-pino';
 import { LoginHandler } from '../handler';
 import { LoginCommand } from '../command';
@@ -91,6 +91,14 @@ describe('Property 5: JWT tokens contain valid user data with roles', () => {
       execute: jest.fn(),
     };
 
+    const mockEventPublisher = {
+      mergeObjectContext: jest.fn((obj) => {
+        // Return the original object with a mock commit method added
+        obj.commit = jest.fn();
+        return obj;
+      }),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         RegisterHandler,
@@ -117,6 +125,10 @@ describe('Property 5: JWT tokens contain valid user data with roles', () => {
         {
           provide: QueryBus,
           useValue: mockQueryBus,
+        },
+        {
+          provide: EventPublisher,
+          useValue: mockEventPublisher,
         },
         {
           provide: PinoLogger,

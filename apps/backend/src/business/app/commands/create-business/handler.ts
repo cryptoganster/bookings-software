@@ -9,8 +9,10 @@ import { WhatsAppPhone } from '@shared/vo/whatsapp-phone';
 import { Timezone } from '@business/domain/vo/timezone';
 import { BusinessAddress } from '@business/domain/vo/business-address';
 import { WhatsAppPhoneAlreadyExistsException } from '@shared/kernel/exceptions/whatsapp-phone-already-exists';
-// import { OnboardingNotCompletedException } from '@business/domain/exceptions/onboarding-not-completed';
-// import { MaxBusinessesExceededException } from '@business/domain/exceptions/max-businesses-exceeded';
+import { OnboardingNotCompletedException } from '@business/domain/exceptions/onboarding-not-completed';
+import { MaxBusinessesExceededException } from '@business/domain/exceptions/max-businesses-exceeded';
+import { GetBusinessOwnerByUserIdQuery } from '@account/app/queries/get-business-owner-by-user-id/query';
+import { BusinessOwnerNotFoundException } from '@business/domain/exceptions/business-owner-not-found';
 
 /**
  * CreateBusinessHandler
@@ -35,30 +37,29 @@ export class CreateBusinessHandler implements ICommandHandler<CreateBusinessComm
   ) {}
 
   async execute(command: CreateBusinessCommand): Promise<{ businessId: string }> {
-    // TODO: Validate BusinessOwner when Account BC is implemented
-    // const businessOwner = await this.queryBus.execute(
-    //   new GetBusinessOwnerByUserIdQuery(command.ownerId),
-    // );
-    //
-    // if (!businessOwner) {
-    //   throw new BusinessOwnerNotFoundException(command.ownerId);
-    // }
-    //
-    // if (!businessOwner.onboardingCompleted) {
-    //   throw new OnboardingNotCompletedException(command.ownerId);
-    // }
-    //
-    // // Validate business count < maxBusinesses
-    // const existingBusinesses = await this.readRepository.findByOwnerId(
-    //   command.ownerId,
-    // );
-    //
-    // if (existingBusinesses.length >= businessOwner.subscriptionPlan.maxBusinesses) {
-    //   throw new MaxBusinessesExceededException(
-    //     command.ownerId,
-    //     businessOwner.subscriptionPlan.maxBusinesses,
-    //   );
-    // }
+    // Validate BusinessOwner exists and onboarding is completed
+    const businessOwner = await this.queryBus.execute(
+      new GetBusinessOwnerByUserIdQuery(command.ownerId),
+    );
+
+    if (!businessOwner) {
+      throw new BusinessOwnerNotFoundException(command.ownerId);
+    }
+
+    if (!businessOwner.onboardingCompleted) {
+      throw new OnboardingNotCompletedException(command.ownerId);
+    }
+
+    // Validate business count < maxBusinesses
+    const existingBusinesses = await this.readRepository.findByOwnerId(command.ownerId);
+
+    if (existingBusinesses.length >= businessOwner.maxBusinesses) {
+      throw new MaxBusinessesExceededException(
+        command.ownerId,
+        existingBusinesses.length,
+        businessOwner.maxBusinesses,
+      );
+    }
 
     // Validate WhatsAppPhone uniqueness
     const existingBusiness = await this.readRepository.findByWhatsAppPhone(command.whatsappPhone);

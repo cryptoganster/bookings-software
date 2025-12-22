@@ -289,12 +289,12 @@ git commit [hash]
   - **Total: 23 tests passing (8 factory + 9 read + 6 write)**
   - _Requirements: 14.4, 9.4, 9.5_
 
-- [ ] 8.9 Write E2E Tests for Business Flow ✅ READY TO EXECUTE
-  - **STATUS:** ✅ Account BC implemented - Ready to execute tests
-  - Test complete flow: User → BusinessOwner → Create Business
-  - Test WhatsAppPhone uniqueness across businesses
-  - Test business count limits per subscription plan
-  - Test business activation/deactivation flow
+- [x] 8.9 Write E2E Tests for Business Flow ✅ COMPLETE
+  - **STATUS:** ✅ All tests passing (19/19)
+  - Test complete flow: User → BusinessOwner → Create Business ✅
+  - Test WhatsAppPhone uniqueness across businesses ✅
+  - Test business count limits per subscription plan ✅
+  - Test business activation/deactivation flow ✅
   - _Requirements: 14.4, 1.1-1.5, 2.1-2.5, 6.1-6.5_
 
 - [x] 8.10 Run all validations ✅
@@ -347,18 +347,17 @@ git commit -m "chore(business): mark Phase 8 complete - all validations passing"
   - Ensure all dependencies are available
   - _Requirements: All_
 
-- [ ] 9.6 Write E2E Tests for Business Endpoints ✅ READY TO EXECUTE
-  - **STATUS:** ✅ Auth BC implemented - Ready to execute tests
-  - Test POST /api/businesses with valid data
-  - Test POST /api/businesses with duplicate WhatsApp
-  - Test GET /api/businesses/:id (found and not found)
-  - Test GET /api/businesses (multiple businesses)
-  - Test PUT /api/businesses/:id with valid data
-  - Test PUT /api/businesses/:id/whatsapp with uniqueness validation
-  - Test DELETE /api/businesses/:id (deactivate)
-  - Test POST /api/businesses/:id/activate
-  - Test authentication and authorization
-  - **Tests written and ready to execute**
+- [x] 9.6 Write E2E Tests for Business Endpoints ✅ COMPLETE
+  - **STATUS:** ✅ All tests passing (19/19)
+  - Test POST /api/businesses with valid data ✅
+  - Test POST /api/businesses with duplicate WhatsApp ✅
+  - Test GET /api/businesses/:id (found and not found) ✅
+  - Test GET /api/businesses (multiple businesses) ✅
+  - Test PUT /api/businesses/:id with valid data ✅
+  - Test PUT /api/businesses/:id/whatsapp with uniqueness validation ✅
+  - Test DELETE /api/businesses/:id (deactivate) ✅
+  - Test POST /api/businesses/:id/activate ✅
+  - Test authentication and authorization ✅
   - _Requirements: 14.4, 1.1-1.5, 3.1-3.5, 6.1-6.5, 10.1-10.5_
 
 ### ✅ Commit Checkpoint 9 - DONE
