@@ -43,7 +43,7 @@ export default async function globalSetup() {
     password: process.env.DB_PASSWORD || 'test',
     database: process.env.DB_DATABASE || 'bookings_test',
     entities: ALL_ENTITIES,
-    synchronize: false, // Don't auto-sync, we'll do it manually
+    synchronize: true, // Auto-create schema in tests
     logging: false,
   });
 
