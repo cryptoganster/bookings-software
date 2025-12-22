@@ -57,8 +57,8 @@ describe('BusinessOwnerFactory (Integration)', () => {
     it('should return aggregate with business logic', async () => {
       // Arrange
       const businessOwnerModel = repository.create({
-        id: 'be67026b-b1e5-4104-b66c-f23d86098321',
-        userId: '65f818ad-9782-40bd-b8ed-16251f31f511',
+        id: 'bo-123',
+        userId: 'user-123',
         subscriptionPlan: 'PRO',
         subscriptionStatus: 'ACTIVE',
         onboardingCompleted: true,
@@ -69,20 +69,20 @@ describe('BusinessOwnerFactory (Integration)', () => {
       await repository.save(businessOwnerModel);
 
       // Act
-      const aggregate = await factory.loadById('be67026b-b1e5-4104-b66c-f23d86098321');
+      const aggregate = await factory.loadById('bo-123');
 
       // Assert
       expect(aggregate).toBeDefined();
       expect(aggregate).not.toBeNull();
-      expect(aggregate!.getId().getValue()).toBe('be67026b-b1e5-4104-b66c-f23d86098321');
-      expect(aggregate!.getUserId().getValue()).toBe('65f818ad-9782-40bd-b8ed-16251f31f511');
+      expect(aggregate!.getId().getValue()).toBe('bo-123');
+      expect(aggregate!.getUserId().getValue()).toBe('user-123');
     });
 
     it('should preserve version from database', async () => {
       // Arrange
       const businessOwnerModel = repository.create({
-        id: 'cc6f68fc-eb33-4f68-8766-373718cb24fa',
-        userId: '7c956221-da3a-49db-b00e-2a25aae38ca7',
+        id: 'bo-456',
+        userId: 'user-456',
         subscriptionPlan: 'ENTERPRISE',
         subscriptionStatus: 'ACTIVE',
         onboardingCompleted: false,
@@ -93,7 +93,7 @@ describe('BusinessOwnerFactory (Integration)', () => {
       await repository.save(businessOwnerModel);
 
       // Act
-      const aggregate = await factory.loadById('cc6f68fc-eb33-4f68-8766-373718cb24fa');
+      const aggregate = await factory.loadById('bo-456');
 
       // Assert
       expect(aggregate).toBeDefined();
@@ -102,7 +102,7 @@ describe('BusinessOwnerFactory (Integration)', () => {
 
     it('should return null for non-existent id', async () => {
       // Act
-      const aggregate = await factory.loadById('11111111-1111-1111-1111-111111111111');
+      const aggregate = await factory.loadById('non-existent');
 
       // Assert
       expect(aggregate).toBeNull();
@@ -111,8 +111,8 @@ describe('BusinessOwnerFactory (Integration)', () => {
     it('should load aggregate that can execute domain methods', async () => {
       // Arrange
       const businessOwnerModel = repository.create({
-        id: '9660e857-1161-47f5-bf42-ae8c0341ee71',
-        userId: '61e339a2-b501-4ca3-88e0-be8af02d9f09',
+        id: 'bo-789',
+        userId: 'user-789',
         subscriptionPlan: 'FREE',
         subscriptionStatus: 'ACTIVE',
         onboardingCompleted: true,
@@ -123,7 +123,7 @@ describe('BusinessOwnerFactory (Integration)', () => {
       await repository.save(businessOwnerModel);
 
       // Act
-      const aggregate = await factory.loadById('9660e857-1161-47f5-bf42-ae8c0341ee71');
+      const aggregate = await factory.loadById('bo-789');
 
       // Assert - Verify aggregate has business logic methods
       expect(aggregate).toBeDefined();
@@ -134,33 +134,11 @@ describe('BusinessOwnerFactory (Integration)', () => {
 
     it('should handle all subscription plans correctly', async () => {
       // Arrange - Create business owners with different plans
-      const testData = [
-        {
-          plan: 'FREE',
-          boId: '8b7b0590-d193-4e90-9f09-1c8cad22154d',
-          userId: 'adb5db2b-4a24-43dd-bc12-b61ce009c9ab',
-        },
-        {
-          plan: 'BASIC',
-          boId: '0c434b2d-5039-4267-acb1-8f1df214723e',
-          userId: 'cdb59a2c-dbb9-4c4a-b628-d1e5c1e840db',
-        },
-        {
-          plan: 'PRO',
-          boId: '3b5245f9-4c13-4040-9d36-961e500de853',
-          userId: '48bf7b41-cfa8-452f-956a-9a747896554b',
-        },
-        {
-          plan: 'ENTERPRISE',
-          boId: 'b0423a8d-def5-480e-80b2-2dfeec3e2eef',
-          userId: '3f77eaf1-6005-4f92-8612-0c1a14ed7531',
-        },
-      ];
-
-      for (const { plan, boId, userId } of testData) {
+      const plans = ['FREE', 'BASIC', 'PRO', 'ENTERPRISE'];
+      for (const plan of plans) {
         const model = repository.create({
-          id: boId,
-          userId: userId,
+          id: `bo-${plan}`,
+          userId: `user-${plan}`,
           subscriptionPlan: plan,
           subscriptionStatus: 'ACTIVE',
           onboardingCompleted: true,
@@ -172,8 +150,8 @@ describe('BusinessOwnerFactory (Integration)', () => {
       }
 
       // Act & Assert
-      for (const { plan, boId } of testData) {
-        const aggregate = await factory.loadById(boId);
+      for (const plan of plans) {
+        const aggregate = await factory.loadById(`bo-${plan}`);
         expect(aggregate).toBeDefined();
         expect(aggregate!.getSubscriptionPlan().getName()).toBe(plan);
       }
@@ -181,28 +159,11 @@ describe('BusinessOwnerFactory (Integration)', () => {
 
     it('should handle all subscription statuses correctly', async () => {
       // Arrange - Create business owners with different statuses
-      const testData = [
-        {
-          status: 'ACTIVE',
-          boId: '96c8298a-bb72-4447-8d22-57769e22dbf8',
-          userId: 'a647cfe4-3fb7-4a48-b772-4be72663198c',
-        },
-        {
-          status: 'SUSPENDED',
-          boId: '3020e074-a12a-4b90-85d2-65a8dbf11e32',
-          userId: '6bb9749e-993d-46c2-8eec-6b694dfb7846',
-        },
-        {
-          status: 'CANCELLED',
-          boId: 'b2c3d4e5-f6a7-4890-abcd-ef2345678901',
-          userId: '897c7cfe-5426-4e21-821f-3b402e9c2c2a',
-        },
-      ];
-
-      for (const { status, boId, userId } of testData) {
+      const statuses = ['ACTIVE', 'SUSPENDED', 'CANCELLED'];
+      for (const status of statuses) {
         const model = repository.create({
-          id: boId,
-          userId: userId,
+          id: `bo-${status}`,
+          userId: `user-${status}`,
           subscriptionPlan: 'PRO',
           subscriptionStatus: status,
           onboardingCompleted: true,
@@ -214,8 +175,8 @@ describe('BusinessOwnerFactory (Integration)', () => {
       }
 
       // Act & Assert
-      for (const { status, boId } of testData) {
-        const aggregate = await factory.loadById(boId);
+      for (const status of statuses) {
+        const aggregate = await factory.loadById(`bo-${status}`);
         expect(aggregate).toBeDefined();
         expect(aggregate!.getSubscriptionStatus().getValue()).toBe(status);
       }
@@ -226,8 +187,8 @@ describe('BusinessOwnerFactory (Integration)', () => {
     it('should return aggregate with business logic', async () => {
       // Arrange
       const businessOwnerModel = repository.create({
-        id: '88d769f4-b41b-45a9-8391-896089054fba',
-        userId: '777f368d-b9e1-44f4-b4c4-3c200e6ec960',
+        id: 'bo-user-123',
+        userId: 'user-unique-123',
         subscriptionPlan: 'BASIC',
         subscriptionStatus: 'ACTIVE',
         onboardingCompleted: true,
@@ -238,19 +199,19 @@ describe('BusinessOwnerFactory (Integration)', () => {
       await repository.save(businessOwnerModel);
 
       // Act
-      const aggregate = await factory.loadByUserId('777f368d-b9e1-44f4-b4c4-3c200e6ec960');
+      const aggregate = await factory.loadByUserId('user-unique-123');
 
       // Assert
       expect(aggregate).toBeDefined();
       expect(aggregate).not.toBeNull();
-      expect(aggregate!.getUserId().getValue()).toBe('777f368d-b9e1-44f4-b4c4-3c200e6ec960');
+      expect(aggregate!.getUserId().getValue()).toBe('user-unique-123');
     });
 
     it('should preserve version from database', async () => {
       // Arrange
       const businessOwnerModel = repository.create({
-        id: '8016076f-812f-4cd1-a318-b98a389f0de7',
-        userId: '79fc1f94-b7c3-4f3b-b36f-03b7161b45db',
+        id: 'bo-user-456',
+        userId: 'user-unique-456',
         subscriptionPlan: 'PRO',
         subscriptionStatus: 'ACTIVE',
         onboardingCompleted: false,
@@ -261,7 +222,7 @@ describe('BusinessOwnerFactory (Integration)', () => {
       await repository.save(businessOwnerModel);
 
       // Act
-      const aggregate = await factory.loadByUserId('79fc1f94-b7c3-4f3b-b36f-03b7161b45db');
+      const aggregate = await factory.loadByUserId('user-unique-456');
 
       // Assert
       expect(aggregate).toBeDefined();
@@ -270,7 +231,7 @@ describe('BusinessOwnerFactory (Integration)', () => {
 
     it('should return null for non-existent userId', async () => {
       // Act
-      const aggregate = await factory.loadByUserId('22222222-2222-2222-2222-222222222222');
+      const aggregate = await factory.loadByUserId('non-existent-user');
 
       // Assert
       expect(aggregate).toBeNull();
@@ -279,8 +240,8 @@ describe('BusinessOwnerFactory (Integration)', () => {
     it('should load aggregate that can execute domain methods', async () => {
       // Arrange
       const businessOwnerModel = repository.create({
-        id: 'a2343508-b80a-4bed-bfb1-6f0cc72ac6d6',
-        userId: '1071aa6c-1e34-425a-8b95-7552f0152faf',
+        id: 'bo-user-789',
+        userId: 'user-unique-789',
         subscriptionPlan: 'ENTERPRISE',
         subscriptionStatus: 'ACTIVE',
         onboardingCompleted: true,
@@ -291,7 +252,7 @@ describe('BusinessOwnerFactory (Integration)', () => {
       await repository.save(businessOwnerModel);
 
       // Act
-      const aggregate = await factory.loadByUserId('1071aa6c-1e34-425a-8b95-7552f0152faf');
+      const aggregate = await factory.loadByUserId('user-unique-789');
 
       // Assert - Verify aggregate has business logic methods
       expect(aggregate).toBeDefined();
