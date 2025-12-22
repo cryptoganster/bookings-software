@@ -5,7 +5,7 @@ import { AppointmentReadRepository } from '../appointment-read';
 import { AppointmentModel } from '../../models/appointment';
 import { CustomerModel } from '@customer/infra/persistence/models/customer.model';
 import { UUID } from '@shared/vo/uuid';
-import { getTestTypeOrmConfig } from '../../../../../../test/test-database.config';
+import { E2EDatabaseHelper } from '@test-utils/e2e-helpers';
 
 describe('AppointmentReadRepository Integration Tests', () => {
   let module: TestingModule;
@@ -15,7 +15,7 @@ describe('AppointmentReadRepository Integration Tests', () => {
   beforeAll(async () => {
     module = await Test.createTestingModule({
       imports: [
-        TypeOrmModule.forRoot(getTestTypeOrmConfig()),
+        TypeOrmModule.forRoot(E2EDatabaseHelper.getTestTypeOrmConfig()),
         TypeOrmModule.forFeature([AppointmentModel]),
       ],
       providers: [AppointmentReadRepository],

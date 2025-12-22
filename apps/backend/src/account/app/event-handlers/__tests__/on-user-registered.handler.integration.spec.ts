@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CommandBus, CqrsModule } from '@nestjs/cqrs';
+import { CommandBus, CqrsModule, EventPublisher } from '@nestjs/cqrs';
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { OnUserRegisteredHandler } from '../on-user-registered.handler';
 import { UserRegistered } from '@auth/domain/events/user-registered';
@@ -17,9 +17,23 @@ describe('OnUserRegisteredHandler - Integration Test', () => {
   let commandBus: CommandBus;
 
   beforeEach(async () => {
+    const mockEventPublisher = {
+      mergeObjectContext: jest.fn((obj: any) => {
+        // Return the original object with a mock commit method added
+        obj.commit = jest.fn();
+        return obj;
+      }),
+    };
+
     module = await Test.createTestingModule({
       imports: [CqrsModule],
-      providers: [OnUserRegisteredHandler],
+      providers: [
+        OnUserRegisteredHandler,
+        {
+          provide: EventPublisher,
+          useValue: mockEventPublisher,
+        },
+      ],
     }).compile();
 
     handler = module.get<OnUserRegisteredHandler>(OnUserRegisteredHandler);
@@ -41,12 +55,23 @@ describe('OnUserRegisteredHandler - Integration Test', () => {
     // Act
     await handler.handle(event);
 
-    // Assert
-    expect(commandBus.execute).toHaveBeenCalledTimes(1);
-    expect(commandBus.execute).toHaveBeenCalledWith(
+    // Assert - Now expects 2 calls: CreateBusinessOwner + CompleteOnboarding
+    expect(commandBus.execute).toHaveBeenCalledTimes(2);
+
+    // First call: CreateBusinessOwnerCommand
+    expect(commandBus.execute).toHaveBeenNthCalledWith(
+      1,
       expect.objectContaining({
         userId: 'user-id-123',
         subscriptionPlanName: 'FREE',
+      }),
+    );
+
+    // Second call: CompleteOnboardingCommand
+    expect(commandBus.execute).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        businessOwnerId: 'test-id', // From mock response
       }),
     );
   });
@@ -127,7 +152,7 @@ describe('OnUserRegisteredHandler - Integration Test', () => {
     await handler.handle(event2);
     await handler.handle(event3);
 
-    // Assert
-    expect(commandBus.execute).toHaveBeenCalledTimes(2); // Only for BUSINESS_OWNER roles
+    // Assert - Now expects 4 calls: 2 BUSINESS_OWNER events × 2 commands each (CreateBusinessOwner + CompleteOnboarding)
+    expect(commandBus.execute).toHaveBeenCalledTimes(4);
   });
 });

@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { CqrsModule, CommandBus } from '@nestjs/cqrs';
+import { CqrsModule, CommandBus, EventPublisher, QueryBus } from '@nestjs/cqrs';
 import { CreateBusinessHandler } from '../handler';
 import { CreateBusinessCommand } from '../command';
 import { BusinessModel } from '@business/infra/persistence/models/business.model';
@@ -32,6 +32,28 @@ describe('CreateBusinessHandler Integration Tests', () => {
   let ownerId: string;
 
   beforeAll(async () => {
+    const mockEventPublisher = {
+      mergeObjectContext: jest.fn((obj: any) => {
+        // Return the original object with a mock commit method added
+        obj.commit = jest.fn();
+        return obj;
+      }),
+    };
+
+    const mockQueryBus = {
+      execute: jest.fn().mockResolvedValue({
+        id: UUID.generate().getValue(),
+        userId: UUID.generate().getValue(),
+        subscriptionPlanName: 'PRO',
+        subscriptionPlanMaxBusinesses: 3,
+        subscriptionPlanMaxAppointmentsPerMonth: 2000,
+        subscriptionPlanPrice: 79,
+        subscriptionStatus: 'ACTIVE',
+        onboardingCompleted: true,
+        createdAt: new Date(),
+      }),
+    };
+
     module = await Test.createTestingModule({
       imports: [
         CqrsModule,
@@ -65,6 +87,14 @@ describe('CreateBusinessHandler Integration Tests', () => {
         {
           provide: 'IUnitOfWork',
           useClass: TypeOrmUnitOfWork,
+        },
+        {
+          provide: EventPublisher,
+          useValue: mockEventPublisher,
+        },
+        {
+          provide: QueryBus,
+          useValue: mockQueryBus,
         },
       ],
     }).compile();

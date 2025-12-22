@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
 import { ConflictException } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
+import { EventPublisher } from '@nestjs/cqrs';
 import { RegisterHandler } from '../handler';
 import { RegisterCommand } from '../command';
 import { IUserWriteRepository } from '@auth/domain/interfaces/repositories/user-write';
@@ -14,6 +15,7 @@ describe('RegisterHandler', () => {
   let userWriteRepository: jest.Mocked<IUserWriteRepository>;
   let userReadRepository: jest.Mocked<IUserReadRepository>;
   let jwtService: jest.Mocked<JwtService>;
+  let eventPublisher: jest.Mocked<EventPublisher>;
 
   beforeEach(async () => {
     const mockUserWriteRepository = {
@@ -29,6 +31,14 @@ describe('RegisterHandler', () => {
 
     const mockJwtService = {
       sign: jest.fn(),
+    };
+
+    const mockEventPublisher = {
+      mergeObjectContext: jest.fn((obj) => {
+        // Return the original object with a mock commit method added
+        obj.commit = jest.fn();
+        return obj;
+      }),
     };
 
     const mockLogger = {
@@ -55,6 +65,10 @@ describe('RegisterHandler', () => {
           useValue: mockJwtService,
         },
         {
+          provide: EventPublisher,
+          useValue: mockEventPublisher,
+        },
+        {
           provide: PinoLogger,
           useValue: mockLogger,
         },
@@ -65,6 +79,7 @@ describe('RegisterHandler', () => {
     userWriteRepository = module.get('IUserWriteRepository');
     userReadRepository = module.get('IUserReadRepository');
     jwtService = module.get(JwtService);
+    eventPublisher = module.get(EventPublisher);
   });
 
   it('should register a new user and return userId and token', async () => {
@@ -88,6 +103,7 @@ describe('RegisterHandler', () => {
     expect(userReadRepository.findByEmail).toHaveBeenCalledWith('test@example.com');
     expect(userWriteRepository.save).toHaveBeenCalled();
     expect(jwtService.sign).toHaveBeenCalled();
+    expect(eventPublisher.mergeObjectContext).toHaveBeenCalled();
   });
 
   it('should throw ConflictException if user already exists', async () => {

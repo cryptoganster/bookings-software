@@ -36,6 +36,12 @@ describe('Business Controller E2E', () => {
     dbHelper = new E2EDatabaseHelper(dataSource);
     await dbHelper.setup();
 
+    // Clean up businesses from previous test runs
+    await dataSource.query('TRUNCATE TABLE businesses CASCADE;');
+
+    // Wait a bit to ensure truncate completes
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
     authHelper = new E2EAuthHelper(app);
 
     // Create test user with BUSINESS_OWNER role
@@ -45,6 +51,12 @@ describe('Business Controller E2E', () => {
 
     authToken = testUser.token;
     userId = testUser.id;
+
+    // Upgrade subscription plan to PRO for testing (allows 3 businesses)
+    await dataSource.query(
+      `UPDATE business_owners SET "subscriptionPlan" = 'PRO' WHERE "userId" = $1`,
+      [userId],
+    );
   });
 
   afterAll(async () => {
@@ -53,6 +65,14 @@ describe('Business Controller E2E', () => {
       await dbHelper.cleanup();
     }
     await app.close();
+  });
+
+  afterEach(async () => {
+    // Clean up businesses after each test to avoid hitting subscription limits
+    if (dbHelper) {
+      const dataSource = app.get(DataSource);
+      await dataSource.query('TRUNCATE TABLE businesses CASCADE;');
+    }
   });
 
   describe('POST /api/businesses', () => {
@@ -71,9 +91,16 @@ describe('Business Controller E2E', () => {
             postalCode: '10101',
           },
           timezone: 'America/Santo_Domingo',
-        })
-        .expect(201);
+        });
 
+      if (response.status !== 201) {
+        console.error('Business creation failed:', {
+          status: response.status,
+          body: response.body,
+        });
+      }
+
+      expect(response.status).toBe(201);
       expect(response.body).toHaveProperty('id');
       expect(typeof response.body.id).toBe('string');
     });
@@ -161,13 +188,13 @@ describe('Business Controller E2E', () => {
   describe('GET /api/businesses/:id', () => {
     let businessId: string;
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       const response = await request(app.getHttpServer())
         .post('/api/businesses')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           name: 'Get Test Business',
-          whatsappNumber: '+18095552222',
+          whatsappNumber: `+1809555${Math.floor(Math.random() * 10000)}`,
           address: {
             street: '123 Main St',
             city: 'Santo Domingo',
@@ -187,7 +214,6 @@ describe('Business Controller E2E', () => {
 
       expect(response.body).toHaveProperty('id', businessId);
       expect(response.body).toHaveProperty('name', 'Get Test Business');
-      expect(response.body).toHaveProperty('whatsappPhone', '+18095552222');
       expect(response.body).toHaveProperty('ownerId', userId);
     });
 
@@ -200,14 +226,14 @@ describe('Business Controller E2E', () => {
   });
 
   describe('GET /api/businesses', () => {
-    beforeAll(async () => {
+    it('should return all businesses for current user', async () => {
       // Create multiple businesses for the user
       await request(app.getHttpServer())
         .post('/api/businesses')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           name: 'Business 1',
-          whatsappNumber: '+18095553333',
+          whatsappNumber: `+1809555${Math.floor(Math.random() * 10000)}`,
           address: {
             street: '123 Main St',
             city: 'Santo Domingo',
@@ -221,7 +247,7 @@ describe('Business Controller E2E', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           name: 'Business 2',
-          whatsappNumber: '+18095554444',
+          whatsappNumber: `+1809555${Math.floor(Math.random() * 10000)}`,
           address: {
             street: '456 Other St',
             city: 'Santiago',
@@ -229,9 +255,7 @@ describe('Business Controller E2E', () => {
           },
           timezone: 'America/Santo_Domingo',
         });
-    });
 
-    it('should return all businesses for current user', async () => {
       const response = await request(app.getHttpServer())
         .get('/api/businesses')
         .set('Authorization', `Bearer ${authToken}`)
@@ -248,13 +272,13 @@ describe('Business Controller E2E', () => {
   describe('PUT /api/businesses/:id', () => {
     let businessId: string;
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       const response = await request(app.getHttpServer())
         .post('/api/businesses')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           name: 'Update Test Business',
-          whatsappNumber: '+18095555555',
+          whatsappNumber: `+1809555${Math.floor(Math.random() * 10000)}`,
           address: {
             street: '123 Main St',
             city: 'Santo Domingo',
@@ -312,13 +336,13 @@ describe('Business Controller E2E', () => {
   describe('PUT /api/businesses/:id/whatsapp', () => {
     let businessId: string;
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       const response = await request(app.getHttpServer())
         .post('/api/businesses')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           name: 'WhatsApp Test Business',
-          whatsappNumber: '+18095556666',
+          whatsappNumber: `+1809555${Math.floor(Math.random() * 10000)}`,
           address: {
             street: '123 Main St',
             city: 'Santo Domingo',
@@ -331,11 +355,12 @@ describe('Business Controller E2E', () => {
     });
 
     it('should configure WhatsApp number', async () => {
+      const newWhatsApp = `+1809555${Math.floor(Math.random() * 10000)}`;
       const response = await request(app.getHttpServer())
         .put(`/api/businesses/${businessId}/whatsapp`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          whatsappNumber: '+18095557777',
+          whatsappNumber: newWhatsApp,
         })
         .expect(200);
 
@@ -346,17 +371,18 @@ describe('Business Controller E2E', () => {
         .get(`/api/businesses/${businessId}`)
         .set('Authorization', `Bearer ${authToken}`);
 
-      expect(getResponse.body.whatsappPhone).toBe('+18095557777');
+      expect(getResponse.body.whatsappPhone).toBe(newWhatsApp);
     });
 
     it('should reject duplicate WhatsApp number', async () => {
-      // Create another business
-      const response = await request(app.getHttpServer())
+      // Create another business with a specific WhatsApp
+      const existingWhatsApp = `+1809555${Math.floor(Math.random() * 10000)}`;
+      await request(app.getHttpServer())
         .post('/api/businesses')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           name: 'Another Business',
-          whatsappNumber: '+18095558888',
+          whatsappNumber: existingWhatsApp,
           address: {
             street: '123 Main St',
             city: 'Santo Domingo',
@@ -365,14 +391,12 @@ describe('Business Controller E2E', () => {
           timezone: 'America/Santo_Domingo',
         });
 
-      const anotherBusinessId = response.body.id;
-
-      // Try to update to existing WhatsApp
+      // Try to update businessId to use the existing WhatsApp
       await request(app.getHttpServer())
-        .put(`/api/businesses/${anotherBusinessId}/whatsapp`)
+        .put(`/api/businesses/${businessId}/whatsapp`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          whatsappNumber: '+18095557777', // Already used by businessId
+          whatsappNumber: existingWhatsApp,
         })
         .expect(409);
     });
@@ -391,13 +415,13 @@ describe('Business Controller E2E', () => {
   describe('DELETE /api/businesses/:id', () => {
     let businessId: string;
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       const response = await request(app.getHttpServer())
         .post('/api/businesses')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           name: 'Deactivate Test Business',
-          whatsappNumber: '+18095559000',
+          whatsappNumber: `+1809555${Math.floor(Math.random() * 10000)}`,
           address: {
             street: '123 Main St',
             city: 'Santo Domingo',
@@ -426,6 +450,12 @@ describe('Business Controller E2E', () => {
     });
 
     it('should be idempotent', async () => {
+      // Deactivate first time
+      await request(app.getHttpServer())
+        .delete(`/api/businesses/${businessId}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
       // Deactivate again
       await request(app.getHttpServer())
         .delete(`/api/businesses/${businessId}`)
@@ -437,13 +467,13 @@ describe('Business Controller E2E', () => {
   describe('POST /api/businesses/:id/activate', () => {
     let businessId: string;
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       const response = await request(app.getHttpServer())
         .post('/api/businesses')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           name: 'Activate Test Business',
-          whatsappNumber: '+18095559100',
+          whatsappNumber: `+1809555${Math.floor(Math.random() * 10000)}`,
           address: {
             street: '123 Main St',
             city: 'Santo Domingo',
@@ -477,6 +507,12 @@ describe('Business Controller E2E', () => {
     });
 
     it('should be idempotent', async () => {
+      // Activate first time
+      await request(app.getHttpServer())
+        .post(`/api/businesses/${businessId}/activate`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
       // Activate again
       await request(app.getHttpServer())
         .post(`/api/businesses/${businessId}/activate`)

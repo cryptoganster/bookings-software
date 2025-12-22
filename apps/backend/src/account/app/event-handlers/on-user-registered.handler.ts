@@ -50,6 +50,16 @@ export class OnUserRegisteredHandler implements IEventHandler<UserRegistered> {
       this.logger.log(
         `Successfully created BusinessOwner ${result.businessOwnerId} for user ${event.userId}`,
       );
+
+      // Automatically complete onboarding for new BusinessOwners
+      // This allows them to create their first business immediately
+      const { CompleteOnboardingCommand } =
+        await import('@account/app/commands/complete-onboarding/command');
+      await this.commandBus.execute(new CompleteOnboardingCommand(result.businessOwnerId));
+
+      this.logger.log(
+        `Successfully completed onboarding for BusinessOwner ${result.businessOwnerId}`,
+      );
     } catch (error) {
       // If BusinessOwner already exists, log and continue (idempotent)
       if (error instanceof BusinessOwnerAlreadyExistsException) {

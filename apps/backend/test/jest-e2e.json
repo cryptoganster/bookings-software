@@ -1,24 +1,28 @@
 {
   "moduleFileExtensions": ["js", "json", "ts"],
-  "rootDir": ".",
+  "rootDir": "../src",
   "testEnvironment": "node",
-  "testRegex": ".e2e-spec.ts$",
+  "testRegex": ".*\\.e2e\\.spec\\.ts$",
+  "testPathIgnorePatterns": ["/node_modules/", "/dist/"],
   "maxWorkers": 1,
+  "testTimeout": 30000,
+  "globalSetup": "<rootDir>/../test/global-setup.ts",
+  "setupFiles": ["<rootDir>/../test/setup.ts"],
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
   },
   "transformIgnorePatterns": ["node_modules/(?!(uuid)/)"],
   "moduleNameMapper": {
-    "^@shared/(.*)$": "<rootDir>/../src/shared/$1",
-    "^@account/(.*)$": "<rootDir>/../src/account/$1",
-    "^@booking/(.*)$": "<rootDir>/../src/booking/$1",
-    "^@availability/(.*)$": "<rootDir>/../src/availability/$1",
-    "^@business/(.*)$": "<rootDir>/../src/business/$1",
-    "^@conversation/(.*)$": "<rootDir>/../src/conversation/$1",
-    "^@auth/(.*)$": "<rootDir>/../src/auth/$1",
-    "^@customer/(.*)$": "<rootDir>/../src/customer/$1",
-    "^@offering/(.*)$": "<rootDir>/../src/offering/$1",
-    "^@test-utils/(.*)$": "<rootDir>/../src/test-utils/$1",
+    "^@shared/(.*)$": "<rootDir>/shared/$1",
+    "^@account/(.*)$": "<rootDir>/account/$1",
+    "^@booking/(.*)$": "<rootDir>/booking/$1",
+    "^@availability/(.*)$": "<rootDir>/availability/$1",
+    "^@business/(.*)$": "<rootDir>/business/$1",
+    "^@conversation/(.*)$": "<rootDir>/conversation/$1",
+    "^@auth/(.*)$": "<rootDir>/auth/$1",
+    "^@customer/(.*)$": "<rootDir>/customer/$1",
+    "^@offering/(.*)$": "<rootDir>/offering/$1",
+    "^@test-utils/(.*)$": "<rootDir>/test-utils/$1",
     "^uuid$": "<rootDir>/../node_modules/uuid/dist/index.js"
   }
 }

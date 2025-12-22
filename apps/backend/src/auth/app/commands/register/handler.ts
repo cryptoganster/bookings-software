@@ -1,4 +1,4 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler, ICommandHandler, EventPublisher } from '@nestjs/cqrs';
 import { ConflictException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PinoLogger } from 'nestjs-pino';
@@ -17,6 +17,7 @@ export class RegisterHandler implements ICommandHandler<RegisterCommand> {
     @Inject('IUserReadRepository')
     private readonly userReadRepository: IUserReadRepository,
     private readonly jwtService: JwtService,
+    private readonly eventPublisher: EventPublisher,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(RegisterHandler.name);
@@ -61,8 +62,14 @@ export class RegisterHandler implements ICommandHandler<RegisterCommand> {
         command.initialRole,
       );
 
+      // Fusionar el aggregate con EventPublisher para habilitar publicación de eventos
+      const userWithContext = this.eventPublisher.mergeObjectContext(user);
+
       // Guardar usuario (usando WRITE repository)
-      await this.userWriteRepository.save(user);
+      await this.userWriteRepository.save(userWithContext);
+
+      // Publicar eventos pendientes (UserRegistered)
+      userWithContext.commit();
 
       // Generar JWT token con roles
       const payload = {

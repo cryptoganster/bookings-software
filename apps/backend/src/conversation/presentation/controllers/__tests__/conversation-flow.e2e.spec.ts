@@ -1,15 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { AppModule } from '../../src/app.module';
+import { AppModule } from '../../../../app.module';
 import { CommandBus } from '@nestjs/cqrs';
 import { ProcessIncomingMessageCommand } from '@conversation/app/commands/process-incoming-message';
 import { IWhatsAppClient, Button } from '@conversation/domain/interfaces/external/whatsapp-client';
 import { UUID } from '@shared/vo/uuid';
 import { AppointmentModel } from '@booking/infra/persistence/models/appointment';
 import { conversationsStore } from '@conversation/conversation.module';
-import { createCapacityForTomorrow } from '@test-utils/e2e-helpers';
-import { createActiveOffering } from '@test-utils/e2e-helpers';
+import { createCapacityForTomorrow, createActiveOffering } from '@test-utils/e2e-helpers';
 import { CapacityModel } from '@availability/infra/persistence/models/capacity';
 
 describe('Conversational Booking Flow (e2e)', () => {
