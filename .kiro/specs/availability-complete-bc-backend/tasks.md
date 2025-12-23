@@ -199,48 +199,48 @@
 
 ## Phase 4: Application Layer - Commands
 
-- [ ] 11. Implement Schedule Commands
-  - [ ] 11.1 Implement CreateScheduleCommand handler
+- [x] 11. Implement Schedule Commands
+  - [x] 11.1 Implement CreateScheduleCommand handler
     - Create `apps/backend/src/availability/app/commands/create-schedule/handler.ts`
     - Implement business logic
     - Add validation
     - Use UnitOfWork for transactions
     - _Requirements: 1.1, 1.2, 1.3, 6.1_
 
-  - [ ] 11.2 Implement UpdateScheduleCommand handler
+  - [x] 11.2 Implement UpdateScheduleCommand handler
     - Create `apps/backend/src/availability/app/commands/update-schedule/handler.ts`
     - Load aggregate via factory
     - Update and persist
     - _Requirements: 1.4_
 
-  - [ ] 11.3 Implement DeleteScheduleCommand handler
+  - [x] 11.3 Implement DeleteScheduleCommand handler
     - Create `apps/backend/src/availability/app/commands/delete-schedule/handler.ts`
     - Load aggregate via factory
     - Deactivate and persist
     - _Requirements: 1.5_
 
-  - [ ] 11.4 Write unit tests for Schedule command handlers
+  - [x] 11.4 Write unit tests for Schedule command handlers
     - Test CreateScheduleHandler
     - Test UpdateScheduleHandler
     - Test DeleteScheduleHandler
     - Mock dependencies
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5_
 
-- [ ] 12. Implement Blockout Commands
-  - [ ] 12.1 Implement CreateBlockoutCommand handler
+- [x] 12. Implement Blockout Commands
+  - [x] 12.1 Implement CreateBlockoutCommand handler
     - Create `apps/backend/src/availability/app/commands/create-blockout/handler.ts`
     - Implement business logic
     - Add validation
     - Use UnitOfWork for transactions
     - _Requirements: 2.1, 2.2, 2.3_
 
-  - [ ] 12.2 Implement RemoveBlockoutCommand handler
+  - [x] 12.2 Implement RemoveBlockoutCommand handler
     - Create `apps/backend/src/availability/app/commands/remove-blockout/handler.ts`
     - Load aggregate via factory
     - Delete from repository
     - _Requirements: 2.4_
 
-  - [ ] 12.3 Write unit tests for Blockout command handlers
+  - [x] 12.3 Write unit tests for Blockout command handlers
     - Test CreateBlockoutHandler
     - Test RemoveBlockoutHandler
     - Mock dependencies
@@ -383,13 +383,13 @@
     - **Property 9: Slot release increments availability**
     - **Validates: Requirements 3.1, 3.2, 3.3, 3.4, 3.5**
 
-  - [ ]\* 19.2 Write Availability query property tests
+  - [ ] 19.2 Write Availability query property tests
     - **Property 10: Available dates exclude blockouts**
     - **Property 11: Available dates exclude zero capacity**
     - **Validates: Requirements 4.2, 4.3**
 
 - [ ] 20. Write Concurrency Tests
-  - [ ]\* 20.1 Write concurrent booking tests
+  - [ ] 20.1 Write concurrent booking tests
     - **Property 12: Optimistic locking prevents double booking**
     - Simulate race conditions
     - Test retry logic

@@ -1,10 +1,7 @@
 import { Query } from '@nestjs/cqrs';
+import { BlockoutReadModel } from '@availability/domain/read-models/blockout';
 
-/**
- * Query to get blockouts by business
- * TODO: Implement full query logic and return type
- */
-export class GetBlockoutsByBusinessQuery extends Query<any[]> {
+export class GetBlockoutsByBusinessQuery extends Query<BlockoutReadModel[]> {
   constructor(public readonly businessId: string) {
     super();
   }

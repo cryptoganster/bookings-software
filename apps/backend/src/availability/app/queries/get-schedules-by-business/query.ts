@@ -1,10 +1,7 @@
 import { Query } from '@nestjs/cqrs';
+import { ScheduleReadModel } from '@availability/domain/read-models/schedule';
 
-/**
- * Query to get schedules by business
- * TODO: Implement full query logic and return type
- */
-export class GetSchedulesByBusinessQuery extends Query<any[]> {
+export class GetSchedulesByBusinessQuery extends Query<ScheduleReadModel[]> {
   constructor(public readonly businessId: string) {
     super();
   }
