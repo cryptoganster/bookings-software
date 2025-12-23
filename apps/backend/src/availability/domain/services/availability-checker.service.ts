@@ -5,12 +5,14 @@ import { IBlockoutReadRepository } from '@availability/domain/interfaces/reposit
 import { ICapacityFactory } from '@availability/domain/interfaces/factories/capacity-factory';
 
 /**
- * Infrastructure implementation of IAvailabilityChecker
+ * Domain Service: AvailabilityChecker
  *
  * This domain service coordinates between Schedule, Blockout, and Capacity
  * to determine availability for bookings.
  *
- * Located in infrastructure because it depends on repositories and factories.
+ * Domain Services contain business logic that doesn't naturally fit within
+ * a single aggregate. They depend on repository interfaces (abstractions),
+ * not concrete implementations, which keeps them in the domain layer.
  */
 @Injectable()
 export class AvailabilityChecker implements IAvailabilityChecker {

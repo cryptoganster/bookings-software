@@ -38,16 +38,18 @@ describe('AvailabilityChecker Service - Unit Tests', () => {
   });
 
   describe('isDateAvailable', () => {
-    const businessId = 'business-123';
-    const offeringId = 'offering-456';
-    const testDate = new Date('2025-01-15T10:00:00Z'); // Wednesday
+    const businessId = '550e8400-e29b-41d4-a716-446655440000';
+    const offeringId = '550e8400-e29b-41d4-a716-446655440001';
+    const today = new Date();
+    const testDate = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days from now
+    const testDayOfWeek = testDate.getDay(); // Get actual day of week (0-6)
 
     it('should return true when date is available (has schedule, no blockout, has capacity)', async () => {
       // Arrange
       const schedule: ScheduleReadModel = {
         id: 'schedule-1',
         businessId,
-        dayOfWeek: 3, // Wednesday
+        dayOfWeek: testDayOfWeek,
         startTime: '09:00',
         endTime: '17:00',
         isActive: true,
@@ -71,7 +73,7 @@ describe('AvailabilityChecker Service - Unit Tests', () => {
 
       // Assert
       expect(result).toBe(true);
-      expect(mockScheduleRepo.findByBusinessAndDay).toHaveBeenCalledWith(businessId, 3);
+      expect(mockScheduleRepo.findByBusinessAndDay).toHaveBeenCalledWith(businessId, testDayOfWeek);
       expect(mockBlockoutRepo.findByBusinessAndDateRange).toHaveBeenCalled();
       expect(mockCapacityFactory.loadByOfferingAndDate).toHaveBeenCalled();
     });
@@ -85,7 +87,7 @@ describe('AvailabilityChecker Service - Unit Tests', () => {
 
       // Assert
       expect(result).toBe(false);
-      expect(mockScheduleRepo.findByBusinessAndDay).toHaveBeenCalledWith(businessId, 3);
+      expect(mockScheduleRepo.findByBusinessAndDay).toHaveBeenCalledWith(businessId, testDayOfWeek);
       expect(mockBlockoutRepo.findByBusinessAndDateRange).not.toHaveBeenCalled();
       expect(mockCapacityFactory.loadByOfferingAndDate).not.toHaveBeenCalled();
     });
@@ -95,7 +97,7 @@ describe('AvailabilityChecker Service - Unit Tests', () => {
       const inactiveSchedule: ScheduleReadModel = {
         id: 'schedule-1',
         businessId,
-        dayOfWeek: 3,
+        dayOfWeek: testDayOfWeek,
         startTime: '09:00',
         endTime: '17:00',
         isActive: false, // Inactive
@@ -117,7 +119,7 @@ describe('AvailabilityChecker Service - Unit Tests', () => {
       const schedule: ScheduleReadModel = {
         id: 'schedule-1',
         businessId,
-        dayOfWeek: 3,
+        dayOfWeek: testDayOfWeek,
         startTime: '09:00',
         endTime: '17:00',
         isActive: true,
@@ -150,7 +152,7 @@ describe('AvailabilityChecker Service - Unit Tests', () => {
       const schedule: ScheduleReadModel = {
         id: 'schedule-1',
         businessId,
-        dayOfWeek: 3,
+        dayOfWeek: testDayOfWeek,
         startTime: '09:00',
         endTime: '17:00',
         isActive: true,
@@ -174,7 +176,7 @@ describe('AvailabilityChecker Service - Unit Tests', () => {
       const schedule: ScheduleReadModel = {
         id: 'schedule-1',
         businessId,
-        dayOfWeek: 3,
+        dayOfWeek: testDayOfWeek,
         startTime: '09:00',
         endTime: '17:00',
         isActive: true,
@@ -202,9 +204,11 @@ describe('AvailabilityChecker Service - Unit Tests', () => {
   });
 
   describe('getAvailableTimeSlots', () => {
-    const businessId = 'business-123';
-    const offeringId = 'offering-456';
-    const testDate = new Date('2025-01-15T10:00:00Z'); // Wednesday
+    const businessId = '550e8400-e29b-41d4-a716-446655440000';
+    const offeringId = '550e8400-e29b-41d4-a716-446655440001';
+    const today = new Date();
+    const testDate = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days from now
+    const testDayOfWeek = testDate.getDay(); // Get actual day of week (0-6)
     const duration = 30; // 30 minutes
 
     it('should return time slots when date is available', async () => {
@@ -212,7 +216,7 @@ describe('AvailabilityChecker Service - Unit Tests', () => {
       const schedule: ScheduleReadModel = {
         id: 'schedule-1',
         businessId,
-        dayOfWeek: 3,
+        dayOfWeek: testDayOfWeek,
         startTime: '09:00',
         endTime: '11:00',
         isActive: true,
@@ -286,7 +290,7 @@ describe('AvailabilityChecker Service - Unit Tests', () => {
       const inactiveSchedule: ScheduleReadModel = {
         id: 'schedule-1',
         businessId,
-        dayOfWeek: 3,
+        dayOfWeek: testDayOfWeek,
         startTime: '09:00',
         endTime: '17:00',
         isActive: false,
@@ -314,7 +318,7 @@ describe('AvailabilityChecker Service - Unit Tests', () => {
       const schedule: ScheduleReadModel = {
         id: 'schedule-1',
         businessId,
-        dayOfWeek: 3,
+        dayOfWeek: testDayOfWeek,
         startTime: '09:00',
         endTime: '17:00',
         isActive: true,
@@ -343,7 +347,7 @@ describe('AvailabilityChecker Service - Unit Tests', () => {
       const schedule: ScheduleReadModel = {
         id: 'schedule-1',
         businessId,
-        dayOfWeek: 3,
+        dayOfWeek: testDayOfWeek,
         startTime: '09:00',
         endTime: '12:00',
         isActive: true,
@@ -369,7 +373,7 @@ describe('AvailabilityChecker Service - Unit Tests', () => {
       const schedule: ScheduleReadModel = {
         id: 'schedule-1',
         businessId,
-        dayOfWeek: 3,
+        dayOfWeek: testDayOfWeek,
         startTime: '09:00',
         endTime: '10:00',
         isActive: true,
