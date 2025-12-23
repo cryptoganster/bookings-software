@@ -248,38 +248,47 @@ apps/backend/src/account/account.module.ts ✅ (registered controller)
 
 ---
 
-#### Task 1.5: Business BC Controllers (Extend) ✅ PARTIALLY COMPLETED
+#### Task 1.5: Business BC Controllers (Extend) ✅ COMPLETED
 
 **Priority:** MEDIUM  
 **Estimated Time:** 2 hours  
-**Status:** ✅ MOSTLY DONE - Basic controller exists
+**Actual Time:** Already implemented  
+**Status:** ✅ FULLY COMPLETED
 
 - [x] Extend `BusinessManagementController`
-  - [x] GET `/api/business` - Get business info ✅
-  - [ ] PUT `/api/business` - Update business info (TODO)
-  - [ ] POST `/api/business/whatsapp` - Configure WhatsApp (TODO)
-  - [ ] GET `/api/business/settings` - Get settings (TODO)
+  - [x] GET `/api/businesses` - Get businesses by owner ✅
+  - [x] GET `/api/businesses/:id` - Get business by ID ✅
+  - [x] POST `/api/businesses` - Create business ✅
+  - [x] PUT `/api/businesses/:id` - Update business info ✅
+  - [x] PUT `/api/businesses/:id/whatsapp` - Configure WhatsApp ✅
+  - [x] DELETE `/api/businesses/:id` - Deactivate business ✅
+  - [x] POST `/api/businesses/:id/activate` - Activate business ✅
 
-- [ ] Create DTOs
-  - [ ] `UpdateBusinessDto`
-  - [ ] `ConfigureWhatsAppDto`
+- [x] Create DTOs
+  - [x] `CreateBusinessDto` ✅
+  - [x] `UpdateBusinessInfoDto` ✅
+  - [x] `ConfigureWhatsAppDto` ✅
 
-- [ ] Add E2E tests
-  - [ ] Test business update
-  - [ ] Test WhatsApp configuration
+- [x] E2E tests exist
+  - [x] Test business CRUD operations ✅
+  - [x] Test WhatsApp configuration ✅
 
-**Files Already Modified:**
+**Files Already Implemented:**
 
 ```
 apps/backend/src/business/presentation/controllers/
-└── business.controller.ts ✅ (has GET endpoint)
+└── business.controller.ts ✅ (all endpoints implemented)
+
+apps/backend/src/business/presentation/dtos/
+├── create-business.dto.ts ✅
+├── update-business-info.dto.ts ✅
+└── configure-whatsapp.dto.ts ✅
+
+apps/backend/src/business/presentation/controllers/__tests__/
+└── business.e2e.spec.ts ✅ (comprehensive E2E tests)
 ```
 
-**Remaining Work:**
-
-1. Create UpdateBusinessDto and ConfigureWhatsAppDto
-2. Add PUT and POST endpoints to controller
-3. Create E2E tests for new endpoints
+**Status:** ✅ FULLY COMPLETED - All endpoints, DTOs, and E2E tests already implemented
 
 ---
 
@@ -796,10 +805,10 @@ apps/backend/README.md (update)
 - [ ] Task 1.2: Availability BC Controllers (0/12) 🔄 IN PROGRESS
 - [x] Task 1.3: Booking BC Controllers (7/7) ✅ COMPLETED
 - [x] Task 1.4: Account BC Controllers (6/9) ✅ COMPLETED (E2E tests deferred)
-- [x] Task 1.5: Business BC Controllers (1/5) ✅ PARTIALLY DONE
+- [x] Task 1.5: Business BC Controllers (7/7) ✅ COMPLETED
 - [ ] Task 1.6: Conversation BC Controllers (0/6) ⏳ NOT STARTED
 
-**Phase 1 Summary:** 22/47 tasks completed (47%)
+**Phase 1 Summary:** 28/49 tasks completed (57%)
 
 ### Phase 2: Frontend Integration
 
@@ -821,13 +830,28 @@ apps/backend/README.md (update)
 
 **Phase 3 Summary:** 0/16 tasks completed (0%)
 
-**Overall Progress:** 22/88 tasks completed (25%)
+**Overall Progress:** 28/90 tasks completed (31%)
 
 ---
 
 ## Latest Updates
 
 ### December 23, 2024
+
+**✅ Task 1.5 - Business BC Controllers - VERIFIED AS COMPLETED**
+
+- Verified all endpoints are already implemented in `BusinessController`
+- All DTOs already exist and are properly structured
+- E2E tests already exist and are comprehensive
+- Endpoints include:
+  - POST `/api/businesses` - Create business
+  - GET `/api/businesses` - Get businesses by owner
+  - GET `/api/businesses/:id` - Get business by ID
+  - PUT `/api/businesses/:id` - Update business info
+  - PUT `/api/businesses/:id/whatsapp` - Configure WhatsApp
+  - DELETE `/api/businesses/:id` - Deactivate business
+  - POST `/api/businesses/:id/activate` - Activate business
+- Status updated from "PARTIALLY DONE" to "FULLY COMPLETED"
 
 **✅ Task 1.4 - Account BC Controllers - COMPLETED**
 
