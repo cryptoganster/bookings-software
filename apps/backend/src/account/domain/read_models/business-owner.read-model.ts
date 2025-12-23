@@ -11,6 +11,7 @@ export class BusinessOwnerReadModel {
   maxAppointmentsPerMonth!: number;
   price!: number;
   onboardingCompleted!: boolean;
+  version!: number;
   createdAt!: Date;
   updatedAt!: Date;
 }

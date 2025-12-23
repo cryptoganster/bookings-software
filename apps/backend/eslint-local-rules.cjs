@@ -32,6 +32,7 @@ module.exports = {
       // Definir aliases permitidos (deben coincidir con tsconfig.json)
       const allowedAliases = [
         '@packages/shared-types',
+        '@/',
         '@shared',
         '@booking',
         '@conversation',

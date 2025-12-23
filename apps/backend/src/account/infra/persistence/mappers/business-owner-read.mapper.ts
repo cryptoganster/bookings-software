@@ -16,6 +16,7 @@ export class BusinessOwnerReadMapper {
       maxAppointmentsPerMonth: plan.getMaxAppointmentsPerMonth(),
       price: plan.getPrice(),
       onboardingCompleted: model.onboardingCompleted,
+      version: model.version,
       createdAt: model.createdAt,
       updatedAt: model.updatedAt,
     };

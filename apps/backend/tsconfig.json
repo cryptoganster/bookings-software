@@ -17,6 +17,7 @@
     "noFallthroughCasesInSwitch": true,
     "paths": {
       "@packages/shared-types": ["../../packages/shared-types/src/index.ts"],
+      "@/*": ["src/*"],
       "@shared/*": ["src/shared/*"],
       "@booking/*": ["src/booking/*"],
       "@conversation/*": ["src/conversation/*"],
