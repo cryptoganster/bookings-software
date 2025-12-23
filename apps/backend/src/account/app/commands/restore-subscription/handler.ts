@@ -37,7 +37,10 @@ export class RestoreSubscriptionHandler implements ICommandHandler<RestoreSubscr
     // Restore subscription
     businessOwner.restoreSubscription();
 
-    // Persist
-    await this.writeRepository.save(businessOwner);
+    // Only persist if there are uncommitted events (state changed)
+    // This handles the idempotent case where subscription is already ACTIVE
+    if (businessOwner.getUncommittedEvents().length > 0) {
+      await this.writeRepository.save(businessOwner);
+    }
   }
 }

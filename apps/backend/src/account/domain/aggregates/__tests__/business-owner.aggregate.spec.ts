@@ -8,7 +8,6 @@ import { CannotDowngradeSubscriptionException } from '../../exceptions/cannot-do
 import { OnboardingAlreadyCompletedException } from '../../exceptions/onboarding-already-completed.exception';
 import { OnboardingNotCompletedException } from '../../exceptions/onboarding-not-completed.exception';
 import { SubscriptionAlreadySuspendedException } from '../../exceptions/subscription-already-suspended.exception';
-import { SubscriptionNotActiveException } from '../../exceptions/subscription-not-active.exception';
 import { BusinessOwnerCreated } from '../../events/business-owner-created';
 import { BusinessOwnerOnboardingCompleted } from '../../events/business-owner-onboarding-completed';
 import { BusinessOwnerSubscriptionUpgraded } from '../../events/business-owner-subscription-upgraded';
@@ -187,10 +186,18 @@ describe('BusinessOwner Aggregate', () => {
       expect(events[2]).toBeInstanceOf(BusinessOwnerSubscriptionRestored);
     });
 
-    it('should throw SubscriptionNotActiveException if already active', () => {
+    it('should be idempotent (no error if already active)', () => {
       const businessOwner = BusinessOwner.create(businessOwnerId, userId, SubscriptionPlan.free());
 
-      expect(() => businessOwner.restoreSubscription()).toThrow(SubscriptionNotActiveException);
+      const versionBefore = businessOwner.getVersion().getValue();
+      const eventsBefore = businessOwner.getUncommittedEvents().length;
+
+      // Should not throw and should not generate events
+      businessOwner.restoreSubscription();
+
+      expect(businessOwner.getVersion().getValue()).toBe(versionBefore);
+      expect(businessOwner.getUncommittedEvents()).toHaveLength(eventsBefore);
+      expect(businessOwner.getSubscriptionStatus().isActive()).toBe(true);
     });
   });
 

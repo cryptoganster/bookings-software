@@ -385,17 +385,20 @@ describe('BusinessOwner Aggregate', () => {
       expect(businessOwner.getVersion().getValue()).toBe(versionAfterSuspend + 1);
     });
 
-    it('should throw error if already active (not idempotent)', () => {
+    it('should be idempotent (no error if already active)', () => {
       const businessOwner = BusinessOwner.create(
         UUID.generate(),
         UUID.generate(),
         SubscriptionPlan.free(),
       );
 
-      // Already active, should throw
-      expect(() => {
-        businessOwner.restoreSubscription();
-      }).toThrow();
+      const versionBefore = businessOwner.getVersion().getValue();
+
+      // Already active, should not throw and version should not change
+      businessOwner.restoreSubscription();
+
+      expect(businessOwner.getVersion().getValue()).toBe(versionBefore);
+      expect(businessOwner.getSubscriptionStatus().isActive()).toBe(true);
     });
   });
 
