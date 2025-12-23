@@ -24,7 +24,12 @@ export class AvailabilityQueryController {
   @HttpCode(HttpStatus.OK)
   async getAvailableDates(@Query() dto: GetAvailableDatesDto) {
     return this.queryBus.execute(
-      new GetAvailableDatesQuery(dto.offeringId, new Date(dto.startDate), new Date(dto.endDate)),
+      new GetAvailableDatesQuery(
+        dto.offeringId,
+        dto.businessId,
+        new Date(dto.startDate),
+        new Date(dto.endDate),
+      ),
     );
   }
 
@@ -35,6 +40,13 @@ export class AvailabilityQueryController {
   @Get('slots')
   @HttpCode(HttpStatus.OK)
   async getAvailableSlots(@Query() dto: GetAvailableSlotsDto) {
-    return this.queryBus.execute(new GetAvailableSlotsQuery(dto.offeringId, new Date(dto.date)));
+    return this.queryBus.execute(
+      new GetAvailableSlotsQuery(
+        dto.offeringId,
+        dto.businessId,
+        new Date(dto.date),
+        dto.durationMinutes,
+      ),
+    );
   }
 }

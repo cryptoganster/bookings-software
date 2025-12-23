@@ -7,6 +7,9 @@ export class GetAvailableDatesDto {
   @IsUUID()
   offeringId!: string;
 
+  @IsUUID()
+  businessId!: string;
+
   @IsDateString()
   startDate!: string; // ISO 8601 format
 

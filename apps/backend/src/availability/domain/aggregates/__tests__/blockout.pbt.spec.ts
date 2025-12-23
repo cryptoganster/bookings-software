@@ -5,6 +5,26 @@ import { UUID } from '@shared/vo/uuid';
 import { DateRange } from '../../vo/date-range.vo';
 
 /**
+ * Custom UUID v4 generator for fast-check
+ * Generates valid UUIDs that pass uuid-validate
+ */
+const uuidV4 = (): fc.Arbitrary<string> => {
+  return fc
+    .tuple(
+      fc.integer({ min: 0, max: 0xffffffff }),
+      fc.integer({ min: 0, max: 0xffff }),
+      fc.integer({ min: 0, max: 0x0fff }),
+      fc.integer({ min: 0, max: 0x3fff }),
+      fc.integer({ min: 0, max: 0xffffffffffff }),
+    )
+    .map(([a, b, c, d, e]) => {
+      // Format as UUID v4
+      const hex = (n: number, len: number) => n.toString(16).padStart(len, '0');
+      return `${hex(a, 8)}-${hex(b, 4)}-4${hex(c, 3)}-${hex(0x8000 | d, 4)}-${hex(e, 12)}`;
+    });
+};
+
+/**
  * Property-Based Tests for Blockout Aggregate
  *
  * These tests verify universal properties that should hold across all inputs.
@@ -86,8 +106,8 @@ describe('Blockout Aggregate - Property-Based Tests', () => {
     it('should create valid blockout with correct properties', () => {
       fc.assert(
         fc.property(
-          fc.uuid(),
-          fc.uuid(),
+          uuidV4(),
+          uuidV4(),
           fc.integer({ min: 0, max: 365 }),
           fc.integer({ min: 0, max: 30 }),
           fc.option(fc.string({ minLength: 1, maxLength: 200 })),
@@ -134,8 +154,8 @@ describe('Blockout Aggregate - Property-Based Tests', () => {
     it('should correctly identify if a date is within the blocked range', () => {
       fc.assert(
         fc.property(
-          fc.uuid(),
-          fc.uuid(),
+          uuidV4(),
+          uuidV4(),
           fc.integer({ min: 0, max: 100 }),
           fc.integer({ min: 1, max: 30 }),
           fc.integer({ min: -5, max: 35 }),

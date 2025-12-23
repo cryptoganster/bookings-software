@@ -40,6 +40,7 @@ import { RemoveBlockoutHandler } from '@availability/app/commands/remove-blockou
 import { GetAvailableSlotsHandler } from '@availability/app/queries/get-available-slots/handler';
 import { GetSchedulesByBusinessHandler } from '@availability/app/queries/get-schedules-by-business/handler';
 import { GetBlockoutsByBusinessHandler } from '@availability/app/queries/get-blockouts-by-business/handler';
+import { GetAvailableDatesHandler } from '@availability/app/queries/get-available-dates/handler';
 
 const CommandHandlers = [
   SetCapacityHandler,
@@ -53,6 +54,7 @@ const QueryHandlers = [
   GetAvailableSlotsHandler,
   GetSchedulesByBusinessHandler,
   GetBlockoutsByBusinessHandler,
+  GetAvailableDatesHandler,
 ];
 
 @Module({
