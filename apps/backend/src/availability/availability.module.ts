@@ -17,6 +17,9 @@ import { CapacityWriteRepository } from '@availability/infra/persistence/reposit
 // Factories
 import { CapacityFactory } from '@availability/infra/persistence/factories/capacity-factory';
 
+// Domain Services
+import { AvailabilityChecker } from '@availability/domain/services/availability-checker.service';
+
 // Command Handlers
 import { SetCapacityHandler } from '@availability/app/commands/set-capacity/handler';
 
@@ -44,11 +47,21 @@ const QueryHandlers = [GetAvailableSlotsHandler];
       provide: 'ICapacityFactory',
       useClass: CapacityFactory,
     },
+    // Domain Services
+    {
+      provide: 'IAvailabilityChecker',
+      useClass: AvailabilityChecker,
+    },
     // Command Handlers
     ...CommandHandlers,
     // Query Handlers
     ...QueryHandlers,
   ],
-  exports: ['ICapacityReadRepository', 'ICapacityWriteRepository', 'ICapacityFactory'],
+  exports: [
+    'ICapacityReadRepository',
+    'ICapacityWriteRepository',
+    'ICapacityFactory',
+    'IAvailabilityChecker',
+  ],
 })
 export class AvailabilityModule {}

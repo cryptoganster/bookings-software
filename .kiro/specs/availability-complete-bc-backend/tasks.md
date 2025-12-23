@@ -83,18 +83,22 @@
     - Create `apps/backend/src/availability/domain/interfaces/factories/blockout-factory.ts`
     - _Requirements: 1.4, 2.4_
 
-- [ ] 5. Create Domain Service
-  - [ ] 5.1 Create AvailabilityChecker service
+- [x] 5. Create Domain Service ✅
+  - [x] 5.1 Create AvailabilityChecker service ✅
     - Create `apps/backend/src/availability/domain/interfaces/services/availability-checker.service.ts`
+    - Create `apps/backend/src/availability/domain/services/availability-checker.service.ts`
     - Implement `isDateAvailable()` method
     - Implement `getAvailableTimeSlots()` method
+    - **Note:** Domain Services belong in domain layer, not infrastructure
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6_
 
-  - [ ] 5.2 Write unit tests for AvailabilityChecker
-    - Test date availability logic
-    - Test time slot generation
+  - [x] 5.2 Write unit tests for AvailabilityChecker ✅
+    - Create `apps/backend/src/availability/domain/services/__tests__/availability-checker.service.spec.ts`
+    - Test date availability logic (6 test cases)
+    - Test time slot generation (7 test cases)
     - Test blockout exclusion
     - Test capacity checking
+    - All 13 tests passing ✅
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6_
 
 - [x] 6. Create Read Models ✅
@@ -134,7 +138,7 @@
     - Implement `toModel()`, `toDomain()`, `toReadModel()`
     - _Requirements: 2.3, 2.5_
 
-  - [ ] 8.3 Write unit tests for mappers
+  - [x] 8.3 Write unit tests for mappers ✅
     - Test Schedule mappers
     - Test Blockout mappers
     - Test round-trip conversions
