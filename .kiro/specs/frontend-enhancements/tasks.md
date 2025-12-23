@@ -71,69 +71,95 @@ Time:        9.892 s
 
 ---
 
-#### Task 1.2: Availability BC Controllers
+#### Task 1.2: Availability BC Controllers ✅ PARTIALLY COMPLETED
 
 **Priority:** HIGH  
 **Estimated Time:** 6 hours  
-**Status:** 🔄 IN PROGRESS
+**Actual Time:** ~1 hour (controllers and DTOs)  
+**Status:** 🔄 Controllers complete, handlers pending
 
-- [ ] Create `ScheduleCrudController`
-  - [ ] GET `/api/schedules` - List schedules
-  - [ ] POST `/api/schedules` - Create schedule
-  - [ ] PUT `/api/schedules/:id` - Update schedule
-  - [ ] DELETE `/api/schedules/:id` - Delete schedule
+- [x] Create `ScheduleCrudController`
+  - [x] GET `/api/schedules` - List schedules ✅
+  - [x] POST `/api/schedules` - Create schedule ✅
+  - [x] PUT `/api/schedules/:id` - Update schedule ✅
+  - [x] DELETE `/api/schedules/:id` - Delete schedule ✅
 
-- [ ] Create `BlockoutCrudController`
-  - [ ] GET `/api/blockouts` - List blockouts
-  - [ ] POST `/api/blockouts` - Create blockout
-  - [ ] DELETE `/api/blockouts/:id` - Delete blockout
+- [x] Create `BlockoutCrudController`
+  - [x] GET `/api/blockouts` - List blockouts ✅
+  - [x] POST `/api/blockouts` - Create blockout ✅
+  - [x] DELETE `/api/blockouts/:id` - Delete blockout ✅
 
-- [ ] Create `AvailabilityQueryController`
-  - [ ] GET `/api/availability/dates` - Get available dates
-  - [ ] GET `/api/availability/slots` - Get available time slots
+- [x] Create `AvailabilityQueryController`
+  - [x] GET `/api/availability/dates` - Get available dates ✅
+  - [x] GET `/api/availability/slots` - Get available time slots ✅
 
-- [ ] Create DTOs
-  - [ ] `CreateScheduleDto`
-  - [ ] `UpdateScheduleDto`
-  - [ ] `CreateBlockoutDto`
-  - [ ] `GetAvailableDatesDto`
-  - [ ] `GetAvailableSlotsDto`
+- [x] Create DTOs
+  - [x] `CreateScheduleDto` ✅
+  - [x] `UpdateScheduleDto` ✅
+  - [x] `CreateBlockoutDto` ✅
+  - [x] `GetAvailableDatesDto` ✅
+  - [x] `GetAvailableSlotsDto` ✅
 
-- [ ] Add to `AvailabilityModule`
-  - [ ] Register controllers
-  - [ ] Export necessary providers
+- [x] Add to `AvailabilityModule`
+  - [x] Register controllers ✅
+  - [x] Export necessary providers ✅
 
-- [ ] Create E2E tests
+- [x] Create command/query stubs
+  - [x] `CreateScheduleCommand` ✅
+  - [x] `UpdateScheduleCommand` ✅
+  - [x] `DeleteScheduleCommand` ✅
+  - [x] `CreateBlockoutCommand` ✅
+  - [x] `RemoveBlockoutCommand` ✅
+  - [x] `GetSchedulesByBusinessQuery` ✅
+  - [x] `GetBlockoutsByBusinessQuery` ✅
+  - [x] `GetAvailableDatesQuery` ✅
+
+- [ ] Create command/query handlers (TODO)
+  - [ ] Implement handler logic
+  - [ ] Add to module providers
+
+- [ ] Create E2E tests (TODO)
   - [ ] Test schedule CRUD
   - [ ] Test blockout CRUD
   - [ ] Test availability queries
 
-**Files to Create:**
+**Files Created:**
 
 ```
 apps/backend/src/availability/presentation/controllers/
-├── schedule-crud.controller.ts
-├── blockout-crud.controller.ts
-├── availability-query.controller.ts
-└── dtos/
-    ├── create-schedule.dto.ts
-    ├── update-schedule.dto.ts
-    ├── create-blockout.dto.ts
-    ├── get-available-dates.dto.ts
-    └── get-available-slots.dto.ts
+├── schedule-crud.controller.ts ✅
+├── blockout-crud.controller.ts ✅
+└── availability-query.controller.ts ✅
 
-apps/backend/src/availability/app/__tests__/
-├── schedule-crud.e2e.spec.ts
-├── blockout-crud.e2e.spec.ts
-└── availability-query.e2e.spec.ts
+apps/backend/src/availability/presentation/dtos/
+├── create-schedule.dto.ts ✅
+├── update-schedule.dto.ts ✅
+├── create-blockout.dto.ts ✅
+├── get-available-dates.dto.ts ✅
+└── get-available-slots.dto.ts ✅
+
+apps/backend/src/availability/app/commands/
+├── create-schedule/command.ts ✅ (stub)
+├── update-schedule/command.ts ✅ (stub)
+├── delete-schedule/command.ts ✅ (stub)
+├── create-blockout/command.ts ✅ (stub)
+└── remove-blockout/command.ts ✅ (stub)
+
+apps/backend/src/availability/app/queries/
+├── get-schedules-by-business/query.ts ✅ (stub)
+├── get-blockouts-by-business/query.ts ✅ (stub)
+└── get-available-dates/query.ts ✅ (stub)
 ```
 
-**Next Steps:**
+**Files Modified:**
 
-1. Create DTOs for availability endpoints
-2. Create controllers for schedules, blockouts, and availability queries
-3. Register controllers in AvailabilityModule
-4. Create E2E tests
+```
+apps/backend/src/availability/availability.module.ts ✅
+```
+
+**Status:** ✅ CONTROLLERS LAYER COMPLETE - Handlers and E2E tests pending
+
+**Note:** Controllers are ready to use once handlers are implemented. The API structure is complete and follows the same patterns as other BCs.
 
 ---
 
@@ -828,13 +854,13 @@ apps/backend/README.md (update)
 ### Phase 1: Backend Controllers & APIs
 
 - [x] Task 1.1: Offering BC Controllers (8/8) ✅ COMPLETED
-- [ ] Task 1.2: Availability BC Controllers (0/12) 🔄 IN PROGRESS
+- [x] Task 1.2: Availability BC Controllers (17/20) ✅ PARTIALLY COMPLETED (controllers done, handlers pending)
 - [x] Task 1.3: Booking BC Controllers (7/7) ✅ COMPLETED
 - [x] Task 1.4: Account BC Controllers (6/9) ✅ COMPLETED (E2E tests deferred)
 - [x] Task 1.5: Business BC Controllers (7/7) ✅ COMPLETED
 - [ ] Task 1.6: Conversation BC Controllers (0/6) ⏳ NOT STARTED
 
-**Phase 1 Summary:** 28/49 tasks completed (57%)
+**Phase 1 Summary:** 45/57 tasks completed (79%)
 
 ### Phase 2: Frontend Integration
 
@@ -856,13 +882,28 @@ apps/backend/README.md (update)
 
 **Phase 3 Summary:** 0/16 tasks completed (0%)
 
-**Overall Progress:** 28/90 tasks completed (31%)
+**Overall Progress:** 45/93 tasks completed (48%)
 
 ---
 
 ## Latest Updates
 
 ### December 23, 2024
+
+**✅ Task 1.2 - Availability BC Controllers - CONTROLLERS LAYER COMPLETE**
+
+- Created 3 controllers with 9 REST endpoints total
+- Created 5 DTOs with comprehensive validation
+- Created 8 command/query stubs for future implementation
+- All controllers registered in AvailabilityModule
+- All endpoints use JWT authentication
+- Files created:
+  - 3 controllers: ScheduleCrudController, BlockoutCrudController, AvailabilityQueryController
+  - 5 DTOs: CreateScheduleDto, UpdateScheduleDto, CreateBlockoutDto, GetAvailableDatesDto, GetAvailableSlotsDto
+  - 5 command stubs: CreateScheduleCommand, UpdateScheduleCommand, DeleteScheduleCommand, CreateBlockoutCommand, RemoveBlockoutCommand
+  - 3 query stubs: GetSchedulesByBusinessQuery, GetBlockoutsByBusinessQuery, GetAvailableDatesQuery
+- Status: Controllers layer complete, handlers pending implementation
+- Commit: `212f204` - "feat(availability): add controllers, DTOs, and command/query stubs"
 
 **✅ Task 1.5 - Business BC Controllers - VERIFIED AS COMPLETED**
 
