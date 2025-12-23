@@ -271,7 +271,8 @@ export interface CreateBusinessRequestDto {
  * DTO para respuesta de creación de negocio
  */
 export interface CreateBusinessResponseDto {
-  businessId: string;
+  id: string;
+  token: string;
 }
 
 /**

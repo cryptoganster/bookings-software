@@ -14,13 +14,35 @@ import { loginApi } from "../api/loginApi";
 import { useAuthStore } from "@app/store/auth.store";
 import type { LoginDto } from "@entities/user";
 import type { ApiErrorDto } from "@packages/shared-types";
+import { logger } from "@shared/lib/logger";
+
+/**
+ * Decode JWT token to extract payload
+ * Note: This is a simple base64 decode, not cryptographic verification
+ * The backend verifies the token signature
+ */
+function decodeJWT(token: string): Record<string, unknown> | null {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) {
+      return null;
+    }
+    const payload = parts[1];
+    const decoded = atob(payload);
+    return JSON.parse(decoded);
+  } catch (error) {
+    logger.error("Failed to decode JWT token", { error });
+    return null;
+  }
+}
 
 /**
  * Hook para realizar login
  *
  * Maneja:
  * - Llamada a la API de login
- * - Actualización del auth store con usuario y token
+ * - Decodificación del JWT para extraer businessId
+ * - Actualización del auth store con usuario, token y businessId
  * - Redirección al dashboard después de login exitoso
  * - Notificaciones de error
  *
@@ -41,8 +63,21 @@ export function useLogin() {
     mutationFn: (credentials: LoginDto) => loginApi.login(credentials),
 
     onSuccess: (data) => {
-      // Actualizar auth store con usuario y token
-      authLogin(data.user, data.token);
+      // Decode JWT to extract businessId
+      const payload = decodeJWT(data.token);
+      const businessId: string | null =
+        payload && typeof payload.businessId === "string"
+          ? payload.businessId
+          : null;
+
+      logger.info("Login successful", {
+        userId: data.user.id,
+        roles: data.user.roles,
+        hasBusinessId: !!businessId,
+      });
+
+      // Actualizar auth store con usuario, token y businessId
+      authLogin(data.user, data.token, businessId);
 
       // Mostrar notificación de éxito
       notifications.show({
@@ -70,6 +105,11 @@ export function useLogin() {
           ? serverMessage.join(", ")
           : serverMessage;
       }
+
+      logger.warn("Login failed", {
+        status: error.response?.status,
+        message: errorMessage,
+      });
 
       // Mostrar notificación de error
       notifications.show({

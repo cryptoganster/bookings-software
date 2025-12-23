@@ -7,6 +7,7 @@ import { ENDPOINTS } from "../endpoints";
 import type {
   BusinessDto,
   CreateBusinessRequestDto,
+  CreateBusinessResponseDto,
   UpdateBusinessInfoRequestDto,
   ConfigureWhatsAppRequestDto,
 } from "@packages/shared-types";
@@ -26,8 +27,10 @@ export const businessService = {
     return data;
   },
 
-  async create(dto: CreateBusinessRequestDto): Promise<BusinessDto> {
-    const { data } = await apiClient.post<BusinessDto>(
+  async create(
+    dto: CreateBusinessRequestDto,
+  ): Promise<CreateBusinessResponseDto> {
+    const { data } = await apiClient.post<CreateBusinessResponseDto>(
       ENDPOINTS.BUSINESS.CREATE,
       dto,
     );

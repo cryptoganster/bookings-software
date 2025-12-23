@@ -5,7 +5,7 @@ import type { UserDto } from "@packages/shared-types";
 /**
  * Auth Store State
  *
- * Manages authentication state including user data, JWT token, and auth status.
+ * Manages authentication state including user data, JWT token, businessId, and auth status.
  * Uses Zustand persist middleware to save state to localStorage.
  *
  * Note: isAuthenticated is computed from token presence.
@@ -15,10 +15,12 @@ interface AuthState {
   // State
   user: UserDto | null;
   token: string | null;
+  businessId: string | null;
   isAuthenticated: boolean;
 
   // Actions
-  login: (user: UserDto, token: string) => void;
+  login: (user: UserDto, token: string, businessId?: string | null) => void;
+  updateBusinessId: (businessId: string) => void;
   logout: () => void;
 }
 
@@ -49,14 +51,22 @@ export const useAuthStore = create<AuthState>()(
       // Initial state
       user: null,
       token: null,
+      businessId: null,
       isAuthenticated: false,
 
-      // Login action - updates token and derives isAuthenticated
-      login: (user, token) =>
+      // Login action - updates token, businessId, and derives isAuthenticated
+      login: (user, token, businessId = null) =>
         set({
           user,
           token,
+          businessId,
           isAuthenticated: !!token,
+        }),
+
+      // Update businessId action - used after creating a business
+      updateBusinessId: (businessId) =>
+        set({
+          businessId,
         }),
 
       // Logout action - clears all auth state
@@ -64,6 +74,7 @@ export const useAuthStore = create<AuthState>()(
         set({
           user: null,
           token: null,
+          businessId: null,
           isAuthenticated: false,
         }),
     }),
@@ -72,7 +83,8 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({
         token: state.token,
         user: state.user,
-      }), // Only persist token and user - isAuthenticated is computed on hydration
+        businessId: state.businessId,
+      }), // Persist token, user, and businessId - isAuthenticated is computed on hydration
       onRehydrateStorage: () => (state) => {
         // After rehydration, compute isAuthenticated from token
         if (state) {
