@@ -50,7 +50,7 @@ export class DayOfWeek extends ValueObject {
     return DayOfWeek.DAY_NAMES[this.value];
   }
 
-  protected getEqualityComponents(): any[] {
+  protected getEqualityComponents(): unknown[] {
     return [this.value];
   }
 }

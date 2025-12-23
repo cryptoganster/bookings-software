@@ -1,6 +1,6 @@
 import { Customer } from '../customer';
 import { UUID } from '@shared/vo/uuid';
-import { WhatsAppPhone } from '../../vo/whatsapp-phone';
+import { WhatsAppPhone } from '@shared/vo/whatsapp-phone';
 import {
   InvalidCustomerDataException,
   InvalidCustomerNameException,

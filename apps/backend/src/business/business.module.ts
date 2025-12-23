@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BusinessModel } from '@business/infra/persistence/models/business.model';
@@ -25,6 +25,7 @@ import { BusinessFactory } from '@business/infra/persistence/factories/business.
 // Shared
 import { SharedModule } from '@shared/shared.module';
 import { AccountModule } from '@account/account.module';
+import { AuthModule } from '@auth/auth.module';
 
 // Controllers
 import { BusinessController } from '@business/presentation/controllers/business.controller';
@@ -78,6 +79,7 @@ const factories = [
     TypeOrmModule.forFeature([BusinessModel]),
     SharedModule,
     AccountModule, // Import AccountModule for BusinessOwner validation
+    forwardRef(() => AuthModule), // Import AuthModule for JwtService (circular dependency)
   ],
   controllers: [BusinessController],
   providers: [...commandHandlers, ...queryHandlers, ...repositories, ...factories],

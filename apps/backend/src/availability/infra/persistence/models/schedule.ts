@@ -7,24 +7,24 @@ export class ScheduleModel {
   @PrimaryColumn('uuid')
   id!: string;
 
-  @Column('uuid')
+  @Column('uuid', { name: 'business_id' })
   businessId!: string;
 
-  @Column('int')
+  @Column('int', { name: 'day_of_week' })
   dayOfWeek!: number; // 0-6 (Sunday-Saturday)
 
-  @Column('time')
+  @Column('time', { name: 'start_time' })
   startTime!: string; // HH:mm format
 
-  @Column('time')
+  @Column('time', { name: 'end_time' })
   endTime!: string; // HH:mm format
 
-  @Column('boolean', { default: true })
+  @Column('boolean', { name: 'is_active', default: true })
   isActive!: boolean;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt!: Date;
 }

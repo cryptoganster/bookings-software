@@ -7,7 +7,7 @@ import { IAppointmentReadRepository } from '@booking/domain/interfaces/repositor
 import { IUnitOfWork } from '@shared/kernel/uow';
 import { Customer } from '@customer/domain/aggregates/customer';
 import { UUID } from '@shared/vo/uuid';
-import { WhatsAppPhone } from '@customer/domain/vo/whatsapp-phone';
+import { WhatsAppPhone } from '@shared/vo/whatsapp-phone';
 import {
   CustomerNotFoundException,
   CustomerHasFutureAppointmentsException,

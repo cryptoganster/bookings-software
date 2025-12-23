@@ -7,18 +7,18 @@ export class BlockoutModel {
   @PrimaryColumn('uuid')
   id!: string;
 
-  @Column('uuid')
+  @Column('uuid', { name: 'business_id' })
   businessId!: string;
 
-  @Column('timestamp')
+  @Column('timestamp', { name: 'start_date' })
   startDate!: Date;
 
-  @Column('timestamp')
+  @Column('timestamp', { name: 'end_date' })
   endDate!: Date;
 
   @Column('text', { nullable: true })
   reason!: string | null;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 }

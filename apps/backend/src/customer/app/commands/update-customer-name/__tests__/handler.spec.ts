@@ -6,7 +6,7 @@ import { ICustomerWriteRepository } from '@customer/domain/interfaces/repositori
 import { Customer } from '@customer/domain/aggregates/customer';
 import { CustomerNotFoundException } from '@customer/domain/exceptions/customer-not-found';
 import { UUID } from '@shared/vo/uuid';
-import { WhatsAppPhone } from '@customer/domain/vo/whatsapp-phone';
+import { WhatsAppPhone } from '@shared/vo/whatsapp-phone';
 
 /**
  * Unit tests for UpdateCustomerNameHandler

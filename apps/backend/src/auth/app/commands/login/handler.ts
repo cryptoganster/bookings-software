@@ -63,7 +63,12 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
       }
 
       // Generar JWT token con roles y businessId (si es BUSINESS_OWNER)
-      const payload: any = {
+      const payload: {
+        sub: string;
+        email: string;
+        roles: string[];
+        businessId?: string;
+      } = {
         sub: user.getId().getValue(),
         email: user.getEmail().getValue(),
         roles: user.getRoles(),

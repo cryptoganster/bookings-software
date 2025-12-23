@@ -1,6 +1,6 @@
 import * as fc from 'fast-check';
-import { WhatsAppPhone } from '../whatsapp-phone';
-import { InvalidWhatsAppPhoneException } from '../../exceptions/invalid-whatsapp-phone';
+import { WhatsAppPhone } from '@shared/vo/whatsapp-phone';
+import { InvalidWhatsAppPhoneException } from '@shared/kernel/exceptions/invalid-whatsapp-phone';
 
 /**
  * Property-Based Tests for WhatsAppPhone

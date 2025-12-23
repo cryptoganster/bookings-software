@@ -31,20 +31,29 @@ The markers are organized into the following categories:
 
 See individual task files:
 
-- [deprecated-code.md](./deprecated-code.md) - P1
-- [conversation-persistence.md](./conversation-persistence.md) - P0
-- [cross-bc-integration.md](./cross-bc-integration.md) - P1
-- [test-fixes.md](./test-fixes.md) - P2
-- [customer-enhancements.md](./customer-enhancements.md) - P2
-- [booking-notifications.md](./booking-notifications.md) - P1
+- [deprecated-code.md](./deprecated-code.md) - P1, 2h
+- [conversation-persistence.md](./conversation-persistence.md) - P0, 2-3d
+- [cross-bc-integration.md](./cross-bc-integration.md) - P1, 3-4d
+- [test-fixes.md](./test-fixes.md) - P2, 1-2d
+- [console-logging.md](./console-logging.md) - P2, 2-3h
 
 ## Summary Statistics
 
-- **Total Markers Found:** ~50+
-- **Critical (P0):** 5
-- **High (P1):** 15
-- **Medium (P2):** 20
-- **Low (P3):** 10+
+- **Total Markers Found:** ~60+
+- **Critical (P0):** 1 task (Conversation persistence)
+- **High (P1):** 2 tasks (Deprecated code, Cross-BC integration)
+- **Medium (P2):** 2 tasks (Test fixes, Console logging)
+- **Low (P3):** 0 tasks
+
+### Breakdown by Type
+
+- **Deprecated Code:** 2 files (barrel exports)
+- **Temporary Mocks:** 1 BC (Conversation - violates CQRS)
+- **Placeholder Commands:** 3 commands (Notification, WhatsApp)
+- **Hardcoded Data:** 2 handlers (dates/times in conversation)
+- **Incomplete Tests:** 1 test (conversation flow)
+- **Console Statements:** 4 production files + test utilities
+- **Cross-BC TODOs:** 5+ integration points
 
 ## Next Steps
 

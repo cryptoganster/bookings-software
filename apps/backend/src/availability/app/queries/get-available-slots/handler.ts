@@ -49,10 +49,11 @@ export class GetAvailableSlotsHandler implements IQueryHandler<GetAvailableSlots
     }
 
     // Transform string slots to TimeSlot objects with Date and availableSlots
+    // Use UTC to avoid timezone issues
     const slots: TimeSlot[] = timeSlotStrings.map((timeString) => {
       const [hours, minutes] = timeString.split(':').map(Number);
       const slotTime = new Date(query.date);
-      slotTime.setHours(hours, minutes, 0, 0);
+      slotTime.setUTCHours(hours, minutes, 0, 0);
 
       return {
         time: slotTime,

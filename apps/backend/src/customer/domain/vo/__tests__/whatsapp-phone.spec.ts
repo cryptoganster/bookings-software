@@ -1,5 +1,5 @@
-import { WhatsAppPhone } from '../whatsapp-phone';
-import { InvalidWhatsAppPhoneException } from '../../exceptions/invalid-whatsapp-phone';
+import { WhatsAppPhone } from '@shared/vo/whatsapp-phone';
+import { InvalidWhatsAppPhoneException } from '@shared/kernel/exceptions/invalid-whatsapp-phone';
 
 describe('WhatsAppPhone Value Object', () => {
   describe('Valid E.164 formats', () => {

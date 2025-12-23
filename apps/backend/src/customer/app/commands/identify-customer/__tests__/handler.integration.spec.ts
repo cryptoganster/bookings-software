@@ -10,7 +10,7 @@ import { CustomerWriteRepository } from '@customer/infra/persistence/repositorie
 import { CustomerReadRepository } from '@customer/infra/persistence/repositories/customer-read.repository';
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { UUID } from '@shared/vo/uuid';
-import { WhatsAppPhone } from '@customer/domain/vo/whatsapp-phone';
+import { WhatsAppPhone } from '@shared/vo/whatsapp-phone';
 
 /**
  * Integration tests for IdentifyCustomerHandler

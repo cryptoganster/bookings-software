@@ -1,8 +1,11 @@
 import { DataSource } from 'typeorm';
 import { config } from 'dotenv';
+import { Logger } from '@nestjs/common';
 
 // Cargar variables de entorno
 config();
+
+const logger = new Logger('DatabaseConfig');
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -22,8 +25,9 @@ export const AppDataSource = new DataSource({
 // Inicializar el DataSource para CLI
 AppDataSource.initialize()
   .then(() => {
-    console.log('Data Source has been initialized!');
+    logger.log('Data Source has been initialized!');
   })
   .catch((err) => {
-    console.error('Error during Data Source initialization:', err);
+    logger.error('Error during Data Source initialization', err.stack);
+    process.exit(1); // Exit on database connection failure
   });

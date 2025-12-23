@@ -1,8 +1,10 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import { UserRole } from '@auth/domain/vo/user-role';
 
 export interface UserPayload {
   userId: string;
   email: string;
+  roles?: UserRole[]; // Optional: roles from JWT
   businessId?: string;
 }
 

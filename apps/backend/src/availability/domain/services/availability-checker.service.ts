@@ -31,9 +31,9 @@ export class AvailabilityChecker implements IAvailabilityChecker {
    * Validates: Requirements 4.1, 4.2, 4.3
    */
   async isDateAvailable(businessId: string, offeringId: string, date: Date): Promise<boolean> {
-    // Normalize date to midnight for comparison
+    // Normalize date to midnight UTC for comparison
     const normalizedDate = new Date(date);
-    normalizedDate.setHours(0, 0, 0, 0);
+    normalizedDate.setUTCHours(0, 0, 0, 0);
 
     // 1. Check if date falls within business hours (Requirement 4.1)
     const dayOfWeek = normalizedDate.getDay(); // 0-6 (Sunday-Saturday)
@@ -75,9 +75,9 @@ export class AvailabilityChecker implements IAvailabilityChecker {
     date: Date,
     duration: number,
   ): Promise<string[]> {
-    // Normalize date to midnight
+    // Normalize date to midnight UTC
     const normalizedDate = new Date(date);
-    normalizedDate.setHours(0, 0, 0, 0);
+    normalizedDate.setUTCHours(0, 0, 0, 0);
 
     // 1. Check if date is blocked (Requirement 4.6)
     const blockouts = await this.blockoutReadRepo.findByBusinessAndDateRange(

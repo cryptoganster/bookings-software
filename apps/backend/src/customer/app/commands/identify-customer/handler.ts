@@ -5,7 +5,7 @@ import { ICustomerFactory } from '@customer/domain/interfaces/factories';
 import { ICustomerWriteRepository } from '@customer/domain/interfaces/repositories';
 import { IUnitOfWork } from '@shared/kernel/uow';
 import { Customer } from '@customer/domain/aggregates/customer';
-import { WhatsAppPhone } from '@customer/domain/vo/whatsapp-phone';
+import { WhatsAppPhone } from '@shared/vo/whatsapp-phone';
 import { UUID } from '@shared/vo/uuid';
 
 /**

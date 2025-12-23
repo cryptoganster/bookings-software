@@ -1,4 +1,14 @@
-import { Controller, Post, Get, Body, UseGuards, Req, Res, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  UseGuards,
+  Req,
+  Res,
+  HttpStatus,
+  Logger,
+} from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { WhatsAppSignatureGuard } from '@conversation/presentation/guards/whatsapp-signature';
 import { ProcessIncomingMessageCommand } from '@conversation/app/commands/process-incoming-message/command';
@@ -46,6 +56,8 @@ interface WhatsAppWebhookPayload {
 @Controller('webhooks/whatsapp')
 @UseGuards(WhatsAppSignatureGuard)
 export class WebhookController {
+  private readonly logger = new Logger(WebhookController.name);
+
   constructor(private readonly commandBus: CommandBus) {}
 
   /**
@@ -126,8 +138,15 @@ export class WebhookController {
       // Responder con 200 OK para confirmar recepción
       return { status: 'success' };
     } catch (error) {
-      // Loggear el error pero responder con 200 para evitar reintentos de WhatsApp
-      console.error('Error processing WhatsApp webhook:', error);
+      // Log error but respond with 200 to avoid WhatsApp retries
+      this.logger.error(
+        'Error processing WhatsApp webhook',
+        error instanceof Error ? error.stack : String(error),
+        {
+          error: error instanceof Error ? error.message : String(error),
+          payload: JSON.stringify(payload),
+        },
+      );
       return { status: 'error', message: 'Internal error' };
     }
   }

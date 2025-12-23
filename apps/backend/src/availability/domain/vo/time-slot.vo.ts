@@ -53,7 +53,7 @@ export class TimeSlot extends ValueObject {
     return endTotalMinutes - startTotalMinutes;
   }
 
-  protected getEqualityComponents(): any[] {
+  protected getEqualityComponents(): unknown[] {
     return [this.startTime, this.endTime];
   }
 }

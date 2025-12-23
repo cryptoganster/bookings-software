@@ -1,7 +1,7 @@
 import * as fc from 'fast-check';
 import { Customer } from '../customer';
 import { UUID } from '@shared/vo/uuid';
-import { WhatsAppPhone } from '../../vo/whatsapp-phone';
+import { WhatsAppPhone } from '@shared/vo/whatsapp-phone';
 
 /**
  * Property-Based Tests for Customer Aggregate

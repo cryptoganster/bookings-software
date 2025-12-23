@@ -59,19 +59,31 @@ describe('Availability Query (e2e)', () => {
       });
 
     businessId = businessResponse.body.id;
+    authToken = businessResponse.body.token; // Update token with businessId
 
     // 4. Create an offering for testing
     const offeringResponse = await request(app.getHttpServer())
       .post('/offerings')
       .set('Authorization', `Bearer ${authToken}`)
       .send({
-        businessId,
         name: 'Test Service',
         durationMinutes: 60,
         maxCapacityPerSlot: 5,
       });
 
-    offeringId = offeringResponse.body.offeringId;
+    // Debug: Log the offering response
+    if (offeringResponse.status !== 201) {
+      console.error('Failed to create offering:', offeringResponse.status, offeringResponse.body);
+      throw new Error(`Failed to create offering: ${JSON.stringify(offeringResponse.body)}`);
+    }
+
+    offeringId = offeringResponse.body.offeringId; // Correct property name from handler
+
+    // Debug: Verify offeringId is valid
+    if (!offeringId) {
+      console.error('Offering ID is null or undefined:', offeringResponse.body);
+      throw new Error('Offering ID is null or undefined');
+    }
 
     // 5. Create schedules for testing (Monday to Friday, 9-17)
     for (let day = 1; day <= 5; day++) {
@@ -86,18 +98,24 @@ describe('Availability Query (e2e)', () => {
         });
     }
 
-    // 6. Set capacity for next 7 days
+    // 6. Create capacity records manually in database (since there's no API endpoint)
+    const { v4: uuidv4 } = require('uuid');
     for (let i = 0; i < 7; i++) {
       const date = new Date();
       date.setDate(date.getDate() + i);
-      await request(app.getHttpServer())
-        .post('/capacity')
-        .set('Authorization', `Bearer ${authToken}`)
-        .send({
+      date.setUTCHours(0, 0, 0, 0);
+
+      await dataSource.query(
+        'INSERT INTO capacities (id, offering_id, date, total_slots, available_slots, version, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())',
+        [
+          uuidv4(), // Generate proper UUID
           offeringId,
-          date: date.toISOString().split('T')[0],
-          totalSlots: 10,
-        });
+          date,
+          10, // total_slots
+          10, // available_slots (all available initially)
+          0, // version
+        ],
+      );
     }
   });
 
@@ -129,9 +147,13 @@ describe('Availability Query (e2e)', () => {
           startDate: startDate.toISOString().split('T')[0],
           endDate: endDate.toISOString().split('T')[0],
         })
-        .set('Authorization', `Bearer ${authToken}`)
-        .expect(200);
+        .set('Authorization', `Bearer ${authToken}`);
 
+      if (response.status !== 200) {
+        console.error('Error response:', response.status, response.body);
+      }
+
+      expect(response.status).toBe(200);
       expect(Array.isArray(response.body)).toBe(true);
       expect(response.body.length).toBeGreaterThan(0);
 

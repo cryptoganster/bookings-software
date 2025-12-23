@@ -40,12 +40,15 @@ export class E2EAuthHelper {
 
       const body = response.body as LoginResponse;
       return body.token; // Changed from accessToken to token
-    } catch (error: any) {
-      if (error.status === 401) {
-        throw new Error('Authentication failed: Invalid credentials');
-      }
-      if (error.status === 500) {
-        throw new Error('Authentication failed: Server error');
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'status' in error) {
+        const httpError = error as { status: number };
+        if (httpError.status === 401) {
+          throw new Error('Authentication failed: Invalid credentials');
+        }
+        if (httpError.status === 500) {
+          throw new Error('Authentication failed: Server error');
+        }
       }
       throw error;
     }
@@ -75,15 +78,18 @@ export class E2EAuthHelper {
         token: body.token,
         userId: body.userId,
       };
-    } catch (error: any) {
-      if (error.status === 400) {
-        console.error('Registration 400 error:', error.body);
-        throw new Error(
-          `Registration failed: ${JSON.stringify(error.body?.message || error.body || 'Invalid data')}`,
-        );
-      }
-      if (error.status === 409) {
-        throw new Error('Registration failed: Email already exists');
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'status' in error) {
+        const httpError = error as { status: number; body?: { message?: string } };
+        if (httpError.status === 400) {
+          console.error('Registration 400 error:', httpError.body);
+          throw new Error(
+            `Registration failed: ${JSON.stringify(httpError.body?.message || httpError.body || 'Invalid data')}`,
+          );
+        }
+        if (httpError.status === 409) {
+          throw new Error('Registration failed: Email already exists');
+        }
       }
       throw error;
     }
@@ -100,9 +106,12 @@ export class E2EAuthHelper {
         .expect(200);
 
       return response.body.token; // Changed from accessToken to token
-    } catch (error: any) {
-      if (error.status === 401) {
-        throw new Error('Token refresh failed: Invalid refresh token');
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'status' in error) {
+        const httpError = error as { status: number };
+        if (httpError.status === 401) {
+          throw new Error('Token refresh failed: Invalid refresh token');
+        }
       }
       throw error;
     }
@@ -251,12 +260,13 @@ export class E2EAuthHelper {
         .expect(201);
 
       return { id: response.body.id };
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Log the error response for debugging
-      if (error.response) {
+      if (error && typeof error === 'object' && 'response' in error) {
+        const httpError = error as { response: { status: number; body: unknown } };
         console.error('Create business failed:', {
-          status: error.response.status,
-          body: error.response.body,
+          status: httpError.response.status,
+          body: httpError.response.body,
         });
       }
       throw error;

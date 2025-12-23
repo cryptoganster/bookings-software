@@ -77,7 +77,7 @@ export class DateRange extends ValueObject {
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 para incluir ambos días
   }
 
-  protected getEqualityComponents(): any[] {
+  protected getEqualityComponents(): unknown[] {
     return [this.startDate.toISOString(), this.endDate.toISOString()];
   }
 }
