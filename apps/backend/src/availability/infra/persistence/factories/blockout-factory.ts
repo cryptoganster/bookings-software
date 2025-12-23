@@ -31,10 +31,14 @@ export class BlockoutFactory implements IBlockoutFactory {
       return null;
     }
 
+    // Ensure dates are Date objects (TypeORM might return strings)
+    const startDate = model.startDate instanceof Date ? model.startDate : new Date(model.startDate);
+    const endDate = model.endDate instanceof Date ? model.endDate : new Date(model.endDate);
+
     return Blockout.fromPersistence(
       UUID.fromString(model.id),
       UUID.fromString(model.businessId),
-      DateRange.create(model.startDate, model.endDate),
+      DateRange.fromPersistence(startDate, endDate), // Use fromPersistence to skip validation
       model.reason,
     );
   }

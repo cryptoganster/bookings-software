@@ -36,7 +36,7 @@ export class ScheduleFactory implements IScheduleFactory {
       UUID.fromString(model.id),
       UUID.fromString(model.businessId),
       DayOfWeek.create(model.dayOfWeek),
-      TimeSlot.create(model.startTime, model.endTime),
+      TimeSlot.create(this.formatTime(model.startTime), this.formatTime(model.endTime)),
       model.isActive,
     );
   }
@@ -54,8 +54,16 @@ export class ScheduleFactory implements IScheduleFactory {
       UUID.fromString(model.id),
       UUID.fromString(model.businessId),
       DayOfWeek.create(model.dayOfWeek),
-      TimeSlot.create(model.startTime, model.endTime),
+      TimeSlot.create(this.formatTime(model.startTime), this.formatTime(model.endTime)),
       model.isActive,
     );
+  }
+
+  /**
+   * Converts PostgreSQL time format (HH:mm:ss) to TimeSlot format (HH:mm)
+   */
+  private formatTime(time: string): string {
+    // PostgreSQL returns time as HH:mm:ss, we need HH:mm
+    return time.substring(0, 5);
   }
 }

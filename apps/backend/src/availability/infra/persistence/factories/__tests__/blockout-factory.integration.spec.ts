@@ -215,9 +215,31 @@ describe('BlockoutFactory (Integration)', () => {
     });
 
     it('should preserve date precision from database', async () => {
-      // Arrange
-      const startDate = new Date('2025-06-15T00:00:00.000Z');
-      const endDate = new Date('2025-06-20T00:00:00.000Z');
+      // Arrange - Create dates entirely in UTC
+      const now = new Date();
+      const startDate = new Date(
+        Date.UTC(
+          now.getUTCFullYear(),
+          now.getUTCMonth(),
+          now.getUTCDate() + 100, // 100 days from now
+          0,
+          0,
+          0,
+          0,
+        ),
+      );
+
+      const endDate = new Date(
+        Date.UTC(
+          now.getUTCFullYear(),
+          now.getUTCMonth(),
+          now.getUTCDate() + 105, // +5 days from start
+          0,
+          0,
+          0,
+          0,
+        ),
+      );
 
       const blockoutModel = repository.create({
         id: '550e8400-e29b-41d4-a716-446655440030',
@@ -232,11 +254,13 @@ describe('BlockoutFactory (Integration)', () => {
       // Act
       const aggregate = await factory.loadById('550e8400-e29b-41d4-a716-446655440030');
 
-      // Assert
+      // Assert - Verify dates are preserved (compare UTC timestamps)
       expect(aggregate).toBeDefined();
       const dateRange = aggregate!.getDateRange();
-      expect(dateRange.getStartDate().toISOString()).toBe(startDate.toISOString());
-      expect(dateRange.getEndDate().toISOString()).toBe(endDate.toISOString());
+
+      // Compare UTC timestamps (should match exactly now)
+      expect(dateRange.getStartDate().getTime()).toBe(startDate.getTime());
+      expect(dateRange.getEndDate().getTime()).toBe(endDate.getTime());
     });
 
     it('should handle blockouts for different businesses', async () => {
@@ -283,11 +307,31 @@ describe('BlockoutFactory (Integration)', () => {
     });
 
     it('should verify isDateBlocked method works correctly', async () => {
-      // Arrange
-      const startDate = new Date();
-      startDate.setDate(startDate.getDate() + 50); // 50 days from now
-      const endDate = new Date(startDate);
-      endDate.setDate(endDate.getDate() + 5); // +5 days
+      // Arrange - Create dates entirely in UTC
+      const now = new Date();
+      const startDate = new Date(
+        Date.UTC(
+          now.getUTCFullYear(),
+          now.getUTCMonth(),
+          now.getUTCDate() + 50, // 50 days from now
+          0,
+          0,
+          0,
+          0,
+        ),
+      );
+
+      const endDate = new Date(
+        Date.UTC(
+          now.getUTCFullYear(),
+          now.getUTCMonth(),
+          now.getUTCDate() + 55, // +5 days from start
+          0,
+          0,
+          0,
+          0,
+        ),
+      );
 
       const blockoutModel = repository.create({
         id: '550e8400-e29b-41d4-a716-446655440050',
@@ -306,18 +350,45 @@ describe('BlockoutFactory (Integration)', () => {
       expect(aggregate).toBeDefined();
 
       // Date within range should be blocked
-      const midDate = new Date(startDate);
-      midDate.setDate(midDate.getDate() + 2);
+      const midDate = new Date(
+        Date.UTC(
+          now.getUTCFullYear(),
+          now.getUTCMonth(),
+          now.getUTCDate() + 52, // 2 days after start
+          0,
+          0,
+          0,
+          0,
+        ),
+      );
       expect(aggregate!.isDateBlocked(midDate)).toBe(true);
 
       // Date before range should not be blocked
-      const beforeDate = new Date(startDate);
-      beforeDate.setDate(beforeDate.getDate() - 1);
+      const beforeDate = new Date(
+        Date.UTC(
+          now.getUTCFullYear(),
+          now.getUTCMonth(),
+          now.getUTCDate() + 49, // 1 day before start
+          0,
+          0,
+          0,
+          0,
+        ),
+      );
       expect(aggregate!.isDateBlocked(beforeDate)).toBe(false);
 
       // Date after range should not be blocked
-      const afterDate = new Date(endDate);
-      afterDate.setDate(afterDate.getDate() + 1);
+      const afterDate = new Date(
+        Date.UTC(
+          now.getUTCFullYear(),
+          now.getUTCMonth(),
+          now.getUTCDate() + 56, // 1 day after end
+          0,
+          0,
+          0,
+          0,
+        ),
+      );
       expect(aggregate!.isDateBlocked(afterDate)).toBe(false);
     });
   });

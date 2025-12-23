@@ -10,10 +10,10 @@ export class BlockoutModel {
   @Column('uuid')
   businessId!: string;
 
-  @Column('date')
+  @Column('timestamp')
   startDate!: Date;
 
-  @Column('date')
+  @Column('timestamp')
   endDate!: Date;
 
   @Column('text', { nullable: true })

@@ -86,8 +86,8 @@ describe('Schedule Repositories (Integration)', () => {
         expect(saved).toBeDefined();
         expect(saved!.businessId).toBe(schedule.getBusinessId().getValue());
         expect(saved!.dayOfWeek).toBe(1);
-        expect(saved!.startTime).toBe('09:00');
-        expect(saved!.endTime).toBe('17:00');
+        expect(saved!.startTime).toBe('09:00:00'); // PostgreSQL returns HH:mm:ss
+        expect(saved!.endTime).toBe('17:00:00'); // PostgreSQL returns HH:mm:ss
         expect(saved!.isActive).toBe(true);
       });
 
@@ -110,8 +110,8 @@ describe('Schedule Repositories (Integration)', () => {
           where: { id: schedule.getId().getValue() },
         });
         expect(updated).toBeDefined();
-        expect(updated!.startTime).toBe('10:00');
-        expect(updated!.endTime).toBe('18:00');
+        expect(updated!.startTime).toBe('10:00:00'); // PostgreSQL returns HH:mm:ss
+        expect(updated!.endTime).toBe('18:00:00'); // PostgreSQL returns HH:mm:ss
       });
 
       it('should handle deactivation correctly', async () => {
@@ -206,8 +206,8 @@ describe('Schedule Repositories (Integration)', () => {
         expect(readModel!.id).toBe('550e8400-e29b-41d4-a716-446655440000');
         expect(readModel!.businessId).toBe('550e8400-e29b-41d4-a716-446655440001');
         expect(readModel!.dayOfWeek).toBe(1);
-        expect(readModel!.startTime).toBe('09:00');
-        expect(readModel!.endTime).toBe('17:00');
+        expect(readModel!.startTime).toBe('09:00:00'); // PostgreSQL returns HH:mm:ss
+        expect(readModel!.endTime).toBe('17:00:00'); // PostgreSQL returns HH:mm:ss
         expect(readModel!.isActive).toBe(true);
       });
 
@@ -369,10 +369,10 @@ describe('Schedule Repositories (Integration)', () => {
 
         // Assert
         expect(mondaySchedule).toBeDefined();
-        expect(mondaySchedule!.startTime).toBe('09:00');
+        expect(mondaySchedule!.startTime).toBe('09:00:00'); // PostgreSQL returns HH:mm:ss
 
         expect(wednesdaySchedule).toBeDefined();
-        expect(wednesdaySchedule!.startTime).toBe('10:00');
+        expect(wednesdaySchedule!.startTime).toBe('10:00:00'); // PostgreSQL returns HH:mm:ss
       });
     });
   });

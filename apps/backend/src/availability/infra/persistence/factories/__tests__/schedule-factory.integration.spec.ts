@@ -216,16 +216,36 @@ describe('ScheduleFactory (Integration)', () => {
     it('should handle different time ranges correctly', async () => {
       // Arrange
       const testData = [
-        { id: '550e8400-e29b-41d4-a716-446655440030', start: '06:00', end: '14:00' }, // Early shift
-        { id: '550e8400-e29b-41d4-a716-446655440031', start: '09:00', end: '17:00' }, // Standard shift
-        { id: '550e8400-e29b-41d4-a716-446655440032', start: '14:00', end: '22:00' }, // Late shift
-        { id: '550e8400-e29b-41d4-a716-446655440033', start: '00:00', end: '23:59' }, // All day
+        {
+          id: '550e8400-e29b-41d4-a716-446655440030',
+          businessId: '550e8400-e29b-41d4-a716-446655440300',
+          start: '06:00',
+          end: '14:00',
+        }, // Early shift
+        {
+          id: '550e8400-e29b-41d4-a716-446655440031',
+          businessId: '550e8400-e29b-41d4-a716-446655440301',
+          start: '09:00',
+          end: '17:00',
+        }, // Standard shift
+        {
+          id: '550e8400-e29b-41d4-a716-446655440032',
+          businessId: '550e8400-e29b-41d4-a716-446655440302',
+          start: '14:00',
+          end: '22:00',
+        }, // Late shift
+        {
+          id: '550e8400-e29b-41d4-a716-446655440033',
+          businessId: '550e8400-e29b-41d4-a716-446655440303',
+          start: '00:00',
+          end: '23:59',
+        }, // All day
       ];
 
-      for (const { id, start, end } of testData) {
+      for (const { id, businessId, start, end } of testData) {
         const model = repository.create({
           id,
-          businessId: '550e8400-e29b-41d4-a716-446655440300',
+          businessId,
           dayOfWeek: 1,
           startTime: start,
           endTime: end,

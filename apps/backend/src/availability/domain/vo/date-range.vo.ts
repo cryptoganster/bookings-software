@@ -4,22 +4,30 @@ export class DateRange extends ValueObject {
   private constructor(
     private readonly startDate: Date,
     private readonly endDate: Date,
+    private readonly skipValidation: boolean = false,
   ) {
     super();
-    this.validate();
+    if (!skipValidation) {
+      this.validate();
+    }
   }
 
   static create(startDate: Date, endDate: Date): DateRange {
-    return new DateRange(startDate, endDate);
+    return new DateRange(startDate, endDate, false);
+  }
+
+  static fromPersistence(startDate: Date, endDate: Date): DateRange {
+    // Skip validation when loading from database (dates might be in the past)
+    return new DateRange(startDate, endDate, true);
   }
 
   private validate(): void {
-    // Normalizar fechas a medianoche para comparación
+    // Normalizar fechas a medianoche UTC para comparación consistente
     const normalizedStart = new Date(this.startDate);
-    normalizedStart.setHours(0, 0, 0, 0);
+    normalizedStart.setUTCHours(0, 0, 0, 0);
 
     const normalizedEnd = new Date(this.endDate);
-    normalizedEnd.setHours(0, 0, 0, 0);
+    normalizedEnd.setUTCHours(0, 0, 0, 0);
 
     // Validar que startDate <= endDate
     if (normalizedStart > normalizedEnd) {
@@ -28,9 +36,9 @@ export class DateRange extends ValueObject {
       );
     }
 
-    // Validar que no sea en el pasado
+    // Validar que no sea en el pasado (comparar en UTC)
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    today.setUTCHours(0, 0, 0, 0);
 
     if (normalizedStart < today) {
       throw new Error(`Start date cannot be in the past: ${this.startDate.toISOString()}`);
@@ -47,23 +55,23 @@ export class DateRange extends ValueObject {
 
   includes(date: Date): boolean {
     const normalizedDate = new Date(date);
-    normalizedDate.setHours(0, 0, 0, 0);
+    normalizedDate.setUTCHours(0, 0, 0, 0);
 
     const normalizedStart = new Date(this.startDate);
-    normalizedStart.setHours(0, 0, 0, 0);
+    normalizedStart.setUTCHours(0, 0, 0, 0);
 
     const normalizedEnd = new Date(this.endDate);
-    normalizedEnd.setHours(0, 0, 0, 0);
+    normalizedEnd.setUTCHours(0, 0, 0, 0);
 
     return normalizedDate >= normalizedStart && normalizedDate <= normalizedEnd;
   }
 
   getDurationInDays(): number {
     const normalizedStart = new Date(this.startDate);
-    normalizedStart.setHours(0, 0, 0, 0);
+    normalizedStart.setUTCHours(0, 0, 0, 0);
 
     const normalizedEnd = new Date(this.endDate);
-    normalizedEnd.setHours(0, 0, 0, 0);
+    normalizedEnd.setUTCHours(0, 0, 0, 0);
 
     const diffTime = normalizedEnd.getTime() - normalizedStart.getTime();
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 para incluir ambos días
