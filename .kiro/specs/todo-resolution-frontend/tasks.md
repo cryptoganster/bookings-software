@@ -35,16 +35,18 @@
 
 **Note:** ✅ Backend Availability BC is complete! Phase 1 done.
 
-#### Phase 2: Conversation & Message ✅ READY TO IMPLEMENT
+#### Phase 2: Conversation & Message ⏳ BLOCKED - Spec Created
 
-- [ ] Backend Conversation BC is complete ✅
-- [ ] Backend Message types exist ✅
-- [ ] Create types in `@packages/shared-types`
-- [ ] Update frontend imports
-- [ ] Remove temporary types from `apps/frontend/src/shared/api/types.ts`
-- [ ] Run tests and verify
+- [ ] Backend Conversation BC needs completion (Message aggregate missing)
+- [ ] Spec created: `.kiro/specs/conversation-bc-completion/`
+- [ ] After backend completion: Create types in `@packages/shared-types`
+- [ ] After backend completion: Update frontend imports
+- [ ] After backend completion: Remove temporary types from `apps/frontend/src/shared/api/types.ts`
+- [ ] After backend completion: Run tests and verify
 
-**Status:** Backend ready, can proceed with implementation
+**Status:** Backend needs Message aggregate implementation. Spec ready at `.kiro/specs/conversation-bc-completion/`
+
+**Action:** Complete Conversation BC backend first, then proceed with frontend integration
 
 **Spec:** [temporary-types.md](./temporary-types.md)
 
