@@ -16,7 +16,7 @@ export interface BlockoutDto {
 export interface CreateBlockoutDto {
   startDate: string;
   endDate: string;
-  reason: string;
+  reason?: string;
 }
 
 export const blockoutsService = {
