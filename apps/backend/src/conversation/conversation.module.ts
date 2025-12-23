@@ -25,6 +25,7 @@ import { ConversationFactory } from '@conversation/infra/persistence/factories/c
 
 // Controllers
 import { WebhookController } from '@conversation/presentation/controllers/webhook';
+import { AdminQueryController } from '@conversation/presentation/controllers/admin-query.controller';
 
 // Guards
 import { WhatsAppSignatureGuard } from '@conversation/presentation/guards/whatsapp-signature';
@@ -88,7 +89,7 @@ const QueryHandlers = [GetAvailableDatesHandler, GetAvailableTimeSlotsHandler];
     CustomerModule, // Import CustomerModule to access IdentifyCustomerCommand
     BookingModule, // Import BookingModule to access CreateAppointmentCommand
   ],
-  controllers: [WebhookController],
+  controllers: [WebhookController, AdminQueryController],
   providers: [
     // Command Handlers
     ...CommandHandlers,
