@@ -106,29 +106,29 @@
     - Create `apps/backend/src/availability/domain/read-models/blockout.ts`
     - _Requirements: 2.5_
 
-## Phase 3: Infrastructure Layer - Persistence
+## Phase 3: Infrastructure Layer - Persistence ✅
 
-- [ ] 7. Create TypeORM Models
-  - [ ] 7.1 Create Schedule model
+- [x] 7. Create TypeORM Models ✅
+  - [x] 7.1 Create Schedule model ✅
     - Create `apps/backend/src/availability/infra/persistence/models/schedule.ts`
     - Add TypeORM decorators
     - Add indexes (businessId, dayOfWeek)
     - _Requirements: 1.3_
 
-  - [ ] 7.2 Create Blockout model
+  - [x] 7.2 Create Blockout model ✅
     - Create `apps/backend/src/availability/infra/persistence/models/blockout.ts`
     - Add TypeORM decorators
     - Add indexes (businessId, startDate, endDate)
     - _Requirements: 2.3_
 
-- [ ] 8. Create Mappers
-  - [ ] 8.1 Create Schedule mappers
+- [x] 8. Create Mappers ✅
+  - [x] 8.1 Create Schedule mappers ✅
     - Create `apps/backend/src/availability/infra/persistence/mappers/schedule-write.mapper.ts`
     - Create `apps/backend/src/availability/infra/persistence/mappers/schedule-read.mapper.ts`
     - Implement `toModel()`, `toDomain()`, `toReadModel()`
     - _Requirements: 1.3, 1.6_
 
-  - [ ] 8.2 Create Blockout mappers
+  - [x] 8.2 Create Blockout mappers ✅
     - Create `apps/backend/src/availability/infra/persistence/mappers/blockout-write.mapper.ts`
     - Create `apps/backend/src/availability/infra/persistence/mappers/blockout-read.mapper.ts`
     - Implement `toModel()`, `toDomain()`, `toReadModel()`
@@ -140,14 +140,14 @@
     - Test round-trip conversions
     - _Requirements: 1.3, 2.3_
 
-- [ ] 9. Create Repositories
-  - [ ] 9.1 Create Schedule repositories
+- [x] 9. Create Repositories ✅
+  - [x] 9.1 Create Schedule repositories ✅
     - Create `apps/backend/src/availability/infra/persistence/repositories/schedule-write.ts`
     - Create `apps/backend/src/availability/infra/persistence/repositories/schedule-read.ts`
     - Implement save(), findById(), findByBusinessAndDay()
     - _Requirements: 1.3, 1.4, 1.5, 1.6_
 
-  - [ ] 9.2 Create Blockout repositories
+  - [x] 9.2 Create Blockout repositories ✅
     - Create `apps/backend/src/availability/infra/persistence/repositories/blockout-write.ts`
     - Create `apps/backend/src/availability/infra/persistence/repositories/blockout-read.ts`
     - Implement save(), findById(), findByBusinessAndDateRange()
@@ -159,14 +159,14 @@
     - Test query methods
     - _Requirements: 1.3, 1.4, 1.5, 1.6, 2.3, 2.4, 2.5_
 
-- [ ] 10. Create Factories
-  - [ ] 10.1 Create Schedule factory
+- [x] 10. Create Factories ✅
+  - [x] 10.1 Create Schedule factory ✅
     - Create `apps/backend/src/availability/infra/persistence/factories/schedule-factory.ts`
     - Implement `loadById()` method
     - Implement `loadByBusinessAndDay()` method
     - _Requirements: 1.4_
 
-  - [ ] 10.2 Create Blockout factory
+  - [x] 10.2 Create Blockout factory ✅
     - Create `apps/backend/src/availability/infra/persistence/factories/blockout-factory.ts`
     - Implement `loadById()` method
     - _Requirements: 2.4_
