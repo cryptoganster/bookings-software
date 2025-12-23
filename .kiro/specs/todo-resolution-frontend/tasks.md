@@ -5,13 +5,13 @@
 
 ## Task Overview
 
-| Task                                          | Priority | Effort | Status              | Assignee |
-| --------------------------------------------- | -------- | ------ | ------------------- | -------- |
-| [Temporary Types](#temporary-types)           | P1       | 1-2d   | � Phase 1 tComplete | Kiro     |
-| [WebSocket businessId](#websocket-businessid) | P1       | 4h     | 🔴 Not Started      | -        |
-| [Console Logging](#console-logging)           | P2       | 2-3h   | ✅ Complete         | Kiro     |
-| [Placeholder Actions](#placeholder-actions)   | P2       | 2-3d   | 🔴 Not Started      | -        |
-| [Mock Data](#mock-data)                       | P3       | 0h     | ✅ No Action        | -        |
+| Task                                          | Priority | Effort | Status                | Assignee |
+| --------------------------------------------- | -------- | ------ | --------------------- | -------- |
+| [Temporary Types](#temporary-types)           | P1       | 1-2d   | 🟡 Phase 1 Complete   | Kiro     |
+| [WebSocket businessId](#websocket-businessid) | P1       | 4h     | 🟡 Phase 1-2 Complete | Kiro     |
+| [Console Logging](#console-logging)           | P2       | 2-3h   | ✅ Complete           | Kiro     |
+| [Placeholder Actions](#placeholder-actions)   | P2       | 2-3d   | 🔴 Not Started        | -        |
+| [Mock Data](#mock-data)                       | P3       | 0h     | ✅ No Action          | -        |
 
 ---
 
@@ -50,32 +50,39 @@
 
 ## WebSocket businessId
 
-**Priority:** P1 | **Effort:** 4 hours | **Status:** 🔴 Not Started
+**Priority:** P1 | **Effort:** 4 hours | **Status:** 🟡 Phase 1-2 Complete
 
 ### Subtasks
 
-#### Phase 1: Fetch Business Data
+#### Phase 1: Fetch Business Data ✅ COMPLETE
 
-- [ ] Create `GetBusinessByOwnerIdQuery` in backend (if not exists)
-- [ ] Create `useBusinesses` hook in frontend
-- [ ] Fetch business data after login
-- [ ] Handle multiple businesses (select first or show selector)
+- [x] Backend already has `GetBusinessesByOwnerIdQuery`
+- [x] Backend already includes businessId in JWT token
+- [x] Business service exists in frontend
 
-#### Phase 2: Update Auth Store
+**Note:** Backend infrastructure already in place.
 
-- [ ] Add `businessId` field to auth store
-- [ ] Store businessId after login
-- [ ] Clear businessId on logout
-- [ ] Persist businessId in localStorage
+#### Phase 2: Update Auth Store ✅ COMPLETE
 
-#### Phase 3: Update WebSocket
+- [x] Add `businessId` field to auth store
+- [x] Add `updateBusinessId` action to auth store
+- [x] Store businessId after login (decoded from JWT)
+- [x] Clear businessId on logout
+- [x] Persist businessId in localStorage
 
-- [ ] Remove temporary userId fallback
+**Completed:** December 23, 2024  
+**Commit:** 5981d39
+
+#### Phase 3: Update WebSocket (TODO)
+
+- [ ] Create WebSocket client/hook
 - [ ] Use real businessId from auth store
-- [ ] Update WebSocket connection logic
 - [ ] Add error handling for missing businessId
+- [ ] Implement connection/reconnection logic
 
-#### Phase 4: Testing
+**Note:** WebSocket functionality doesn't exist yet in frontend. This will be implemented when WebSocket features are added.
+
+#### Phase 4: Testing (TODO)
 
 - [ ] Test WebSocket connection with real businessId
 - [ ] Test multi-tenancy isolation
@@ -259,6 +266,16 @@ Mock data in test files is **correct and expected**. No action needed.
    - Fixed type imports in business and offerings services
    - Fixed `.lintstagedrc.json` for shared-types
    - Commits: Auto-committed by pre-commit hooks
+   - Date: December 23, 2024
+
+3. **WebSocket businessId - Phase 1-2** (P1) - ✅ Complete
+   - Updated `CreateBusinessResponseDto` to match backend (id + token)
+   - Added `businessId` field to auth store
+   - Added `updateBusinessId` action to auth store
+   - Decode JWT token in login to extract businessId
+   - Updated business service to use correct response type
+   - Persist businessId in localStorage
+   - Commit: 5981d39
    - Date: December 23, 2024
 
 ### In Progress
