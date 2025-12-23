@@ -318,47 +318,61 @@ apps/backend/src/business/presentation/controllers/__tests__/
 
 ---
 
-#### Task 1.6: Conversation BC Controllers
+#### Task 1.6: Conversation BC Controllers ✅ COMPLETED
 
 **Priority:** LOW  
 **Estimated Time:** 3 hours  
-**Status:** ⏳ NOT STARTED
+**Actual Time:** ~30 minutes  
+**Status:** ✅ CONTROLLERS LAYER COMPLETE
 
-- [ ] Create `AdminQueryController`
-  - [ ] GET `/api/admin-queries/pending` - Get pending queries
-  - [ ] GET `/api/admin-queries/:id` - Get conversation
-  - [ ] POST `/api/admin-queries/:id/respond` - Respond to query
+- [x] Create `AdminQueryController`
+  - [x] GET `/api/admin-queries/pending` - Get pending queries ✅
+  - [x] GET `/api/admin-queries/:id` - Get conversation ✅
+  - [x] POST `/api/admin-queries/:id/respond` - Respond to query ✅
 
-- [ ] Create DTOs
-  - [ ] `RespondToQueryDto`
+- [x] Create DTOs
+  - [x] `RespondToQueryDto` ✅
 
-- [ ] Add to `ConversationModule`
-  - [ ] Register controller
-  - [ ] Export necessary providers
+- [x] Create command/query stubs
+  - [x] `SendAdminResponseCommand` ✅
+  - [x] `GetPendingAdminQueriesQuery` ✅
+  - [x] `GetConversationQuery` ✅
 
-- [ ] Create E2E tests
+- [x] Add to `ConversationModule`
+  - [x] Register controller ✅
+  - [x] Export necessary providers ✅
+
+- [ ] Create E2E tests (TODO)
   - [ ] Test pending queries
   - [ ] Test conversation retrieval
   - [ ] Test admin response
 
-**Files to Create:**
+**Files Created:**
 
 ```
 apps/backend/src/conversation/presentation/controllers/
-├── admin-query.controller.ts
-└── dtos/
-    └── respond-to-query.dto.ts
+└── admin-query.controller.ts ✅
 
-apps/backend/src/conversation/app/__tests__/
-└── admin-query.e2e.spec.ts
+apps/backend/src/conversation/presentation/dtos/
+└── respond-to-query.dto.ts ✅
+
+apps/backend/src/conversation/app/commands/
+└── send-admin-response/command.ts ✅ (stub)
+
+apps/backend/src/conversation/app/queries/
+├── get-pending-admin-queries/query.ts ✅ (stub)
+└── get-conversation/query.ts ✅ (stub)
 ```
 
-**Next Steps:**
+**Files Modified:**
 
-1. Create RespondToQueryDto
-2. Create AdminQueryController
-3. Register controller in ConversationModule
-4. Create E2E tests
+```
+apps/backend/src/conversation/conversation.module.ts ✅
+```
+
+**Status:** ✅ CONTROLLERS LAYER COMPLETE - Handlers and E2E tests pending
+
+**Note:** Controller is ready to use once handlers are implemented. Follows same patterns as other BCs.
 
 ---
 
@@ -858,9 +872,9 @@ apps/backend/README.md (update)
 - [x] Task 1.3: Booking BC Controllers (7/7) ✅ COMPLETED
 - [x] Task 1.4: Account BC Controllers (6/9) ✅ COMPLETED (E2E tests deferred)
 - [x] Task 1.5: Business BC Controllers (7/7) ✅ COMPLETED
-- [ ] Task 1.6: Conversation BC Controllers (0/6) ⏳ NOT STARTED
+- [x] Task 1.6: Conversation BC Controllers (6/9) ✅ COMPLETED (handlers and E2E tests pending)
 
-**Phase 1 Summary:** 45/57 tasks completed (79%)
+**Phase 1 Summary:** 51/60 tasks completed (85%)
 
 ### Phase 2: Frontend Integration
 
@@ -882,13 +896,28 @@ apps/backend/README.md (update)
 
 **Phase 3 Summary:** 0/16 tasks completed (0%)
 
-**Overall Progress:** 45/93 tasks completed (48%)
+**Overall Progress:** 51/96 tasks completed (53%)
 
 ---
 
 ## Latest Updates
 
 ### December 23, 2024
+
+**✅ Task 1.6 - Conversation BC Controllers - COMPLETED**
+
+- Created AdminQueryController with 3 REST endpoints
+- Created RespondToQueryDto with validation
+- Created 3 command/query stubs for future implementation
+- Controller registered in ConversationModule
+- All endpoints use JWT authentication
+- Files created:
+  - 1 controller: AdminQueryController
+  - 1 DTO: RespondToQueryDto
+  - 1 command stub: SendAdminResponseCommand
+  - 2 query stubs: GetPendingAdminQueriesQuery, GetConversationQuery
+- Status: Controllers layer complete, handlers and E2E tests pending
+- Commit: `c6043f8` - "feat(conversation): add admin query controller and command/query stubs"
 
 **✅ Task 1.2 - Availability BC Controllers - CONTROLLERS LAYER COMPLETE**
 
