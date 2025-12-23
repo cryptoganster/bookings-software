@@ -23,7 +23,7 @@
     - Implement validation logic
     - _Requirements: 1.1, 1.2_
 
-  - [ ] 1.4 Write property tests for Schedule (OPTIONAL)
+  - [x] 1.4 Write property tests for Schedule ✅
     - **Property 1: Schedule time range validity**
     - **Property 2: Schedule day of week validity**
     - **Validates: Requirements 1.1, 1.2**
@@ -46,7 +46,7 @@
     - Implement validation logic
     - _Requirements: 2.1, 2.2_
 
-  - [ ] 2.4 Write property tests for Blockout (OPTIONAL)
+  - [x] 2.4 Write property tests for Blockout ✅
     - **Property 3: Blockout date range validity**
     - **Property 4: Blockout no past dates**
     - **Validates: Requirements 2.1, 2.2**
@@ -65,20 +65,20 @@
     - Create `apps/backend/src/availability/domain/exceptions/blockout-not-found.exception.ts`
     - _Requirements: 2.1, 2.2_
 
-## Phase 2: Domain Layer - Interfaces & Services
+## Phase 2: Domain Layer - Interfaces & Services ✅
 
-- [ ] 4. Create Repository Interfaces
-  - [ ] 4.1 Create Schedule repository interfaces
+- [x] 4. Create Repository Interfaces ✅
+  - [x] 4.1 Create Schedule repository interfaces ✅
     - Create `apps/backend/src/availability/domain/interfaces/repositories/schedule-write.ts`
     - Create `apps/backend/src/availability/domain/interfaces/repositories/schedule-read.ts`
     - _Requirements: 1.3, 1.4, 1.5, 1.6_
 
-  - [ ] 4.2 Create Blockout repository interfaces
+  - [x] 4.2 Create Blockout repository interfaces ✅
     - Create `apps/backend/src/availability/domain/interfaces/repositories/blockout-write.ts`
     - Create `apps/backend/src/availability/domain/interfaces/repositories/blockout-read.ts`
     - _Requirements: 2.3, 2.4, 2.5_
 
-  - [ ] 4.3 Create Factory interfaces
+  - [x] 4.3 Create Factory interfaces ✅
     - Create `apps/backend/src/availability/domain/interfaces/factories/schedule-factory.ts`
     - Create `apps/backend/src/availability/domain/interfaces/factories/blockout-factory.ts`
     - _Requirements: 1.4, 2.4_
@@ -97,12 +97,12 @@
     - Test capacity checking
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6_
 
-- [ ] 6. Create Read Models
-  - [ ] 6.1 Create Schedule read model
+- [x] 6. Create Read Models ✅
+  - [x] 6.1 Create Schedule read model ✅
     - Create `apps/backend/src/availability/domain/read-models/schedule.ts`
     - _Requirements: 1.6_
 
-  - [ ] 6.2 Create Blockout read model
+  - [x] 6.2 Create Blockout read model ✅
     - Create `apps/backend/src/availability/domain/read-models/blockout.ts`
     - _Requirements: 2.5_
 
@@ -355,7 +355,7 @@
 ## Phase 8: Property-Based Tests & Concurrency Tests
 
 - [ ] 19. Write Property-Based Tests
-  - [ ]\* 19.1 Write Capacity property tests
+  - [x] 19.1 Write Capacity property tests ✅
     - **Property 5: Capacity positive slots**
     - **Property 6: Capacity no past dates**
     - **Property 7: Capacity update constraint**
