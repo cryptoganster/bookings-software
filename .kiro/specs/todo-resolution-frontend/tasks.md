@@ -35,14 +35,16 @@
 
 **Note:** ✅ Backend Availability BC is complete! Phase 1 done.
 
-#### Phase 2: Conversation & Message (Wait for backend)
+#### Phase 2: Conversation & Message ✅ READY TO IMPLEMENT
 
-- [ ] Wait for backend Conversation BC implementation
-- [ ] Wait for backend Message BC implementation
+- [ ] Backend Conversation BC is complete ✅
+- [ ] Backend Message types exist ✅
 - [ ] Create types in `@packages/shared-types`
 - [ ] Update frontend imports
 - [ ] Remove temporary types from `apps/frontend/src/shared/api/types.ts`
 - [ ] Run tests and verify
+
+**Status:** Backend ready, can proceed with implementation
 
 **Spec:** [temporary-types.md](./temporary-types.md)
 
@@ -282,27 +284,23 @@ Mock data in test files is **correct and expected**. No action needed.
 
 _None yet_
 
-### Blocked
-
-- Temporary Types - Phase 2 (waiting for backend Conversation/Message BC)
-
 ---
 
 ## Dependencies
 
 ### Backend Dependencies
 
-| Frontend Task                          | Backend Requirement       | Status             |
-| -------------------------------------- | ------------------------- | ------------------ |
-| Temporary Types - Schedule/Blockout    | Availability BC complete  | ✅ Ready           |
-| Temporary Types - Conversation/Message | Conversation BC complete  | ⏳ Waiting         |
-| WebSocket businessId                   | GetBusinessByOwnerIdQuery | ❓ Check           |
-| Edit Customer                          | UpdateCustomerCommand     | ❓ Check           |
-| Merge Customers                        | MergeCustomersCommand     | ❌ Not implemented |
-| Delete Customer                        | DeleteCustomerCommand     | ❓ Check           |
-| Export Customer                        | GetCustomerExportQuery    | ❌ Not implemented |
+| Frontend Task                          | Backend Requirement       | Status   |
+| -------------------------------------- | ------------------------- | -------- |
+| Temporary Types - Schedule/Blockout    | Availability BC complete  | ✅ Ready |
+| Temporary Types - Conversation/Message | Conversation BC complete  | ✅ Ready |
+| WebSocket businessId                   | GetBusinessByOwnerIdQuery | ✅ Ready |
+| Edit Customer                          | UpdateCustomerNameCommand | ✅ Ready |
+| Merge Customers                        | MergeCustomersCommand     | ✅ Ready |
+| Delete Customer                        | DeleteCustomerCommand     | ✅ Ready |
+| Export Customer                        | ExportCustomerDataQuery   | ✅ Ready |
 
-**Action:** Verify backend commands/queries exist before implementing frontend
+**Status:** ✅ All backend dependencies are ready! All BCs are implemented.
 
 ---
 

@@ -338,6 +338,78 @@ export interface BlockoutReadModel {
 }
 
 // ============================================================================
+// CONVERSATIONS
+// ============================================================================
+
+/**
+ * Conversation Status types
+ */
+export type ConversationStatus = "ACTIVE" | "AWAITING_ADMIN" | "RESOLVED";
+
+/**
+ * Message Direction types
+ */
+export type MessageDirection = "INBOUND" | "OUTBOUND";
+
+/**
+ * Conversation DTO - Representa una conversación con un cliente
+ */
+export interface ConversationDto {
+  id: string;
+  businessId: string;
+  customerId: string;
+  status: ConversationStatus;
+  lastMessageAt: string; // ISO 8601 string
+  createdAt: string; // ISO 8601 string
+}
+
+/**
+ * Conversation Read Model - Modelo de lectura enriquecido para queries
+ * Incluye datos desnormalizados del cliente
+ */
+export interface ConversationReadModel {
+  id: string;
+  businessId: string;
+  customerId: string;
+  customerName: string | null; // Denormalized from Customer
+  customerPhone: string; // Denormalized from Customer
+  status: ConversationStatus;
+  lastMessageAt: string; // ISO 8601 string
+  createdAt: string; // ISO 8601 string
+}
+
+/**
+ * Message DTO - Representa un mensaje en una conversación
+ */
+export interface MessageDto {
+  id: string;
+  conversationId: string;
+  direction: MessageDirection;
+  content: string;
+  messageType: string; // TEXT, BUTTON, LOCATION, etc.
+  sentAt: string; // ISO 8601 string
+  isFromAdmin: boolean;
+}
+
+/**
+ * Conversation Detail - Conversación con sus mensajes
+ */
+export interface ConversationDetailDto {
+  conversation: ConversationDto;
+  customerName: string | null;
+  customerPhone: string;
+  messages: MessageDto[];
+}
+
+/**
+ * DTO para responder a una consulta de cliente
+ */
+export interface RespondToQueryRequestDto {
+  id: string; // Conversation ID
+  message: string;
+}
+
+// ============================================================================
 // ACCOUNT (BUSINESS OWNER)
 // ============================================================================
 
