@@ -153,6 +153,39 @@ export class AppointmentReadRepository implements IAppointmentReadRepository {
     return results.map((result) => AppointmentReadMapper.toReadModel(result));
   }
 
+  async findToday(businessId: string): Promise<AppointmentReadModel[]> {
+    // Get today's date range (00:00:00 to 23:59:59)
+    const today = new Date();
+    const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0);
+    const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
+
+    const results = await this.repository
+      .createQueryBuilder('appointment')
+      .leftJoin('customers', 'customer', 'customer.id = appointment.customerId')
+      .leftJoin('offerings', 'offering', 'offering.id = appointment.offeringId')
+      .select([
+        'appointment.id as id',
+        'appointment.businessId as "businessId"',
+        'appointment.customerId as "customerId"',
+        'customer.name as "customerName"',
+        'customer.whatsapp_phone as "customerPhone"',
+        'appointment.offeringId as "offeringId"',
+        'offering.name as "offeringName"',
+        'appointment.dateTime as "dateTime"',
+        'appointment.status as status',
+        'appointment.createdAt as "createdAt"',
+        'appointment.cancelledAt as "cancelledAt"',
+      ])
+      .where('appointment.businessId = :businessId', { businessId })
+      .andWhere('appointment.dateTime >= :startOfDay', { startOfDay })
+      .andWhere('appointment.dateTime <= :endOfDay', { endOfDay })
+      .andWhere('appointment.status != :cancelled', { cancelled: 'CANCELLED' })
+      .orderBy('appointment.dateTime', 'ASC')
+      .getRawMany();
+
+    return results.map((result) => AppointmentReadMapper.toReadModel(result));
+  }
+
   async findByBusinessAndDateRange(
     businessId: string,
     startDate: Date,

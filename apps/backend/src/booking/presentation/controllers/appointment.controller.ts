@@ -9,6 +9,7 @@ import { CancelAppointmentCommand } from '@booking/app/commands/cancel-appointme
 import { GetBusinessAppointmentsQuery } from '@booking/app/queries/get-business-appointments';
 import { GetAppointmentQuery } from '@booking/app/queries/get-appointment';
 import { GetUpcomingAppointmentsQuery } from '@booking/app/queries/get-upcoming-appointments';
+import { GetTodayAppointmentsQuery } from '@booking/app/queries/get-today-appointments';
 import { GetAppointmentStatsQuery } from '@booking/app/queries/get-appointment-stats';
 
 @Controller('appointments')
@@ -53,6 +54,14 @@ export class AppointmentController {
     // TODO: Obtener businessId real del Business BC cuando esté implementado
     const businessId = user.businessId || '489b4d38-5146-4760-ae5f-d1910c3308bb'; // Hardcoded para MVP
     const appointments = await this.queryBus.execute(new GetUpcomingAppointmentsQuery(businessId));
+    return appointments;
+  }
+
+  @Get('today')
+  async findToday(@CurrentUser() user: UserPayload) {
+    // TODO: Obtener businessId real del Business BC cuando esté implementado
+    const businessId = user.businessId || '489b4d38-5146-4760-ae5f-d1910c3308bb'; // Hardcoded para MVP
+    const appointments = await this.queryBus.execute(new GetTodayAppointmentsQuery(businessId));
     return appointments;
   }
 
