@@ -54,7 +54,7 @@ describe('Business Controller E2E', () => {
 
     // Upgrade subscription plan to PRO for testing (allows 3 businesses)
     await dataSource.query(
-      `UPDATE business_owners SET "subscriptionPlan" = 'PRO' WHERE "userId" = $1`,
+      `UPDATE business_owners SET subscription_plan = 'PRO' WHERE user_id = $1`,
       [userId],
     );
   });

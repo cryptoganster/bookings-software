@@ -38,7 +38,7 @@ describe('BusinessWriteRepository Integration Tests', () => {
           password: process.env.DB_PASSWORD || 'postgres',
           database: process.env.DB_DATABASE || 'bookings_test',
           entities: [BusinessModel],
-          synchronize: false,
+          synchronize: true, // ← Changed from false to true to auto-create tables
         }),
         TypeOrmModule.forFeature([BusinessModel]),
       ],

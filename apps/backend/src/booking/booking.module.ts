@@ -4,6 +4,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 // Models
 import { AppointmentModel } from '@booking/infra/persistence/models/appointment';
+import { CustomerModel } from '@customer/infra/persistence/models';
+import { OfferingModel } from '@offering/infra/persistence/models/offering';
 
 // Modules
 import { AvailabilityModule } from '@availability/availability.module';
@@ -59,7 +61,7 @@ const Sagas = [AppointmentNotificationSaga];
 @Module({
   imports: [
     CqrsModule,
-    TypeOrmModule.forFeature([AppointmentModel]),
+    TypeOrmModule.forFeature([AppointmentModel, CustomerModel, OfferingModel]),
     AvailabilityModule,
     forwardRef(() => CustomerModule), // ← Use forwardRef to avoid circular dependency
   ],
