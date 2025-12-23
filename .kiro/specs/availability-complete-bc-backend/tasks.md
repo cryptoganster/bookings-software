@@ -157,10 +157,13 @@
     - Implement save(), findById(), findByBusinessAndDateRange()
     - _Requirements: 2.3, 2.4, 2.5_
 
-  - [ ] 9.3 Write integration tests for repositories
-    - Test Schedule repositories with real database
-    - Test Blockout repositories with real database
-    - Test query methods
+  - [x] 9.3 Write integration tests for repositories ✅
+    - Create `apps/backend/src/availability/infra/persistence/repositories/__tests__/schedule-repositories.integration.spec.ts`
+    - Create `apps/backend/src/availability/infra/persistence/repositories/__tests__/blockout-repositories.integration.spec.ts`
+    - Test Schedule repositories with real database (save, findById, findByBusinessId, findByBusinessAndDay)
+    - Test Blockout repositories with real database (save, delete, findById, findByBusinessId, findByBusinessAndDateRange)
+    - Test query methods with various scenarios
+    - Test transaction support with UnitOfWork
     - _Requirements: 1.3, 1.4, 1.5, 1.6, 2.3, 2.4, 2.5_
 
 - [x] 10. Create Factories ✅
@@ -175,10 +178,15 @@
     - Implement `loadById()` method
     - _Requirements: 2.4_
 
-  - [ ] 10.3 Write integration tests for factories
-    - Test Schedule factory
-    - Test Blockout factory
-    - Test aggregate reconstruction
+  - [x] 10.3 Write integration tests for factories ✅
+    - Create `apps/backend/src/availability/infra/persistence/factories/__tests__/schedule-factory.integration.spec.ts`
+    - Create `apps/backend/src/availability/infra/persistence/factories/__tests__/blockout-factory.integration.spec.ts`
+    - Test Schedule factory (loadById, loadByBusinessAndDay)
+    - Test Blockout factory (loadById)
+    - Test aggregate reconstruction with business logic
+    - Test all days of week, time ranges, active/inactive states
+    - Test single-day and multi-day blockouts
+    - Test isDateBlocked method works correctly
     - _Requirements: 1.4, 2.4_
 
 ## Phase 4: Application Layer - Commands
