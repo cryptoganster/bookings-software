@@ -6,6 +6,9 @@ import { OfferingFactory } from '@offering/infra/persistence/factories/offering-
 import { OfferingWriteRepository } from '@offering/infra/persistence/repositories/offering-write';
 import { OfferingReadRepository } from '@offering/infra/persistence/repositories/offering-read';
 
+// Controllers
+import { OfferingCrudController } from '@offering/presentation/controllers/offering-crud.controller';
+
 // Command Handlers
 import { CreateOfferingHandler } from '@offering/app/commands/create-offering/handler';
 import { UpdateOfferingHandler } from '@offering/app/commands/update-offering/handler';
@@ -19,6 +22,7 @@ import { GetOfferingsByBusinessHandler } from '@offering/app/queries/get-offerin
 
 @Module({
   imports: [CqrsModule, TypeOrmModule.forFeature([OfferingModel])],
+  controllers: [OfferingCrudController],
   providers: [
     // Factories
     {
