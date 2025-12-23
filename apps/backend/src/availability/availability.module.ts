@@ -5,6 +5,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 // Models
 import { CapacityModel } from '@availability/infra/persistence/models/capacity';
 
+// Controllers
+import { ScheduleCrudController } from '@availability/presentation/controllers/schedule-crud.controller';
+import { BlockoutCrudController } from '@availability/presentation/controllers/blockout-crud.controller';
+import { AvailabilityQueryController } from '@availability/presentation/controllers/availability-query.controller';
+
 // Repositories
 import { CapacityReadRepository } from '@availability/infra/persistence/repositories/capacity-read';
 import { CapacityWriteRepository } from '@availability/infra/persistence/repositories/capacity-write';
@@ -23,6 +28,7 @@ const QueryHandlers = [GetAvailableSlotsHandler];
 
 @Module({
   imports: [CqrsModule, TypeOrmModule.forFeature([CapacityModel])],
+  controllers: [ScheduleCrudController, BlockoutCrudController, AvailabilityQueryController],
   providers: [
     // Repositories
     {
