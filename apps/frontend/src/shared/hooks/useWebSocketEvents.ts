@@ -32,6 +32,7 @@ import {
   type AppointmentModifiedPayload,
 } from "@shared/api/websocket";
 import { appointmentKeys } from "@entities/appointment/model/queries";
+import { logger } from "@shared/lib/logger";
 
 /**
  * Hook to listen to WebSocket events and invalidate queries
@@ -58,11 +59,11 @@ export function useWebSocketEvents() {
     const socket = getWebSocket();
 
     if (!socket) {
-      console.warn("[useWebSocketEvents] No WebSocket connection available");
+      logger.warn("useWebSocketEvents: No WebSocket connection available");
       return;
     }
 
-    console.log("[useWebSocketEvents] Subscribing to WebSocket events");
+    logger.info("useWebSocketEvents: Subscribing to WebSocket events");
 
     /**
      * Handle appointment:created event
@@ -73,7 +74,10 @@ export function useWebSocketEvents() {
      * - Today appointments (dashboard widget)
      */
     const handleAppointmentCreated = (data: AppointmentCreatedPayload) => {
-      console.log("[WebSocket] 📨 Appointment created:", data);
+      logger.info("WebSocket: Appointment created event received", {
+        appointmentId: data.appointmentId,
+        customerId: data.customerId,
+      });
 
       // Invalidate queries to trigger refetch
       queryClient.invalidateQueries({ queryKey: appointmentKeys.lists() });
@@ -94,7 +98,9 @@ export function useWebSocketEvents() {
      * - Today appointments (may be removed from list)
      */
     const handleAppointmentCancelled = (data: AppointmentCancelledPayload) => {
-      console.log("[WebSocket] 📨 Appointment cancelled:", data);
+      logger.info("WebSocket: Appointment cancelled event received", {
+        appointmentId: data.appointmentId,
+      });
 
       // Invalidate queries
       queryClient.invalidateQueries({ queryKey: appointmentKeys.lists() });
@@ -117,7 +123,10 @@ export function useWebSocketEvents() {
      * - Upcoming appointments (order may change)
      */
     const handleAppointmentModified = (data: AppointmentModifiedPayload) => {
-      console.log("[WebSocket] 📨 Appointment modified:", data);
+      logger.info("WebSocket: Appointment modified event received", {
+        appointmentId: data.appointmentId,
+        newDateTime: data.newDateTime,
+      });
 
       // Invalidate queries
       queryClient.invalidateQueries({ queryKey: appointmentKeys.lists() });
@@ -134,7 +143,7 @@ export function useWebSocketEvents() {
 
     // Cleanup on unmount
     return () => {
-      console.log("[useWebSocketEvents] Unsubscribing from WebSocket events");
+      logger.info("useWebSocketEvents: Unsubscribing from WebSocket events");
       socket.off(WS_EVENTS.APPOINTMENT_CREATED, handleAppointmentCreated);
       socket.off(WS_EVENTS.APPOINTMENT_CANCELLED, handleAppointmentCancelled);
       socket.off(WS_EVENTS.APPOINTMENT_MODIFIED, handleAppointmentModified);

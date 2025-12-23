@@ -12,6 +12,7 @@ import { router } from "./app/router";
 import { useAuthStore } from "./app/store/auth.store";
 import { connectWebSocket, disconnectWebSocket } from "./shared/api/websocket";
 import { useWebSocketEvents } from "./shared/hooks/useWebSocketEvents";
+import { logger } from "./shared/lib/logger";
 
 /**
  * App Root Component
@@ -37,10 +38,10 @@ function App() {
   // Manage WebSocket connection based on auth state
   useEffect(() => {
     if (isAuthenticated) {
-      console.log("[App] User authenticated, connecting WebSocket...");
+      logger.info("App: User authenticated, connecting WebSocket");
       connectWebSocket();
     } else {
-      console.log("[App] User not authenticated, disconnecting WebSocket...");
+      logger.info("App: User not authenticated, disconnecting WebSocket");
       disconnectWebSocket();
     }
 

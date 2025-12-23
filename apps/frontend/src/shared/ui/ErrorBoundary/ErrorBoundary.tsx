@@ -1,6 +1,7 @@
 import { Component, type ReactNode } from "react";
 import { Container, Title, Text, Button, Stack } from "@mantine/core";
 import { IconAlertTriangle } from "@tabler/icons-react";
+import { logger } from "@shared/lib/logger";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -25,7 +26,11 @@ export class ErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("Error Boundary caught:", error, errorInfo);
+    logger.error("Error Boundary caught error", {
+      error: error.message,
+      stack: error.stack,
+      componentStack: errorInfo.componentStack,
+    });
   }
 
   handleReload = () => {

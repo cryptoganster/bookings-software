@@ -14,6 +14,7 @@
 import { io, Socket } from "socket.io-client";
 import { useAuthStore } from "@app/store/auth.store";
 import { env } from "@shared/config/env";
+import { logger } from "@shared/lib/logger";
 
 let socket: Socket | null = null;
 
@@ -76,18 +77,18 @@ export function connectWebSocket(): Socket | null {
   const user = useAuthStore.getState().user;
 
   if (!user?.id) {
-    console.warn("[WebSocket] Cannot connect: no user");
+    logger.warn("WebSocket: Cannot connect - no user authenticated");
     return null;
   }
 
   // TODO: WebSocket needs businessId but UserDto no longer has it
   // Need to fetch business data first or pass businessId separately
   // For now, using userId as fallback
-  console.warn("[WebSocket] Using userId as businessId (temporary)");
+  logger.warn("WebSocket: Using userId as businessId (temporary)");
 
   // Already connected
   if (socket?.connected) {
-    console.log("[WebSocket] Already connected");
+    logger.info("WebSocket: Already connected");
     return socket;
   }
 
@@ -106,15 +107,15 @@ export function connectWebSocket(): Socket | null {
 
   // Connection event handlers
   socket.on(WS_EVENTS.CONNECT, () => {
-    console.log("[WebSocket] ✅ Connected");
+    logger.info("WebSocket: Connected successfully");
   });
 
   socket.on(WS_EVENTS.DISCONNECT, (reason) => {
-    console.log("[WebSocket] ❌ Disconnected:", reason);
+    logger.info("WebSocket: Disconnected", { reason });
   });
 
   socket.on(WS_EVENTS.CONNECT_ERROR, (error) => {
-    console.error("[WebSocket] Connection error:", error);
+    logger.error("WebSocket: Connection error", { error });
   });
 
   return socket;
@@ -132,7 +133,7 @@ export function connectWebSocket(): Socket | null {
  */
 export function disconnectWebSocket(): void {
   if (socket) {
-    console.log("[WebSocket] Disconnecting...");
+    logger.info("WebSocket: Disconnecting...");
     socket.disconnect();
     socket = null;
   }

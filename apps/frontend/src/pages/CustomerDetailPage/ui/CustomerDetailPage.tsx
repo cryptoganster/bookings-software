@@ -46,6 +46,7 @@ import {
   formatCustomerPhone,
   getCustomerInitials,
 } from "@shared/lib/customer/formatters";
+import { logger } from "@shared/lib/logger";
 
 export function CustomerDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -59,22 +60,22 @@ export function CustomerDetailPage() {
 
   const handleEdit = () => {
     // TODO: Implement edit functionality
-    console.log("Edit customer:", id);
+    logger.debug("Edit customer action triggered", { customerId: id });
   };
 
   const handleMerge = () => {
     // TODO: Implement merge functionality
-    console.log("Merge customer:", id);
+    logger.debug("Merge customer action triggered", { customerId: id });
   };
 
   const handleDelete = () => {
     // TODO: Implement delete functionality
-    console.log("Delete customer:", id);
+    logger.debug("Delete customer action triggered", { customerId: id });
   };
 
   const handleExport = () => {
     // TODO: Implement export functionality
-    console.log("Export customer data:", id);
+    logger.debug("Export customer data action triggered", { customerId: id });
   };
 
   // Loading state
