@@ -27,8 +27,12 @@ export * as customersApi from "./customers";
 export type {
   DashboardStats,
   AppointmentFilters,
-  ScheduleReadModel,
-  BlockoutReadModel,
   ConversationReadModel,
   MessageReadModel,
 } from "./types";
+
+// Re-export Schedule and Blockout from shared-types for convenience
+export type {
+  ScheduleReadModel,
+  BlockoutReadModel,
+} from "@packages/shared-types";

@@ -171,6 +171,28 @@ export interface CreateOfferingRequestDto {
   maxDailyCapacity?: number;
 }
 
+/**
+ * DTO para actualizar un offering
+ */
+export interface UpdateOfferingRequestDto {
+  name?: string;
+  duration?: number;
+  maxCapacityPerSlot?: number;
+  maxDailyCapacity?: number;
+  isActive?: boolean;
+}
+
+/**
+ * DTO para actualizar un offering
+ */
+export interface UpdateOfferingRequestDto {
+  name?: string;
+  duration?: number;
+  maxCapacityPerSlot?: number;
+  maxDailyCapacity?: number;
+  isActive?: boolean;
+}
+
 // ============================================================================
 // CUSTOMERS
 // ============================================================================
@@ -272,6 +294,46 @@ export interface UpdateBusinessInfoRequestDto {
  */
 export interface ConfigureWhatsAppRequestDto {
   whatsappPhone: string;
+}
+
+// ============================================================================
+// AVAILABILITY (SCHEDULES & BLOCKOUTS)
+// ============================================================================
+
+/**
+ * Schedule Read Model - Horarios de atención del negocio
+ *
+ * @remarks
+ * - dayOfWeek: 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+ * - startTime/endTime: HH:MM format (e.g., "09:00", "17:30")
+ * - isActive: false = temporarily disabled
+ */
+export interface ScheduleReadModel {
+  id: string;
+  businessId: string;
+  dayOfWeek: number; // 0-6 (0 = Sunday)
+  startTime: string; // HH:MM format
+  endTime: string; // HH:MM format
+  isActive: boolean;
+  createdAt: string; // ISO 8601 string
+  updatedAt: string; // ISO 8601 string
+}
+
+/**
+ * Blockout Read Model - Bloqueos de fechas específicas
+ *
+ * @remarks
+ * - Used for vacations, holidays, special closures
+ * - startDate/endDate: ISO 8601 date strings
+ * - reason: Optional explanation for the blockout
+ */
+export interface BlockoutReadModel {
+  id: string;
+  businessId: string;
+  startDate: string; // ISO 8601 date string
+  endDate: string; // ISO 8601 date string
+  reason: string | null;
+  createdAt: string; // ISO 8601 string
 }
 
 // ============================================================================

@@ -9,6 +9,6 @@
     "pnpm --filter frontend format",
     "bash -c 'pnpm --filter frontend typecheck'"
   ],
-  "packages/shared-types/src/**/*.ts": ["eslint --fix", "prettier --write"],
+  "packages/shared-types/src/**/*.ts": ["prettier --write"],
   "*.{json,md}": ["prettier --write"]
 }

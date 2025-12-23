@@ -51,31 +51,6 @@ export interface AppointmentFilters {
 }
 
 /**
- * Schedule read model (not yet in shared-types)
- * TODO: Move to shared-types when backend implements schedules
- */
-export interface ScheduleReadModel {
-  id: string;
-  businessId: string;
-  dayOfWeek: number;
-  startTime: string;
-  endTime: string;
-  isActive: boolean;
-}
-
-/**
- * Blockout read model (not yet in shared-types)
- * TODO: Move to shared-types when backend implements blockouts
- */
-export interface BlockoutReadModel {
-  id: string;
-  businessId: string;
-  startDate: Date;
-  endDate: Date;
-  reason: string;
-}
-
-/**
  * Conversation read model (not yet in shared-types)
  * TODO: Move to shared-types when backend implements conversations
  */
