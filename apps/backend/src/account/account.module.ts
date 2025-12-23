@@ -26,6 +26,9 @@ import { BusinessOwnerReadRepository } from '@account/infra/persistence/reposito
 // Factory
 import { BusinessOwnerFactory } from '@account/infra/persistence/factories/business-owner.factory';
 
+// Controllers
+import { BusinessOwnerProfileController } from '@account/presentation/controllers/business-owner-profile.controller';
+
 const commandHandlers = [
   CreateBusinessOwnerHandler,
   CompleteOnboardingHandler,
@@ -40,6 +43,7 @@ const eventHandlers = [OnUserRegisteredHandler];
 
 @Module({
   imports: [CqrsModule, TypeOrmModule.forFeature([BusinessOwnerModel])],
+  controllers: [BusinessOwnerProfileController],
   providers: [
     // Command Handlers
     ...commandHandlers,
