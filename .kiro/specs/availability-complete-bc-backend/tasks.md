@@ -248,26 +248,26 @@
 
 ## Phase 5: Application Layer - Queries
 
-- [ ] 13. Implement Schedule Queries
-  - [ ] 13.1 Implement GetSchedulesByBusinessQuery handler
+- [x] 13. Implement Schedule Queries
+  - [x] 13.1 Implement GetSchedulesByBusinessQuery handler
     - Create `apps/backend/src/availability/app/queries/get-schedules-by-business/handler.ts`
     - Use read repository
     - Return read models
     - _Requirements: 1.6_
 
-  - [ ] 13.2 Write unit tests for Schedule query handlers
+  - [x] 13.2 Write unit tests for Schedule query handlers
     - Test GetSchedulesByBusinessHandler
     - Mock read repository
     - _Requirements: 1.6_
 
-- [ ] 14. Implement Blockout Queries
-  - [ ] 14.1 Implement GetBlockoutsByBusinessQuery handler
+- [x] 14. Implement Blockout Queries
+  - [x] 14.1 Implement GetBlockoutsByBusinessQuery handler
     - Create `apps/backend/src/availability/app/queries/get-blockouts-by-business/handler.ts`
     - Use read repository
     - Return read models
     - _Requirements: 2.5_
 
-  - [ ] 14.2 Write unit tests for Blockout query handlers
+  - [x] 14.2 Write unit tests for Blockout query handlers
     - Test GetBlockoutsByBusinessHandler
     - Mock read repository
     - _Requirements: 2.5_
