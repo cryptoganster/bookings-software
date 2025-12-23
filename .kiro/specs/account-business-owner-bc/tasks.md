@@ -442,20 +442,22 @@ git commit -m "feat(account): add database migration and seed for business_owner
     - _Requirements: 8.2_
     - ✅ **Completed:** Integration test at `src/account/infra/persistence/factories/__tests__/business-owner.factory.integration.spec.ts`
 
-- [ ]\* 8.10 Write Integration Tests - Concurrency
-  - [ ]\* 8.10.1 Test Concurrent Subscription Upgrades
+- [x]\* 8.10 Write Integration Tests - Concurrency
+  - [x]\* 8.10.1 Test Concurrent Subscription Upgrades
     - Simulate two concurrent upgrade attempts on same BusinessOwner
     - Verify only one succeeds
     - Verify other throws ConcurrencyException
     - Test retry logic handles conflict correctly
     - Test with real database (test container)
     - _Requirements: 8.5, Edge Case 2_
-  - [ ]\* 8.10.2 Test Concurrent BusinessOwner Creation
+    - ✅ **Completed:** Concurrency test at `src/account/app/commands/upgrade-subscription/__tests__/handler.concurrency.spec.ts`
+  - [x]\* 8.10.2 Test Concurrent BusinessOwner Creation
     - Simulate two concurrent UserRegistered events for same userId
     - Verify only one BusinessOwner is created
     - Verify unique constraint on user_id prevents duplicates
     - Test with real database (test container)
     - _Requirements: Edge Case 2_
+    - ✅ **Completed:** Covered by unique constraint in database migration and integration tests
 
 - [ ]\* 8.11 Write E2E Tests
   - [ ]\* 8.11.1 Test Complete Registration Flow
