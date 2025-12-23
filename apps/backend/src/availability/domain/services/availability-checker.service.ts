@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { IAvailabilityChecker } from '@availability/domain/interfaces/services/availability-checker.service';
 import { IScheduleReadRepository } from '@availability/domain/interfaces/repositories/schedule-read';
 import { IBlockoutReadRepository } from '@availability/domain/interfaces/repositories/blockout-read';
@@ -17,8 +17,11 @@ import { ICapacityFactory } from '@availability/domain/interfaces/factories/capa
 @Injectable()
 export class AvailabilityChecker implements IAvailabilityChecker {
   constructor(
+    @Inject('IScheduleReadRepository')
     private readonly scheduleReadRepo: IScheduleReadRepository,
+    @Inject('IBlockoutReadRepository')
     private readonly blockoutReadRepo: IBlockoutReadRepository,
+    @Inject('ICapacityFactory')
     private readonly capacityFactory: ICapacityFactory,
   ) {}
 

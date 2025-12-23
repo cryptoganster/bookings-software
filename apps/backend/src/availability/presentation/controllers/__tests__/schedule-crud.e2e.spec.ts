@@ -8,6 +8,7 @@ describe('Schedule CRUD (e2e)', () => {
   let app: INestApplication;
   let dataSource: DataSource;
   let authToken: string;
+  let userId: string;
   let businessId: string;
   let scheduleId: string;
 
@@ -29,7 +30,7 @@ describe('Schedule CRUD (e2e)', () => {
 
     dataSource = moduleFixture.get<DataSource>(DataSource);
 
-    // Register and login a test user
+    // 1. Register a test user
     const registerResponse = await request(app.getHttpServer()).post('/auth/register').send({
       email: 'schedule-test@example.com',
       password: 'Test1234!',
@@ -37,14 +38,36 @@ describe('Schedule CRUD (e2e)', () => {
     });
 
     authToken = registerResponse.body.token;
-    businessId = registerResponse.body.user.businessId; // Assuming user has businessId
+    userId = registerResponse.body.userId;
+
+    // 2. Wait a bit for event handlers to process (BusinessOwner creation)
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    // 3. Create a business for testing
+    const businessResponse = await request(app.getHttpServer())
+      .post('/businesses')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        name: 'Test Schedule Business',
+        whatsappNumber: '+18095551234',
+        address: {
+          street: '123 Test St',
+          city: 'Test City',
+          country: 'DO',
+        },
+        timezone: 'America/Santo_Domingo',
+      });
+
+    businessId = businessResponse.body.id;
   });
 
   afterAll(async () => {
-    // Clean up test data
+    // Clean up test data (use snake_case for column names)
     if (dataSource) {
       await dataSource.query('DELETE FROM schedules WHERE business_id = $1', [businessId]);
-      await dataSource.query('DELETE FROM users WHERE email = $1', ['schedule-test@example.com']);
+      await dataSource.query('DELETE FROM businesses WHERE id = $1', [businessId]);
+      await dataSource.query('DELETE FROM business_owners WHERE user_id = $1', [userId]);
+      await dataSource.query('DELETE FROM users WHERE id = $1', [userId]);
     }
     await app.close();
   });
@@ -62,9 +85,9 @@ describe('Schedule CRUD (e2e)', () => {
         })
         .expect(201);
 
-      expect(response.body).toHaveProperty('scheduleId');
-      expect(response.body.scheduleId).toBeDefined();
-      scheduleId = response.body.scheduleId;
+      expect(response.body).toHaveProperty('id');
+      expect(response.body.id).toBeDefined();
+      scheduleId = response.body.id;
     });
 
     it('should fail with invalid day of week', async () => {

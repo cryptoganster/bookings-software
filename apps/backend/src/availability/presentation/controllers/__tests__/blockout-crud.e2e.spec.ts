@@ -8,6 +8,7 @@ describe('Blockout CRUD (e2e)', () => {
   let app: INestApplication;
   let dataSource: DataSource;
   let authToken: string;
+  let userId: string;
   let businessId: string;
   let blockoutId: string;
 
@@ -29,7 +30,7 @@ describe('Blockout CRUD (e2e)', () => {
 
     dataSource = moduleFixture.get<DataSource>(DataSource);
 
-    // Register and login a test user
+    // 1. Register a test user
     const registerResponse = await request(app.getHttpServer()).post('/auth/register').send({
       email: 'blockout-test@example.com',
       password: 'Test1234!',
@@ -37,14 +38,36 @@ describe('Blockout CRUD (e2e)', () => {
     });
 
     authToken = registerResponse.body.token;
-    businessId = registerResponse.body.user.businessId;
+    userId = registerResponse.body.userId;
+
+    // 2. Wait a bit for event handlers to process (BusinessOwner creation)
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    // 3. Create a business for testing
+    const businessResponse = await request(app.getHttpServer())
+      .post('/businesses')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        name: 'Test Blockout Business',
+        whatsappNumber: '+18095555678',
+        address: {
+          street: '456 Test Ave',
+          city: 'Test City',
+          country: 'DO',
+        },
+        timezone: 'America/Santo_Domingo',
+      });
+
+    businessId = businessResponse.body.id;
   });
 
   afterAll(async () => {
-    // Clean up test data
+    // Clean up test data (use snake_case for column names)
     if (dataSource) {
       await dataSource.query('DELETE FROM blockouts WHERE business_id = $1', [businessId]);
-      await dataSource.query('DELETE FROM users WHERE email = $1', ['blockout-test@example.com']);
+      await dataSource.query('DELETE FROM businesses WHERE id = $1', [businessId]);
+      await dataSource.query('DELETE FROM business_owners WHERE user_id = $1', [userId]);
+      await dataSource.query('DELETE FROM users WHERE id = $1', [userId]);
     }
     await app.close();
   });
@@ -67,9 +90,9 @@ describe('Blockout CRUD (e2e)', () => {
         })
         .expect(201);
 
-      expect(response.body).toHaveProperty('blockoutId');
-      expect(response.body.blockoutId).toBeDefined();
-      blockoutId = response.body.blockoutId;
+      expect(response.body).toHaveProperty('id');
+      expect(response.body.id).toBeDefined();
+      blockoutId = response.body.id;
     });
 
     it('should fail with past start date', async () => {
@@ -121,7 +144,7 @@ describe('Blockout CRUD (e2e)', () => {
         })
         .expect(201);
 
-      expect(response.body).toHaveProperty('blockoutId');
+      expect(response.body).toHaveProperty('id');
     });
 
     it('should fail without authentication', async () => {
@@ -277,9 +300,9 @@ describe('Blockout CRUD (e2e)', () => {
         })
         .expect(201);
 
-      expect(response1.body.blockoutId).toBeDefined();
-      expect(response2.body.blockoutId).toBeDefined();
-      expect(response1.body.blockoutId).not.toBe(response2.body.blockoutId);
+      expect(response1.body.id).toBeDefined();
+      expect(response2.body.id).toBeDefined();
+      expect(response1.body.id).not.toBe(response2.body.id);
     });
   });
 });

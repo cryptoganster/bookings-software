@@ -3,6 +3,8 @@ import { config } from 'dotenv';
 import { join } from 'path';
 import { AppointmentModel } from '../src/booking/infra/persistence/models/appointment';
 import { CapacityModel } from '../src/availability/infra/persistence/models/capacity';
+import { ScheduleModel } from '../src/availability/infra/persistence/models/schedule';
+import { BlockoutModel } from '../src/availability/infra/persistence/models/blockout';
 import { OfferingModel } from '../src/offering/infra/persistence/models/offering';
 import { CustomerModel } from '../src/customer/infra/persistence/models/customer.model';
 import { BusinessModel } from '../src/business/infra/persistence/models/business.model';
@@ -16,6 +18,8 @@ import { UserModel } from '../src/auth/infra/persistence/models/user';
 const ALL_ENTITIES = [
   AppointmentModel,
   CapacityModel,
+  ScheduleModel,
+  BlockoutModel,
   OfferingModel,
   CustomerModel,
   BusinessModel,
