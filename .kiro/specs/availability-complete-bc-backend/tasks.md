@@ -158,6 +158,11 @@
     - _Requirements: 2.3, 2.4, 2.5_
 
   - [x] 9.3 Write integration tests for repositories ✅
+    - [x] Schedule write repository integration tests (save, update, delete)
+    - [x] Schedule read repository integration tests (findById, findByBusinessId, findByBusinessAndDay)
+    - [x] Blockout write repository integration tests (save, delete)
+    - [x] Blockout read repository integration tests (findById, findByBusinessId, findByBusinessAndDateRange)
+    - [x] All repository integration tests passing (216 total tests)
     - Create `apps/backend/src/availability/infra/persistence/repositories/__tests__/schedule-repositories.integration.spec.ts`
     - Create `apps/backend/src/availability/infra/persistence/repositories/__tests__/blockout-repositories.integration.spec.ts`
     - Test Schedule repositories with real database (save, findById, findByBusinessId, findByBusinessAndDay)
@@ -179,14 +184,17 @@
     - _Requirements: 2.4_
 
   - [x] 10.3 Write integration tests for factories ✅
+    - [x] Schedule factory integration tests (loadById, loadByBusinessAndDay) - 10 tests passing
+    - [x] Blockout factory integration tests (loadById) - 9 tests passing
+    - [x] Test aggregate reconstruction with business logic
+    - [x] Test all days of week, time ranges, active/inactive states
+    - [x] Test single-day and multi-day blockouts
+    - [x] Test isDateBlocked method works correctly
+    - [x] Fixed timezone issues with UTC normalization in DateRange VO
+    - [x] Fixed PostgreSQL date column type (changed from 'date' to 'timestamp')
+    - [x] All factory integration tests passing
     - Create `apps/backend/src/availability/infra/persistence/factories/__tests__/schedule-factory.integration.spec.ts`
     - Create `apps/backend/src/availability/infra/persistence/factories/__tests__/blockout-factory.integration.spec.ts`
-    - Test Schedule factory (loadById, loadByBusinessAndDay)
-    - Test Blockout factory (loadById)
-    - Test aggregate reconstruction with business logic
-    - Test all days of week, time ranges, active/inactive states
-    - Test single-day and multi-day blockouts
-    - Test isDateBlocked method works correctly
     - _Requirements: 1.4, 2.4_
 
 ## Phase 4: Application Layer - Commands
