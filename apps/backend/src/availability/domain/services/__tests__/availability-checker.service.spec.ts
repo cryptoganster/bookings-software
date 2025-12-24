@@ -42,7 +42,11 @@ describe('AvailabilityChecker Service - Unit Tests', () => {
     const offeringId = '550e8400-e29b-41d4-a716-446655440001';
     const today = new Date();
     const testDate = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days from now
-    const testDayOfWeek = testDate.getDay(); // Get actual day of week (0-6)
+
+    // Normalize to UTC midnight to match service behavior
+    const normalizedTestDate = new Date(testDate);
+    normalizedTestDate.setUTCHours(0, 0, 0, 0);
+    const testDayOfWeek = normalizedTestDate.getUTCDay(); // Get UTC day of week (0-6)
 
     it('should return true when date is available (has schedule, no blockout, has capacity)', async () => {
       // Arrange
@@ -208,7 +212,11 @@ describe('AvailabilityChecker Service - Unit Tests', () => {
     const offeringId = '550e8400-e29b-41d4-a716-446655440001';
     const today = new Date();
     const testDate = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days from now
-    const testDayOfWeek = testDate.getDay(); // Get actual day of week (0-6)
+
+    // Normalize to UTC midnight to match service behavior
+    const normalizedTestDate = new Date(testDate);
+    normalizedTestDate.setUTCHours(0, 0, 0, 0);
+    const testDayOfWeek = normalizedTestDate.getUTCDay(); // Get UTC day of week (0-6)
     const duration = 30; // 30 minutes
 
     it('should return time slots when date is available', async () => {

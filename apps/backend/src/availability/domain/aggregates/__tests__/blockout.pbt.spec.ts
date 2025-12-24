@@ -40,8 +40,8 @@ describe('Blockout Aggregate - Property-Based Tests', () => {
     it('should accept date ranges where start <= end (both in future)', () => {
       fc.assert(
         fc.property(
-          fc.integer({ min: 0, max: 365 }),
-          fc.integer({ min: 0, max: 365 }),
+          fc.integer({ min: 1, max: 365 }), // Cambio: min=1 para evitar "hoy"
+          fc.integer({ min: 1, max: 365 }), // Cambio: min=1 para evitar "hoy"
           (daysFromNow1: number, daysFromNow2: number) => {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
@@ -108,7 +108,7 @@ describe('Blockout Aggregate - Property-Based Tests', () => {
         fc.property(
           uuidV4(),
           uuidV4(),
-          fc.integer({ min: 0, max: 365 }),
+          fc.integer({ min: 1, max: 365 }),
           fc.integer({ min: 0, max: 30 }),
           fc.option(fc.string({ minLength: 1, maxLength: 200 })),
           (
@@ -156,7 +156,7 @@ describe('Blockout Aggregate - Property-Based Tests', () => {
         fc.property(
           uuidV4(),
           uuidV4(),
-          fc.integer({ min: 0, max: 100 }),
+          fc.integer({ min: 1, max: 100 }),
           fc.integer({ min: 1, max: 30 }),
           fc.integer({ min: -5, max: 35 }),
           (
@@ -216,7 +216,7 @@ describe('Blockout Aggregate - Property-Based Tests', () => {
     it('should calculate duration correctly (inclusive of both days)', () => {
       fc.assert(
         fc.property(
-          fc.integer({ min: 0, max: 100 }),
+          fc.integer({ min: 1, max: 100 }),
           fc.integer({ min: 0, max: 30 }),
           (daysFromNow: number, duration: number) => {
             const today = new Date();

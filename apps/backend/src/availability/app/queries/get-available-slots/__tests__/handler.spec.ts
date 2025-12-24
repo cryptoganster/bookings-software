@@ -65,11 +65,11 @@ describe('GetAvailableSlotsHandler', () => {
 
       // Assert
       expect(result).toHaveLength(3);
-      expect(result[0].time.getHours()).toBe(9);
+      expect(result[0].time.getUTCHours()).toBe(9);
       expect(result[0].availableSlots).toBe(5);
-      expect(result[1].time.getHours()).toBe(10);
+      expect(result[1].time.getUTCHours()).toBe(10);
       expect(result[1].availableSlots).toBe(5);
-      expect(result[2].time.getHours()).toBe(11);
+      expect(result[2].time.getUTCHours()).toBe(11);
       expect(result[2].availableSlots).toBe(5);
     });
 
@@ -125,10 +125,10 @@ describe('GetAvailableSlotsHandler', () => {
 
       // Assert
       expect(result).toHaveLength(2);
-      expect(result[0].time.getHours()).toBe(9);
-      expect(result[0].time.getMinutes()).toBe(0);
-      expect(result[1].time.getHours()).toBe(9);
-      expect(result[1].time.getMinutes()).toBe(30);
+      expect(result[0].time.getUTCHours()).toBe(9);
+      expect(result[0].time.getUTCMinutes()).toBe(0);
+      expect(result[1].time.getUTCHours()).toBe(9);
+      expect(result[1].time.getUTCMinutes()).toBe(30);
     });
 
     it('should pass correct parameters to AvailabilityChecker', async () => {
@@ -172,10 +172,10 @@ describe('GetAvailableSlotsHandler', () => {
 
       // Assert
       expect(result).toHaveLength(2);
-      expect(result[0].time.getHours()).toBe(14);
-      expect(result[0].time.getMinutes()).toBe(30);
-      expect(result[1].time.getHours()).toBe(15);
-      expect(result[1].time.getMinutes()).toBe(30);
+      expect(result[0].time.getUTCHours()).toBe(14);
+      expect(result[0].time.getUTCMinutes()).toBe(30);
+      expect(result[1].time.getUTCHours()).toBe(15);
+      expect(result[1].time.getUTCMinutes()).toBe(30);
     });
 
     it('should include capacity count in all slots', async () => {

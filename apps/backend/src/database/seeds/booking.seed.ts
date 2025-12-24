@@ -14,80 +14,106 @@ export async function seedBooking(
   console.log('📝 Seeding Booking BC...');
 
   const today = new Date();
+  const appointments: Array<{
+    date: Date;
+    customerId: string;
+    offeringId: string;
+    status: string;
+  }> = [];
 
-  // Cita 1 - Mañana a las 10:00 - CONFIRMED
-  const appointment1Date = addDays(today, 1);
-  appointment1Date.setHours(10, 0, 0, 0);
+  // Citas para HOY (para probar "Citas Hoy" en Dashboard)
+  const todayMorning = new Date(today);
+  todayMorning.setHours(9, 0, 0, 0);
+  appointments.push({
+    date: todayMorning,
+    customerId: customerId1,
+    offeringId: offering1Id,
+    status: 'CONFIRMED',
+  });
 
-  await dataSource.query(
-    `INSERT INTO appointments (id, business_id, customer_id, offering_id, date_time, status, version, created_at, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())`,
-    [uuidv4(), businessId, customerId1, offering1Id, appointment1Date, 'CONFIRMED', 0],
+  const todayAfternoon = new Date(today);
+  todayAfternoon.setHours(14, 0, 0, 0);
+  appointments.push({
+    date: todayAfternoon,
+    customerId: customerId2,
+    offeringId: offering2Id,
+    status: 'CONFIRMED',
+  });
+
+  // Citas para los próximos 6 días (para probar "Citas Esta Semana")
+  for (let i = 1; i <= 6; i++) {
+    const appointmentDate = addDays(today, i);
+    appointmentDate.setHours(10, 0, 0, 0);
+
+    appointments.push({
+      date: appointmentDate,
+      customerId: i % 3 === 0 ? customerId3 : i % 2 === 0 ? customerId2 : customerId1,
+      offeringId: i % 2 === 0 ? offering2Id : offering1Id,
+      status: 'CONFIRMED',
+    });
+
+    // Agregar cita por la tarde solo en días laborables (lunes a viernes)
+    const dayOfWeek = appointmentDate.getDay();
+    if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+      const afternoonDate = new Date(appointmentDate);
+      afternoonDate.setHours(15, 0, 0, 0);
+
+      appointments.push({
+        date: afternoonDate,
+        customerId: i % 2 === 0 ? customerId1 : customerId3,
+        offeringId: i % 2 === 0 ? offering1Id : offering2Id,
+        status: 'CONFIRMED',
+      });
+    }
+  }
+
+  // Cita cancelada (para probar filtros)
+  const cancelledDate = addDays(today, 3);
+  cancelledDate.setHours(11, 0, 0, 0);
+  appointments.push({
+    date: cancelledDate,
+    customerId: customerId2,
+    offeringId: offering1Id,
+    status: 'CANCELLED',
+  });
+
+  // Cita completada (ayer - para probar filtros)
+  const completedDate = addDays(today, -1);
+  completedDate.setHours(15, 0, 0, 0);
+  appointments.push({
+    date: completedDate,
+    customerId: customerId3,
+    offeringId: offering2Id,
+    status: 'COMPLETED',
+  });
+
+  // Insertar todas las citas
+  for (const apt of appointments) {
+    await dataSource.query(
+      `INSERT INTO appointments (id, business_id, customer_id, offering_id, date_time, status, version, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())`,
+      [uuidv4(), businessId, apt.customerId, apt.offeringId, apt.date, apt.status, 0],
+    );
+
+    // Actualizar capacidad solo para citas CONFIRMED
+    if (apt.status === 'CONFIRMED') {
+      await dataSource.query(
+        `UPDATE capacities 
+         SET available_slots = available_slots - 1 
+         WHERE offering_id = $1 AND date = $2`,
+        [apt.offeringId, format(apt.date, 'yyyy-MM-dd')],
+      );
+    }
+  }
+
+  const confirmedCount = appointments.filter((a) => a.status === 'CONFIRMED').length;
+  const cancelledCount = appointments.filter((a) => a.status === 'CANCELLED').length;
+  const completedCount = appointments.filter((a) => a.status === 'COMPLETED').length;
+
+  console.log(
+    `✅ Booking BC seeded: ${appointments.length} appointments (${confirmedCount} CONFIRMED, ${cancelledCount} CANCELLED, ${completedCount} COMPLETED)`,
   );
-
-  // Cita 2 - Pasado mañana a las 14:00 - CONFIRMED
-  const appointment2Date = addDays(today, 2);
-  appointment2Date.setHours(14, 0, 0, 0);
-
-  await dataSource.query(
-    `INSERT INTO appointments (id, business_id, customer_id, offering_id, date_time, status, version, created_at, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())`,
-    [uuidv4(), businessId, customerId2, offering2Id, appointment2Date, 'CONFIRMED', 0],
-  );
-
-  // Cita 3 - En 3 días a las 16:00 - CONFIRMED
-  const appointment3Date = addDays(today, 3);
-  appointment3Date.setHours(16, 0, 0, 0);
-
-  await dataSource.query(
-    `INSERT INTO appointments (id, business_id, customer_id, offering_id, date_time, status, version, created_at, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())`,
-    [uuidv4(), businessId, customerId3, offering1Id, appointment3Date, 'CONFIRMED', 0],
-  );
-
-  // Cita 4 - En 5 días a las 11:00 - CANCELLED (para probar filtros)
-  const appointment4Date = addDays(today, 5);
-  appointment4Date.setHours(11, 0, 0, 0);
-
-  await dataSource.query(
-    `INSERT INTO appointments (id, business_id, customer_id, offering_id, date_time, status, version, created_at, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())`,
-    [uuidv4(), businessId, customerId1, offering2Id, appointment4Date, 'CANCELLED', 0],
-  );
-
-  // Cita 5 - Ayer a las 15:00 - COMPLETED (para probar filtros)
-  const appointment5Date = addDays(today, -1);
-  appointment5Date.setHours(15, 0, 0, 0);
-
-  await dataSource.query(
-    `INSERT INTO appointments (id, business_id, customer_id, offering_id, date_time, status, version, created_at, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())`,
-    [uuidv4(), businessId, customerId2, offering1Id, appointment5Date, 'COMPLETED', 0],
-  );
-
-  console.log('✅ Booking BC seeded: 5 appointments (3 CONFIRMED, 1 CANCELLED, 1 COMPLETED)');
-
-  // Actualizar capacidades para reflejar las citas creadas
-  await dataSource.query(
-    `UPDATE capacities 
-     SET available_slots = available_slots - 1 
-     WHERE offering_id = $1 AND date = $2`,
-    [offering1Id, format(appointment1Date, 'yyyy-MM-dd')],
-  );
-
-  await dataSource.query(
-    `UPDATE capacities 
-     SET available_slots = available_slots - 1 
-     WHERE offering_id = $1 AND date = $2`,
-    [offering2Id, format(appointment2Date, 'yyyy-MM-dd')],
-  );
-
-  await dataSource.query(
-    `UPDATE capacities 
-     SET available_slots = available_slots - 1 
-     WHERE offering_id = $1 AND date = $2`,
-    [offering1Id, format(appointment3Date, 'yyyy-MM-dd')],
-  );
-
+  console.log(`   - Today: 2 appointments`);
+  console.log(`   - This week: ${confirmedCount - 2} more appointments`);
   console.log('✅ Capacities updated to reflect appointments');
 }
