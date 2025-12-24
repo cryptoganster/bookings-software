@@ -3,57 +3,74 @@
  *
  * Provides hooks for:
  * - Fetching pending admin queries
- * - Fetching conversation by ID
- * - Responding to queries
+ * - Fetching conversation history (messages)
+ * - Sending admin responses
  */
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { conversationsService } from "@shared/api/services/conversations.service";
+import type {
+  ConversationReadModel,
+  MessageReadModel,
+} from "@packages/shared-types";
+import { conversationService } from "@shared/api/services/conversation.service";
 
 // Query Keys
 export const conversationKeys = {
   all: ["conversations"] as const,
   pending: () => [...conversationKeys.all, "pending"] as const,
-  details: () => [...conversationKeys.all, "detail"] as const,
-  detail: (id: string) => [...conversationKeys.details(), id] as const,
+  messages: () => [...conversationKeys.all, "messages"] as const,
+  conversationMessages: (id: string) =>
+    [...conversationKeys.messages(), id] as const,
 };
 
 /**
  * Hook to fetch pending admin queries
+ *
+ * @returns Query with pending conversations
  */
-export function usePendingQueries() {
-  return useQuery({
+export function useConversations() {
+  return useQuery<ConversationReadModel[]>({
     queryKey: conversationKeys.pending(),
-    queryFn: () => conversationsService.getPending(),
+    queryFn: conversationService.getPendingConversations,
   });
 }
 
 /**
- * Hook to fetch conversation by ID
+ * Hook to fetch conversation history (messages)
+ *
+ * @param conversationId - ID of the conversation
+ * @returns Query with message history
  */
-export function useConversation(id: string) {
-  return useQuery({
-    queryKey: conversationKeys.detail(id),
-    queryFn: () => conversationsService.getById(id),
-    enabled: !!id,
+export function useConversationHistory(conversationId: string) {
+  return useQuery<MessageReadModel[]>({
+    queryKey: conversationKeys.conversationMessages(conversationId),
+    queryFn: () => conversationService.getConversationHistory(conversationId),
+    enabled: !!conversationId,
   });
 }
 
 /**
- * Hook to respond to query
+ * Hook to send admin response
+ *
+ * @returns Mutation to send admin response
  */
-export function useRespondToQuery() {
+export function useSendAdminResponse() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, message }: { id: string; message: string }) =>
-      conversationsService.respond(id, { message }),
-    onSuccess: (_, variables) => {
-      // Invalidate pending queries list
+    mutationFn: ({
+      conversationId,
+      content,
+    }: {
+      conversationId: string;
+      content: string;
+    }) => conversationService.sendAdminResponse(conversationId, content),
+    onSuccess: (_, { conversationId }) => {
+      // Invalidate pending conversations list
       queryClient.invalidateQueries({ queryKey: conversationKeys.pending() });
-      // Invalidate the specific conversation
+      // Invalidate the conversation messages
       queryClient.invalidateQueries({
-        queryKey: conversationKeys.detail(variables.id),
+        queryKey: conversationKeys.conversationMessages(conversationId),
       });
     },
   });

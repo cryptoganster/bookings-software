@@ -3,8 +3,8 @@
  *
  * Main conversations management page that displays:
  * - List of pending admin queries
- * - Conversation detail modal
- * - Respond to query action
+ * - Conversation history (messages)
+ * - Send admin response action
  *
  * Uses TanStack Query for server state management.
  */
@@ -33,9 +33,9 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { PageHeader } from "@shared/ui/PageHeader/PageHeader";
 import {
-  usePendingQueries,
-  useConversation,
-  useRespondToQuery,
+  useConversations,
+  useConversationHistory,
+  useSendAdminResponse,
 } from "@entities/conversation";
 
 export function ConversationsPage() {
@@ -44,20 +44,15 @@ export function ConversationsPage() {
   >(null);
   const [responseText, setResponseText] = useState("");
 
-  const {
-    data: conversations,
-    isLoading,
-    isError,
-    error,
-  } = usePendingQueries();
+  const { data: conversations, isLoading, isError, error } = useConversations();
 
   const {
-    data: conversation,
-    isLoading: isLoadingConversation,
-    isError: isErrorConversation,
-  } = useConversation(selectedConversationId || "");
+    data: messages,
+    isLoading: isLoadingMessages,
+    isError: isErrorMessages,
+  } = useConversationHistory(selectedConversationId || "");
 
-  const respondToQuery = useRespondToQuery();
+  const sendResponse = useSendAdminResponse();
 
   const handleOpenConversation = (conversationId: string) => {
     setSelectedConversationId(conversationId);
@@ -72,9 +67,9 @@ export function ConversationsPage() {
   const handleSendResponse = async () => {
     if (!selectedConversationId || !responseText.trim()) return;
 
-    await respondToQuery.mutateAsync({
-      id: selectedConversationId,
-      message: responseText.trim(),
+    await sendResponse.mutateAsync({
+      conversationId: selectedConversationId,
+      content: responseText.trim(),
     });
 
     handleCloseModal();
@@ -83,6 +78,11 @@ export function ConversationsPage() {
   const formatDate = (dateString: string) => {
     return format(new Date(dateString), "dd MMM yyyy HH:mm", { locale: es });
   };
+
+  // Find selected conversation details
+  const selectedConversation = conversations?.find(
+    (c) => c.id === selectedConversationId,
+  );
 
   return (
     <Container fluid py="md">
@@ -181,13 +181,13 @@ export function ConversationsPage() {
         size="lg"
         radius="xl"
       >
-        {isLoadingConversation && (
+        {isLoadingMessages && (
           <Center py="xl">
             <Loader size="md" />
           </Center>
         )}
 
-        {isErrorConversation && (
+        {isErrorMessages && (
           <Alert
             icon={<IconAlertCircle size={16} />}
             title="Error al cargar conversación"
@@ -198,23 +198,23 @@ export function ConversationsPage() {
           </Alert>
         )}
 
-        {conversation && (
+        {selectedConversation && messages && (
           <Stack gap="md">
             {/* Customer Info */}
             <Card withBorder p="md" radius="md">
               <Stack gap="xs">
                 <Text fw={600}>
-                  {conversation.conversation.customerName || "Cliente Anónimo"}
+                  {selectedConversation.customerName || "Cliente Anónimo"}
                 </Text>
                 <Text size="sm" c="dimmed">
-                  {conversation.conversation.customerPhone}
+                  {selectedConversation.customerPhone}
                 </Text>
               </Stack>
             </Card>
 
             {/* Messages */}
             <Stack gap="sm">
-              {conversation.messages.map((message) => (
+              {messages.map((message) => (
                 <Card
                   key={message.id}
                   withBorder
@@ -235,7 +235,9 @@ export function ConversationsPage() {
                       >
                         {message.direction === "INBOUND"
                           ? "Cliente"
-                          : "Negocio"}
+                          : message.isFromAdmin
+                            ? "Admin"
+                            : "Negocio"}
                       </Badge>
                       <Text size="xs" c="dimmed">
                         {formatDate(message.sentAt)}
@@ -259,7 +261,7 @@ export function ConversationsPage() {
               <Button
                 leftSection={<IconSend size={16} />}
                 onClick={handleSendResponse}
-                loading={respondToQuery.isPending}
+                loading={sendResponse.isPending}
                 disabled={!responseText.trim()}
                 radius="xl"
               >

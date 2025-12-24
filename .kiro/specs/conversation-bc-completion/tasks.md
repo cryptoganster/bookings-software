@@ -243,59 +243,59 @@
 
 ## Phase 9: Shared Types Integration
 
-- [ ] 9.1 Add ConversationReadModel to shared-types
+- [x] 9.1 Add ConversationReadModel to shared-types
   - Copy from design document
   - Add JSDoc comments
   - Export from index.ts
   - _Requirements: 6.1, 6.4_
 
-- [ ] 9.2 Add MessageReadModel to shared-types
+- [x] 9.2 Add MessageReadModel to shared-types
   - Copy from design document
   - Add JSDoc comments
   - Export from index.ts
   - _Requirements: 6.2, 6.4_
 
-- [ ] 9.3 Add SendAdminResponseDto to shared-types
+- [x] 9.3 Add SendAdminResponseDto to shared-types
   - Copy from design document
   - Export from index.ts
   - _Requirements: 6.4_
 
-- [ ] 9.4 Build shared-types package
+- [x] 9.4 Build shared-types package
   - Run `pnpm --filter shared-types build`
   - Verify no compilation errors
   - _Requirements: 6.3_
 
-- [ ] 9.5 Remove temporary types from frontend
+- [x] 9.5 Remove temporary types from frontend
   - Delete ConversationReadModel from `apps/frontend/src/shared/api/types.ts`
   - Delete MessageReadModel from `apps/frontend/src/shared/api/types.ts`
   - _Requirements: 6.5_
 
 ## Phase 10: Frontend Integration
 
-- [ ] 10.1 Create conversation API service
+- [x] 10.1 Create conversation API service
   - `getPendingConversations()`
   - `getConversationHistory(conversationId)`
   - `sendAdminResponse(conversationId, content)`
   - _Requirements: 7.1, 7.2, 7.3_
 
-- [ ] 10.2 Update useConversations hook
+- [x] 10.2 Update useConversations hook
   - Import ConversationReadModel from shared-types
   - Use TanStack Query
   - _Requirements: 7.1_
 
-- [ ] 10.3 Create useConversationHistory hook
+- [x] 10.3 Create useConversationHistory hook
   - Import MessageReadModel from shared-types
   - Use TanStack Query with conversationId
   - Enable only when conversationId is provided
   - _Requirements: 7.2_
 
-- [ ] 10.4 Create useSendAdminResponse mutation hook
+- [x] 10.4 Create useSendAdminResponse mutation hook
   - Use TanStack Query mutation
   - Invalidate conversations and messages queries on success
   - Show error notification on failure
   - _Requirements: 7.3, 7.4, 7.5_
 
-- [ ] 10.5 Update ConversationsPage component
+- [x] 10.5 Update ConversationsPage component
   - Display pending conversations
   - Show conversation history when selected
   - Add response form

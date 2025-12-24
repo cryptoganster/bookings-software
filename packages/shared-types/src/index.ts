@@ -338,7 +338,7 @@ export interface BlockoutReadModel {
 }
 
 // ============================================================================
-// CONVERSATIONS
+// CONVERSATIONS & MESSAGES
 // ============================================================================
 
 /**
@@ -350,6 +350,11 @@ export type ConversationStatus = "ACTIVE" | "AWAITING_ADMIN" | "RESOLVED";
  * Message Direction types
  */
 export type MessageDirection = "INBOUND" | "OUTBOUND";
+
+/**
+ * Message Type types
+ */
+export type MessageType = "TEXT" | "BUTTON" | "LOCATION";
 
 /**
  * Conversation DTO - Representa una conversación con un cliente
@@ -365,7 +370,13 @@ export interface ConversationDto {
 
 /**
  * Conversation Read Model - Modelo de lectura enriquecido para queries
- * Incluye datos desnormalizados del cliente
+ *
+ * @remarks
+ * - customerName denormalized from Customer BC
+ * - customerPhone denormalized from Customer BC
+ * - status: ACTIVE, AWAITING_ADMIN, RESOLVED
+ * - lastMessageAt: timestamp of most recent message
+ * - Used in admin panel to display pending conversations
  */
 export interface ConversationReadModel {
   id: string;
@@ -386,7 +397,27 @@ export interface MessageDto {
   conversationId: string;
   direction: MessageDirection;
   content: string;
-  messageType: string; // TEXT, BUTTON, LOCATION, etc.
+  messageType: MessageType;
+  sentAt: string; // ISO 8601 string
+  isFromAdmin: boolean;
+}
+
+/**
+ * Message Read Model - Mensaje individual en conversación
+ *
+ * @remarks
+ * - direction: INBOUND (from customer), OUTBOUND (to customer)
+ * - messageType: TEXT, BUTTON, LOCATION
+ * - isFromAdmin: true if sent by admin, false if automated
+ * - sentAt: ISO 8601 string for frontend compatibility
+ * - Used in conversation history display
+ */
+export interface MessageReadModel {
+  id: string;
+  conversationId: string;
+  direction: MessageDirection;
+  content: string;
+  messageType: MessageType;
   sentAt: string; // ISO 8601 string
   isFromAdmin: boolean;
 }
@@ -407,6 +438,13 @@ export interface ConversationDetailDto {
 export interface RespondToQueryRequestDto {
   id: string; // Conversation ID
   message: string;
+}
+
+/**
+ * DTO para enviar respuesta de admin
+ */
+export interface SendAdminResponseDto {
+  content: string;
 }
 
 // ============================================================================
