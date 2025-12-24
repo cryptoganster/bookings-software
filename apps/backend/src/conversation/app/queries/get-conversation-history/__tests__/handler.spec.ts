@@ -2,16 +2,26 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { GetConversationHistoryHandler } from '@conversation/app/queries/get-conversation-history/handler';
 import { GetConversationHistoryQuery } from '@conversation/app/queries/get-conversation-history/query';
 import { IMessageReadRepository } from '@conversation/domain/interfaces/repositories/message-read.repository.interface';
+import { IConversationReadRepository } from '@conversation/domain/interfaces/repositories/conversation-read';
 import { MessageReadModel } from '@conversation/domain/read-models/message';
+import { ConversationReadModel } from '@conversation/domain/read-models/conversation';
+import { NotFoundException } from '@nestjs/common';
 
 describe('GetConversationHistoryHandler', () => {
   let handler: GetConversationHistoryHandler;
   let messageReadRepository: jest.Mocked<IMessageReadRepository>;
+  let conversationReadRepository: jest.Mocked<IConversationReadRepository>;
 
   beforeEach(async () => {
-    // Create mock
+    // Create mocks
     messageReadRepository = {
       findByConversationId: jest.fn(),
+    } as any;
+
+    conversationReadRepository = {
+      findById: jest.fn(),
+      findByBusinessId: jest.fn(),
+      findPendingByBusinessId: jest.fn(),
     } as any;
 
     const module: TestingModule = await Test.createTestingModule({
@@ -20,6 +30,10 @@ describe('GetConversationHistoryHandler', () => {
         {
           provide: 'IMessageReadRepository',
           useValue: messageReadRepository,
+        },
+        {
+          provide: 'IConversationReadRepository',
+          useValue: conversationReadRepository,
         },
       ],
     }).compile();
@@ -31,11 +45,54 @@ describe('GetConversationHistoryHandler', () => {
     jest.clearAllMocks();
   });
 
+  // Helper function to create mock conversation
+  const createMockConversation = (conversationId: string): ConversationReadModel => {
+    return new ConversationReadModel(
+      conversationId,
+      'business-123',
+      'customer-123',
+      'John Doe',
+      '+18095551234',
+      'ACTIVE',
+      new Date('2024-12-23T10:00:00.000Z'),
+      new Date('2024-12-23T09:00:00.000Z'),
+    );
+  };
+
+  describe('execute - conversation validation', () => {
+    it('should throw NotFoundException when conversation does not exist', async () => {
+      // Arrange
+      const conversationId = 'non-existent-conversation';
+      const query = new GetConversationHistoryQuery(conversationId);
+
+      conversationReadRepository.findById.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(handler.execute(query)).rejects.toThrow(NotFoundException);
+      await expect(handler.execute(query)).rejects.toThrow(
+        `Conversation with id ${conversationId} not found`,
+      );
+      expect(conversationReadRepository.findById).toHaveBeenCalledWith(conversationId);
+      expect(messageReadRepository.findByConversationId).not.toHaveBeenCalled();
+    });
+  });
+
   describe('execute - message retrieval', () => {
     it('should retrieve messages for a conversation', async () => {
       // Arrange
       const conversationId = 'conversation-123';
       const query = new GetConversationHistoryQuery(conversationId);
+
+      const mockConversation = new ConversationReadModel(
+        conversationId,
+        'business-123',
+        'customer-123',
+        'John Doe',
+        '+18095551234',
+        'ACTIVE',
+        new Date('2024-12-23T10:00:00.000Z'),
+        new Date('2024-12-23T09:00:00.000Z'),
+      );
 
       const mockMessages: MessageReadModel[] = [
         new MessageReadModel(
@@ -58,6 +115,7 @@ describe('GetConversationHistoryHandler', () => {
         ),
       ];
 
+      conversationReadRepository.findById.mockResolvedValue(mockConversation);
       messageReadRepository.findByConversationId.mockResolvedValue(mockMessages);
 
       // Act
@@ -67,6 +125,7 @@ describe('GetConversationHistoryHandler', () => {
       expect(result).toBeDefined();
       expect(result).toHaveLength(2);
       expect(result).toEqual(mockMessages);
+      expect(conversationReadRepository.findById).toHaveBeenCalledWith(conversationId);
       expect(messageReadRepository.findByConversationId).toHaveBeenCalledTimes(1);
       expect(messageReadRepository.findByConversationId).toHaveBeenCalledWith(conversationId);
     });
@@ -75,6 +134,8 @@ describe('GetConversationHistoryHandler', () => {
       // Arrange
       const conversationId = 'conversation-456';
       const query = new GetConversationHistoryQuery(conversationId);
+
+      conversationReadRepository.findById.mockResolvedValue(createMockConversation(conversationId));
 
       const mockMessages: MessageReadModel[] = [
         new MessageReadModel(
@@ -133,6 +194,8 @@ describe('GetConversationHistoryHandler', () => {
       const conversationId = 'conversation-789';
       const query = new GetConversationHistoryQuery(conversationId);
 
+      conversationReadRepository.findById.mockResolvedValue(createMockConversation(conversationId));
+
       const mockMessages: MessageReadModel[] = [
         new MessageReadModel(
           'message-1',
@@ -181,6 +244,8 @@ describe('GetConversationHistoryHandler', () => {
       // Arrange
       const conversationId = 'conversation-123';
       const query = new GetConversationHistoryQuery(conversationId);
+
+      conversationReadRepository.findById.mockResolvedValue(createMockConversation(conversationId));
 
       const mockMessages: MessageReadModel[] = [
         new MessageReadModel(
@@ -235,6 +300,8 @@ describe('GetConversationHistoryHandler', () => {
       const conversationId = 'conversation-456';
       const query = new GetConversationHistoryQuery(conversationId);
 
+      conversationReadRepository.findById.mockResolvedValue(createMockConversation(conversationId));
+
       const dates = [
         '2024-12-23T09:00:00.000Z',
         '2024-12-23T09:30:00.000Z',
@@ -277,6 +344,7 @@ describe('GetConversationHistoryHandler', () => {
       const conversationId = 'empty-conversation';
       const query = new GetConversationHistoryQuery(conversationId);
 
+      conversationReadRepository.findById.mockResolvedValue(createMockConversation(conversationId));
       messageReadRepository.findByConversationId.mockResolvedValue([]);
 
       // Act
@@ -286,22 +354,8 @@ describe('GetConversationHistoryHandler', () => {
       expect(result).toBeDefined();
       expect(result).toEqual([]);
       expect(result).toHaveLength(0);
+      expect(conversationReadRepository.findById).toHaveBeenCalledWith(conversationId);
       expect(messageReadRepository.findByConversationId).toHaveBeenCalledTimes(1);
-      expect(messageReadRepository.findByConversationId).toHaveBeenCalledWith(conversationId);
-    });
-
-    it('should not throw error for non-existent conversation', async () => {
-      // Arrange
-      const conversationId = 'non-existent-conversation';
-      const query = new GetConversationHistoryQuery(conversationId);
-
-      messageReadRepository.findByConversationId.mockResolvedValue([]);
-
-      // Act
-      const result = await handler.execute(query);
-
-      // Assert
-      expect(result).toEqual([]);
       expect(messageReadRepository.findByConversationId).toHaveBeenCalledWith(conversationId);
     });
   });
@@ -311,6 +365,8 @@ describe('GetConversationHistoryHandler', () => {
       // Arrange
       const conversationId = 'conversation-123';
       const query = new GetConversationHistoryQuery(conversationId);
+
+      conversationReadRepository.findById.mockResolvedValue(createMockConversation(conversationId));
 
       const mockMessages: MessageReadModel[] = [
         new MessageReadModel(
@@ -364,6 +420,8 @@ describe('GetConversationHistoryHandler', () => {
       // Arrange
       const conversationId = 'conversation-456';
       const query = new GetConversationHistoryQuery(conversationId);
+
+      conversationReadRepository.findById.mockResolvedValue(createMockConversation(conversationId));
 
       const mockMessages: MessageReadModel[] = [
         new MessageReadModel(
