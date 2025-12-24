@@ -160,7 +160,7 @@
   - Update mapper to include new fields
   - _Requirements: 5.1, 5.2, 5.4, 5.5_
 
-- [ ]\* 5.9 Write integration tests for repositories
+- [x]\* 5.9 Write integration tests for repositories
   - Test MessageWriteRepository.save()
   - Test MessageReadRepository.findByConversationId()
   - Test message ordering

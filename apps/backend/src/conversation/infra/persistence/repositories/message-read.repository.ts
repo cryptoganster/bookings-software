@@ -35,8 +35,8 @@ export class MessageReadRepository implements IMessageReadRepository {
       .createQueryBuilder('message')
       .where('message.conversation_id = :conversationId', { conversationId })
       .orderBy('message.sent_at', 'ASC')
-      .getRawMany();
+      .getMany();
 
-    return messages.map((raw) => MessageReadMapper.toReadModel(raw));
+    return messages.map((model) => MessageReadMapper.toReadModel(model));
   }
 }

@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 // Import AvailabilityModule to access ICapacityReadRepository
 import { AvailabilityModule } from '@availability/availability.module';
@@ -12,16 +13,29 @@ import { BookingModule } from '@booking/booking.module';
 
 // Command Handlers
 import { ProcessIncomingMessageHandler } from '@conversation/app/commands/process-incoming-message/handler';
+import { SendWhatsAppMessageHandler } from '@conversation/app/commands/send-whatsapp-message/handler';
 
 // Query Handlers
 import { GetAvailableDatesHandler } from '@conversation/app/queries/get-available-dates/handler';
 import { GetAvailableTimeSlotsHandler } from '@conversation/app/queries/get-available-time-slots/handler';
+import { GetConversationHistoryHandler } from '@conversation/app/queries/get-conversation-history/handler';
+
+// Event Handlers
+import { OnAppointmentCreatedHandler } from '@conversation/app/event-handlers/on-appointment-created.handler';
+import { OnAppointmentCancelledHandler } from '@conversation/app/event-handlers/on-appointment-cancelled.handler';
 
 // External clients
 import { WhatsAppBusinessApiClient } from '@conversation/infra/external/whatsapp-business-api-client';
 
 // Factories
 import { ConversationFactory } from '@conversation/infra/persistence/factories/conversation-factory';
+
+// Models
+import { MessageModel } from '@conversation/infra/persistence/models/message.model';
+
+// Repositories
+import { MessageWriteRepository } from '@conversation/infra/persistence/repositories/message-write.repository';
+import { MessageReadRepository } from '@conversation/infra/persistence/repositories/message-read.repository';
 
 // Controllers
 import { WebhookController } from '@conversation/presentation/controllers/webhook';
@@ -77,13 +91,20 @@ class MockConversationWriteRepository {
 // Export the store for testing purposes
 export { conversationsStore };
 
-const CommandHandlers = [ProcessIncomingMessageHandler];
+const CommandHandlers = [ProcessIncomingMessageHandler, SendWhatsAppMessageHandler];
 
-const QueryHandlers = [GetAvailableDatesHandler, GetAvailableTimeSlotsHandler];
+const QueryHandlers = [
+  GetAvailableDatesHandler,
+  GetAvailableTimeSlotsHandler,
+  GetConversationHistoryHandler,
+];
+
+const EventHandlers = [OnAppointmentCreatedHandler, OnAppointmentCancelledHandler];
 
 @Module({
   imports: [
     CqrsModule,
+    TypeOrmModule.forFeature([MessageModel]),
     AvailabilityModule, // Import AvailabilityModule to access ICapacityReadRepository
     OfferingModule, // Import OfferingModule to access GetActiveOfferingsQuery
     CustomerModule, // Import CustomerModule to access IdentifyCustomerCommand
@@ -96,6 +117,9 @@ const QueryHandlers = [GetAvailableDatesHandler, GetAvailableTimeSlotsHandler];
 
     // Query Handlers
     ...QueryHandlers,
+
+    // Event Handlers
+    ...EventHandlers,
 
     // Guards
     WhatsAppSignatureGuard,
@@ -111,6 +135,14 @@ const QueryHandlers = [GetAvailableDatesHandler, GetAvailableTimeSlotsHandler];
       provide: 'IConversationWriteRepository',
       useClass: MockConversationWriteRepository,
     },
+    {
+      provide: 'IMessageWriteRepository',
+      useClass: MessageWriteRepository,
+    },
+    {
+      provide: 'IMessageReadRepository',
+      useClass: MessageReadRepository,
+    },
     // ICapacityReadRepository is provided by AvailabilityModule
 
     // External clients
@@ -119,6 +151,12 @@ const QueryHandlers = [GetAvailableDatesHandler, GetAvailableTimeSlotsHandler];
       useClass: WhatsAppBusinessApiClient,
     },
   ],
-  exports: ['IConversationFactory', 'IConversationWriteRepository', 'IWhatsAppClient'],
+  exports: [
+    'IConversationFactory',
+    'IConversationWriteRepository',
+    'IMessageWriteRepository',
+    'IMessageReadRepository',
+    'IWhatsAppClient',
+  ],
 })
 export class ConversationModule {}
