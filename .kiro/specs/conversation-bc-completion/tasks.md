@@ -30,17 +30,27 @@
   - Include messageId, conversationId, content, sentAt
   - _Requirements: 2.5_
 
-- [ ]\* 1.6 Write unit tests for Message aggregate
+- [x]\* 1.6 Write unit tests for Message aggregate
   - Test factory method validation
   - Test empty content rejection
   - Test fromPersistence reconstruction
   - _Requirements: 8.1_
+  - **Completed:** 41 tests passing
 
-- [ ]\* 1.7 Write unit tests for value objects
+- [x]\* 1.7 Write unit tests for value objects
   - Test MessageDirection validation
   - Test MessageType validation
   - Test equality methods
   - _Requirements: 8.1_
+  - **Completed:** All tests passing
+
+- [x]\* 1.8 Write unit tests for Conversation aggregate
+  - Test factory method validation
+  - Test message addition
+  - Test status transitions
+  - Test fromPersistence reconstruction
+  - _Requirements: 8.1_
+  - **Completed:** 38 tests passing
 
 ## Phase 2: Domain Layer - Interfaces & Read Models ✅ COMPLETE
 
@@ -77,12 +87,13 @@
   - Use UnitOfWork for transaction
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
 
-- [ ]\* 3.3 Write unit tests for SendWhatsAppMessageHandler
+- [x]\* 3.3 Write unit tests for SendWhatsAppMessageHandler
   - Test success path
   - Test retry logic on WhatsApp API failure
   - Test transaction rollback on error
   - Test exponential backoff timing
   - _Requirements: 8.2_
+  - **Completed:** 13 tests passing
 
 ## Phase 4: Application Layer - Queries ✅ COMPLETE
 
@@ -97,11 +108,12 @@
   - Handle empty results
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
 
-- [ ]\* 4.3 Write unit tests for GetConversationHistoryHandler
+- [x]\* 4.3 Write unit tests for GetConversationHistoryHandler
   - Test message retrieval
   - Test ordering
   - Test empty conversation
   - _Requirements: 8.4_
+  - **Completed:** 9 tests passing
 
 ## Phase 5: Infrastructure Layer - Persistence ✅ COMPLETE
 
