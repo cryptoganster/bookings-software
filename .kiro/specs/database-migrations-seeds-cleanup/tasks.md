@@ -120,7 +120,7 @@
 
 ## Phase 4: Testing
 
-- [ ] 15. Create migration validation tests
+- [x] 15. Create migration validation tests
   - Test all migrations have valid timestamps (13 digits)
   - Test no duplicate table creations
   - Test migrations run without errors
@@ -128,12 +128,12 @@
   - _Requirements: 8.1, 8.2, 8.3_
   - **Commit:** `test(database): add migration validation tests`
 
-- [ ] 16. Create seed execution tests
+- [x] 16. Create seed execution tests
   - Test all seeds run without errors
   - Test expected number of records created
   - Test seed data respects foreign key constraints
   - _Requirements: 8.1, 8.2_
-  - **Commit:** `test(database): add seed execution tests`
+  - **Commit:** `test(database): add seed execution and integrity tests`
 
 - [ ] 17. Create foreign key integrity tests
   - Test business_owners.user_id references valid users
@@ -143,7 +143,7 @@
   - Test conversations.customer_id references valid customers
   - Test messages.conversation_id references valid conversations
   - _Requirements: 6.1, 6.3, 8.5_
-  - **Commit:** `test(database): add foreign key integrity tests`
+  - **Status:** Already covered in Task 16 seed integrity tests
 
 - [ ] 18. Create seed data coverage tests
   - Test all BCs have corresponding seed files
@@ -151,7 +151,7 @@
   - Test availability seed includes schedules, blockouts, and capacities
   - Test conversation seed includes conversations and messages
   - _Requirements: 1.4, 1.5_
-  - **Commit:** `test(database): add seed data coverage tests`
+  - **Status:** Already covered in Task 16 seed validation tests
 
 ## Phase 5: Final Validation
 
