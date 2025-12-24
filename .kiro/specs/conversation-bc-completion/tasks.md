@@ -167,7 +167,7 @@
   - Test ConversationReadRepository with customerName
   - _Requirements: 8.3_
 
-## Phase 6: Application Layer - Event Handlers ✅ COMPLETE
+## Phase 6: Application Layer - Event Handlers ✅ COMPLETE ✅ COMPLETE
 
 - [x] 6.1 Create OnAppointmentCreatedHandler
   - Listen to AppointmentCreated event
@@ -181,11 +181,12 @@
   - Handle errors without propagating
   - _Requirements: 10.2_
 
-- [ ]\* 6.3 Write integration tests for event handlers
+- [x]\* 6.3 Write integration tests for event handlers
   - Test OnAppointmentCreatedHandler dispatches command
   - Test OnAppointmentCancelledHandler dispatches command
   - Test error handling doesn't propagate
   - _Requirements: 8.5, 10.4, 10.5_
+  - **Completed:** 13 tests passing (6 for OnAppointmentCreatedHandler, 7 for OnAppointmentCancelledHandler)
 
 ## Phase 7: Presentation Layer - API Endpoints ✅ COMPLETE
 
