@@ -71,11 +71,11 @@ async function seed() {
     console.log('✅ Auth BC: 2 users');
     console.log('✅ Account BC: 2 business owners (1 FREE, 1 PRO)');
     console.log('✅ Business BC: 1 business');
-    console.log('✅ Customer BC: 3 customers (2 anonymous, 1 registered)');
-    console.log('✅ Offering BC: 3 offerings');
+    console.log('✅ Customer BC: 25 customers (12 anonymous, 8 registered, 5 merged)');
+    console.log('✅ Offering BC: 7 offerings (6 active, 1 inactive)');
     console.log('✅ Availability BC: 6 schedules + 3 blockouts + ~78 capacity records');
-    console.log('✅ Booking BC: 5 appointments (3 CONFIRMED, 1 CANCELLED, 1 COMPLETED)');
-    console.log('✅ Conversation BC: 8 conversations + 35+ messages');
+    console.log('✅ Booking BC: ~30 appointments (20 CONFIRMED, 5 CANCELLED, 5 COMPLETED)');
+    console.log('✅ Conversation BC: 8 conversations + 29 messages');
     console.log('==================\n');
 
     console.log('✅ Seeding completed successfully');
