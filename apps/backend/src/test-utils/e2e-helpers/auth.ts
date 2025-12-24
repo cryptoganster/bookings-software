@@ -203,8 +203,8 @@ export class E2EAuthHelper {
           await dataSource.query('DELETE FROM customers WHERE id = $1', [testUser.customerId]);
         }
 
-        // Delete business_owners if exists (using camelCase column name)
-        await dataSource.query('DELETE FROM business_owners WHERE "userId" = $1', [testUser.id]);
+        // Delete business_owners if exists (using snake_case column name)
+        await dataSource.query('DELETE FROM business_owners WHERE user_id = $1', [testUser.id]);
 
         // Delete user
         await dataSource.query('DELETE FROM users WHERE id = $1', [testUser.id]);

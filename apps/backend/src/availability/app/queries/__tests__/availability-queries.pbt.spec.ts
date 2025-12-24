@@ -148,7 +148,9 @@ describe('Availability Queries - Property-Based Tests', () => {
         fc.asyncProperty(
           fc.uuid(),
           fc.uuid(),
-          fc.date({ min: new Date(), max: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) }),
+          fc
+            .date({ min: new Date(), max: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) })
+            .filter((d) => !isNaN(d.getTime())),
           fc.integer({ min: 0, max: 10 }),
           async (offeringId, businessId, startDate, availableSlots) => {
             const endDate = new Date(startDate);
@@ -195,7 +197,9 @@ describe('Availability Queries - Property-Based Tests', () => {
         fc.asyncProperty(
           fc.uuid(),
           fc.uuid(),
-          fc.date({ min: new Date(), max: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) }),
+          fc
+            .date({ min: new Date(), max: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) })
+            .filter((d) => !isNaN(d.getTime())),
           async (offeringId, businessId, startDate) => {
             const endDate = new Date(startDate);
             endDate.setDate(endDate.getDate() + 3);
