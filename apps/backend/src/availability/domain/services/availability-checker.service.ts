@@ -36,7 +36,7 @@ export class AvailabilityChecker implements IAvailabilityChecker {
     normalizedDate.setUTCHours(0, 0, 0, 0);
 
     // 1. Check if date falls within business hours (Requirement 4.1)
-    const dayOfWeek = normalizedDate.getDay(); // 0-6 (Sunday-Saturday)
+    const dayOfWeek = normalizedDate.getUTCDay(); // 0-6 (Sunday-Saturday) in UTC
     const schedule = await this.scheduleReadRepo.findByBusinessAndDay(businessId, dayOfWeek);
 
     if (!schedule || !schedule.isActive) {
@@ -91,7 +91,7 @@ export class AvailabilityChecker implements IAvailabilityChecker {
     }
 
     // 2. Get business hours for this day (Requirement 4.5)
-    const dayOfWeek = normalizedDate.getDay();
+    const dayOfWeek = normalizedDate.getUTCDay(); // 0-6 (Sunday-Saturday) in UTC
     const schedule = await this.scheduleReadRepo.findByBusinessAndDay(businessId, dayOfWeek);
 
     if (!schedule || !schedule.isActive) {

@@ -334,7 +334,7 @@ describe('E2E: Edge Cases', () => {
       );
 
       expect(businessOwnerAfter.subscriptionStatus).toBe('ACTIVE');
-      expect(businessOwnerAfter.version).toBe(2); // Version unchanged (restore is idempotent when already ACTIVE)
+      expect(businessOwnerAfter.version).toBe(2); // Version 2 after creation (1) + onboarding (2), unchanged by idempotent restore
     });
   });
 });
