@@ -15,11 +15,12 @@ import { RespondToQueryDto } from '@conversation/presentation/dtos/respond-to-qu
 import { SendAdminResponseCommand } from '@conversation/app/commands/send-admin-response/command';
 import { GetPendingAdminQueriesQuery } from '@conversation/app/queries/get-pending-admin-queries/query';
 import { GetConversationQuery } from '@conversation/app/queries/get-conversation/query';
+import { GetConversationHistoryQuery } from '@conversation/app/queries/get-conversation-history/query';
 
 /**
  * Admin Query Controller
  *
- * Handles HTTP requests for admin query management
+ * Handles HTTP requests for admin query management and conversation history
  */
 @Controller('admin-queries')
 @UseGuards(JwtAuthGuard)
@@ -47,6 +48,16 @@ export class AdminQueryController {
   @HttpCode(HttpStatus.OK)
   async getConversation(@Param('id') id: string) {
     return this.queryBus.execute(new GetConversationQuery(id));
+  }
+
+  /**
+   * GET /api/admin-queries/:id/messages
+   * Get conversation message history
+   */
+  @Get(':id/messages')
+  @HttpCode(HttpStatus.OK)
+  async getMessages(@Param('id') conversationId: string) {
+    return this.queryBus.execute(new GetConversationHistoryQuery(conversationId));
   }
 
   /**
