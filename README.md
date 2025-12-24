@@ -100,8 +100,207 @@ CREATE DATABASE bookings_test;
 # Ejecutar migraciones
 npm run migration:run
 
+# Verificar estado de migraciones
+npm run migration:show
+
 # Ejecutar seeders (datos de prueba)
 npm run seed
+```
+
+## 📊 Database Management
+
+### Migraciones
+
+Las migraciones gestionan el esquema de la base de datos de forma versionada.
+
+#### Crear Nueva Migración
+
+```bash
+# Generar migración automáticamente basada en cambios de entities
+npm run migration:generate -- -n NombreDeLaMigracion
+
+# Crear migración vacía para cambios manuales
+npm run migration:create -- -n NombreDeLaMigracion
+```
+
+#### Ejecutar Migraciones
+
+```bash
+# Ejecutar todas las migraciones pendientes
+npm run migration:run
+
+# Ver estado de migraciones
+npm run migration:show
+
+# Revertir última migración
+npm run migration:revert
+```
+
+#### Analizar Migraciones
+
+```bash
+# Ejecutar script de análisis para detectar problemas
+npm run migration:analyze
+```
+
+El script de análisis detecta:
+
+- ✅ Migraciones con timestamps inválidos (deben ser 13 dígitos)
+- ✅ Migraciones duplicadas
+- ✅ Tablas faltantes en la base de datos
+
+#### Estructura de Migraciones
+
+Las migraciones están organizadas por Bounded Context:
+
+```
+src/database/migrations/
+├── 1702550000000-EnableUuidExtension.ts          # Shared
+├── 1702552000000-CreateUsersTable.ts             # Auth BC
+├── 1734480000000-RefactorUserRoles.ts            # Auth BC
+├── 1734481000000-StandardizeUsersTableNaming.ts  # Auth BC
+├── 1734482000000-CreateCustomersTable.ts         # Customer BC
+├── 1702553000000-CreateOfferingsTable.ts         # Offering BC
+├── 1734650000000-CreateSchedulesTable.ts         # Availability BC
+├── 1734650100000-CreateBlockoutsTable.ts         # Availability BC
+├── 1702551100000-CreateCapacitiesTable.ts        # Availability BC
+├── 1702551000000-CreateAppointmentsTable.ts      # Booking BC
+├── 1734650200000-CreateConversationsTable.ts     # Conversation BC
+├── 1734650300000-CreateMessagesTable.ts          # Conversation BC
+├── 1734650400000-CreateBusinessOwnersTable.ts    # Account BC
+├── 1734650500000-CreateBusinessesTable.ts        # Business BC
+└── 1766345899000-AddSearchIndexesToCustomers.ts  # Customer BC
+```
+
+**Documentación completa:** `apps/backend/src/database/MIGRATIONS.md`
+
+### Seeds
+
+Los seeds poblan la base de datos con datos de prueba para desarrollo.
+
+#### Ejecutar Seeds
+
+```bash
+# Ejecutar todos los seeds en orden
+npm run seed
+
+# Los seeds se ejecutan en este orden:
+# 1. auth (users)
+# 2. account (business_owners)
+# 3. business (businesses)
+# 4. customer (customers)
+# 5. offering (offerings)
+# 6. availability (schedules, blockouts, capacities)
+# 7. booking (appointments)
+# 8. conversation (conversations, messages)
+```
+
+#### Datos Generados por Seeds
+
+| Tabla           | Registros | Descripción                                |
+| --------------- | --------- | ------------------------------------------ |
+| users           | 2         | 1 BUSINESS_OWNER, 1 CUSTOMER               |
+| business_owners | 2         | 1 FREE plan, 1 PRO plan                    |
+| businesses      | 1         | Peluquería Central (activo)                |
+| customers       | 25        | 12 anónimos, 8 registrados, 5 merged       |
+| offerings       | 7         | 6 activos (15-90 min), 1 inactivo          |
+| schedules       | 6         | Lun-Vie 9am-6pm, Sáb 10am-2pm, Dom cerrado |
+| blockouts       | 3         | Navidad, Año Nuevo, Vacaciones de verano   |
+| capacities      | ~78       | 30 días de capacidad para cada offering    |
+| appointments    | ~35       | 23 CONFIRMED, 5 CANCELLED, 7 COMPLETED     |
+| conversations   | 8         | 3 ACTIVE, 2 AWAITING_ADMIN, 3 RESOLVED     |
+| messages        | 29        | TEXT, BUTTON, LOCATION types               |
+
+**Documentación completa:** `apps/backend/src/database/SEEDS.md`
+
+#### Verificar Datos de Seeds
+
+```bash
+# Conectar a la base de datos
+docker exec -it <container-id> psql -U postgres -d bookings-software
+
+# Verificar conteo de registros
+SELECT 'users' as table_name, COUNT(*) FROM users
+UNION ALL
+SELECT 'business_owners', COUNT(*) FROM business_owners
+UNION ALL
+SELECT 'businesses', COUNT(*) FROM businesses
+UNION ALL
+SELECT 'customers', COUNT(*) FROM customers
+UNION ALL
+SELECT 'offerings', COUNT(*) FROM offerings
+UNION ALL
+SELECT 'schedules', COUNT(*) FROM schedules
+UNION ALL
+SELECT 'blockouts', COUNT(*) FROM blockouts
+UNION ALL
+SELECT 'capacities', COUNT(*) FROM capacities
+UNION ALL
+SELECT 'appointments', COUNT(*) FROM appointments
+UNION ALL
+SELECT 'conversations', COUNT(*) FROM conversations
+UNION ALL
+SELECT 'messages', COUNT(*) FROM messages;
+```
+
+### Troubleshooting Database
+
+#### Error: "Cannot connect to database"
+
+```bash
+# Verificar que PostgreSQL esté corriendo
+docker-compose -f docker-compose.dev.yml ps
+
+# Ver logs de PostgreSQL
+docker-compose -f docker-compose.dev.yml logs postgres
+
+# Reiniciar PostgreSQL
+docker-compose -f docker-compose.dev.yml restart postgres
+```
+
+#### Error: "Migration failed"
+
+```bash
+# Revertir última migración
+npm run migration:revert
+
+# Volver a ejecutar
+npm run migration:run
+
+# Si persiste, verificar logs y estado de la base de datos
+npm run migration:show
+```
+
+#### Error: "Seed failed"
+
+```bash
+# Los seeds usan TRUNCATE CASCADE, así que son seguros de re-ejecutar
+npm run seed
+
+# Si hay errores de foreign keys, verificar orden de ejecución en:
+# apps/backend/src/database/seeds/seed.ts
+```
+
+#### Limpiar Base de Datos
+
+```bash
+# Revertir todas las migraciones
+npm run migration:revert
+
+# Volver a ejecutar todo
+npm run migration:run
+npm run seed
+```
+
+#### Verificar Integridad de Datos
+
+```bash
+# Ejecutar tests de integridad de base de datos
+npm run test -- database/__tests__
+
+# Tests incluyen:
+# - Validación de migraciones (timestamps, duplicados, tablas)
+# - Validación de seeds (conteos, foreign keys, variedad de datos)
 ```
 
 ## 🚀 Ejecución
@@ -246,6 +445,8 @@ npm run format             # Formatear con Prettier
 npm run migration:generate # Generar migración
 npm run migration:run      # Ejecutar migraciones
 npm run migration:revert   # Revertir última migración
+npm run migration:show     # Ver estado de migraciones
+npm run migration:analyze  # Analizar migraciones (detectar problemas)
 npm run seed               # Ejecutar seeders
 ```
 
@@ -390,6 +591,8 @@ Limpiar base de datos de test y volver a ejecutar:
 ```bash
 npm run test:e2e
 ```
+
+Para más detalles sobre troubleshooting de base de datos, ver la sección **Database Management** arriba.
 
 ## 🔄 CI/CD & DevSecOps
 
