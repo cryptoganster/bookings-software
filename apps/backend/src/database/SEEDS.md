@@ -27,13 +27,10 @@ Seeds must be executed in the following order to respect foreign key dependencie
 
 **Data Created**:
 
-- User 1: BUSINESS_OWNER role only
-- User 2: CUSTOMER role only
-- User 3: Both BUSINESS_OWNER and CUSTOMER roles
-- User 4: ADMIN role
-- User 5: BUSINESS_OWNER role (for testing)
+- User 1: BUSINESS_OWNER role (owner@example.com)
+- User 2: CUSTOMER role (customer@example.com)
 
-**Returns**: `{ userId, businessId }`
+**Returns**: `{ userId1, userId2 }`
 
 **Example**:
 
@@ -55,12 +52,10 @@ Seeds must be executed in the following order to respect foreign key dependencie
 
 **Data Created**:
 
-- BusinessOwner 1: FREE plan, onboarding completed
-- BusinessOwner 2: BASIC plan, onboarding completed
-- BusinessOwner 3: PRO plan, onboarding completed
-- BusinessOwner 4: FREE plan, onboarding NOT completed
+- BusinessOwner 1: FREE plan, onboarding completed (linked to User 1)
+- BusinessOwner 2: PRO plan, onboarding completed (linked to User 2)
 
-**Returns**: `void`
+**Returns**: `{ businessOwnerId1, businessOwnerId2 }`
 
 **Example**:
 
@@ -81,9 +76,7 @@ Seeds must be executed in the following order to respect foreign key dependencie
 
 **Data Created**:
 
-- Business 1: Active, timezone America/New_York
-- Business 2: Active, timezone America/Los_Angeles
-- Business 3: Inactive, timezone Europe/London
+- Business 1: "Peluquería Central" - Active, timezone America/New_York, owned by User 1
 
 **Returns**: `{ businessId }`
 
@@ -108,13 +101,15 @@ Seeds must be executed in the following order to respect foreign key dependencie
 
 **Data Created**:
 
-- Customer 1: Anonymous (user_id = null)
-- Customer 2: Anonymous (user_id = null)
-- Customer 3: Registered (user_id != null)
-- Customer 4: Anonymous without name
-- Customer 5: Registered with merged_into field
+- 25 customers total:
+  - 12 anonymous customers (user_id = null)
+  - 8 registered customers (user_id != null)
+  - 5 merged customers (merged_into field set)
+- Varied names, phone numbers, and registration states
+- Mix of customers with and without names
+- Realistic WhatsApp phone numbers
 
-**Returns**: `{ customerId1, customerId2, customerId3 }`
+**Returns**: `{ customerIds: string[] }` (array of 25 customer IDs)
 
 **Example**:
 
@@ -144,12 +139,15 @@ Seeds must be executed in the following order to respect foreign key dependencie
 
 **Data Created**:
 
-- Offering 1: Active, 30 min duration, 8 slots/day
-- Offering 2: Active, 20 min duration, 12 slots/day
-- Offering 3: Active, 90 min duration, 4 slots/day
-- Offering 4: Inactive, 45 min duration
+- Offering 1: Lavado - Active, 15 min duration, quick service
+- Offering 2: Barba - Active, 20 min duration, quick service
+- Offering 3: Corte de Pelo - Active, 30 min duration, standard service
+- Offering 4: Peinado - Active, 45 min duration, medium service
+- Offering 5: Tinte - Active, 60 min duration, medium service
+- Offering 6: Tratamiento Capilar - Active, 90 min duration, long service
+- Offering 7: Manicure - Inactive, 30 min duration
 
-**Returns**: `{ offering1Id, offering2Id, offering3Id }`
+**Returns**: `{ offering1Id, offering2Id, offering3Id, offering4Id, offering5Id, offering6Id, offering7Id }`
 
 **Example**:
 
@@ -227,15 +225,20 @@ Seeds must be executed in the following order to respect foreign key dependencie
 
 ### 7. Booking BC (`booking.seed.ts`)
 
-**Purpose**: Create appointments with different states
+**Purpose**: Create appointments with different states and time distributions
 
 **Data Created**:
 
-- Appointment 1: CONFIRMED, future date
-- Appointment 2: CONFIRMED, today
-- Appointment 3: CONFIRMED, future date
-- Appointment 4: CANCELLED, past date
-- Appointment 5: COMPLETED, past date
+- ~35 appointments total
+- Status distribution:
+  - 23 CONFIRMED (future dates)
+  - 5 CANCELLED (past dates)
+  - 7 COMPLETED (past dates)
+- Time range: 7 days past to 14 days future
+- Time slots: morning (9am-12pm), afternoon (2pm-5pm), evening (6pm-8pm)
+- Realistic distribution across days and times
+- Skips Sundays (business closed)
+- Reduced Saturday capacity
 
 **Returns**: `void`
 
@@ -342,17 +345,17 @@ Seeds are typically only run in development/staging environments. For production
 
 | Table           | Seed File            | Records | Status |
 | --------------- | -------------------- | ------- | ------ |
-| users           | auth.seed.ts         | 5       | ✅     |
-| business_owners | account.seed.ts      | 4       | ✅     |
-| businesses      | business.seed.ts     | 3       | ✅     |
-| customers       | customer.seed.ts     | 5       | ✅     |
-| offerings       | offering.seed.ts     | 4       | ✅     |
-| schedules       | availability.seed.ts | 7       | ✅     |
+| users           | auth.seed.ts         | 2       | ✅     |
+| business_owners | account.seed.ts      | 2       | ✅     |
+| businesses      | business.seed.ts     | 1       | ✅     |
+| customers       | customer.seed.ts     | 25      | ✅     |
+| offerings       | offering.seed.ts     | 7       | ✅     |
+| schedules       | availability.seed.ts | 6       | ✅     |
 | blockouts       | availability.seed.ts | 3       | ✅     |
-| capacities      | availability.seed.ts | 90      | ✅     |
-| appointments    | booking.seed.ts      | 5       | ✅     |
-| conversations   | conversation.seed.ts | 3       | ✅     |
-| messages        | conversation.seed.ts | 10+     | ✅     |
+| capacities      | availability.seed.ts | ~78     | ✅     |
+| appointments    | booking.seed.ts      | ~35     | ✅     |
+| conversations   | conversation.seed.ts | 8       | ✅     |
+| messages        | conversation.seed.ts | 29      | ✅     |
 
 ## Verification
 
@@ -391,17 +394,17 @@ Expected output:
 ```
 table_name       | count
 -----------------+-------
-users            |     5
-business_owners  |     4
-businesses       |     3
-customers        |     5
-offerings        |     4
-schedules        |     7
+users            |     2
+business_owners  |     2
+businesses       |     1
+customers        |    25
+offerings        |     7
+schedules        |     6
 blockouts        |     3
-capacities       |    90
-appointments     |     5
-conversations    |     3
-messages         |    10+
+capacities       |   ~78
+appointments     |   ~35
+conversations    |     8
+messages         |    29
 ```
 
 ## Troubleshooting
