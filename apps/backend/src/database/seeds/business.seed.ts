@@ -1,115 +1,59 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import { DataSource } from 'typeorm';
+import { v4 as uuidv4 } from 'uuid';
 
 /**
- * BusinessesSeed
+ * Business Seed Data
  *
- * Seeds the businesses table with test data
- * Creates 2 businesses linked to existing users
- * Uses unique, valid WhatsApp phone numbers in E.164 format
- * Uses valid IANA timezones
+ * Creates 1 business for testing linked to the first user
  *
- * Requirements: 13.4-13.5
+ * @see .kiro/specs/database-migrations-seeds-cleanup/design.md
  */
-export class BusinessesSeed implements MigrationInterface {
-  public async up(queryRunner: QueryRunner): Promise<void> {
-    // Get existing users to link businesses to
-    const users = await queryRunner.query(`
-      SELECT id FROM users LIMIT 2
-    `);
+export async function seedBusiness(
+  dataSource: DataSource,
+  userId: string,
+): Promise<{ businessId: string }> {
+  console.log('🏢 Seeding Business BC...');
 
-    if (users.length < 2) {
-      console.warn('Not enough users found to seed businesses. Skipping seed.');
-      return;
-    }
+  const businessId = uuidv4();
 
-    const [user1, user2] = users;
+  await dataSource.query(
+    `INSERT INTO businesses (
+      id,
+      owner_id,
+      name,
+      whatsapp_phone,
+      address_street,
+      address_city,
+      address_state,
+      address_country,
+      address_postal_code,
+      timezone,
+      is_active,
+      version,
+      created_at,
+      updated_at
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW(), NOW())`,
+    [
+      businessId,
+      userId,
+      'Peluquería El Estilo',
+      '+18095551234',
+      'Calle Principal 123',
+      'Santo Domingo',
+      'Distrito Nacional',
+      'República Dominicana',
+      '10101',
+      'America/Santo_Domingo',
+      true,
+      0,
+    ],
+  );
 
-    // Insert business 1
-    await queryRunner.query(
-      `
-      INSERT INTO businesses (
-        id,
-        owner_id,
-        name,
-        whatsapp_phone,
-        address_street,
-        address_city,
-        address_state,
-        address_country,
-        address_postal_code,
-        timezone,
-        is_active,
-        version,
-        created_at,
-        updated_at
-      ) VALUES (
-        gen_random_uuid(),
-        $1,
-        'Bufete López - Centro',
-        '+18095551111',
-        'Calle Principal 123',
-        'Santo Domingo',
-        'Distrito Nacional',
-        'República Dominicana',
-        '10101',
-        'America/Santo_Domingo',
-        true,
-        0,
-        now(),
-        now()
-      )
-    `,
-      [user1.id],
-    );
+  console.log('✅ Business BC seeded');
+  console.log(`   Business ID: ${businessId}`);
+  console.log('   Name: Peluquería El Estilo');
+  console.log('   WhatsApp: +18095551234');
+  console.log('   Location: Santo Domingo, República Dominicana');
 
-    // Insert business 2
-    await queryRunner.query(
-      `
-      INSERT INTO businesses (
-        id,
-        owner_id,
-        name,
-        whatsapp_phone,
-        address_street,
-        address_city,
-        address_state,
-        address_country,
-        address_postal_code,
-        timezone,
-        is_active,
-        version,
-        created_at,
-        updated_at
-      ) VALUES (
-        gen_random_uuid(),
-        $1,
-        'Consultoría Legal Norte',
-        '+18095552222',
-        'Avenida 27 de Febrero 456',
-        'Santiago',
-        'Santiago',
-        'República Dominicana',
-        '51000',
-        'America/Santo_Domingo',
-        true,
-        0,
-        now(),
-        now()
-      )
-    `,
-      [user2.id],
-    );
-
-    console.log('✅ Businesses seeded successfully');
-  }
-
-  public async down(queryRunner: QueryRunner): Promise<void> {
-    // Delete seeded businesses
-    await queryRunner.query(`
-      DELETE FROM businesses
-      WHERE whatsapp_phone IN ('+18095551111', '+18095552222')
-    `);
-
-    console.log('✅ Businesses seed reverted');
-  }
+  return { businessId };
 }
