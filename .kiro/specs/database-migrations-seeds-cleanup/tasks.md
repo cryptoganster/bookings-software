@@ -145,7 +145,7 @@
   - _Requirements: 6.1, 6.3, 8.5_
   - **Status:** Already covered in Task 16 seed integrity tests
 
-- [ ] 18. Create seed data coverage tests
+- [x] 18. Create seed data coverage tests
   - Test all BCs have corresponding seed files
   - Test all tables have seed data
   - Test availability seed includes schedules, blockouts, and capacities
@@ -155,7 +155,7 @@
 
 ## Phase 5: Final Validation
 
-- [ ] 19. Run full test suite
+- [x] 19. Run full test suite
   - Execute all migration tests
   - Execute all seed tests
   - Execute all integrity tests
@@ -163,7 +163,7 @@
   - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5_
   - **Commit:** `test(database): verify all tests pass`
 
-- [ ] 20. Update main README
+- [x] 20. Update main README
   - Add database setup instructions
   - Add migration execution instructions
   - Add seed execution instructions
@@ -171,7 +171,7 @@
   - _Requirements: 7.3, 7.4_
   - **Commit:** `docs(database): update README with setup instructions`
 
-- [ ] 21. Final verification checkpoint
+- [-] 21. Final verification checkpoint
   - Verify zero duplicate migrations
   - Verify all timestamps are correct
   - Verify all BCs have seeds
