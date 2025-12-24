@@ -9,26 +9,17 @@ import { NoAvailableSlotsException } from '@booking/domain/exceptions/no-availab
 import { GetActiveOfferingsQuery } from '@offering/app/queries/get-active-offerings';
 import { OfferingReadModel } from '@offering/domain/read-models/offering';
 import { IdentifyCustomerCommand } from '@customer/app/commands/identify-customer';
-
-/**
- * TEMPORARY: This handler still uses the mock repository directly
- * because there's no real persistence layer yet.
- *
- * TODO: When real persistence is implemented:
- * 1. Inject IConversationFactory instead of IConversationWriteRepository
- * 2. Use factory.loadByCustomerIdAndBusinessId() to load conversations
- * 3. Keep using IConversationWriteRepository only for save()
- */
-interface MockConversationRepository {
-  findByCustomerIdAndBusinessId(customerId: UUID, businessId: UUID): Promise<Conversation | null>;
-  save(conversation: Conversation): Promise<void>;
-}
+import { IConversationFactory } from '@conversation/domain/interfaces/factories/conversation-factory';
+import { IConversationWriteRepository } from '@conversation/domain/interfaces/repositories/conversation-write';
+import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 
 @CommandHandler(ProcessIncomingMessageCommand)
 export class ProcessIncomingMessageHandler implements ICommandHandler<ProcessIncomingMessageCommand> {
   constructor(
+    @Inject('IConversationFactory')
+    private readonly conversationFactory: IConversationFactory,
     @Inject('IConversationWriteRepository')
-    private readonly conversationRepository: MockConversationRepository,
+    private readonly conversationRepository: IConversationWriteRepository,
     @Inject('IWhatsAppClient')
     private readonly whatsappClient: IWhatsAppClient,
     private readonly queryBus: QueryBus,
@@ -36,6 +27,29 @@ export class ProcessIncomingMessageHandler implements ICommandHandler<ProcessInc
   ) {}
 
   async execute(command: ProcessIncomingMessageCommand): Promise<void> {
+    const maxRetries = 3;
+    let attempt = 0;
+
+    while (attempt < maxRetries) {
+      try {
+        await this.processMessage(command);
+        return; // Éxito
+      } catch (error) {
+        if (error instanceof ConcurrencyException) {
+          attempt++;
+          if (attempt >= maxRetries) {
+            throw new Error('Unable to process message after multiple attempts. Please try again.');
+          }
+          // Exponential backoff: 100ms, 200ms, 400ms
+          await new Promise((resolve) => setTimeout(resolve, 100 * Math.pow(2, attempt)));
+        } else {
+          throw error; // Otros errores se propagan inmediatamente
+        }
+      }
+    }
+  }
+
+  private async processMessage(command: ProcessIncomingMessageCommand): Promise<void> {
     // 1. Identificar o crear customer (anónimo) antes de procesar conversación
     // Esto garantiza que el customer existe en la BD antes de crear la conversación
     const identifyResult = await this.commandBus.execute(
@@ -71,8 +85,8 @@ export class ProcessIncomingMessageHandler implements ICommandHandler<ProcessInc
      * **Requirements: 8.3**
      */
 
-    // 2. Obtener o crear conversación
-    let conversation = await this.conversationRepository.findByCustomerIdAndBusinessId(
+    // 2. Obtener o crear conversación usando factory
+    let conversation = await this.conversationFactory.loadByCustomerIdAndBusinessId(
       customerId,
       businessId,
     );

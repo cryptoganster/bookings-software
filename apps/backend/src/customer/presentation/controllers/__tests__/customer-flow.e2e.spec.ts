@@ -10,7 +10,7 @@ import { IWhatsAppClient, Button } from '@conversation/domain/interfaces/externa
 import { UUID } from '@shared/vo/uuid';
 import { AppointmentModel } from '@booking/infra/persistence/models/appointment';
 import { CustomerModel } from '@customer/infra/persistence/models/customer.model';
-import { conversationsStore } from '@conversation/conversation.module';
+import { ConversationModel } from '@conversation/infra/persistence/models/conversation.model';
 import { createCapacityForTomorrow, createActiveOffering } from '@test-utils/e2e-helpers';
 
 describe('Customer Flow E2E', () => {
@@ -78,8 +78,8 @@ describe('Customer Flow E2E', () => {
     await dataSource.query('DELETE FROM capacities');
     await dataSource.query('DELETE FROM offerings');
 
-    // Clear in-memory conversations
-    conversationsStore.clear();
+    // Clear conversations from database
+    await dataSource.getRepository(ConversationModel).clear();
   });
 
   describe('Requirement 7.1: Customer Identification', () => {

@@ -7,9 +7,9 @@ import { ProcessIncomingMessageCommand } from '@conversation/app/commands/proces
 import { IWhatsAppClient, Button } from '@conversation/domain/interfaces/external/whatsapp-client';
 import { UUID } from '@shared/vo/uuid';
 import { AppointmentModel } from '@booking/infra/persistence/models/appointment';
-import { conversationsStore } from '@conversation/conversation.module';
 import { createCapacityForTomorrow, createActiveOffering } from '@test-utils/e2e-helpers';
 import { CapacityModel } from '@availability/infra/persistence/models/capacity';
+import { ConversationModel } from '@conversation/infra/persistence/models/conversation.model';
 
 describe('Conversational Booking Flow (e2e)', () => {
   let app: INestApplication;
@@ -81,8 +81,8 @@ describe('Conversational Booking Flow (e2e)', () => {
     await dataSource.query('DELETE FROM offerings');
     await dataSource.query('DELETE FROM customers');
 
-    // Limpiar conversaciones en memoria
-    conversationsStore.clear();
+    // Limpiar conversaciones en base de datos
+    await dataSource.getRepository(ConversationModel).clear();
   });
 
   describe('Flujo completo: mensaje inicial → selección servicio → fecha → hora → confirmación', () => {

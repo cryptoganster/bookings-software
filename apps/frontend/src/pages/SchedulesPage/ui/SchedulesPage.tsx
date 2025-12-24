@@ -30,9 +30,13 @@ import {
   IconTrash,
   IconClock,
 } from "@tabler/icons-react";
+import { useState } from "react";
+import { notifications } from "@mantine/notifications";
 import { PageHeader } from "@shared/ui/PageHeader/PageHeader";
 import { useSchedules, useDeleteSchedule } from "@entities/schedule";
 import type { ScheduleDto } from "@shared/api/services/schedules.service";
+import { ScheduleCreateModal } from "./ScheduleCreateModal";
+import { ScheduleEditModal } from "./ScheduleEditModal";
 
 const DAYS_OF_WEEK = [
   "Domingo",
@@ -48,10 +52,34 @@ export function SchedulesPage() {
   const { data: schedules, isLoading, isError, error } = useSchedules();
   const deleteSchedule = useDeleteSchedule();
 
+  const [createModalOpened, setCreateModalOpened] = useState(false);
+  const [editModalOpened, setEditModalOpened] = useState(false);
+  const [selectedSchedule, setSelectedSchedule] = useState<ScheduleDto | null>(
+    null,
+  );
+
   const handleDelete = async (id: string) => {
     if (window.confirm("¿Estás seguro de eliminar este horario?")) {
-      await deleteSchedule.mutateAsync(id);
+      try {
+        await deleteSchedule.mutateAsync(id);
+        notifications.show({
+          title: "Horario eliminado",
+          message: "El horario se ha eliminado exitosamente",
+          color: "green",
+        });
+      } catch {
+        notifications.show({
+          title: "Error",
+          message: "No se pudo eliminar el horario",
+          color: "red",
+        });
+      }
     }
+  };
+
+  const handleEdit = (schedule: ScheduleDto) => {
+    setSelectedSchedule(schedule);
+    setEditModalOpened(true);
   };
 
   // Group schedules by day of week
@@ -74,9 +102,7 @@ export function SchedulesPage() {
           <Button
             leftSection={<IconPlus size={16} />}
             radius="xl"
-            onClick={() => {
-              /* TODO: Open create modal */
-            }}
+            onClick={() => setCreateModalOpened(true)}
           >
             Nuevo Horario
           </Button>
@@ -172,9 +198,7 @@ export function SchedulesPage() {
                               <Menu.Dropdown>
                                 <Menu.Item
                                   leftSection={<IconEdit size={14} />}
-                                  onClick={() => {
-                                    /* TODO: Open edit modal */
-                                  }}
+                                  onClick={() => handleEdit(schedule)}
                                 >
                                   Editar
                                 </Menu.Item>
@@ -197,6 +221,17 @@ export function SchedulesPage() {
             </Stack>
           )}
       </Stack>
+
+      {/* Modals */}
+      <ScheduleCreateModal
+        opened={createModalOpened}
+        onClose={() => setCreateModalOpened(false)}
+      />
+      <ScheduleEditModal
+        opened={editModalOpened}
+        onClose={() => setEditModalOpened(false)}
+        schedule={selectedSchedule}
+      />
     </Container>
   );
 }
