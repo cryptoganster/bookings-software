@@ -22,6 +22,8 @@ import { CustomerModel } from '@customer/infra/persistence/models/customer.model
 import { BusinessModel } from '@business/infra/persistence/models/business.model';
 import { BusinessOwnerModel } from '@account/infra/persistence/models/business-owner.model';
 import { UserModel } from '@auth/infra/persistence/models/user';
+import { ConversationModel } from '@conversation/infra/persistence/models/conversation.model';
+import { MessageModel } from '@conversation/infra/persistence/models/message.model';
 
 /**
  * All entities in the system
@@ -35,6 +37,8 @@ const ALL_ENTITIES = [
   BusinessModel,
   BusinessOwnerModel,
   UserModel,
+  ConversationModel,
+  MessageModel,
 ];
 
 /**

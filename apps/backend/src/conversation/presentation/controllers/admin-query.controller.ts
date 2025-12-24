@@ -12,6 +12,8 @@ import {
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { JwtAuthGuard } from '@auth/infra/guards/jwt-auth';
 import { RespondToQueryDto } from '@conversation/presentation/dtos/respond-to-query.dto';
+import { GetPendingQueriesDto } from '@conversation/presentation/dtos/get-pending-queries.dto';
+import { ConversationIdParamDto } from '@conversation/presentation/dtos/conversation-id-param.dto';
 import { SendAdminResponseCommand } from '@conversation/app/commands/send-admin-response/command';
 import { GetPendingAdminQueriesQuery } from '@conversation/app/queries/get-pending-admin-queries/query';
 import { GetConversationQuery } from '@conversation/app/queries/get-conversation/query';
@@ -36,8 +38,8 @@ export class AdminQueryController {
    */
   @Get('pending')
   @HttpCode(HttpStatus.OK)
-  async getPending(@Query('businessId') businessId: string) {
-    return this.queryBus.execute(new GetPendingAdminQueriesQuery(businessId));
+  async getPending(@Query() query: GetPendingQueriesDto) {
+    return this.queryBus.execute(new GetPendingAdminQueriesQuery(query.businessId));
   }
 
   /**
@@ -46,8 +48,8 @@ export class AdminQueryController {
    */
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  async getConversation(@Param('id') id: string) {
-    return this.queryBus.execute(new GetConversationQuery(id));
+  async getConversation(@Param() params: ConversationIdParamDto) {
+    return this.queryBus.execute(new GetConversationQuery(params.id));
   }
 
   /**
@@ -56,8 +58,8 @@ export class AdminQueryController {
    */
   @Get(':id/messages')
   @HttpCode(HttpStatus.OK)
-  async getMessages(@Param('id') conversationId: string) {
-    return this.queryBus.execute(new GetConversationHistoryQuery(conversationId));
+  async getMessages(@Param() params: ConversationIdParamDto) {
+    return this.queryBus.execute(new GetConversationHistoryQuery(params.id));
   }
 
   /**
@@ -67,10 +69,10 @@ export class AdminQueryController {
   @Post(':id/respond')
   @HttpCode(HttpStatus.OK)
   async respond(
-    @Param('id') conversationId: string,
+    @Param() params: ConversationIdParamDto,
     @Body() dto: RespondToQueryDto,
   ): Promise<{ message: string }> {
-    await this.commandBus.execute(new SendAdminResponseCommand(conversationId, dto.message));
+    await this.commandBus.execute(new SendAdminResponseCommand(params.id, dto.message));
 
     return { message: 'Response sent successfully' };
   }

@@ -1,5 +1,4 @@
-import { Entity, Column, PrimaryColumn, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { ConversationModel } from '@conversation/infra/persistence/models/conversation.model';
+import { Entity, Column, PrimaryColumn, CreateDateColumn } from 'typeorm';
 
 /**
  * MessageModel - TypeORM Entity
@@ -8,7 +7,7 @@ import { ConversationModel } from '@conversation/infra/persistence/models/conver
  *
  * @remarks
  * - Mapea a la tabla 'messages'
- * - Relación ManyToOne con ConversationModel
+ * - Relación con ConversationModel via conversationId (foreign key only, no bidirectional relation)
  * - direction: 'INBOUND' | 'OUTBOUND'
  * - messageType: 'TEXT' | 'BUTTON' | 'LOCATION'
  */
@@ -37,9 +36,4 @@ export class MessageModel {
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
-
-  // Relación con Conversation
-  @ManyToOne(() => ConversationModel, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'conversation_id' })
-  conversation?: ConversationModel;
 }

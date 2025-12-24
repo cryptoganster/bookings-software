@@ -1,12 +1,4 @@
-import {
-  Entity,
-  Column,
-  PrimaryColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-  OneToMany,
-} from 'typeorm';
-import { MessageModel } from '@conversation/infra/persistence/models/message.model';
+import { Entity, Column, PrimaryColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 /**
  * ConversationModel - TypeORM Entity
@@ -15,7 +7,7 @@ import { MessageModel } from '@conversation/infra/persistence/models/message.mod
  *
  * @remarks
  * - Mapea a la tabla 'conversations'
- * - Relación OneToMany con MessageModel
+ * - Relación con MessageModel via conversationId (foreign key only, no bidirectional relation)
  * - status: 'ACTIVE' | 'AWAITING_ADMIN' | 'RESOLVED'
  * - version: Para optimistic locking
  */
@@ -62,8 +54,4 @@ export class ConversationModel {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt!: Date;
-
-  // Relación con Messages
-  @OneToMany(() => MessageModel, (message) => message.conversation)
-  messages?: MessageModel[];
 }

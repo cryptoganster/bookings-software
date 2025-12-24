@@ -14,11 +14,14 @@ import { BookingModule } from '@booking/booking.module';
 // Command Handlers
 import { ProcessIncomingMessageHandler } from '@conversation/app/commands/process-incoming-message/handler';
 import { SendWhatsAppMessageHandler } from '@conversation/app/commands/send-whatsapp-message/handler';
+import { SendAdminResponseHandler } from '@conversation/app/commands/send-admin-response/handler';
 
 // Query Handlers
 import { GetAvailableDatesHandler } from '@conversation/app/queries/get-available-dates/handler';
 import { GetAvailableTimeSlotsHandler } from '@conversation/app/queries/get-available-time-slots/handler';
 import { GetConversationHistoryHandler } from '@conversation/app/queries/get-conversation-history/handler';
+import { GetPendingAdminQueriesHandler } from '@conversation/app/queries/get-pending-admin-queries/handler';
+import { GetConversationHandler } from '@conversation/app/queries/get-conversation/handler';
 
 // Event Handlers
 import { OnAppointmentCreatedHandler } from '@conversation/app/event-handlers/on-appointment-created.handler';
@@ -32,10 +35,12 @@ import { ConversationFactory } from '@conversation/infra/persistence/factories/c
 
 // Models
 import { MessageModel } from '@conversation/infra/persistence/models/message.model';
+import { ConversationModel } from '@conversation/infra/persistence/models/conversation.model';
 
 // Repositories
 import { MessageWriteRepository } from '@conversation/infra/persistence/repositories/message-write.repository';
 import { MessageReadRepository } from '@conversation/infra/persistence/repositories/message-read.repository';
+import { ConversationReadRepository } from '@conversation/infra/persistence/repositories/conversation-read.repository';
 
 // Controllers
 import { WebhookController } from '@conversation/presentation/controllers/webhook';
@@ -91,12 +96,18 @@ class MockConversationWriteRepository {
 // Export the store for testing purposes
 export { conversationsStore };
 
-const CommandHandlers = [ProcessIncomingMessageHandler, SendWhatsAppMessageHandler];
+const CommandHandlers = [
+  ProcessIncomingMessageHandler,
+  SendWhatsAppMessageHandler,
+  SendAdminResponseHandler,
+];
 
 const QueryHandlers = [
   GetAvailableDatesHandler,
   GetAvailableTimeSlotsHandler,
   GetConversationHistoryHandler,
+  GetPendingAdminQueriesHandler,
+  GetConversationHandler,
 ];
 
 const EventHandlers = [OnAppointmentCreatedHandler, OnAppointmentCancelledHandler];
@@ -104,7 +115,7 @@ const EventHandlers = [OnAppointmentCreatedHandler, OnAppointmentCancelledHandle
 @Module({
   imports: [
     CqrsModule,
-    TypeOrmModule.forFeature([MessageModel]),
+    TypeOrmModule.forFeature([MessageModel, ConversationModel]),
     AvailabilityModule, // Import AvailabilityModule to access ICapacityReadRepository
     OfferingModule, // Import OfferingModule to access GetActiveOfferingsQuery
     CustomerModule, // Import CustomerModule to access IdentifyCustomerCommand
@@ -136,6 +147,10 @@ const EventHandlers = [OnAppointmentCreatedHandler, OnAppointmentCancelledHandle
       useClass: MockConversationWriteRepository,
     },
     {
+      provide: 'IConversationReadRepository',
+      useClass: ConversationReadRepository,
+    },
+    {
       provide: 'IMessageWriteRepository',
       useClass: MessageWriteRepository,
     },
@@ -154,6 +169,7 @@ const EventHandlers = [OnAppointmentCreatedHandler, OnAppointmentCancelledHandle
   exports: [
     'IConversationFactory',
     'IConversationWriteRepository',
+    'IConversationReadRepository',
     'IMessageWriteRepository',
     'IMessageReadRepository',
     'IWhatsAppClient',
