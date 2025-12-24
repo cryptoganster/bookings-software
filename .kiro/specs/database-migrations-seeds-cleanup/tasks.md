@@ -26,7 +26,7 @@
   - _Requirements: 2.1, 2.5_
   - **Commit:** `refactor(database): remove duplicate CreateBusinessesTableOld migration`
 
-- [ ] 4. Fix invalid timestamp migration
+- [x] 4. Fix invalid timestamp migration
   - Rename `20251219020859-add-search-indexes-to-customers.ts` to correct timestamp format
   - Update class name to match new filename
   - Verify migration still works correctly
