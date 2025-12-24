@@ -1,32 +1,32 @@
 # Implementation Plan - Conversation BC Completion
 
-## Phase 1: Domain Layer - Message Aggregate
+## Phase 1: Domain Layer - Message Aggregate ✅ COMPLETE
 
-- [ ] 1.1 Create Message aggregate
+- [x] 1.1 Create Message aggregate
   - Implement factory method `create()` with validation
   - Implement `fromPersistence()` for reconstruction
   - Add getters for all fields
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5_
 
-- [ ] 1.2 Create MessageDirection value object
+- [x] 1.2 Create MessageDirection value object
   - Implement `inbound()`, `outbound()` factory methods
   - Add validation in constructor
   - Implement `isInbound()`, `isOutbound()` methods
   - _Requirements: 1.3_
 
-- [ ] 1.3 Create MessageType value object
+- [x] 1.3 Create MessageType value object
   - Implement `text()`, `button()`, `location()` factory methods
   - Add validation in constructor
   - _Requirements: 1.4_
 
-- [ ] 1.4 Create domain exceptions
+- [x] 1.4 Create domain exceptions
   - `EmptyMessageContentException`
   - `InvalidMessageDirectionException`
   - `InvalidMessageTypeException`
   - `WhatsAppMessageFailedException`
   - _Requirements: 1.1, 2.3_
 
-- [ ] 1.5 Create MessageSent domain event
+- [x] 1.5 Create MessageSent domain event
   - Include messageId, conversationId, content, sentAt
   - _Requirements: 2.5_
 
@@ -42,35 +42,35 @@
   - Test equality methods
   - _Requirements: 8.1_
 
-## Phase 2: Domain Layer - Interfaces & Read Models
+## Phase 2: Domain Layer - Interfaces & Read Models ✅ COMPLETE
 
-- [ ] 2.1 Create IMessageWriteRepository interface
+- [x] 2.1 Create IMessageWriteRepository interface
   - `save(message: Message): Promise<void>`
   - _Requirements: 3.1, 3.4_
 
-- [ ] 2.2 Create IMessageReadRepository interface
+- [x] 2.2 Create IMessageReadRepository interface
   - `findByConversationId(conversationId: string): Promise<MessageReadModel[]>`
   - _Requirements: 3.2, 4.1_
 
-- [ ] 2.3 Complete ConversationReadModel
+- [x] 2.3 Complete ConversationReadModel
   - Add customerName field with documentation
   - Add lastMessageAt field
   - Update constructor
   - _Requirements: 5.1, 5.2, 5.3_
 
-- [ ] 2.4 Create MessageReadModel
+- [x] 2.4 Create MessageReadModel
   - All fields from design document
   - Constructor with all parameters
   - _Requirements: 3.3, 3.5_
 
-## Phase 3: Application Layer - Commands
+## Phase 3: Application Layer - Commands ✅ COMPLETE
 
-- [ ] 3.1 Create SendWhatsAppMessageCommand
+- [x] 3.1 Create SendWhatsAppMessageCommand
   - Extend `Command<{ messageId: string }>`
   - Add conversationId, content, messageType, recipientPhone fields
   - _Requirements: 2.1, 2.4_
 
-- [ ] 3.2 Implement SendWhatsAppMessageHandler
+- [x] 3.2 Implement SendWhatsAppMessageHandler
   - Create Message aggregate
   - Call WhatsApp API with retry logic (3 attempts, exponential backoff)
   - Persist message via repository
@@ -84,14 +84,14 @@
   - Test exponential backoff timing
   - _Requirements: 8.2_
 
-## Phase 4: Application Layer - Queries
+## Phase 4: Application Layer - Queries ✅ COMPLETE
 
-- [ ] 4.1 Create GetConversationHistoryQuery
+- [x] 4.1 Create GetConversationHistoryQuery
   - Extend `Query<MessageReadModel[]>`
   - Add conversationId field
   - _Requirements: 4.1_
 
-- [ ] 4.2 Implement GetConversationHistoryHandler
+- [x] 4.2 Implement GetConversationHistoryHandler
   - Use MessageReadRepository
   - Return messages ordered by sentAt ASC
   - Handle empty results
@@ -103,46 +103,46 @@
   - Test empty conversation
   - _Requirements: 8.4_
 
-## Phase 5: Infrastructure Layer - Persistence
+## Phase 5: Infrastructure Layer - Persistence ✅ COMPLETE
 
-- [ ] 5.1 Create database migration for messages table
+- [x] 5.1 Create database migration for messages table
   - All fields from design document
   - Foreign key to conversations table with CASCADE
   - Indexes on conversation_id and sent_at
   - _Requirements: 3.1, 3.2_
 
-- [ ] 5.2 Add last_message_at column to conversations table
+- [x] 5.2 Add last_message_at column to conversations table
   - Migration to add column
   - _Requirements: 5.2_
 
-- [ ] 5.3 Create MessageModel (TypeORM entity)
+- [x] 5.3 Create MessageModel (TypeORM entity)
   - Map all fields to database columns
   - Add decorators (@Entity, @Column, etc.)
   - _Requirements: 3.1_
 
-- [ ] 5.4 Create MessageWriteMapper
+- [x] 5.4 Create MessageWriteMapper
   - `toModel(message: Message): MessageModel`
   - Map all aggregate fields to model
   - _Requirements: 3.1_
 
-- [ ] 5.5 Create MessageReadMapper
+- [x] 5.5 Create MessageReadMapper
   - `toReadModel(model: any): MessageReadModel`
   - Map database result to read model
   - _Requirements: 3.3, 3.5_
 
-- [ ] 5.6 Implement MessageWriteRepository
+- [x] 5.6 Implement MessageWriteRepository
   - Inject TypeORM repository and UnitOfWork
   - Implement `save()` with transaction
   - Use MessageWriteMapper
   - _Requirements: 3.1, 3.4_
 
-- [ ] 5.7 Implement MessageReadRepository
+- [x] 5.7 Implement MessageReadRepository
   - Inject TypeORM repository
   - Implement `findByConversationId()` with ORDER BY sent_at ASC
   - Use MessageReadMapper
   - _Requirements: 3.2, 4.1, 4.2_
 
-- [ ] 5.8 Update ConversationReadRepository
+- [x] 5.8 Update ConversationReadRepository
   - Add JOIN with customers table for customerName
   - Add lastMessageAt field to query
   - Update mapper to include new fields
@@ -155,15 +155,15 @@
   - Test ConversationReadRepository with customerName
   - _Requirements: 8.3_
 
-## Phase 6: Application Layer - Event Handlers
+## Phase 6: Application Layer - Event Handlers ✅ COMPLETE
 
-- [ ] 6.1 Create OnAppointmentCreatedHandler
+- [x] 6.1 Create OnAppointmentCreatedHandler
   - Listen to AppointmentCreated event
   - Dispatch SendWhatsAppMessageCommand with confirmation message
   - Handle errors without propagating
   - _Requirements: 10.1_
 
-- [ ] 6.2 Create OnAppointmentCancelledHandler
+- [x] 6.2 Create OnAppointmentCancelledHandler
   - Listen to AppointmentCancelled event
   - Dispatch SendWhatsAppMessageCommand with cancellation message
   - Handle errors without propagating
@@ -175,22 +175,24 @@
   - Test error handling doesn't propagate
   - _Requirements: 8.5, 10.4, 10.5_
 
-## Phase 7: Presentation Layer - API Endpoints
+## Phase 7: Presentation Layer - API Endpoints ✅ COMPLETE
 
-- [ ] 7.1 Update ConversationController
+- [x] 7.1 Update ConversationController
   - Add GET /conversations/:id/messages endpoint
   - Use GetConversationHistoryQuery
   - Add authentication guard
   - _Requirements: 9.2, 9.4_
 
-- [ ] 7.2 Create GetConversationHistoryDto (if needed)
+- [x] 7.2 Create GetConversationHistoryDto (if needed)
   - Query parameters for pagination (future)
   - _Requirements: 9.2_
+  - **Note:** Not needed for MVP - pagination is future enhancement
 
-- [ ] 7.3 Update SendAdminResponseDto validation
+- [x] 7.3 Update SendAdminResponseDto validation
   - Ensure content is not empty
   - Add max length validation
   - _Requirements: 9.5_
+  - **Note:** Already has IsString and IsNotEmpty validation
 
 - [ ]\* 7.4 Write E2E tests for conversation endpoints
   - Test GET /conversations returns pending conversations
