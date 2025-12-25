@@ -34,7 +34,7 @@ export class E2EAuthHelper {
   async login(email: string, password: string): Promise<string> {
     try {
       const response = await request(this.app.getHttpServer())
-        .post('/auth/login') // ✅ Fixed: Remove /api prefix
+        .post('/api/auth/login')
         .send({ email, password })
         .expect(201); // Login devuelve 201 Created
 
@@ -61,7 +61,7 @@ export class E2EAuthHelper {
   async register(userData: RegisterDto): Promise<{ token: string; userId: string }> {
     try {
       const response = await request(this.app.getHttpServer())
-        .post('/auth/register') // ✅ Fixed: Remove /api prefix
+        .post('/api/auth/register')
         .send(userData)
         .expect(201);
 
@@ -101,7 +101,7 @@ export class E2EAuthHelper {
   async refreshToken(refreshToken: string): Promise<string> {
     try {
       const response = await request(this.app.getHttpServer())
-        .post('/auth/refresh') // ✅ Fixed: Remove /api prefix
+        .post('/api/auth/refresh')
         .send({ refreshToken })
         .expect(200);
 
@@ -243,7 +243,7 @@ export class E2EAuthHelper {
 
     try {
       const response = await request(this.app.getHttpServer())
-        .post('/businesses') // ✅ Fixed: Remove /api prefix
+        .post('/api/businesses')
         .set('Authorization', `Bearer ${token}`)
         .send({
           name: businessData?.name || 'Test Business',

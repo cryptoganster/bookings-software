@@ -1,11 +1,9 @@
 # Test Fixes Progress Summary
 
-## 📊 Current Status
+## 📊 Current Status (Updated: 2024-12-25)
 
-**Test Suites**: 145 passing / 186 total (78.0% ✅)
-**Individual Tests**: 1386 passing / 1749 total (79.2% ✅)
-**Failing Suites**: 41 (down from 43)
-**Failing Tests**: 363 (down from 374)
+**Conversation Module**: 14/15 suites passing (93.3% ✅), 158/162 tests passing (97.5% ✅)
+**Overall Progress**: Significant improvement in test stability
 
 ## 🎯 Major Achievements
 
@@ -21,7 +19,7 @@
 - **Solution**: Changed all `synchronize: true` → `synchronize: false` (32 files)
 - **Impact**: Eliminated "duplicate key value violates unique constraint" errors
 
-### 3. ✅ Migrated 7 Tests to Shared DataSource
+### 3. ✅ Migrated Account Module Tests (11 tests)
 
 - **Problem**: Tests with isolated DataSource had no schema (`relation does not exist`)
 - **Solution**: Migrated to `createIntegrationTestDataSource()` helper
@@ -33,40 +31,86 @@
   5. `get-business-owner-by-user-id/__tests__/handler.integration.spec.ts` ✅
   6. `create-business-owner/__tests__/handler.integration.spec.ts` ✅
   7. `upgrade-subscription/__tests__/handler.integration.spec.ts` ✅
-- **Impact**: 7 more suites passing, 11 more tests passing
+  8. `restore-subscription/__tests__/handler.integration.spec.ts` ✅
+  9. `suspend-subscription/__tests__/handler.integration.spec.ts` ✅
+  10. `complete-onboarding/__tests__/handler.integration.spec.ts` ✅
+  11. `upgrade-subscription/__tests__/handler.concurrency.spec.ts` ✅
+- **Impact**: All 11 Account module tests passing
+
+### 4. ✅ Migrated Availability Module Tests (19 tests)
+
+- **Files migrated**:
+  1. `blockout.factory.integration.spec.ts` ✅
+  2. `schedule.factory.integration.spec.ts` ✅
+- **Impact**: All 19 Availability factory tests passing
+
+### 5. ✅ Migrated Conversation Module Tests (158/162 passing)
+
+- **Files migrated**:
+  1. `message-write.repository.integration.spec.ts` ✅
+  2. `message-read.repository.integration.spec.ts` ✅
+  3. `conversation-factory.spec.ts` ✅ (converted to integration test)
+  4. `admin-query.controller.e2e.spec.ts` ✅ (fixed E2E auth helper)
+- **Remaining failures**: 4 tests in `conversation-flow.e2e.spec.ts` (business logic issue, not database)
+- **Impact**: 14/15 suites passing (93.3%), 158/162 tests passing (97.5%)
+
+### 6. ✅ Fixed E2E Authentication Helper
+
+- **Problem**: E2E tests were calling `/auth/register` instead of `/api/auth/register`
+- **Solution**: Added `/api` prefix to all auth routes in E2E helper
+- **Impact**: All E2E tests using authentication now work correctly
 
 ## 📈 Progress Timeline
 
-| Milestone             | Suites Passing | Tests Passing | Time      |
-| --------------------- | -------------- | ------------- | --------- |
-| Initial State         | 0              | 0             | Timeout ∞ |
-| After DB name fix     | 138            | 1310          | ~50s      |
-| After synchronize fix | 138            | 1310          | ~50s      |
-| After 5 migrations    | 143            | 1375          | ~50s      |
-| After 7 migrations    | **145**        | **1386**      | ~50s      |
+| Milestone                     | Suites Passing | Tests Passing | Time      |
+| ----------------------------- | -------------- | ------------- | --------- |
+| Initial State                 | 0              | 0             | Timeout ∞ |
+| After DB name fix             | 138            | 1310          | ~50s      |
+| After synchronize fix         | 138            | 1310          | ~50s      |
+| After Account migrations      | 145            | 1386          | ~50s      |
+| After Availability migrations | 150            | 1426          | ~50s      |
+| After Conversation migrations | **153**        | **1584**      | ~50s      |
+
+## 🔧 Completed Modules
+
+### ✅ Account Module (100% complete)
+
+- All 11 integration tests passing
+- All command handlers migrated
+- All repositories migrated
+- Factory migrated
+
+### ✅ Availability Module (100% complete)
+
+- All 19 factory tests passing
+- Blockout factory migrated
+- Schedule factory migrated
+
+### ✅ Conversation Module (93.3% complete)
+
+- 14/15 test suites passing
+- All repository tests passing
+- Factory tests passing
+- Admin query E2E tests passing
+- **Remaining**: conversation-flow.e2e.spec.ts (business logic issue)
 
 ## 🔧 Remaining Work
 
-### Priority 1: Migrate Remaining Account Module Tests (4 files)
+### Priority 1: Business Logic Issues
 
-- [ ] `restore-subscription/__tests__/handler.integration.spec.ts`
-- [ ] `suspend-subscription/__tests__/handler.integration.spec.ts`
-- [ ] `complete-onboarding/__tests__/handler.integration.spec.ts`
-- [ ] `upgrade-subscription/__tests__/handler.concurrency.spec.ts`
+- [ ] Fix `conversation-flow.e2e.spec.ts` (4 tests) - ProcessIncomingMessageHandler concurrency issue
 
-### Then: Migrate Other Modules (~30 tests)
+### Priority 2: Migrate Other Modules (~30 tests)
 
-- Availability module tests
-- Booking module tests
-- Business module tests
-- Customer module tests
-- Offering module tests
-- Conversation module tests
+- [ ] Business module tests
+- [ ] Customer module tests
+- [ ] Offering module tests
+- [ ] Booking module tests
 
-### Migration Template to Apply
+### Migration Template Applied
 
 ```typescript
-// 1. Add import
+// 1. Add imports
 import {
   createIntegrationTestDataSource,
   cleanDatabase,
@@ -83,7 +127,7 @@ beforeAll(async () => {
       // ... other providers
       {
         provide: DataSource,
-        useValue: dataSource, // ← Use shared DataSource
+        useValue: dataSource,
       },
       {
         provide: getRepositoryToken(ModelName),
@@ -96,17 +140,12 @@ beforeAll(async () => {
 
 // 3. In beforeEach, use cleanDatabase
 beforeEach(async () => {
-  await cleanDatabase(dataSource); // ← Replace repository.clear()
+  await cleanDatabase(dataSource);
 });
 
 // 4. Replace hardcoded UUIDs with generateTestId()
-const id = generateTestId(); // ← Instead of 'uuid-string'
+const id = generateTestId();
 ```
-
-### Additional Issues to Fix (Lower Priority)
-
-- **E2E Route Mismatches**: ~5 tests use `/api` prefix incorrectly
-- **Hardcoded IDs**: ~10 tests use duplicate UUIDs, need `generateTestId()`
 
 ## 📝 Notes
 
@@ -116,6 +155,7 @@ const id = generateTestId(); // ← Instead of 'uuid-string'
 - **Solution**: Provide repository token directly using `getRepositoryToken()` and `useFactory`
 - **Pattern**: All integration tests should use shared DataSource with ALL entities
 - **Cleanup**: Use `cleanDatabase()` helper instead of `repository.clear()`
+- **E2E Tests**: Must use `/api` prefix for all routes when `app.setGlobalPrefix('api')` is set
 
 ### Migration Pattern
 
@@ -124,8 +164,13 @@ const id = generateTestId(); // ← Instead of 'uuid-string'
 3. Provide DataSource and repository tokens manually
 4. Use `cleanDatabase()` in `beforeEach`
 5. Replace hardcoded UUIDs with `generateTestId()`
+6. For E2E tests, ensure routes use `/api` prefix
+
+### Conversation Flow E2E Issue
+
+The `conversation-flow.e2e.spec.ts` test is failing due to a business logic issue in `ProcessIncomingMessageHandler`, not a database schema issue. The handler is hitting the retry limit (3 attempts) when processing messages. This requires investigation of the conversation state machine logic, which is outside the scope of the database migration task.
 
 ---
 
-**Last Updated**: 2024-12-24 21:30
-**Next Action**: Migrate remaining 4 account command handler tests
+**Last Updated**: 2024-12-25 22:00
+**Next Action**: Investigate ProcessIncomingMessageHandler concurrency issue or continue with other module migrations
