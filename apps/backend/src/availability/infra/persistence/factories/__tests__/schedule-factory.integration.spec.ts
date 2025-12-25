@@ -3,6 +3,11 @@ import { DataSource, Repository } from 'typeorm';
 import { ScheduleFactory } from '../schedule-factory';
 import { ScheduleModel } from '../../models/schedule';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import {
+  createIntegrationTestDataSource,
+  cleanDatabase,
+  generateTestId,
+} from '@test-utils/integration-test-helper';
 
 describe('ScheduleFactory (Integration)', () => {
   let module: TestingModule;
@@ -11,6 +16,9 @@ describe('ScheduleFactory (Integration)', () => {
   let dataSource: DataSource;
 
   beforeAll(async () => {
+    // Create shared DataSource with ALL entities
+    dataSource = await createIntegrationTestDataSource();
+
     module = await Test.createTestingModule({
       providers: [
         ScheduleFactory,
@@ -21,27 +29,13 @@ describe('ScheduleFactory (Integration)', () => {
         },
         {
           provide: DataSource,
-          useFactory: async () => {
-            const AppDataSource = new DataSource({
-              type: 'postgres',
-              host: process.env.DB_HOST || 'localhost',
-              port: parseInt(process.env.DB_PORT || '5432'),
-              username: process.env.DB_USERNAME || 'postgres',
-              password: process.env.DB_PASSWORD || 'postgres',
-              database: process.env.DB_DATABASE || 'postgres_test',
-              entities: [ScheduleModel],
-              synchronize: false,
-              dropSchema: true,
-            });
-            return AppDataSource.initialize();
-          },
+          useValue: dataSource,
         },
       ],
     }).compile();
 
     factory = module.get<ScheduleFactory>(ScheduleFactory);
     repository = module.get<Repository<ScheduleModel>>(getRepositoryToken(ScheduleModel));
-    dataSource = module.get<DataSource>(DataSource);
   });
 
   afterAll(async () => {
@@ -50,15 +44,17 @@ describe('ScheduleFactory (Integration)', () => {
   });
 
   beforeEach(async () => {
-    await repository.clear();
+    await cleanDatabase(dataSource);
   });
 
   describe('loadById', () => {
     it('should return aggregate with business logic', async () => {
       // Arrange
+      const id = generateTestId();
+      const businessId = generateTestId();
       const scheduleModel = repository.create({
-        id: '550e8400-e29b-41d4-a716-446655440000',
-        businessId: '550e8400-e29b-41d4-a716-446655440001',
+        id,
+        businessId,
         dayOfWeek: 1, // Monday
         startTime: '09:00',
         endTime: '17:00',
@@ -69,13 +65,13 @@ describe('ScheduleFactory (Integration)', () => {
       await repository.save(scheduleModel);
 
       // Act
-      const aggregate = await factory.loadById('550e8400-e29b-41d4-a716-446655440000');
+      const aggregate = await factory.loadById(id);
 
       // Assert
       expect(aggregate).toBeDefined();
       expect(aggregate).not.toBeNull();
-      expect(aggregate!.getId().getValue()).toBe('550e8400-e29b-41d4-a716-446655440000');
-      expect(aggregate!.getBusinessId().getValue()).toBe('550e8400-e29b-41d4-a716-446655440001');
+      expect(aggregate!.getId().getValue()).toBe(id);
+      expect(aggregate!.getBusinessId().getValue()).toBe(businessId);
       expect(aggregate!.getDayOfWeek().getValue()).toBe(1);
       expect(aggregate!.getTimeSlot().getStartTime()).toBe('09:00');
       expect(aggregate!.getTimeSlot().getEndTime()).toBe('17:00');
@@ -84,7 +80,7 @@ describe('ScheduleFactory (Integration)', () => {
 
     it('should return null for non-existent id', async () => {
       // Act
-      const aggregate = await factory.loadById('11111111-1111-1111-1111-111111111111');
+      const aggregate = await factory.loadById(generateTestId());
 
       // Assert
       expect(aggregate).toBeNull();
@@ -92,9 +88,11 @@ describe('ScheduleFactory (Integration)', () => {
 
     it('should load aggregate that can execute domain methods', async () => {
       // Arrange
+      const id = generateTestId();
+      const businessId = generateTestId();
       const scheduleModel = repository.create({
-        id: '550e8400-e29b-41d4-a716-446655440002',
-        businessId: '550e8400-e29b-41d4-a716-446655440003',
+        id,
+        businessId,
         dayOfWeek: 2, // Tuesday
         startTime: '08:00',
         endTime: '16:00',
@@ -105,7 +103,7 @@ describe('ScheduleFactory (Integration)', () => {
       await repository.save(scheduleModel);
 
       // Act
-      const aggregate = await factory.loadById('550e8400-e29b-41d4-a716-446655440002');
+      const aggregate = await factory.loadById(id);
 
       // Assert - Verify aggregate has business logic methods
       expect(aggregate).toBeDefined();
@@ -119,38 +117,38 @@ describe('ScheduleFactory (Integration)', () => {
       const testData = [
         {
           day: 0,
-          id: '550e8400-e29b-41d4-a716-446655440010',
-          businessId: '550e8400-e29b-41d4-a716-446655440100',
+          id: generateTestId(),
+          businessId: generateTestId(),
         }, // Sunday
         {
           day: 1,
-          id: '550e8400-e29b-41d4-a716-446655440011',
-          businessId: '550e8400-e29b-41d4-a716-446655440101',
+          id: generateTestId(),
+          businessId: generateTestId(),
         }, // Monday
         {
           day: 2,
-          id: '550e8400-e29b-41d4-a716-446655440012',
-          businessId: '550e8400-e29b-41d4-a716-446655440102',
+          id: generateTestId(),
+          businessId: generateTestId(),
         }, // Tuesday
         {
           day: 3,
-          id: '550e8400-e29b-41d4-a716-446655440013',
-          businessId: '550e8400-e29b-41d4-a716-446655440103',
+          id: generateTestId(),
+          businessId: generateTestId(),
         }, // Wednesday
         {
           day: 4,
-          id: '550e8400-e29b-41d4-a716-446655440014',
-          businessId: '550e8400-e29b-41d4-a716-446655440104',
+          id: generateTestId(),
+          businessId: generateTestId(),
         }, // Thursday
         {
           day: 5,
-          id: '550e8400-e29b-41d4-a716-446655440015',
-          businessId: '550e8400-e29b-41d4-a716-446655440105',
+          id: generateTestId(),
+          businessId: generateTestId(),
         }, // Friday
         {
           day: 6,
-          id: '550e8400-e29b-41d4-a716-446655440016',
-          businessId: '550e8400-e29b-41d4-a716-446655440106',
+          id: generateTestId(),
+          businessId: generateTestId(),
         }, // Saturday
       ];
 
@@ -178,9 +176,14 @@ describe('ScheduleFactory (Integration)', () => {
 
     it('should handle both active and inactive schedules', async () => {
       // Arrange
+      const activeId = generateTestId();
+      const activeBusinessId = generateTestId();
+      const inactiveId = generateTestId();
+      const inactiveBusinessId = generateTestId();
+
       const activeSchedule = repository.create({
-        id: '550e8400-e29b-41d4-a716-446655440020',
-        businessId: '550e8400-e29b-41d4-a716-446655440200',
+        id: activeId,
+        businessId: activeBusinessId,
         dayOfWeek: 1,
         startTime: '09:00',
         endTime: '17:00',
@@ -190,8 +193,8 @@ describe('ScheduleFactory (Integration)', () => {
       });
 
       const inactiveSchedule = repository.create({
-        id: '550e8400-e29b-41d4-a716-446655440021',
-        businessId: '550e8400-e29b-41d4-a716-446655440201',
+        id: inactiveId,
+        businessId: inactiveBusinessId,
         dayOfWeek: 2,
         startTime: '10:00',
         endTime: '18:00',
@@ -203,8 +206,8 @@ describe('ScheduleFactory (Integration)', () => {
       await repository.save([activeSchedule, inactiveSchedule]);
 
       // Act
-      const activeAggregate = await factory.loadById('550e8400-e29b-41d4-a716-446655440020');
-      const inactiveAggregate = await factory.loadById('550e8400-e29b-41d4-a716-446655440021');
+      const activeAggregate = await factory.loadById(activeId);
+      const inactiveAggregate = await factory.loadById(inactiveId);
 
       // Assert
       expect(activeAggregate).toBeDefined();
@@ -217,26 +220,26 @@ describe('ScheduleFactory (Integration)', () => {
       // Arrange
       const testData = [
         {
-          id: '550e8400-e29b-41d4-a716-446655440030',
-          businessId: '550e8400-e29b-41d4-a716-446655440300',
+          id: generateTestId(),
+          businessId: generateTestId(),
           start: '06:00',
           end: '14:00',
         }, // Early shift
         {
-          id: '550e8400-e29b-41d4-a716-446655440031',
-          businessId: '550e8400-e29b-41d4-a716-446655440301',
+          id: generateTestId(),
+          businessId: generateTestId(),
           start: '09:00',
           end: '17:00',
         }, // Standard shift
         {
-          id: '550e8400-e29b-41d4-a716-446655440032',
-          businessId: '550e8400-e29b-41d4-a716-446655440302',
+          id: generateTestId(),
+          businessId: generateTestId(),
           start: '14:00',
           end: '22:00',
         }, // Late shift
         {
-          id: '550e8400-e29b-41d4-a716-446655440033',
-          businessId: '550e8400-e29b-41d4-a716-446655440303',
+          id: generateTestId(),
+          businessId: generateTestId(),
           start: '00:00',
           end: '23:59',
         }, // All day
@@ -269,9 +272,9 @@ describe('ScheduleFactory (Integration)', () => {
   describe('loadByBusinessAndDay', () => {
     it('should return aggregate for specific business and day', async () => {
       // Arrange
-      const businessId = '550e8400-e29b-41d4-a716-446655440400';
+      const businessId = generateTestId();
       const scheduleModel = repository.create({
-        id: '550e8400-e29b-41d4-a716-446655440040',
+        id: generateTestId(),
         businessId,
         dayOfWeek: 3, // Wednesday
         startTime: '10:00',
@@ -294,10 +297,7 @@ describe('ScheduleFactory (Integration)', () => {
 
     it('should return null when no schedule exists for business and day', async () => {
       // Act
-      const aggregate = await factory.loadByBusinessAndDay(
-        '550e8400-e29b-41d4-a716-446655440500',
-        5,
-      );
+      const aggregate = await factory.loadByBusinessAndDay(generateTestId(), 5);
 
       // Assert
       expect(aggregate).toBeNull();
@@ -305,24 +305,24 @@ describe('ScheduleFactory (Integration)', () => {
 
     it('should return correct schedule when multiple schedules exist for same business', async () => {
       // Arrange
-      const businessId = '550e8400-e29b-41d4-a716-446655440600';
+      const businessId = generateTestId();
 
       // Create schedules for Monday, Wednesday, Friday
       const schedules = [
         {
-          id: '550e8400-e29b-41d4-a716-446655440050',
+          id: generateTestId(),
           dayOfWeek: 1,
           startTime: '09:00',
           endTime: '17:00',
         },
         {
-          id: '550e8400-e29b-41d4-a716-446655440051',
+          id: generateTestId(),
           dayOfWeek: 3,
           startTime: '10:00',
           endTime: '18:00',
         },
         {
-          id: '550e8400-e29b-41d4-a716-446655440052',
+          id: generateTestId(),
           dayOfWeek: 5,
           startTime: '08:00',
           endTime: '16:00',
@@ -358,9 +358,9 @@ describe('ScheduleFactory (Integration)', () => {
 
     it('should load aggregate that can execute domain methods', async () => {
       // Arrange
-      const businessId = '550e8400-e29b-41d4-a716-446655440700';
+      const businessId = generateTestId();
       const scheduleModel = repository.create({
-        id: '550e8400-e29b-41d4-a716-446655440060',
+        id: generateTestId(),
         businessId,
         dayOfWeek: 4, // Thursday
         startTime: '09:00',

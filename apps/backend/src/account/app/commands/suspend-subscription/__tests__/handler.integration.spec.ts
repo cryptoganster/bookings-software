@@ -9,6 +9,11 @@ import { BusinessOwnerModel } from '@account/infra/persistence/models/business-o
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { BusinessOwnerNotFoundException } from '@account/domain/exceptions/business-owner-not-found.exception';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import {
+  createIntegrationTestDataSource,
+  cleanDatabase,
+  generateTestId,
+} from '@test-utils/integration-test-helper';
 
 describe('SuspendSubscriptionHandler (Integration)', () => {
   let module: TestingModule;
@@ -18,6 +23,9 @@ describe('SuspendSubscriptionHandler (Integration)', () => {
   let commandBus: CommandBus;
 
   beforeAll(async () => {
+    // Create shared DataSource with all entities
+    dataSource = await createIntegrationTestDataSource();
+
     module = await Test.createTestingModule({
       providers: [
         SuspendSubscriptionHandler,
@@ -40,20 +48,7 @@ describe('SuspendSubscriptionHandler (Integration)', () => {
         },
         {
           provide: DataSource,
-          useFactory: async () => {
-            const AppDataSource = new DataSource({
-              type: 'postgres',
-              host: process.env.DB_HOST || 'localhost',
-              port: parseInt(process.env.DB_PORT || '5432'),
-              username: process.env.DB_USERNAME || 'postgres',
-              password: process.env.DB_PASSWORD || 'postgres',
-              database: process.env.DB_DATABASE || 'postgres_test',
-              entities: [BusinessOwnerModel],
-              synchronize: false,
-              dropSchema: true,
-            });
-            return AppDataSource.initialize();
-          },
+          useValue: dataSource,
         },
         {
           provide: CommandBus,
@@ -66,7 +61,6 @@ describe('SuspendSubscriptionHandler (Integration)', () => {
 
     handler = module.get<SuspendSubscriptionHandler>(SuspendSubscriptionHandler);
     repository = module.get<Repository<BusinessOwnerModel>>(getRepositoryToken(BusinessOwnerModel));
-    dataSource = module.get<DataSource>(DataSource);
     commandBus = module.get<CommandBus>(CommandBus);
   });
 
@@ -76,15 +70,17 @@ describe('SuspendSubscriptionHandler (Integration)', () => {
   });
 
   beforeEach(async () => {
-    await repository.clear();
+    await cleanDatabase(dataSource);
   });
 
   describe('execute', () => {
     it('should suspend subscription successfully', async () => {
       // Arrange
+      const boId = generateTestId();
+      const userId = generateTestId();
       const businessOwnerModel = repository.create({
-        id: 'be67026b-b1e5-4104-b66c-f23d86098321',
-        userId: '65f818ad-9782-40bd-b8ed-16251f31f511',
+        id: boId,
+        userId: userId,
         subscriptionPlan: 'PRO',
         subscriptionStatus: 'ACTIVE',
         onboardingCompleted: true,
@@ -93,14 +89,14 @@ describe('SuspendSubscriptionHandler (Integration)', () => {
       });
       await repository.save(businessOwnerModel);
 
-      const command = new SuspendSubscriptionCommand('be67026b-b1e5-4104-b66c-f23d86098321');
+      const command = new SuspendSubscriptionCommand(boId);
 
       // Act
       await handler.execute(command);
 
       // Assert
       const updated = await repository.findOne({
-        where: { id: 'be67026b-b1e5-4104-b66c-f23d86098321' },
+        where: { id: boId },
       });
       expect(updated).toBeDefined();
       expect(updated!.subscriptionStatus).toBe('SUSPENDED');
@@ -109,7 +105,8 @@ describe('SuspendSubscriptionHandler (Integration)', () => {
 
     it('should throw BusinessOwnerNotFoundException if not found', async () => {
       // Arrange
-      const command = new SuspendSubscriptionCommand('11111111-1111-1111-1111-111111111111');
+      const nonExistentId = generateTestId();
+      const command = new SuspendSubscriptionCommand(nonExistentId);
 
       // Act & Assert
       await expect(handler.execute(command)).rejects.toThrow(BusinessOwnerNotFoundException);
@@ -117,9 +114,11 @@ describe('SuspendSubscriptionHandler (Integration)', () => {
 
     it('should persist changes to database', async () => {
       // Arrange
+      const boId = generateTestId();
+      const userId = generateTestId();
       const businessOwnerModel = repository.create({
-        id: 'be67026b-b1e5-4104-b66c-f23d86098321',
-        userId: '65f818ad-9782-40bd-b8ed-16251f31f511',
+        id: boId,
+        userId: userId,
         subscriptionPlan: 'BASIC',
         subscriptionStatus: 'ACTIVE',
         onboardingCompleted: true,
@@ -128,14 +127,14 @@ describe('SuspendSubscriptionHandler (Integration)', () => {
       });
       await repository.save(businessOwnerModel);
 
-      const command = new SuspendSubscriptionCommand('be67026b-b1e5-4104-b66c-f23d86098321');
+      const command = new SuspendSubscriptionCommand(boId);
 
       // Act
       await handler.execute(command);
 
       // Assert - Verify persistence
       const persisted = await repository.findOne({
-        where: { id: 'be67026b-b1e5-4104-b66c-f23d86098321' },
+        where: { id: boId },
       });
       expect(persisted).toBeDefined();
       expect(persisted!.subscriptionStatus).toBe('SUSPENDED');

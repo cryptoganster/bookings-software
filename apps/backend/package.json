@@ -96,6 +96,7 @@
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
     "testTimeout": 60000,
+    "maxWorkers": 1,
     "globalSetup": "<rootDir>/../test/global-setup.ts",
     "setupFiles": [
       "<rootDir>/../test/setup.ts"

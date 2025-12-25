@@ -9,6 +9,11 @@ import { BusinessOwnerModel } from '@account/infra/persistence/models/business-o
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { BusinessOwnerNotFoundException } from '@account/domain/exceptions/business-owner-not-found.exception';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import {
+  createIntegrationTestDataSource,
+  cleanDatabase,
+  generateTestId,
+} from '@test-utils/integration-test-helper';
 
 describe('RestoreSubscriptionHandler (Integration)', () => {
   let module: TestingModule;
@@ -18,6 +23,9 @@ describe('RestoreSubscriptionHandler (Integration)', () => {
   let commandBus: CommandBus;
 
   beforeAll(async () => {
+    // Create shared DataSource with all entities
+    dataSource = await createIntegrationTestDataSource();
+
     module = await Test.createTestingModule({
       providers: [
         RestoreSubscriptionHandler,
@@ -40,20 +48,7 @@ describe('RestoreSubscriptionHandler (Integration)', () => {
         },
         {
           provide: DataSource,
-          useFactory: async () => {
-            const AppDataSource = new DataSource({
-              type: 'postgres',
-              host: process.env.DB_HOST || 'localhost',
-              port: parseInt(process.env.DB_PORT || '5432'),
-              username: process.env.DB_USERNAME || 'postgres',
-              password: process.env.DB_PASSWORD || 'postgres',
-              database: process.env.DB_DATABASE || 'postgres_test',
-              entities: [BusinessOwnerModel],
-              synchronize: false,
-              dropSchema: true,
-            });
-            return AppDataSource.initialize();
-          },
+          useValue: dataSource,
         },
         {
           provide: CommandBus,
@@ -66,7 +61,6 @@ describe('RestoreSubscriptionHandler (Integration)', () => {
 
     handler = module.get<RestoreSubscriptionHandler>(RestoreSubscriptionHandler);
     repository = module.get<Repository<BusinessOwnerModel>>(getRepositoryToken(BusinessOwnerModel));
-    dataSource = module.get<DataSource>(DataSource);
     commandBus = module.get<CommandBus>(CommandBus);
   });
 
@@ -76,15 +70,17 @@ describe('RestoreSubscriptionHandler (Integration)', () => {
   });
 
   beforeEach(async () => {
-    await repository.clear();
+    await cleanDatabase(dataSource);
   });
 
   describe('execute', () => {
     it('should restore subscription successfully', async () => {
       // Arrange
+      const boId = generateTestId();
+      const userId = generateTestId();
       const businessOwnerModel = repository.create({
-        id: 'be67026b-b1e5-4104-b66c-f23d86098321',
-        userId: '65f818ad-9782-40bd-b8ed-16251f31f511',
+        id: boId,
+        userId: userId,
         subscriptionPlan: 'PRO',
         subscriptionStatus: 'SUSPENDED',
         onboardingCompleted: true,
@@ -93,14 +89,14 @@ describe('RestoreSubscriptionHandler (Integration)', () => {
       });
       await repository.save(businessOwnerModel);
 
-      const command = new RestoreSubscriptionCommand('be67026b-b1e5-4104-b66c-f23d86098321');
+      const command = new RestoreSubscriptionCommand(boId);
 
       // Act
       await handler.execute(command);
 
       // Assert
       const updated = await repository.findOne({
-        where: { id: 'be67026b-b1e5-4104-b66c-f23d86098321' },
+        where: { id: boId },
       });
       expect(updated).toBeDefined();
       expect(updated!.subscriptionStatus).toBe('ACTIVE');
@@ -109,9 +105,11 @@ describe('RestoreSubscriptionHandler (Integration)', () => {
 
     it('should be idempotent (no error if already active)', async () => {
       // Arrange
+      const boId = generateTestId();
+      const userId = generateTestId();
       const businessOwnerModel = repository.create({
-        id: 'be67026b-b1e5-4104-b66c-f23d86098321',
-        userId: '65f818ad-9782-40bd-b8ed-16251f31f511',
+        id: boId,
+        userId: userId,
         subscriptionPlan: 'BASIC',
         subscriptionStatus: 'ACTIVE',
         onboardingCompleted: true,
@@ -120,14 +118,14 @@ describe('RestoreSubscriptionHandler (Integration)', () => {
       });
       await repository.save(businessOwnerModel);
 
-      const command = new RestoreSubscriptionCommand('be67026b-b1e5-4104-b66c-f23d86098321');
+      const command = new RestoreSubscriptionCommand(boId);
 
       // Act - Should not throw
       await handler.execute(command);
 
       // Assert - Verify status remains ACTIVE and version unchanged (idempotent)
       const updated = await repository.findOne({
-        where: { id: 'be67026b-b1e5-4104-b66c-f23d86098321' },
+        where: { id: boId },
       });
       expect(updated!.subscriptionStatus).toBe('ACTIVE');
       expect(updated!.version).toBe(1); // Version unchanged because no state change
@@ -135,7 +133,8 @@ describe('RestoreSubscriptionHandler (Integration)', () => {
 
     it('should throw BusinessOwnerNotFoundException if not found', async () => {
       // Arrange
-      const command = new RestoreSubscriptionCommand('11111111-1111-1111-1111-111111111111');
+      const nonExistentId = generateTestId();
+      const command = new RestoreSubscriptionCommand(nonExistentId);
 
       // Act & Assert
       await expect(handler.execute(command)).rejects.toThrow(BusinessOwnerNotFoundException);
@@ -143,9 +142,11 @@ describe('RestoreSubscriptionHandler (Integration)', () => {
 
     it('should persist changes to database', async () => {
       // Arrange
+      const boId = generateTestId();
+      const userId = generateTestId();
       const businessOwnerModel = repository.create({
-        id: 'be67026b-b1e5-4104-b66c-f23d86098321',
-        userId: '65f818ad-9782-40bd-b8ed-16251f31f511',
+        id: boId,
+        userId: userId,
         subscriptionPlan: 'ENTERPRISE',
         subscriptionStatus: 'SUSPENDED',
         onboardingCompleted: true,
@@ -154,14 +155,14 @@ describe('RestoreSubscriptionHandler (Integration)', () => {
       });
       await repository.save(businessOwnerModel);
 
-      const command = new RestoreSubscriptionCommand('be67026b-b1e5-4104-b66c-f23d86098321');
+      const command = new RestoreSubscriptionCommand(boId);
 
       // Act
       await handler.execute(command);
 
       // Assert - Verify persistence
       const persisted = await repository.findOne({
-        where: { id: 'be67026b-b1e5-4104-b66c-f23d86098321' },
+        where: { id: boId },
       });
       expect(persisted).toBeDefined();
       expect(persisted!.subscriptionStatus).toBe('ACTIVE');
