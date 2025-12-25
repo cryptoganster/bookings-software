@@ -1,7 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { CqrsModule } from '@nestjs/cqrs';
-import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+import { describe, it, expect, beforeAll, beforeEach, afterAll } from '@jest/globals';
 import { CreateBusinessOwnerHandler } from '../handler';
 import { CreateBusinessOwnerCommand } from '../command';
 import { BusinessOwnerWriteRepository } from '@account/infra/persistence/repositories/business-owner-write.repository';
@@ -11,6 +9,11 @@ import { SubscriptionPlan } from '@account/domain/vo/subscription-plan';
 import { UUID } from '@shared/vo/uuid';
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { DataSource } from 'typeorm';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import {
+  createIntegrationTestDataSource,
+  cleanDatabase,
+} from '@test-utils/integration-test-helper';
 
 /**
  * Integration Test for CreateBusinessOwnerHandler
@@ -23,23 +26,11 @@ describe('CreateBusinessOwnerHandler - Integration Test', () => {
   let dataSource: DataSource;
   let factory: BusinessOwnerFactory;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
+    // Create shared DataSource with all entities
+    dataSource = await createIntegrationTestDataSource();
+
     module = await Test.createTestingModule({
-      imports: [
-        TypeOrmModule.forRoot({
-          type: 'postgres',
-          host: process.env.DB_HOST || 'localhost',
-          port: parseInt(process.env.DB_PORT || '5432', 10),
-          username: process.env.DB_USERNAME || 'postgres',
-          password: process.env.DB_PASSWORD || 'postgres',
-          database: process.env.DB_DATABASE_TEST || 'postgres_test',
-          entities: [BusinessOwnerModel],
-          synchronize: false, // Only for tests
-          dropSchema: true, // Clean database before each test
-        }),
-        TypeOrmModule.forFeature([BusinessOwnerModel]),
-        CqrsModule,
-      ],
       providers: [
         CreateBusinessOwnerHandler,
         BusinessOwnerWriteRepository,
@@ -57,15 +48,28 @@ describe('CreateBusinessOwnerHandler - Integration Test', () => {
           provide: 'IUnitOfWork',
           useClass: TypeOrmUnitOfWork,
         },
+        {
+          provide: DataSource,
+          useValue: dataSource,
+        },
+        {
+          provide: getRepositoryToken(BusinessOwnerModel),
+          useFactory: (dataSource: DataSource) => dataSource.getRepository(BusinessOwnerModel),
+          inject: [DataSource],
+        },
       ],
     }).compile();
 
     handler = module.get<CreateBusinessOwnerHandler>(CreateBusinessOwnerHandler);
-    dataSource = module.get<DataSource>(DataSource);
     factory = module.get<BusinessOwnerFactory>(BusinessOwnerFactory);
   });
 
-  afterEach(async () => {
+  beforeEach(async () => {
+    // Clean database before each test
+    await cleanDatabase(dataSource);
+  });
+
+  afterAll(async () => {
     await dataSource.destroy();
     await module.close();
   });
