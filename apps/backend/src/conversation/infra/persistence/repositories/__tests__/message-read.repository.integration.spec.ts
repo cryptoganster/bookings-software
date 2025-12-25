@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import { MessageReadRepository } from '@conversation/infra/persistence/repositories/message-read.repository';
 import { MessageModel } from '@conversation/infra/persistence/models/message.model';
 import { ConversationModel } from '@conversation/infra/persistence/models/conversation.model';
@@ -8,6 +8,11 @@ import { Message } from '@conversation/domain/aggregates/message';
 import { UUID } from '@shared/vo/uuid';
 import { MessageDirection } from '@conversation/domain/vo/message-direction';
 import { MessageType } from '@conversation/domain/vo/message-type';
+import {
+  createIntegrationTestDataSource,
+  cleanDatabase,
+  generateTestId,
+} from '@test-utils/integration-test-helper';
 
 describe('MessageReadRepository (Integration)', () => {
   let repository: MessageReadRepository;
@@ -28,26 +33,25 @@ describe('MessageReadRepository (Integration)', () => {
   };
 
   beforeAll(async () => {
+    // Create shared DataSource with ALL entities
+    dataSource = await createIntegrationTestDataSource();
+
     const module: TestingModule = await Test.createTestingModule({
-      imports: [
-        TypeOrmModule.forRoot({
-          type: 'postgres',
-          host: process.env.DB_HOST || 'localhost',
-          port: parseInt(process.env.DB_PORT || '5432', 10),
-          username: process.env.DB_USERNAME || 'postgres',
-          password: process.env.DB_PASSWORD || 'postgres',
-          database: process.env.DB_DATABASE || 'postgres_test',
-          entities: [MessageModel, ConversationModel],
-          synchronize: false,
-          dropSchema: true,
-        }),
-        TypeOrmModule.forFeature([MessageModel, ConversationModel]),
+      providers: [
+        MessageReadRepository,
+        {
+          provide: getRepositoryToken(MessageModel),
+          useFactory: (dataSource: DataSource) => dataSource.getRepository(MessageModel),
+          inject: [DataSource],
+        },
+        {
+          provide: DataSource,
+          useValue: dataSource,
+        },
       ],
-      providers: [MessageReadRepository],
     }).compile();
 
     repository = module.get<MessageReadRepository>(MessageReadRepository);
-    dataSource = module.get<DataSource>(DataSource);
   });
 
   afterAll(async () => {
@@ -55,7 +59,7 @@ describe('MessageReadRepository (Integration)', () => {
   });
 
   beforeEach(async () => {
-    await dataSource.getRepository(MessageModel).clear();
+    await cleanDatabase(dataSource);
   });
 
   describe('findByConversationId', () => {

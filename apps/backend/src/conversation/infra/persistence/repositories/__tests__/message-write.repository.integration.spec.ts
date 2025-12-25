@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import { MessageWriteRepository } from '@conversation/infra/persistence/repositories/message-write.repository';
 import { MessageModel } from '@conversation/infra/persistence/models/message.model';
 import { ConversationModel } from '@conversation/infra/persistence/models/conversation.model';
@@ -10,6 +10,11 @@ import { MessageDirection } from '@conversation/domain/vo/message-direction';
 import { MessageType } from '@conversation/domain/vo/message-type';
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { MessageWriteMapper } from '@conversation/infra/persistence/mappers/message-write.mapper';
+import {
+  createIntegrationTestDataSource,
+  cleanDatabase,
+  generateTestId,
+} from '@test-utils/integration-test-helper';
 
 describe('MessageWriteRepository (Integration)', () => {
   let repository: MessageWriteRepository;
@@ -31,32 +36,29 @@ describe('MessageWriteRepository (Integration)', () => {
   };
 
   beforeAll(async () => {
+    // Create shared DataSource with ALL entities
+    dataSource = await createIntegrationTestDataSource();
+
     const module: TestingModule = await Test.createTestingModule({
-      imports: [
-        TypeOrmModule.forRoot({
-          type: 'postgres',
-          host: process.env.DB_HOST || 'localhost',
-          port: parseInt(process.env.DB_PORT || '5432', 10),
-          username: process.env.DB_USERNAME || 'postgres',
-          password: process.env.DB_PASSWORD || 'postgres',
-          database: process.env.DB_DATABASE || 'postgres_test',
-          entities: [MessageModel, ConversationModel],
-          synchronize: false,
-          dropSchema: true,
-        }),
-        TypeOrmModule.forFeature([MessageModel, ConversationModel]),
-      ],
       providers: [
         MessageWriteRepository,
         {
           provide: 'IUnitOfWork',
           useClass: TypeOrmUnitOfWork,
         },
+        {
+          provide: getRepositoryToken(MessageModel),
+          useFactory: (dataSource: DataSource) => dataSource.getRepository(MessageModel),
+          inject: [DataSource],
+        },
+        {
+          provide: DataSource,
+          useValue: dataSource,
+        },
       ],
     }).compile();
 
     repository = module.get<MessageWriteRepository>(MessageWriteRepository);
-    dataSource = module.get<DataSource>(DataSource);
     uow = module.get<TypeOrmUnitOfWork>('IUnitOfWork');
   });
 
@@ -65,7 +67,7 @@ describe('MessageWriteRepository (Integration)', () => {
   });
 
   beforeEach(async () => {
-    await dataSource.getRepository(MessageModel).clear();
+    await cleanDatabase(dataSource);
   });
 
   describe('save', () => {
