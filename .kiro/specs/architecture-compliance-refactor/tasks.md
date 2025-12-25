@@ -27,7 +27,7 @@ Este plan de implementación refactoriza el código existente para eliminar toda
 
 ## Phase 2: Business BC - Domain Services
 
-- [ ] 2. Create BusinessUniquenessChecker domain service
+- [x] 2. Create BusinessUniquenessChecker domain service
   - Create interface in `business/domain/interfaces/services/business-uniqueness-checker.interface.ts`
   - Create implementation in `business/domain/services/business-uniqueness-checker.service.ts`
   - Inject `IBusinessReadRepository` via token
@@ -35,7 +35,7 @@ Este plan de implementación refactoriza el código existente para eliminar toda
   - Add JSDoc comments explaining purpose and usage
   - _Requirements: 4.1, 4.2, 4.3, 15.3, 15.4, 15.5_
 
-- [ ] 2.1 Write unit tests for BusinessUniquenessChecker
+- [x] 2.1 Write unit tests for BusinessUniquenessChecker
   - Test returns true when phone not found
   - Test returns false when phone exists
   - Test returns true when phone exists but belongs to same business
@@ -43,14 +43,14 @@ Este plan de implementación refactoriza el código existente para eliminar toda
   - Achieve > 90% coverage
   - _Requirements: 6.2, 12.1_
 
-- [ ] 2.2 Write property-based tests for BusinessUniquenessChecker
+- [x] 2.2 Write property-based tests for BusinessUniquenessChecker
   - **Property: Idempotence** - Calling twice with same input returns same result
   - **Validates: Requirements 19.2**
   - Use fast-check library
   - Run minimum 100 iterations
   - _Requirements: 19.1, 19.2, 19.3, 19.4_
 
-- [ ] 3. Create BusinessLimitChecker domain service
+- [x] 3. Create BusinessLimitChecker domain service
   - Create interface in `business/domain/interfaces/services/business-limit-checker.interface.ts`
   - Create implementation in `business/domain/services/business-limit-checker.service.ts`
   - Inject `IBusinessReadRepository` and `IBusinessOwnerReadRepository` via tokens
@@ -60,7 +60,7 @@ Este plan de implementación refactoriza el código existente para eliminar toda
   - Add JSDoc comments
   - _Requirements: 4.1, 4.2, 4.3, 15.3, 15.4, 15.5_
 
-- [ ] 3.1 Write unit tests for BusinessLimitChecker
+- [x] 3.1 Write unit tests for BusinessLimitChecker
   - Test returns true when under limit
   - Test returns false when at limit
   - Test returns false when over limit
@@ -70,13 +70,13 @@ Este plan de implementación refactoriza el código existente para eliminar toda
   - Achieve > 90% coverage
   - _Requirements: 6.2, 12.1_
 
-- [ ] 3.2 Write property-based tests for BusinessLimitChecker
+- [x] 3.2 Write property-based tests for BusinessLimitChecker
   - **Property: Idempotence** - Calling twice with same input returns same result
   - **Validates: Requirements 19.2**
   - Use fast-check library
   - _Requirements: 19.1, 19.2, 19.3, 19.4_
 
-- [ ] 4. Register domain services in BusinessModule
+- [x] 4. Register domain services in BusinessModule
   - Add BusinessUniquenessChecker to providers with token
   - Add BusinessLimitChecker to providers with token
   - Export services for use in command handlers
@@ -86,7 +86,7 @@ Este plan de implementación refactoriza el código existente para eliminar toda
 
 ## Phase 3: Business BC - Refactor Command Handlers
 
-- [ ] 5. Refactor CreateBusinessHandler
+- [-] 5. Refactor CreateBusinessHandler
   - Remove `@Inject('IBusinessReadRepository')` from constructor
   - Add `@Inject('IBusinessUniquenessChecker')` to constructor
   - Add `@Inject('IBusinessLimitChecker')` to constructor

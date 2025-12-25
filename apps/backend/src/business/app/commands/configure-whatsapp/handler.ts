@@ -3,7 +3,7 @@ import { Inject } from '@nestjs/common';
 import { ConfigureWhatsAppCommand } from '@business/app/commands/configure-whatsapp/command';
 import { IBusinessFactory } from '@business/domain/interfaces/factories/business-factory';
 import { IBusinessWriteRepository } from '@business/domain/interfaces/repositories/business-write';
-import { IBusinessReadRepository } from '@business/domain/interfaces/repositories/business-read';
+import { IBusinessUniquenessChecker } from '@business/domain/interfaces/services/business-uniqueness-checker.interface';
 import { WhatsAppPhone } from '@shared/vo/whatsapp-phone';
 import { BusinessNotFoundException } from '@business/domain/exceptions/business-not-found';
 import { WhatsAppPhoneAlreadyExistsException } from '@shared/kernel/exceptions/whatsapp-phone-already-exists';
@@ -14,6 +14,12 @@ import { WhatsAppPhoneAlreadyExistsException } from '@shared/kernel/exceptions/w
  * Handles configuring WhatsApp phone number for a business.
  * Validates global uniqueness before updating.
  *
+ * Architecture:
+ * - Uses Domain Service for validation (maintains CQRS strict separation)
+ * - Uses Factory to load aggregate for modification
+ * - Only injects Write Repository for persistence
+ * - No direct Read Repository injection (CQRS compliant)
+ *
  * Requirements: 3.1-3.5, 10.3
  */
 @CommandHandler(ConfigureWhatsAppCommand)
@@ -23,8 +29,8 @@ export class ConfigureWhatsAppHandler implements ICommandHandler<ConfigureWhatsA
     private readonly factory: IBusinessFactory,
     @Inject('IBusinessWriteRepository')
     private readonly writeRepository: IBusinessWriteRepository,
-    @Inject('IBusinessReadRepository')
-    private readonly readRepository: IBusinessReadRepository,
+    @Inject('IBusinessUniquenessChecker')
+    private readonly uniquenessChecker: IBusinessUniquenessChecker,
   ) {}
 
   async execute(command: ConfigureWhatsAppCommand): Promise<void> {
@@ -35,13 +41,15 @@ export class ConfigureWhatsAppHandler implements ICommandHandler<ConfigureWhatsA
       throw new BusinessNotFoundException(command.businessId);
     }
 
-    // Validate WhatsAppPhone uniqueness (skip if same as current)
-    if (business.getWhatsAppPhone().getValue() !== command.whatsappPhone) {
-      const existingBusiness = await this.readRepository.findByWhatsAppPhone(command.whatsappPhone);
+    // Validate WhatsAppPhone uniqueness using domain service
+    // Pass current businessId to exclude it from uniqueness check (update scenario)
+    const isUnique = await this.uniquenessChecker.isWhatsAppPhoneUnique(
+      command.whatsappPhone,
+      command.businessId,
+    );
 
-      if (existingBusiness) {
-        throw new WhatsAppPhoneAlreadyExistsException(command.whatsappPhone);
-      }
+    if (!isUnique) {
+      throw new WhatsAppPhoneAlreadyExistsException(command.whatsappPhone);
     }
 
     // Configure WhatsApp

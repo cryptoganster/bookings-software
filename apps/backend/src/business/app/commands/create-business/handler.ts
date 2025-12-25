@@ -2,7 +2,8 @@ import { CommandHandler, ICommandHandler, QueryBus } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
 import { CreateBusinessCommand } from '@business/app/commands/create-business/command';
 import { IBusinessWriteRepository } from '@business/domain/interfaces/repositories/business-write';
-import { IBusinessReadRepository } from '@business/domain/interfaces/repositories/business-read';
+import { IBusinessUniquenessChecker } from '@business/domain/interfaces/services/business-uniqueness-checker.interface';
+import { IBusinessLimitChecker } from '@business/domain/interfaces/services/business-limit-checker.interface';
 import { Business } from '@business/domain/aggregates/business';
 import { UUID } from '@shared/vo/uuid';
 import { WhatsAppPhone } from '@shared/vo/whatsapp-phone';
@@ -21,8 +22,13 @@ import { BusinessOwnerNotFoundException } from '@business/domain/exceptions/busi
  *
  * Validations:
  * 1. BusinessOwner exists and onboarding is completed (via Account BC)
- * 2. Business count < maxBusinesses from subscription plan
- * 3. WhatsAppPhone is globally unique
+ * 2. Business count < maxBusinesses from subscription plan (via BusinessLimitChecker)
+ * 3. WhatsAppPhone is globally unique (via BusinessUniquenessChecker)
+ *
+ * Architecture:
+ * - Uses Domain Services for validation (maintains CQRS strict separation)
+ * - Only injects Write Repository for persistence
+ * - No direct Read Repository injection (CQRS compliant)
  *
  * Requirements: 1.1-1.5, 2.1-2.5, 10.1, 11.1-11.5
  */
@@ -31,8 +37,10 @@ export class CreateBusinessHandler implements ICommandHandler<CreateBusinessComm
   constructor(
     @Inject('IBusinessWriteRepository')
     private readonly writeRepository: IBusinessWriteRepository,
-    @Inject('IBusinessReadRepository')
-    private readonly readRepository: IBusinessReadRepository,
+    @Inject('IBusinessUniquenessChecker')
+    private readonly uniquenessChecker: IBusinessUniquenessChecker,
+    @Inject('IBusinessLimitChecker')
+    private readonly limitChecker: IBusinessLimitChecker,
     private readonly queryBus: QueryBus,
   ) {}
 
@@ -50,21 +58,22 @@ export class CreateBusinessHandler implements ICommandHandler<CreateBusinessComm
       throw new OnboardingNotCompletedException(command.ownerId);
     }
 
-    // Validate business count < maxBusinesses
-    const existingBusinesses = await this.readRepository.findByOwnerId(command.ownerId);
+    // Validate business limit using domain service
+    const canCreate = await this.limitChecker.canCreateBusiness(command.ownerId);
 
-    if (existingBusinesses.length >= businessOwner.maxBusinesses) {
-      throw new MaxBusinessesExceededException(
-        command.ownerId,
-        existingBusinesses.length,
-        businessOwner.maxBusinesses,
-      );
+    if (!canCreate) {
+      const [currentCount, maxAllowed] = await Promise.all([
+        this.limitChecker.getBusinessCount(command.ownerId),
+        this.limitChecker.getMaxBusinessesAllowed(command.ownerId),
+      ]);
+
+      throw new MaxBusinessesExceededException(command.ownerId, currentCount, maxAllowed);
     }
 
-    // Validate WhatsAppPhone uniqueness
-    const existingBusiness = await this.readRepository.findByWhatsAppPhone(command.whatsappPhone);
+    // Validate WhatsAppPhone uniqueness using domain service
+    const isUnique = await this.uniquenessChecker.isWhatsAppPhoneUnique(command.whatsappPhone);
 
-    if (existingBusiness) {
+    if (!isUnique) {
       throw new WhatsAppPhoneAlreadyExistsException(command.whatsappPhone);
     }
 
