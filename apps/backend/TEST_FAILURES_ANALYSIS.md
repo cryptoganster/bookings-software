@@ -299,3 +299,63 @@ beforeEach(async () => {
 
 **Última Actualización**: 2024-12-24 20:00
 **Próximo Paso**: Ejecutar tests y continuar con Prioridad 1 y 2
+
+---
+
+## 🎯 Próximos Pasos Inmediatos
+
+### **Paso 1: Migrar 2-3 tests a createIntegrationTestDataSource()**
+
+Seleccionar tests simples primero:
+
+1. `business-owner-read.repository.integration.spec.ts`
+2. `business-owner-write.repository.integration.spec.ts`
+3. `business-owner.factory.integration.spec.ts`
+
+**Template de migración**:
+
+```typescript
+// Importar helpers
+import {
+  createIntegrationTestDataSource,
+  cleanDatabase,
+} from '@test-utils/integration-test-helper';
+
+// Reemplazar DataSource creation
+let dataSource: DataSource;
+
+beforeAll(async () => {
+  dataSource = await createIntegrationTestDataSource();
+});
+
+// Reemplazar cleanup
+beforeEach(async () => {
+  await cleanDatabase(dataSource);
+});
+
+afterAll(async () => {
+  await dataSource.destroy();
+});
+```
+
+### **Paso 2: Verificar que pasan**
+
+```bash
+pnpm test business-owner-read.repository.integration.spec.ts
+```
+
+### **Paso 3: Commit**
+
+```bash
+git add -A
+git commit -m "fix(tests): migrate 3 tests to shared DataSource helper"
+```
+
+### **Paso 4: Repetir con más tests**
+
+Continuar con batches de 2-3 tests hasta completar los 48 suites.
+
+---
+
+**Última Actualización**: 2024-12-24 20:30
+**Próximo Paso**: Migrar primeros 3 tests a createIntegrationTestDataSource()

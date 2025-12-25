@@ -3,6 +3,10 @@ import { DataSource, Repository } from 'typeorm';
 import { BusinessOwnerFactory } from '../business-owner.factory';
 import { BusinessOwnerModel } from '../../models/business-owner.model';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import {
+  createIntegrationTestDataSource,
+  cleanDatabase,
+} from '@test-utils/integration-test-helper';
 
 describe('BusinessOwnerFactory (Integration)', () => {
   let module: TestingModule;
@@ -11,6 +15,9 @@ describe('BusinessOwnerFactory (Integration)', () => {
   let dataSource: DataSource;
 
   beforeAll(async () => {
+    // Use shared DataSource with all entities
+    dataSource = await createIntegrationTestDataSource();
+
     module = await Test.createTestingModule({
       providers: [
         BusinessOwnerFactory,
@@ -21,27 +28,13 @@ describe('BusinessOwnerFactory (Integration)', () => {
         },
         {
           provide: DataSource,
-          useFactory: async () => {
-            const AppDataSource = new DataSource({
-              type: 'postgres',
-              host: process.env.DB_HOST || 'localhost',
-              port: parseInt(process.env.DB_PORT || '5432'),
-              username: process.env.DB_USERNAME || 'postgres',
-              password: process.env.DB_PASSWORD || 'postgres',
-              database: process.env.DB_DATABASE || 'postgres_test',
-              entities: [BusinessOwnerModel],
-              synchronize: false,
-              dropSchema: true,
-            });
-            return AppDataSource.initialize();
-          },
+          useValue: dataSource, // Use the shared DataSource
         },
       ],
     }).compile();
 
     factory = module.get<BusinessOwnerFactory>(BusinessOwnerFactory);
     repository = module.get<Repository<BusinessOwnerModel>>(getRepositoryToken(BusinessOwnerModel));
-    dataSource = module.get<DataSource>(DataSource);
   });
 
   afterAll(async () => {
@@ -50,7 +43,8 @@ describe('BusinessOwnerFactory (Integration)', () => {
   });
 
   beforeEach(async () => {
-    await repository.clear();
+    // Clean all tables with RESTART IDENTITY CASCADE
+    await cleanDatabase(dataSource);
   });
 
   describe('loadById', () => {

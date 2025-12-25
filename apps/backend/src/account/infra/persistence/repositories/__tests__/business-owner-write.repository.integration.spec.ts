@@ -10,6 +10,10 @@ import { UUID } from '@shared/vo/uuid';
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 import { DataSource } from 'typeorm';
+import {
+  createIntegrationTestDataSource,
+  cleanDatabase,
+} from '@test-utils/integration-test-helper';
 
 /**
  * Integration Test for BusinessOwnerWriteRepository
@@ -23,6 +27,9 @@ describe('BusinessOwnerWriteRepository - Integration Test (Optimistic Locking)',
   let dataSource: DataSource;
 
   beforeEach(async () => {
+    // Use shared DataSource with all entities
+    dataSource = await createIntegrationTestDataSource();
+
     module = await Test.createTestingModule({
       imports: [
         TypeOrmModule.forRoot({
@@ -31,10 +38,9 @@ describe('BusinessOwnerWriteRepository - Integration Test (Optimistic Locking)',
           port: parseInt(process.env.DB_PORT || '5432', 10),
           username: process.env.DB_USERNAME || 'postgres',
           password: process.env.DB_PASSWORD || 'postgres',
-          database: process.env.DB_DATABASE_TEST || 'postgres_test',
+          database: process.env.DB_DATABASE || 'postgres_test',
           entities: [BusinessOwnerModel],
-          synchronize: false, // Only for tests
-          dropSchema: true, // Clean database before each test
+          synchronize: false,
         }),
         TypeOrmModule.forFeature([BusinessOwnerModel]),
       ],
@@ -46,12 +52,18 @@ describe('BusinessOwnerWriteRepository - Integration Test (Optimistic Locking)',
           provide: 'IUnitOfWork',
           useClass: TypeOrmUnitOfWork,
         },
+        {
+          provide: DataSource,
+          useValue: dataSource, // Use the shared DataSource
+        },
       ],
     }).compile();
 
     repository = module.get<BusinessOwnerWriteRepository>(BusinessOwnerWriteRepository);
     factory = module.get<BusinessOwnerFactory>(BusinessOwnerFactory);
-    dataSource = module.get<DataSource>(DataSource);
+
+    // Clean all tables with RESTART IDENTITY CASCADE
+    await cleanDatabase(dataSource);
   });
 
   afterEach(async () => {
