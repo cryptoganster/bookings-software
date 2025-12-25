@@ -53,9 +53,9 @@ describe('CustomerController (Integration)', () => {
           port: parseInt(process.env.DB_PORT || '5432', 10),
           username: process.env.DB_USERNAME || 'postgres',
           password: process.env.DB_PASSWORD || 'postgres',
-          database: process.env.DB_DATABASE || 'bookings_test',
+          database: process.env.DB_DATABASE || 'postgres_test',
           autoLoadEntities: true,
-          synchronize: true, // Only for tests
+          synchronize: false, // Only for tests
         }),
         CqrsModule,
         SharedModule, // ← Provides IUnitOfWork

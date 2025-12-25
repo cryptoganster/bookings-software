@@ -31,9 +31,9 @@ describe('BusinessOwnerWriteRepository - Integration Test (Optimistic Locking)',
           port: parseInt(process.env.DB_PORT || '5432', 10),
           username: process.env.DB_USERNAME || 'postgres',
           password: process.env.DB_PASSWORD || 'postgres',
-          database: process.env.DB_DATABASE_TEST || 'bookings_test',
+          database: process.env.DB_DATABASE_TEST || 'postgres_test',
           entities: [BusinessOwnerModel],
-          synchronize: true, // Only for tests
+          synchronize: false, // Only for tests
           dropSchema: true, // Clean database before each test
         }),
         TypeOrmModule.forFeature([BusinessOwnerModel]),

@@ -24,9 +24,9 @@ describe('OfferingWriteRepository Integration Tests', () => {
           port: parseInt(process.env.DB_PORT || '5432', 10),
           username: process.env.DB_USERNAME || 'postgres',
           password: process.env.DB_PASSWORD || 'postgres',
-          database: process.env.DB_DATABASE || 'bookings_test',
+          database: process.env.DB_DATABASE || 'postgres_test',
           entities: [OfferingModel],
-          synchronize: true, // Solo para tests
+          synchronize: false, // Solo para tests
           dropSchema: false, // No eliminar el schema en cada test
         }),
         TypeOrmModule.forFeature([OfferingModel]),

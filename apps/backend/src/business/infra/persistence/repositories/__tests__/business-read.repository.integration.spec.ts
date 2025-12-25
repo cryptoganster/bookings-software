@@ -30,9 +30,9 @@ describe('BusinessReadRepository Integration Tests', () => {
           port: parseInt(process.env.DB_PORT || '5432', 10),
           username: process.env.DB_USERNAME || 'postgres',
           password: process.env.DB_PASSWORD || 'postgres',
-          database: process.env.DB_DATABASE || 'bookings_test',
+          database: process.env.DB_DATABASE || 'postgres_test',
           entities: [BusinessModel],
-          synchronize: true, // ← Changed from false to true to auto-create tables
+          synchronize: false, // ← Changed from false to true to auto-create tables
         }),
         TypeOrmModule.forFeature([BusinessModel]),
       ],

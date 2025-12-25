@@ -3,12 +3,14 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '@/app.module';
 import { DataSource } from 'typeorm';
+import { E2EAuthHelper } from '@test-utils/e2e-helpers';
+import { generateTestId } from '@test-utils/integration-test-helper';
 
 describe('Schedule CRUD (e2e)', () => {
   let app: INestApplication;
   let dataSource: DataSource;
+  let authHelper: E2EAuthHelper;
   let authToken: string;
-  let userId: string;
   let businessId: string;
   let scheduleId: string;
 
@@ -29,47 +31,17 @@ describe('Schedule CRUD (e2e)', () => {
     await app.init();
 
     dataSource = moduleFixture.get<DataSource>(DataSource);
+    authHelper = new E2EAuthHelper(app);
 
-    // 1. Register a test user
-    const registerResponse = await request(app.getHttpServer()).post('/auth/register').send({
-      email: 'schedule-test@example.com',
-      password: 'Test1234!',
-      name: 'Schedule Test User',
-    });
-
-    authToken = registerResponse.body.token;
-    userId = registerResponse.body.userId;
-
-    // 2. Wait a bit for event handlers to process (BusinessOwner creation)
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    // 3. Create a business for testing
-    const businessResponse = await request(app.getHttpServer())
-      .post('/businesses')
-      .set('Authorization', `Bearer ${authToken}`)
-      .send({
-        name: 'Test Schedule Business',
-        whatsappNumber: '+18095551234',
-        address: {
-          street: '123 Test St',
-          city: 'Test City',
-          country: 'DO',
-        },
-        timezone: 'America/Santo_Domingo',
-      });
-
-    businessId = businessResponse.body.id;
-    authToken = businessResponse.body.token; // Update token with businessId
+    // Create business owner with business using helper
+    const testUser = await authHelper.createBusinessOwner();
+    authToken = testUser.token;
+    businessId = testUser.businessId!;
   });
 
   afterAll(async () => {
-    // Clean up test data (use snake_case for column names)
-    if (dataSource) {
-      await dataSource.query('DELETE FROM schedules WHERE business_id = $1', [businessId]);
-      await dataSource.query('DELETE FROM businesses WHERE id = $1', [businessId]);
-      await dataSource.query('DELETE FROM business_owners WHERE user_id = $1', [userId]);
-      await dataSource.query('DELETE FROM users WHERE id = $1', [userId]);
-    }
+    // Clean up test data
+    await authHelper.cleanupTestUsers();
     await app.close();
   });
 
@@ -175,7 +147,7 @@ describe('Schedule CRUD (e2e)', () => {
     it('should return empty array for business with no schedules', async () => {
       const response = await request(app.getHttpServer())
         .get('/schedules')
-        .query({ businessId: '00000000-0000-0000-0000-000000000000' })
+        .query({ businessId: generateTestId() })
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 

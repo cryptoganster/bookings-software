@@ -47,9 +47,9 @@ export default async function globalSetup() {
     type: 'postgres',
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT || '5432', 10),
-    username: process.env.DB_USERNAME || 'test',
-    password: process.env.DB_PASSWORD || 'test',
-    database: process.env.DB_DATABASE || 'bookings_test',
+    username: process.env.DB_USERNAME || 'postgres',
+    password: process.env.DB_PASSWORD || 'postgres',
+    database: process.env.DB_DATABASE || 'postgres_test',
     entities: ALL_ENTITIES,
     synchronize: true, // Auto-create schema in tests
     logging: false,

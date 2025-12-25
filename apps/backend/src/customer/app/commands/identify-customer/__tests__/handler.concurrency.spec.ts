@@ -36,9 +36,9 @@ describe('IdentifyCustomerHandler - Concurrency Tests', () => {
           port: parseInt(process.env.DB_PORT || '5432', 10),
           username: process.env.DB_USERNAME || 'postgres',
           password: process.env.DB_PASSWORD || 'postgres',
-          database: process.env.DB_DATABASE || 'bookings_test',
+          database: process.env.DB_DATABASE || 'postgres_test',
           entities: [CustomerModel],
-          synchronize: true, // Enable synchronize for test database
+          synchronize: false, // Enable synchronize for test database
           dropSchema: false,
         }),
         TypeOrmModule.forFeature([CustomerModel]),

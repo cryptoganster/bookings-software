@@ -3,10 +3,14 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '@/app.module';
 import { DataSource } from 'typeorm';
+import { E2EAuthHelper } from '@test-utils/e2e-helpers/auth';
+import { createActiveOffering } from '@test-utils/e2e-helpers/offering';
+import { UserRole } from '@test-utils/e2e-helpers/types';
 
 describe('Availability Query (e2e)', () => {
   let app: INestApplication;
   let dataSource: DataSource;
+  let authHelper: E2EAuthHelper;
   let authToken: string;
   let userId: string;
   let businessId: string;
@@ -29,63 +33,32 @@ describe('Availability Query (e2e)', () => {
     await app.init();
 
     dataSource = moduleFixture.get<DataSource>(DataSource);
+    authHelper = new E2EAuthHelper(app);
 
-    // 1. Register a test user
-    const registerResponse = await request(app.getHttpServer()).post('/auth/register').send({
-      email: 'availability-test@example.com',
-      password: 'Test1234!',
-      name: 'Availability Test User',
+    // 1. Create a BUSINESS_OWNER test user with business
+    const testUser = await authHelper.createBusinessOwner({
+      name: 'Test Availability Business',
+      whatsappNumber: '+18095559012',
+      address: '789 Test Blvd, Test City, DO', // ✅ Fixed: address is a string
+      timezone: 'America/Santo_Domingo',
     });
 
-    authToken = registerResponse.body.token;
-    userId = registerResponse.body.userId;
+    authToken = testUser.token;
+    userId = testUser.id;
+    businessId = testUser.businessId!;
 
-    // 2. Wait a bit for event handlers to process (BusinessOwner creation)
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    // 2. Create an offering using helper (direct database insert)
+    const offering = await createActiveOffering(
+      dataSource,
+      businessId,
+      undefined,
+      'Test Service',
+      60,
+      5,
+    );
+    offeringId = offering.id;
 
-    // 3. Create a business for testing
-    const businessResponse = await request(app.getHttpServer())
-      .post('/businesses')
-      .set('Authorization', `Bearer ${authToken}`)
-      .send({
-        name: 'Test Availability Business',
-        whatsappNumber: '+18095559012',
-        address: {
-          street: '789 Test Blvd',
-          city: 'Test City',
-          country: 'DO',
-        },
-        timezone: 'America/Santo_Domingo',
-      });
-
-    businessId = businessResponse.body.id;
-    authToken = businessResponse.body.token; // Update token with businessId
-
-    // 4. Create an offering for testing
-    const offeringResponse = await request(app.getHttpServer())
-      .post('/offerings')
-      .set('Authorization', `Bearer ${authToken}`)
-      .send({
-        name: 'Test Service',
-        durationMinutes: 60,
-        maxCapacityPerSlot: 5,
-      });
-
-    // Debug: Log the offering response
-    if (offeringResponse.status !== 201) {
-      console.error('Failed to create offering:', offeringResponse.status, offeringResponse.body);
-      throw new Error(`Failed to create offering: ${JSON.stringify(offeringResponse.body)}`);
-    }
-
-    offeringId = offeringResponse.body.offeringId; // Correct property name from handler
-
-    // Debug: Verify offeringId is valid
-    if (!offeringId) {
-      console.error('Offering ID is null or undefined:', offeringResponse.body);
-      throw new Error('Offering ID is null or undefined');
-    }
-
-    // 5. Create schedules for testing (Monday to Friday, 9-17)
+    // 3. Create schedules for testing (Monday to Friday, 9-17)
     for (let day = 1; day <= 5; day++) {
       await request(app.getHttpServer())
         .post('/schedules')
@@ -98,7 +71,7 @@ describe('Availability Query (e2e)', () => {
         });
     }
 
-    // 6. Create capacity records manually in database (since there's no API endpoint)
+    // 4. Create capacity records manually in database (since there's no API endpoint)
     const { v4: uuidv4 } = require('uuid');
     for (let i = 0; i < 7; i++) {
       const date = new Date();
@@ -120,15 +93,15 @@ describe('Availability Query (e2e)', () => {
   });
 
   afterAll(async () => {
-    // Clean up test data (use snake_case for column names)
+    // Clean up test data using authHelper
+    await authHelper.cleanupTestUsers();
+
+    // Clean up additional test data (use snake_case for column names)
     if (dataSource) {
       await dataSource.query('DELETE FROM capacities WHERE offering_id = $1', [offeringId]);
       await dataSource.query('DELETE FROM schedules WHERE business_id = $1', [businessId]);
       await dataSource.query('DELETE FROM blockouts WHERE business_id = $1', [businessId]);
       await dataSource.query('DELETE FROM offerings WHERE id = $1', [offeringId]);
-      await dataSource.query('DELETE FROM businesses WHERE id = $1', [businessId]);
-      await dataSource.query('DELETE FROM business_owners WHERE user_id = $1', [userId]);
-      await dataSource.query('DELETE FROM users WHERE id = $1', [userId]);
     }
     await app.close();
   });
