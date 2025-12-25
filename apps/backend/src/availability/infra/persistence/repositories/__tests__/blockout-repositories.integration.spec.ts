@@ -8,6 +8,11 @@ import { Blockout } from '@availability/domain/aggregates/blockout';
 import { UUID } from '@shared/vo/uuid';
 import { DateRange } from '@availability/domain/vo/date-range.vo';
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
+import {
+  createIntegrationTestDataSource,
+  cleanDatabase,
+  generateTestId,
+} from '@test-utils/integration-test-helper';
 
 describe('Blockout Repositories (Integration)', () => {
   let module: TestingModule;
