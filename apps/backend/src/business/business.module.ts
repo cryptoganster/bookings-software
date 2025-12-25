@@ -22,6 +22,10 @@ import { BusinessReadRepository } from '@business/infra/persistence/repositories
 // Factory
 import { BusinessFactory } from '@business/infra/persistence/factories/business.factory';
 
+// Domain Services
+import { BusinessUniquenessChecker } from '@business/domain/services/business-uniqueness-checker.service';
+import { BusinessLimitChecker } from '@business/domain/services/business-limit-checker.service';
+
 // Shared
 import { SharedModule } from '@shared/shared.module';
 import { AccountModule } from '@account/account.module';
@@ -62,6 +66,17 @@ const factories = [
   },
 ];
 
+const domainServices = [
+  {
+    provide: 'IBusinessUniquenessChecker',
+    useClass: BusinessUniquenessChecker,
+  },
+  {
+    provide: 'IBusinessLimitChecker',
+    useClass: BusinessLimitChecker,
+  },
+];
+
 /**
  * BusinessModule
  *
@@ -82,10 +97,18 @@ const factories = [
     forwardRef(() => AuthModule), // Import AuthModule for JwtService (circular dependency)
   ],
   controllers: [BusinessController],
-  providers: [...commandHandlers, ...queryHandlers, ...repositories, ...factories],
+  providers: [
+    ...commandHandlers,
+    ...queryHandlers,
+    ...repositories,
+    ...factories,
+    ...domainServices,
+  ],
   exports: [
     'IBusinessReadRepository', // Export for other BCs to query businesses
     'IBusinessFactory', // Export for other BCs to load businesses
+    'IBusinessUniquenessChecker', // Export for use in command handlers
+    'IBusinessLimitChecker', // Export for use in command handlers
   ],
 })
 export class BusinessModule {}
