@@ -92,7 +92,7 @@ describe('Schedule Repositories (Integration)', () => {
         // Arrange - Create initial schedule
         const schedule = Schedule.create(
           UUID.generate(),
-          UUID.generate(),
+          UUID.fromString(testBusinessId),
           DayOfWeek.create(2), // Tuesday
           TimeSlot.create('08:00', '16:00'),
         );
@@ -115,7 +115,7 @@ describe('Schedule Repositories (Integration)', () => {
         // Arrange
         const schedule = Schedule.create(
           UUID.generate(),
-          UUID.generate(),
+          UUID.fromString(testBusinessId),
           DayOfWeek.create(3), // Wednesday
           TimeSlot.create('09:00', '17:00'),
         );
@@ -137,7 +137,7 @@ describe('Schedule Repositories (Integration)', () => {
         // Arrange - Create and deactivate
         const schedule = Schedule.create(
           UUID.generate(),
-          UUID.generate(),
+          UUID.fromString(testBusinessId),
           DayOfWeek.create(4), // Thursday
           TimeSlot.create('09:00', '17:00'),
         );
@@ -160,7 +160,7 @@ describe('Schedule Repositories (Integration)', () => {
         // Arrange
         const schedule = Schedule.create(
           UUID.generate(),
-          UUID.generate(),
+          UUID.fromString(testBusinessId),
           DayOfWeek.create(5), // Friday
           TimeSlot.create('09:00', '17:00'),
         );
@@ -185,7 +185,7 @@ describe('Schedule Repositories (Integration)', () => {
         // Arrange
         const scheduleModel = repository.create({
           id: '550e8400-e29b-41d4-a716-446655440000',
-          businessId: '550e8400-e29b-41d4-a716-446655440001',
+          businessId: testBusinessId,
           dayOfWeek: 1,
           startTime: '09:00',
           endTime: '17:00',
@@ -201,7 +201,7 @@ describe('Schedule Repositories (Integration)', () => {
         // Assert
         expect(readModel).toBeDefined();
         expect(readModel!.id).toBe('550e8400-e29b-41d4-a716-446655440000');
-        expect(readModel!.businessId).toBe('550e8400-e29b-41d4-a716-446655440001');
+        expect(readModel!.businessId).toBe(testBusinessId);
         expect(readModel!.dayOfWeek).toBe(1);
         expect(readModel!.startTime).toBe('09:00:00'); // PostgreSQL returns HH:mm:ss
         expect(readModel!.endTime).toBe('17:00:00'); // PostgreSQL returns HH:mm:ss
@@ -220,8 +220,6 @@ describe('Schedule Repositories (Integration)', () => {
     describe('findByBusinessId', () => {
       it('should return all schedules for a business', async () => {
         // Arrange
-        const businessId = '550e8400-e29b-41d4-a716-446655440100';
-
         // Create schedules for Monday, Wednesday, Friday
         const schedules = [
           { id: '550e8400-e29b-41d4-a716-446655440010', dayOfWeek: 1 },
@@ -232,7 +230,7 @@ describe('Schedule Repositories (Integration)', () => {
         for (const schedule of schedules) {
           const model = repository.create({
             ...schedule,
-            businessId,
+            businessId: testBusinessId,
             startTime: '09:00',
             endTime: '17:00',
             isActive: true,
@@ -243,7 +241,7 @@ describe('Schedule Repositories (Integration)', () => {
         }
 
         // Act
-        const readModels = await readRepo.findByBusinessId(businessId);
+        const readModels = await readRepo.findByBusinessId(testBusinessId);
 
         // Assert
         expect(readModels).toHaveLength(3);
@@ -259,15 +257,14 @@ describe('Schedule Repositories (Integration)', () => {
       });
 
       it('should only return schedules for specified business', async () => {
-        // Arrange
-        const business1 = '550e8400-e29b-41d4-a716-446655440300';
-        const business2 = '550e8400-e29b-41d4-a716-446655440301';
+        // Arrange - Create another test business
+        const business2Id = await createTestBusiness(dataSource);
 
         // Create schedules for both businesses
         await repository.save([
           repository.create({
             id: '550e8400-e29b-41d4-a716-446655440020',
-            businessId: business1,
+            businessId: testBusinessId,
             dayOfWeek: 1,
             startTime: '09:00',
             endTime: '17:00',
@@ -277,7 +274,7 @@ describe('Schedule Repositories (Integration)', () => {
           }),
           repository.create({
             id: '550e8400-e29b-41d4-a716-446655440021',
-            businessId: business2,
+            businessId: business2Id,
             dayOfWeek: 1,
             startTime: '10:00',
             endTime: '18:00',
@@ -288,21 +285,20 @@ describe('Schedule Repositories (Integration)', () => {
         ]);
 
         // Act
-        const readModels = await readRepo.findByBusinessId(business1);
+        const readModels = await readRepo.findByBusinessId(testBusinessId);
 
         // Assert
         expect(readModels).toHaveLength(1);
-        expect(readModels[0].businessId).toBe(business1);
+        expect(readModels[0].businessId).toBe(testBusinessId);
       });
     });
 
     describe('findByBusinessAndDay', () => {
       it('should return schedule for specific business and day', async () => {
         // Arrange
-        const businessId = '550e8400-e29b-41d4-a716-446655440400';
         const scheduleModel = repository.create({
           id: '550e8400-e29b-41d4-a716-446655440030',
-          businessId,
+          businessId: testBusinessId,
           dayOfWeek: 2, // Tuesday
           startTime: '10:00',
           endTime: '18:00',
@@ -313,11 +309,11 @@ describe('Schedule Repositories (Integration)', () => {
         await repository.save(scheduleModel);
 
         // Act
-        const readModel = await readRepo.findByBusinessAndDay(businessId, 2);
+        const readModel = await readRepo.findByBusinessAndDay(testBusinessId, 2);
 
         // Assert
         expect(readModel).toBeDefined();
-        expect(readModel!.businessId).toBe(businessId);
+        expect(readModel!.businessId).toBe(testBusinessId);
         expect(readModel!.dayOfWeek).toBe(2);
       });
 
@@ -334,13 +330,11 @@ describe('Schedule Repositories (Integration)', () => {
 
       it('should return correct schedule when multiple days exist for same business', async () => {
         // Arrange
-        const businessId = '550e8400-e29b-41d4-a716-446655440600';
-
         // Create schedules for different days
         await repository.save([
           repository.create({
             id: '550e8400-e29b-41d4-a716-446655440040',
-            businessId,
+            businessId: testBusinessId,
             dayOfWeek: 1,
             startTime: '09:00',
             endTime: '17:00',
@@ -350,7 +344,7 @@ describe('Schedule Repositories (Integration)', () => {
           }),
           repository.create({
             id: '550e8400-e29b-41d4-a716-446655440041',
-            businessId,
+            businessId: testBusinessId,
             dayOfWeek: 3,
             startTime: '10:00',
             endTime: '18:00',
@@ -361,8 +355,8 @@ describe('Schedule Repositories (Integration)', () => {
         ]);
 
         // Act
-        const mondaySchedule = await readRepo.findByBusinessAndDay(businessId, 1);
-        const wednesdaySchedule = await readRepo.findByBusinessAndDay(businessId, 3);
+        const mondaySchedule = await readRepo.findByBusinessAndDay(testBusinessId, 1);
+        const wednesdaySchedule = await readRepo.findByBusinessAndDay(testBusinessId, 3);
 
         // Assert
         expect(mondaySchedule).toBeDefined();

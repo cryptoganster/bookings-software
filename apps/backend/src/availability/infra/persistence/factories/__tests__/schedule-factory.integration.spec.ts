@@ -56,7 +56,6 @@ describe('ScheduleFactory (Integration)', () => {
     it('should return aggregate with business logic', async () => {
       // Arrange
       const id = generateTestId();
-      const businessId = generateTestId();
       const scheduleModel = repository.create({
         id,
         businessId: testBusinessId,
@@ -76,7 +75,7 @@ describe('ScheduleFactory (Integration)', () => {
       expect(aggregate).toBeDefined();
       expect(aggregate).not.toBeNull();
       expect(aggregate!.getId().getValue()).toBe(id);
-      expect(aggregate!.getBusinessId().getValue()).toBe(businessId);
+      expect(aggregate!.getBusinessId().getValue()).toBe(testBusinessId);
       expect(aggregate!.getDayOfWeek().getValue()).toBe(1);
       expect(aggregate!.getTimeSlot().getStartTime()).toBe('09:00');
       expect(aggregate!.getTimeSlot().getEndTime()).toBe('17:00');
@@ -94,10 +93,9 @@ describe('ScheduleFactory (Integration)', () => {
     it('should load aggregate that can execute domain methods', async () => {
       // Arrange
       const id = generateTestId();
-      const businessId = generateTestId();
       const scheduleModel = repository.create({
         id,
-        businessId,
+        businessId: testBusinessId,
         dayOfWeek: 2, // Tuesday
         startTime: '08:00',
         endTime: '16:00',
@@ -120,47 +118,19 @@ describe('ScheduleFactory (Integration)', () => {
     it('should handle all days of week correctly', async () => {
       // Arrange - Create schedules for all days
       const testData = [
-        {
-          day: 0,
-          id: generateTestId(),
-          businessId: generateTestId(),
-        }, // Sunday
-        {
-          day: 1,
-          id: generateTestId(),
-          businessId: generateTestId(),
-        }, // Monday
-        {
-          day: 2,
-          id: generateTestId(),
-          businessId: generateTestId(),
-        }, // Tuesday
-        {
-          day: 3,
-          id: generateTestId(),
-          businessId: generateTestId(),
-        }, // Wednesday
-        {
-          day: 4,
-          id: generateTestId(),
-          businessId: generateTestId(),
-        }, // Thursday
-        {
-          day: 5,
-          id: generateTestId(),
-          businessId: generateTestId(),
-        }, // Friday
-        {
-          day: 6,
-          id: generateTestId(),
-          businessId: generateTestId(),
-        }, // Saturday
+        { day: 0, id: generateTestId() }, // Sunday
+        { day: 1, id: generateTestId() }, // Monday
+        { day: 2, id: generateTestId() }, // Tuesday
+        { day: 3, id: generateTestId() }, // Wednesday
+        { day: 4, id: generateTestId() }, // Thursday
+        { day: 5, id: generateTestId() }, // Friday
+        { day: 6, id: generateTestId() }, // Saturday
       ];
 
-      for (const { day, id, businessId } of testData) {
+      for (const { day, id } of testData) {
         const model = repository.create({
           id,
-          businessId,
+          businessId: testBusinessId,
           dayOfWeek: day,
           startTime: '09:00',
           endTime: '17:00',
@@ -182,13 +152,11 @@ describe('ScheduleFactory (Integration)', () => {
     it('should handle both active and inactive schedules', async () => {
       // Arrange
       const activeId = generateTestId();
-      const activeBusinessId = generateTestId();
       const inactiveId = generateTestId();
-      const inactiveBusinessId = generateTestId();
 
       const activeSchedule = repository.create({
         id: activeId,
-        businessId: activeBusinessId,
+        businessId: testBusinessId,
         dayOfWeek: 1,
         startTime: '09:00',
         endTime: '17:00',
@@ -199,7 +167,7 @@ describe('ScheduleFactory (Integration)', () => {
 
       const inactiveSchedule = repository.create({
         id: inactiveId,
-        businessId: inactiveBusinessId,
+        businessId: testBusinessId,
         dayOfWeek: 2,
         startTime: '10:00',
         endTime: '18:00',
@@ -224,37 +192,17 @@ describe('ScheduleFactory (Integration)', () => {
     it('should handle different time ranges correctly', async () => {
       // Arrange
       const testData = [
-        {
-          id: generateTestId(),
-          businessId: generateTestId(),
-          start: '06:00',
-          end: '14:00',
-        }, // Early shift
-        {
-          id: generateTestId(),
-          businessId: generateTestId(),
-          start: '09:00',
-          end: '17:00',
-        }, // Standard shift
-        {
-          id: generateTestId(),
-          businessId: generateTestId(),
-          start: '14:00',
-          end: '22:00',
-        }, // Late shift
-        {
-          id: generateTestId(),
-          businessId: generateTestId(),
-          start: '00:00',
-          end: '23:59',
-        }, // All day
+        { id: generateTestId(), day: 1, start: '06:00', end: '14:00' }, // Early shift - Monday
+        { id: generateTestId(), day: 2, start: '09:00', end: '17:00' }, // Standard shift - Tuesday
+        { id: generateTestId(), day: 3, start: '14:00', end: '22:00' }, // Late shift - Wednesday
+        { id: generateTestId(), day: 4, start: '00:00', end: '23:59' }, // All day - Thursday
       ];
 
-      for (const { id, businessId, start, end } of testData) {
+      for (const { id, day, start, end } of testData) {
         const model = repository.create({
           id,
-          businessId,
-          dayOfWeek: 1,
+          businessId: testBusinessId,
+          dayOfWeek: day,
           startTime: start,
           endTime: end,
           isActive: true,
@@ -277,10 +225,9 @@ describe('ScheduleFactory (Integration)', () => {
   describe('loadByBusinessAndDay', () => {
     it('should return aggregate for specific business and day', async () => {
       // Arrange
-      const businessId = generateTestId();
       const scheduleModel = repository.create({
         id: generateTestId(),
-        businessId,
+        businessId: testBusinessId,
         dayOfWeek: 3, // Wednesday
         startTime: '10:00',
         endTime: '18:00',
@@ -291,12 +238,12 @@ describe('ScheduleFactory (Integration)', () => {
       await repository.save(scheduleModel);
 
       // Act
-      const aggregate = await factory.loadByBusinessAndDay(businessId, 3);
+      const aggregate = await factory.loadByBusinessAndDay(testBusinessId, 3);
 
       // Assert
       expect(aggregate).toBeDefined();
       expect(aggregate).not.toBeNull();
-      expect(aggregate!.getBusinessId().getValue()).toBe(businessId);
+      expect(aggregate!.getBusinessId().getValue()).toBe(testBusinessId);
       expect(aggregate!.getDayOfWeek().getValue()).toBe(3);
     });
 
@@ -310,8 +257,6 @@ describe('ScheduleFactory (Integration)', () => {
 
     it('should return correct schedule when multiple schedules exist for same business', async () => {
       // Arrange
-      const businessId = generateTestId();
-
       // Create schedules for Monday, Wednesday, Friday
       const schedules = [
         {
@@ -337,7 +282,7 @@ describe('ScheduleFactory (Integration)', () => {
       for (const schedule of schedules) {
         const model = repository.create({
           ...schedule,
-          businessId,
+          businessId: testBusinessId,
           isActive: true,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -346,9 +291,9 @@ describe('ScheduleFactory (Integration)', () => {
       }
 
       // Act
-      const mondaySchedule = await factory.loadByBusinessAndDay(businessId, 1);
-      const wednesdaySchedule = await factory.loadByBusinessAndDay(businessId, 3);
-      const fridaySchedule = await factory.loadByBusinessAndDay(businessId, 5);
+      const mondaySchedule = await factory.loadByBusinessAndDay(testBusinessId, 1);
+      const wednesdaySchedule = await factory.loadByBusinessAndDay(testBusinessId, 3);
+      const fridaySchedule = await factory.loadByBusinessAndDay(testBusinessId, 5);
 
       // Assert
       expect(mondaySchedule).toBeDefined();
@@ -363,10 +308,9 @@ describe('ScheduleFactory (Integration)', () => {
 
     it('should load aggregate that can execute domain methods', async () => {
       // Arrange
-      const businessId = generateTestId();
       const scheduleModel = repository.create({
         id: generateTestId(),
-        businessId,
+        businessId: testBusinessId,
         dayOfWeek: 4, // Thursday
         startTime: '09:00',
         endTime: '17:00',
@@ -377,7 +321,7 @@ describe('ScheduleFactory (Integration)', () => {
       await repository.save(scheduleModel);
 
       // Act
-      const aggregate = await factory.loadByBusinessAndDay(businessId, 4);
+      const aggregate = await factory.loadByBusinessAndDay(testBusinessId, 4);
 
       // Assert - Verify aggregate has business logic methods
       expect(aggregate).toBeDefined();
