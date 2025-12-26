@@ -13,6 +13,7 @@ import { UUID } from '@shared/vo/uuid';
 import {
   createIntegrationTestDataSource,
   cleanDatabase,
+  createTestBusiness,
 } from '@test-utils/integration-test-helper';
 
 /**
@@ -67,8 +68,6 @@ describe('IdentifyCustomerHandler Integration Tests', () => {
     await module.init();
 
     commandBus = module.get<CommandBus>(CommandBus);
-
-    businessId = UUID.generate().getValue();
   }, 30000);
 
   afterAll(async () => {
@@ -76,8 +75,10 @@ describe('IdentifyCustomerHandler Integration Tests', () => {
     await module.close();
   });
 
-  afterEach(async () => {
+  beforeEach(async () => {
     await cleanDatabase(dataSource);
+    // Create a test business for each test to satisfy foreign key constraint
+    businessId = await createTestBusiness(dataSource);
   });
 
   describe('Create new customer', () => {
@@ -237,9 +238,9 @@ describe('IdentifyCustomerHandler Integration Tests', () => {
 
   describe('Multi-tenant isolation', () => {
     it('should create separate customers for same phone in different businesses', async () => {
-      // Arrange
-      const business1 = UUID.generate().getValue();
-      const business2 = UUID.generate().getValue();
+      // Arrange - Create two test businesses
+      const business1 = await createTestBusiness(dataSource);
+      const business2 = await createTestBusiness(dataSource);
       const phone = '+18095555555';
 
       const command1 = new IdentifyCustomerCommand(business1, phone, 'Customer 1');

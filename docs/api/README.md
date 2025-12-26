@@ -4,6 +4,19 @@ This directory contains comprehensive API documentation for all backend services
 
 ## Available APIs
 
+### Table of Contents
+
+1. [Auth API](#1-auth-api)
+2. [Account API](#2-account-api)
+3. [Customer API](#3-customer-api)
+4. [Availability API](#4-availability-api)
+5. [Booking API](#5-booking-api)
+6. [Business API](#6-business-api)
+7. [Conversation API](#7-conversation-api)
+8. [Offering API](#8-offering-api)
+
+---
+
 ### 1. [Auth API](./auth.md)
 
 Authentication and user management endpoints.
@@ -240,19 +253,135 @@ When adding new API endpoints:
 
 ---
 
+### 4. [Availability API](./availability.md)
+
+Schedule, blockout, and capacity management endpoints.
+
+**Key Features:**
+
+- Query available dates and time slots
+- Schedule management (business hours)
+- Blockout management (holidays, closures)
+- Capacity tracking and management
+- Multi-tenant support
+
+**Endpoints:**
+
+- `GET /availability/dates` - Get available dates for a service
+- `GET /availability/slots` - Get available time slots for a date
+- `POST /schedules` - Create business schedule
+- `GET /schedules` - List schedules
+- `PUT /schedules/:id` - Update schedule
+- `DELETE /schedules/:id` - Delete schedule
+- `POST /blockouts` - Create blockout period
+- `GET /blockouts` - List blockouts
+- `DELETE /blockouts/:id` - Delete blockout
+
+---
+
+### 5. [Booking API](./booking.md)
+
+Appointment creation and management endpoints.
+
+**Key Features:**
+
+- Appointment creation with validation
+- Appointment cancellation (with time restrictions)
+- Appointment modification
+- Appointment history and filtering
+- Status tracking (CONFIRMED, CANCELLED, COMPLETED)
+- Optimistic locking for concurrency control
+
+**Endpoints:**
+
+- `POST /appointments` - Create new appointment
+- `GET /appointments/:id` - Get appointment details
+- `GET /appointments` - List appointments with filters
+- `PUT /appointments/:id/cancel` - Cancel appointment
+- `PUT /appointments/:id/modify` - Modify appointment
+- `GET /appointments/today` - Get today's appointments
+- `GET /appointments/upcoming` - Get upcoming appointments
+
+---
+
+### 6. [Business API](./business.md)
+
+Business profile and configuration endpoints.
+
+**Key Features:**
+
+- Business profile management
+- WhatsApp configuration
+- Multi-business support per owner
+- Timezone configuration
+- Business activation/deactivation
+
+**Endpoints:**
+
+- `POST /businesses` - Create new business
+- `GET /businesses/:id` - Get business details
+- `GET /businesses` - List businesses for owner
+- `PUT /businesses/:id` - Update business profile
+- `PUT /businesses/:id/whatsapp` - Configure WhatsApp
+- `PATCH /businesses/:id/activate` - Activate business
+- `PATCH /businesses/:id/deactivate` - Deactivate business
+
+---
+
+### 7. [Conversation API](./conversation.md)
+
+WhatsApp integration and customer communication endpoints.
+
+**Key Features:**
+
+- WhatsApp webhook integration
+- Admin query management
+- Conversation history tracking
+- Message sending and receiving
+- Webhook signature verification
+- Automated response handling
+
+**Endpoints:**
+
+- `GET /conversations/admin-queries/pending` - Get pending admin queries
+- `POST /conversations/:id/respond` - Respond to admin query
+- `GET /conversations/:id/history` - Get conversation history
+- `POST /webhooks/whatsapp` - WhatsApp webhook (receive messages)
+- `GET /webhooks/whatsapp` - WhatsApp webhook verification
+
+---
+
+### 8. [Offering API](./offering.md)
+
+Service offerings management endpoints.
+
+**Key Features:**
+
+- Service creation and configuration
+- Duration and capacity settings
+- Service activation/deactivation
+- Service catalog management
+- Multi-tenant support
+
+**Endpoints:**
+
+- `POST /offerings` - Create new service
+- `GET /offerings/:id` - Get service details
+- `GET /offerings` - List services for business
+- `PUT /offerings/:id` - Update service
+- `DELETE /offerings/:id` - Deactivate service
+- `GET /offerings/active` - List active services
+
+---
+
 ## Upcoming APIs
 
 The following APIs are planned but not yet documented:
 
-- **Business API** - Business management and configuration
-- **Offering API** - Service offerings management
-- **Availability API** - Schedules and capacity management
-- **Booking API** - Appointment management
-- **Conversation API** - WhatsApp integration
 - **Notification API** - Reminders and notifications
 
 ---
 
-**Last Updated:** December 19, 2025  
+**Last Updated:** December 26, 2025  
 **Maintained By:** Development Team  
 **Contact:** dev@example.com
