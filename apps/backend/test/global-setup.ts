@@ -6,7 +6,7 @@ import { join } from 'path';
  * Jest Global Setup
  * Runs once before all test suites
  * Executes migrations to create database schema
- * 
+ *
  * This approach:
  * 1. Validates that migrations work correctly
  * 2. Ensures test schema matches production schema
