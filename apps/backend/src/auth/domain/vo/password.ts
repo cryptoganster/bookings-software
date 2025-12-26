@@ -1,5 +1,5 @@
 import { ValueObject } from '@shared/kernel/value-object';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 export class Password extends ValueObject {
   private constructor(private readonly hashedValue: string) {

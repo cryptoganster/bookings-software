@@ -33,7 +33,7 @@ export async function seedAccount(
   // Create second BusinessOwner with PRO plan (for testing different plans)
   const userId2 = uuidv4();
   const businessOwnerId2 = uuidv4();
-  const hashedPassword = await import('bcrypt').then((bcrypt) => bcrypt.hash('Test456!', 10));
+  const hashedPassword = await import('bcryptjs').then((bcrypt) => bcrypt.hash('Test456!', 10));
 
   // Create second user
   await dataSource.query(
