@@ -7,6 +7,7 @@ import { GetBusinessesByOwnerIdQuery } from '../query';
 import { BusinessModel } from '@business/infra/persistence/models/business.model';
 import { BusinessReadRepository } from '@business/infra/persistence/repositories/business-read.repository';
 import { UUID } from '@shared/vo/uuid';
+import { createTestUser, cleanDatabase } from '@test-utils/e2e-helpers';
 
 /**
  * Integration tests for GetBusinessesByOwnerIdHandler
@@ -33,9 +34,9 @@ describe('GetBusinessesByOwnerIdHandler Integration Tests', () => {
           port: parseInt(process.env.DB_PORT || '5432', 10),
           username: process.env.DB_USERNAME || 'postgres',
           password: process.env.DB_PASSWORD || 'postgres',
-          database: process.env.DB_DATABASE || 'bookings_test',
+          database: process.env.DB_DATABASE || 'postgres_test',
           entities: [BusinessModel],
-          synchronize: true,
+          synchronize: false,
           dropSchema: false,
         }),
         TypeOrmModule.forFeature([BusinessModel]),
@@ -61,13 +62,14 @@ describe('GetBusinessesByOwnerIdHandler Integration Tests', () => {
   });
 
   afterEach(async () => {
-    await dataSource.getRepository(BusinessModel).clear();
+    await cleanDatabase(dataSource);
   });
 
   describe('Find businesses by owner', () => {
     it('should return multiple businesses for same owner', async () => {
       // Arrange
       const ownerId = UUID.generate().getValue();
+      await createTestUser(dataSource, ownerId);
 
       const businesses = [
         {
@@ -129,10 +131,10 @@ describe('GetBusinessesByOwnerIdHandler Integration Tests', () => {
 
       // Assert
       expect(result).toHaveLength(3);
-      expect(result.every((b) => b.ownerId === ownerId)).toBe(true);
-      expect(result.map((b) => b.name)).toContain('Business 1');
-      expect(result.map((b) => b.name)).toContain('Business 2');
-      expect(result.map((b) => b.name)).toContain('Business 3');
+      expect(result.every((b: any) => b.ownerId === ownerId)).toBe(true);
+      expect(result.map((b: any) => b.name)).toContain('Business 1');
+      expect(result.map((b: any) => b.name)).toContain('Business 2');
+      expect(result.map((b: any) => b.name)).toContain('Business 3');
     });
 
     it('should return empty list when owner has no businesses', async () => {
@@ -152,6 +154,8 @@ describe('GetBusinessesByOwnerIdHandler Integration Tests', () => {
       // Arrange
       const owner1 = UUID.generate().getValue();
       const owner2 = UUID.generate().getValue();
+      await createTestUser(dataSource, owner1);
+      await createTestUser(dataSource, owner2);
 
       await dataSource.getRepository(BusinessModel).insert([
         {
@@ -204,6 +208,7 @@ describe('GetBusinessesByOwnerIdHandler Integration Tests', () => {
     it('should return both active and inactive businesses', async () => {
       // Arrange
       const ownerId = UUID.generate().getValue();
+      await createTestUser(dataSource, ownerId);
 
       await dataSource.getRepository(BusinessModel).insert([
         {
@@ -247,8 +252,8 @@ describe('GetBusinessesByOwnerIdHandler Integration Tests', () => {
 
       // Assert
       expect(result).toHaveLength(2);
-      expect(result.find((b) => b.name === 'Active Business')?.isActive).toBe(true);
-      expect(result.find((b) => b.name === 'Inactive Business')?.isActive).toBe(false);
+      expect(result.find((b: any) => b.name === 'Active Business')?.isActive).toBe(true);
+      expect(result.find((b: any) => b.name === 'Inactive Business')?.isActive).toBe(false);
     });
   });
 });

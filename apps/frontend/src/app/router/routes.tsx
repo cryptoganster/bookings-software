@@ -12,6 +12,10 @@ import { AppointmentsPage } from "@pages/AppointmentsPage";
 import { CustomersPage } from "@pages/CustomersPage";
 import { CustomerDetailPage } from "@pages/CustomerDetailPage";
 import { CustomerDuplicatesPage } from "@pages/CustomerDuplicatesPage";
+import { OfferingsPage } from "@pages/OfferingsPage";
+import { SchedulesPage } from "@pages/SchedulesPage";
+import { BlockoutsPage } from "@pages/BlockoutsPage";
+import { ConversationsPage } from "@pages/ConversationsPage";
 import { DashboardLayout } from "@app/layouts/DashboardLayout";
 import { ProtectedRoute } from "./ProtectedRoute";
 
@@ -25,6 +29,10 @@ import { ProtectedRoute } from "./ProtectedRoute";
  * - /customers (protegida) - Gestión de clientes
  * - /customers/:id (protegida) - Detalle de cliente
  * - /customers/duplicates (protegida) - Clientes duplicados
+ * - /offerings (protegida) - Gestión de servicios
+ * - /schedules (protegida) - Gestión de horarios
+ * - /blockouts (protegida) - Gestión de bloqueos
+ * - /conversations (protegida) - Consultas de clientes
  *
  * Las rutas protegidas requieren autenticación y redirigen a /login
  * si el usuario no está autenticado. Todas las rutas protegidas
@@ -80,10 +88,23 @@ export const router = createBrowserRouter([
             path: "/customers/:id",
             element: <CustomerDetailPage />,
           },
+          {
+            path: "/offerings",
+            element: <OfferingsPage />,
+          },
+          {
+            path: "/schedules",
+            element: <SchedulesPage />,
+          },
+          {
+            path: "/blockouts",
+            element: <BlockoutsPage />,
+          },
+          {
+            path: "/conversations",
+            element: <ConversationsPage />,
+          },
           // Aquí se agregarán más rutas protegidas en el futuro:
-          // - /offerings
-          // - /schedules
-          // - /conversations
           // - /settings
         ],
       },

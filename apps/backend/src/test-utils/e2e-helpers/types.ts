@@ -27,10 +27,18 @@ export interface RegisterDto {
   initialRole?: UserRole; // Cambiado de role a initialRole y hecho opcional
 }
 
+export interface AddressDto {
+  street: string;
+  city: string;
+  state?: string | null;
+  country: string;
+  postalCode?: string | null;
+}
+
 export interface CreateBusinessDto {
   name: string;
   whatsappNumber: string;
-  address: string;
+  address: AddressDto;
   timezone: string;
 }
 

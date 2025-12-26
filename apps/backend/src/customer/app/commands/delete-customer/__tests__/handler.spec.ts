@@ -3,23 +3,22 @@ import { DeleteCustomerHandler } from '../handler';
 import { DeleteCustomerCommand } from '../command';
 import { ICustomerFactory } from '@customer/domain/interfaces/factories/customer-factory';
 import { ICustomerWriteRepository } from '@customer/domain/interfaces/repositories/customer-write';
-import { IAppointmentReadRepository } from '@booking/domain/interfaces/repositories/appointment-read';
+import { ICustomerAppointmentChecker } from '@customer/domain/interfaces/services/customer-appointment-checker.interface';
 import { IUnitOfWork } from '@shared/kernel/uow';
 import { Customer } from '@customer/domain/aggregates/customer';
 import { UUID } from '@shared/vo/uuid';
-import { WhatsAppPhone } from '@customer/domain/vo/whatsapp-phone';
+import { WhatsAppPhone } from '@shared/vo/whatsapp-phone';
 import {
   CustomerNotFoundException,
   CustomerHasFutureAppointmentsException,
   CustomerAlreadyDeletedException,
 } from '@customer/domain/exceptions';
-import { AppointmentReadModel } from '@booking/domain/read-models/appointment';
 
 describe('DeleteCustomerHandler', () => {
   let handler: DeleteCustomerHandler;
   let customerFactory: jest.Mocked<ICustomerFactory>;
   let customerWriteRepository: jest.Mocked<ICustomerWriteRepository>;
-  let appointmentReadRepository: jest.Mocked<IAppointmentReadRepository>;
+  let appointmentChecker: jest.Mocked<ICustomerAppointmentChecker>;
   let uow: jest.Mocked<IUnitOfWork>;
 
   const mockCustomerId = '550e8400-e29b-41d4-a716-446655440001';
@@ -36,8 +35,9 @@ describe('DeleteCustomerHandler', () => {
       save: jest.fn(),
     } as any;
 
-    appointmentReadRepository = {
-      findByCustomerId: jest.fn(),
+    appointmentChecker = {
+      hasFutureAppointments: jest.fn(),
+      getFutureAppointmentsCount: jest.fn(),
     } as any;
 
     uow = {
@@ -56,8 +56,8 @@ describe('DeleteCustomerHandler', () => {
           useValue: customerWriteRepository,
         },
         {
-          provide: 'IAppointmentReadRepository',
-          useValue: appointmentReadRepository,
+          provide: 'ICustomerAppointmentChecker',
+          useValue: appointmentChecker,
         },
         {
           provide: 'IUnitOfWork',
@@ -84,7 +84,7 @@ describe('DeleteCustomerHandler', () => {
       );
 
       customerFactory.loadById.mockResolvedValue(customer);
-      appointmentReadRepository.findByCustomerId.mockResolvedValue([]);
+      appointmentChecker.hasFutureAppointments.mockResolvedValue(false);
 
       const command = new DeleteCustomerCommand(mockCustomerId, mockDeletedBy);
 
@@ -93,7 +93,7 @@ describe('DeleteCustomerHandler', () => {
 
       // Assert
       expect(customerFactory.loadById).toHaveBeenCalledWith(mockCustomerId);
-      expect(appointmentReadRepository.findByCustomerId).toHaveBeenCalledWith(mockCustomerId);
+      expect(appointmentChecker.hasFutureAppointments).toHaveBeenCalledWith(mockCustomerId);
       expect(customerWriteRepository.save).toHaveBeenCalledWith(customer);
       expect(uow.transaction).toHaveBeenCalled();
 
@@ -111,22 +111,8 @@ describe('DeleteCustomerHandler', () => {
         'Jane Smith',
       );
 
-      const pastAppointment: AppointmentReadModel = {
-        id: 'apt-1',
-        businessId: mockBusinessId,
-        customerId: mockCustomerId,
-        customerName: 'Jane Smith',
-        customerPhone: '+18095551234',
-        offeringId: 'offering-1',
-        offeringName: 'Haircut',
-        dateTime: new Date('2023-01-01T10:00:00Z'), // Past date
-        status: 'COMPLETED',
-        createdAt: new Date('2023-01-01T09:00:00Z'),
-        cancelledAt: null,
-      };
-
       customerFactory.loadById.mockResolvedValue(customer);
-      appointmentReadRepository.findByCustomerId.mockResolvedValue([pastAppointment]);
+      appointmentChecker.hasFutureAppointments.mockResolvedValue(false);
 
       const command = new DeleteCustomerCommand(mockCustomerId, mockDeletedBy);
 
@@ -159,25 +145,9 @@ describe('DeleteCustomerHandler', () => {
         'Bob Johnson',
       );
 
-      const futureDate = new Date();
-      futureDate.setDate(futureDate.getDate() + 7); // 7 days in the future
-
-      const futureAppointment: AppointmentReadModel = {
-        id: 'apt-2',
-        businessId: mockBusinessId,
-        customerId: mockCustomerId,
-        customerName: 'Bob Johnson',
-        customerPhone: '+18095551234',
-        offeringId: 'offering-1',
-        offeringName: 'Consultation',
-        dateTime: futureDate,
-        status: 'CONFIRMED',
-        createdAt: new Date(),
-        cancelledAt: null,
-      };
-
       customerFactory.loadById.mockResolvedValue(customer);
-      appointmentReadRepository.findByCustomerId.mockResolvedValue([futureAppointment]);
+      appointmentChecker.hasFutureAppointments.mockResolvedValue(true);
+      appointmentChecker.getFutureAppointmentsCount.mockResolvedValue(1);
 
       const command = new DeleteCustomerCommand(mockCustomerId, mockDeletedBy);
 
@@ -197,43 +167,9 @@ describe('DeleteCustomerHandler', () => {
         'Alice Brown',
       );
 
-      const futureDate1 = new Date();
-      futureDate1.setDate(futureDate1.getDate() + 7);
-
-      const futureDate2 = new Date();
-      futureDate2.setDate(futureDate2.getDate() + 14);
-
-      const appointments: AppointmentReadModel[] = [
-        {
-          id: 'apt-3',
-          businessId: mockBusinessId,
-          customerId: mockCustomerId,
-          customerName: 'Alice Brown',
-          customerPhone: '+18095551234',
-          offeringId: 'offering-1',
-          offeringName: 'Service 1',
-          dateTime: futureDate1,
-          status: 'CONFIRMED',
-          createdAt: new Date(),
-          cancelledAt: null,
-        },
-        {
-          id: 'apt-4',
-          businessId: mockBusinessId,
-          customerId: mockCustomerId,
-          customerName: 'Alice Brown',
-          customerPhone: '+18095551234',
-          offeringId: 'offering-2',
-          offeringName: 'Service 2',
-          dateTime: futureDate2,
-          status: 'CONFIRMED',
-          createdAt: new Date(),
-          cancelledAt: null,
-        },
-      ];
-
       customerFactory.loadById.mockResolvedValue(customer);
-      appointmentReadRepository.findByCustomerId.mockResolvedValue(appointments);
+      appointmentChecker.hasFutureAppointments.mockResolvedValue(true);
+      appointmentChecker.getFutureAppointmentsCount.mockResolvedValue(2);
 
       const command = new DeleteCustomerCommand(mockCustomerId, mockDeletedBy);
 
@@ -256,7 +192,7 @@ describe('DeleteCustomerHandler', () => {
       customer.linkToUser(UUID.fromString('550e8400-e29b-41d4-a716-446655440004'));
 
       customerFactory.loadById.mockResolvedValue(customer);
-      appointmentReadRepository.findByCustomerId.mockResolvedValue([]);
+      appointmentChecker.hasFutureAppointments.mockResolvedValue(false);
 
       const command = new DeleteCustomerCommand(mockCustomerId, mockDeletedBy);
 
@@ -282,7 +218,7 @@ describe('DeleteCustomerHandler', () => {
       );
 
       customerFactory.loadById.mockResolvedValue(customer);
-      appointmentReadRepository.findByCustomerId.mockResolvedValue([]);
+      appointmentChecker.hasFutureAppointments.mockResolvedValue(false);
 
       const command = new DeleteCustomerCommand(mockCustomerId, mockDeletedBy);
 
@@ -301,7 +237,7 @@ describe('DeleteCustomerHandler', () => {
       );
 
       customerFactory.loadById.mockResolvedValue(customer);
-      appointmentReadRepository.findByCustomerId.mockResolvedValue([]);
+      appointmentChecker.hasFutureAppointments.mockResolvedValue(false);
 
       const command = new DeleteCustomerCommand(mockCustomerId, mockDeletedBy);
 
@@ -326,7 +262,7 @@ describe('DeleteCustomerHandler', () => {
       );
 
       customerFactory.loadById.mockResolvedValue(customer);
-      appointmentReadRepository.findByCustomerId.mockResolvedValue([]);
+      appointmentChecker.hasFutureAppointments.mockResolvedValue(false);
 
       const command = new DeleteCustomerCommand(mockCustomerId, mockDeletedBy);
 
@@ -346,25 +282,8 @@ describe('DeleteCustomerHandler', () => {
         'Cancelled Apt Customer',
       );
 
-      const futureDate = new Date();
-      futureDate.setDate(futureDate.getDate() + 7);
-
-      const cancelledAppointment: AppointmentReadModel = {
-        id: 'apt-5',
-        businessId: mockBusinessId,
-        customerId: mockCustomerId,
-        customerName: 'Cancelled Apt Customer',
-        customerPhone: '+18095551234',
-        offeringId: 'offering-1',
-        offeringName: 'Service',
-        dateTime: futureDate,
-        status: 'CANCELLED', // Cancelled status
-        createdAt: new Date(),
-        cancelledAt: new Date(),
-      };
-
       customerFactory.loadById.mockResolvedValue(customer);
-      appointmentReadRepository.findByCustomerId.mockResolvedValue([cancelledAppointment]);
+      appointmentChecker.hasFutureAppointments.mockResolvedValue(false);
 
       const command = new DeleteCustomerCommand(mockCustomerId, mockDeletedBy);
 

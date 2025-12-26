@@ -4,7 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { PinoLogger } from 'nestjs-pino';
 import { RegisterCommand } from '@auth/app/commands/register/command';
 import { IUserWriteRepository } from '@auth/domain/interfaces/repositories/user-write';
-import { IUserReadRepository } from '@auth/domain/interfaces/repositories/user-read';
+import { IUserUniquenessChecker } from '@auth/domain/interfaces/services/user-uniqueness-checker.interface';
 import { User } from '@auth/domain/aggregates/user';
 import { UUID } from '@shared/vo/uuid';
 import { Email } from '@auth/domain/vo/email';
@@ -14,8 +14,8 @@ export class RegisterHandler implements ICommandHandler<RegisterCommand> {
   constructor(
     @Inject('IUserWriteRepository')
     private readonly userWriteRepository: IUserWriteRepository,
-    @Inject('IUserReadRepository')
-    private readonly userReadRepository: IUserReadRepository,
+    @Inject('IUserUniquenessChecker')
+    private readonly uniquenessChecker: IUserUniquenessChecker,
     private readonly jwtService: JwtService,
     private readonly eventPublisher: EventPublisher,
     private readonly logger: PinoLogger,
@@ -37,9 +37,9 @@ export class RegisterHandler implements ICommandHandler<RegisterCommand> {
     );
 
     try {
-      // Verificar si el usuario ya existe (usando READ repository)
-      const existingUser = await this.userReadRepository.findByEmail(command.email);
-      if (existingUser) {
+      // Verificar si el email es único (usando domain service)
+      const isUnique = await this.uniquenessChecker.isEmailUnique(command.email);
+      if (!isUnique) {
         this.logger.warn(
           {
             commandName: 'RegisterCommand',

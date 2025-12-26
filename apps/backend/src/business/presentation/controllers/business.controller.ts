@@ -11,6 +11,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { JwtService } from '@nestjs/jwt';
 import { JwtAuthGuard } from '@auth/infra/guards/jwt-auth';
 import { CurrentUser, UserPayload } from '@auth/presentation/decorators/current-user';
 import { CreateBusinessDto } from '@business/presentation/dtos/create-business.dto';
@@ -35,18 +36,21 @@ export class BusinessController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
+    private readonly jwtService: JwtService,
   ) {}
 
   /**
    * POST /api/businesses
    * Create a new business
+   *
+   * Returns the business ID and a new JWT token with businessId included
    */
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(
     @Body() dto: CreateBusinessDto,
     @CurrentUser() user: UserPayload,
-  ): Promise<{ id: string }> {
+  ): Promise<{ id: string; token: string }> {
     const result = await this.commandBus.execute(
       new CreateBusinessCommand(
         user.userId,
@@ -63,7 +67,20 @@ export class BusinessController {
       ),
     );
 
-    return { id: result.businessId };
+    // Generate new JWT token with businessId included
+    // Use the same payload structure as login handler (sub, email, roles, businessId)
+    const newPayload = {
+      sub: user.userId,
+      email: user.email,
+      roles: user.roles || [], // Get roles from user payload
+      businessId: result.businessId,
+    };
+    const newToken = this.jwtService.sign(newPayload);
+
+    return {
+      id: result.businessId,
+      token: newToken,
+    };
   }
 
   /**

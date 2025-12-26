@@ -13,7 +13,7 @@ import { DataSource } from 'typeorm';
 import { BusinessReadRepository } from '../business-read.repository';
 import { BusinessModel } from '../../models/business.model';
 import { UUID } from '@shared/vo/uuid';
-import { E2EDatabaseHelper } from '@test-utils/e2e-helpers';
+import { E2EDatabaseHelper, createTestUser } from '@test-utils/e2e-helpers';
 
 describe('BusinessReadRepository Integration Tests', () => {
   let module: TestingModule;
@@ -30,9 +30,9 @@ describe('BusinessReadRepository Integration Tests', () => {
           port: parseInt(process.env.DB_PORT || '5432', 10),
           username: process.env.DB_USERNAME || 'postgres',
           password: process.env.DB_PASSWORD || 'postgres',
-          database: process.env.DB_DATABASE || 'bookings_test',
+          database: process.env.DB_DATABASE || 'postgres_test',
           entities: [BusinessModel],
-          synchronize: true, // ← Changed from false to true to auto-create tables
+          synchronize: false, // ← Changed from false to true to auto-create tables
         }),
         TypeOrmModule.forFeature([BusinessModel]),
       ],
@@ -73,6 +73,7 @@ describe('BusinessReadRepository Integration Tests', () => {
       // Arrange
       const businessId = UUID.generate().getValue();
       const ownerId = UUID.generate().getValue();
+      await createTestUser(dataSource, ownerId); // Create user first
 
       await dataSource.getRepository(BusinessModel).insert({
         id: businessId,
@@ -124,6 +125,7 @@ describe('BusinessReadRepository Integration Tests', () => {
     it('should return all businesses for owner', async () => {
       // Arrange
       const ownerId = UUID.generate().getValue();
+      await createTestUser(dataSource, ownerId);
 
       await dataSource.getRepository(BusinessModel).insert([
         {
@@ -169,6 +171,8 @@ describe('BusinessReadRepository Integration Tests', () => {
       // Arrange
       const owner1 = UUID.generate().getValue();
       const owner2 = UUID.generate().getValue();
+      await createTestUser(dataSource, owner1);
+      await createTestUser(dataSource, owner2);
 
       await dataSource.getRepository(BusinessModel).insert([
         {
@@ -226,10 +230,12 @@ describe('BusinessReadRepository Integration Tests', () => {
       // Arrange
       const businessId = UUID.generate().getValue();
       const phone = '+18095551234';
+      const ownerId = UUID.generate().getValue();
+      await createTestUser(dataSource, ownerId);
 
       await dataSource.getRepository(BusinessModel).insert({
         id: businessId,
-        ownerId: UUID.generate().getValue(),
+        ownerId: ownerId,
         name: 'Test Business',
         whatsappPhone: phone,
         addressStreet: 'Calle Test',
@@ -254,10 +260,12 @@ describe('BusinessReadRepository Integration Tests', () => {
     it('should return inactive business (state handled by caller)', async () => {
       // Arrange
       const phone = '+18095558888';
+      const ownerId = UUID.generate().getValue();
+      await createTestUser(dataSource, ownerId);
 
       await dataSource.getRepository(BusinessModel).insert({
         id: UUID.generate().getValue(),
-        ownerId: UUID.generate().getValue(),
+        ownerId: ownerId,
         name: 'Inactive Business',
         whatsappPhone: phone,
         addressStreet: 'Calle Inactive',
@@ -283,6 +291,8 @@ describe('BusinessReadRepository Integration Tests', () => {
     it('should handle large result sets efficiently', async () => {
       // Arrange
       const ownerId = UUID.generate().getValue();
+      await createTestUser(dataSource, ownerId);
+
       const businesses = Array.from({ length: 50 }, (_, i) => ({
         id: UUID.generate().getValue(),
         ownerId: ownerId,

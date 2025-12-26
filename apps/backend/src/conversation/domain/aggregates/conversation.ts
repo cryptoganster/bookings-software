@@ -4,6 +4,7 @@ import { ConversationState } from '@conversation/domain/vo/conversation-state';
 import { ConversationStarted } from '@conversation/domain/events/conversation-started';
 import { ConversationStateChanged } from '@conversation/domain/events/conversation-state-changed';
 import { ConversationCompleted } from '@conversation/domain/events/conversation-completed';
+import { AdminQueryResolved } from '@conversation/domain/events/admin-query-resolved.event';
 
 export class Conversation extends VersionedAggregateRoot {
   private id!: UUID;
@@ -11,9 +12,10 @@ export class Conversation extends VersionedAggregateRoot {
   private customerId!: UUID;
   private customerPhone!: string;
   private state!: ConversationState;
+  private status!: string; // 'ACTIVE' | 'AWAITING_ADMIN' | 'RESOLVED'
   private selectedOfferingId?: string;
   private selectedDate?: Date;
-  private selectedTime?: Date;
+  private selectedTime?: string; // Store as "HH:MM" format
   private createdAppointmentId?: string;
 
   // Factory method para creación
@@ -24,6 +26,7 @@ export class Conversation extends VersionedAggregateRoot {
     conversation.customerId = customerId;
     conversation.customerPhone = customerPhone;
     conversation.state = ConversationState.initial();
+    conversation.status = 'ACTIVE'; // Initial status
 
     // Publicar evento
     conversation.apply(
@@ -80,7 +83,7 @@ export class Conversation extends VersionedAggregateRoot {
     );
   }
 
-  selectTime(time: Date): void {
+  selectTime(time: string): void {
     if (!this.state.isSelectingTime()) {
       throw new Error('Cannot select time in current state');
     }
@@ -117,6 +120,27 @@ export class Conversation extends VersionedAggregateRoot {
     this.apply(new ConversationCompleted(this.id.getValue(), appointmentId));
   }
 
+  /**
+   * Resolves an admin query by marking the conversation as resolved.
+   *
+   * @throws Error if conversation is already resolved
+   *
+   * @remarks
+   * - Updates status from 'AWAITING_ADMIN' to 'RESOLVED'
+   * - Increments version for optimistic locking
+   * - Publishes AdminQueryResolved event
+   */
+  resolveAdminQuery(): void {
+    if (this.status === 'RESOLVED') {
+      throw new Error('Conversation is already resolved');
+    }
+
+    this.status = 'RESOLVED';
+    this.incrementVersion();
+
+    this.apply(new AdminQueryResolved(this.id.getValue()));
+  }
+
   // Factory method para reconstrucción desde persistencia
   static fromPersistence(
     id: UUID,
@@ -124,9 +148,10 @@ export class Conversation extends VersionedAggregateRoot {
     customerId: UUID,
     customerPhone: string,
     state: ConversationState,
+    status: string,
     selectedOfferingId: string | undefined,
     selectedDate: Date | undefined,
-    selectedTime: Date | undefined,
+    selectedTime: string | undefined,
     createdAppointmentId: string | undefined,
     version: number,
   ): Conversation {
@@ -136,6 +161,7 @@ export class Conversation extends VersionedAggregateRoot {
     conversation.customerId = customerId;
     conversation.customerPhone = customerPhone;
     conversation.state = state;
+    conversation.status = status;
     conversation.selectedOfferingId = selectedOfferingId;
     conversation.selectedDate = selectedDate;
     conversation.selectedTime = selectedTime;
@@ -173,11 +199,15 @@ export class Conversation extends VersionedAggregateRoot {
     return this.selectedDate;
   }
 
-  getSelectedTime(): Date | undefined {
+  getSelectedTime(): string | undefined {
     return this.selectedTime;
   }
 
   getCreatedAppointmentId(): string | undefined {
     return this.createdAppointmentId;
+  }
+
+  getStatus(): string {
+    return this.status;
   }
 }

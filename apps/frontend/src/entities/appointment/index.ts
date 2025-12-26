@@ -21,6 +21,7 @@ export {
   useUpcomingAppointments,
   useTodayAppointments,
 } from "./model/queries";
+export { useCancelAppointment } from "./model/mutations";
 export { appointmentsApi } from "./model/api";
 
 // Utilities

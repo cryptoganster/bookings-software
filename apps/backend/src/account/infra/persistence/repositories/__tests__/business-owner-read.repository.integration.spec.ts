@@ -1,8 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { createTestUser } from '@test-utils/e2e-helpers';
 import { DataSource, Repository } from 'typeorm';
 import { BusinessOwnerReadRepository } from '../business-owner-read.repository';
 import { BusinessOwnerModel } from '../../models/business-owner.model';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import {
+  createIntegrationTestDataSource,
+  cleanDatabase,
+} from '@test-utils/integration-test-helper';
 
 describe('BusinessOwnerReadRepository (Integration)', () => {
   let module: TestingModule;
@@ -11,6 +16,9 @@ describe('BusinessOwnerReadRepository (Integration)', () => {
   let dataSource: DataSource;
 
   beforeAll(async () => {
+    // Use shared DataSource with all entities
+    dataSource = await createIntegrationTestDataSource();
+
     module = await Test.createTestingModule({
       providers: [
         BusinessOwnerReadRepository,
@@ -21,27 +29,13 @@ describe('BusinessOwnerReadRepository (Integration)', () => {
         },
         {
           provide: DataSource,
-          useFactory: async () => {
-            const AppDataSource = new DataSource({
-              type: 'postgres',
-              host: process.env.DB_HOST || 'localhost',
-              port: parseInt(process.env.DB_PORT || '5432'),
-              username: process.env.DB_USERNAME || 'postgres',
-              password: process.env.DB_PASSWORD || 'postgres',
-              database: process.env.DB_DATABASE || 'bookings_test',
-              entities: [BusinessOwnerModel],
-              synchronize: true,
-              dropSchema: true,
-            });
-            return AppDataSource.initialize();
-          },
+          useValue: dataSource, // Use the shared DataSource
         },
       ],
     }).compile();
 
     readRepository = module.get<BusinessOwnerReadRepository>(BusinessOwnerReadRepository);
     repository = module.get<Repository<BusinessOwnerModel>>(getRepositoryToken(BusinessOwnerModel));
-    dataSource = module.get<DataSource>(DataSource);
   });
 
   afterAll(async () => {
@@ -50,7 +44,8 @@ describe('BusinessOwnerReadRepository (Integration)', () => {
   });
 
   beforeEach(async () => {
-    await repository.clear();
+    // Clean all tables with RESTART IDENTITY CASCADE
+    await cleanDatabase(dataSource);
   });
 
   describe('findById', () => {
@@ -66,6 +61,7 @@ describe('BusinessOwnerReadRepository (Integration)', () => {
         createdAt: new Date('2024-01-15'),
         updatedAt: new Date('2024-01-15'),
       });
+      await createTestUser(dataSource, '65f818ad-9782-40bd-b8ed-16251f31f511');
       await repository.save(businessOwnerModel);
 
       // Act
@@ -106,6 +102,7 @@ describe('BusinessOwnerReadRepository (Integration)', () => {
         createdAt: new Date('2024-06-01'),
         updatedAt: new Date('2024-06-15'),
       });
+      await createTestUser(dataSource, '7c956221-da3a-49db-b00e-2a25aae38ca7');
       await repository.save(businessOwnerModel);
 
       // Act
@@ -146,6 +143,7 @@ describe('BusinessOwnerReadRepository (Integration)', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       });
+      await createTestUser(dataSource, '61e339a2-b501-4ca3-88e0-be8af02d9f09');
       await repository.save(businessOwnerModel);
 
       // Act
@@ -170,6 +168,7 @@ describe('BusinessOwnerReadRepository (Integration)', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       });
+      await createTestUser(dataSource, '50254344-ff7c-4933-b50a-e66fadd31688');
       await repository.save(businessOwnerModel);
 
       // Act

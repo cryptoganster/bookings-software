@@ -1,31 +1,27 @@
 /**
  * ConversationReadModel
  *
- * Read model for conversation queries.
+ * Modelo de lectura para conversaciones.
+ * Usado en queries para mostrar conversaciones pendientes y detalles.
  *
- * **TODO: Implement when Conversation BC persistence is ready**
+ * @remarks
+ * - customerName: Denormalizado desde Customer BC para evitar joins en frontend
+ * - lastMessageAt: Timestamp del último mensaje para ordenamiento
+ * - status: 'ACTIVE' | 'AWAITING_ADMIN' | 'RESOLVED'
+ * - Todos los campos Date son serializados como ISO 8601 strings en la API
  *
- * **Requirements 8.5:** Add customerName field for display in admin panel
- *
- * This read model should include:
- * - id: string
- * - businessId: string
- * - customerId: string
- * - customerName: string | null  ← **NEW: Denormalized from Customer BC**
- * - customerPhone: string
- * - status: string
- * - lastMessageAt: Date
- * - createdAt: Date
- *
- * When implementing the read repository, JOIN with customers table:
+ * **Implementation Note:**
+ * El read repository debe hacer JOIN con customers table:
  *
  * ```sql
  * SELECT
  *   c.*,
- *   cust.name as customer_name
+ *   cust.name as customer_name,
+ *   cust.whatsapp_phone as customer_phone
  * FROM conversations c
  * LEFT JOIN customers cust ON cust.id = c.customer_id
- * WHERE c.id = :id
+ * WHERE c.business_id = :businessId
+ * ORDER BY c.last_message_at DESC
  * ```
  */
 export class ConversationReadModel {

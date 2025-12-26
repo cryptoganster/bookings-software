@@ -171,6 +171,28 @@ export interface CreateOfferingRequestDto {
   maxDailyCapacity?: number;
 }
 
+/**
+ * DTO para actualizar un offering
+ */
+export interface UpdateOfferingRequestDto {
+  name?: string;
+  duration?: number;
+  maxCapacityPerSlot?: number;
+  maxDailyCapacity?: number;
+  isActive?: boolean;
+}
+
+/**
+ * DTO para actualizar un offering
+ */
+export interface UpdateOfferingRequestDto {
+  name?: string;
+  duration?: number;
+  maxCapacityPerSlot?: number;
+  maxDailyCapacity?: number;
+  isActive?: boolean;
+}
+
 // ============================================================================
 // CUSTOMERS
 // ============================================================================
@@ -249,7 +271,8 @@ export interface CreateBusinessRequestDto {
  * DTO para respuesta de creación de negocio
  */
 export interface CreateBusinessResponseDto {
-  businessId: string;
+  id: string;
+  token: string;
 }
 
 /**
@@ -272,6 +295,156 @@ export interface UpdateBusinessInfoRequestDto {
  */
 export interface ConfigureWhatsAppRequestDto {
   whatsappPhone: string;
+}
+
+// ============================================================================
+// AVAILABILITY (SCHEDULES & BLOCKOUTS)
+// ============================================================================
+
+/**
+ * Schedule Read Model - Horarios de atención del negocio
+ *
+ * @remarks
+ * - dayOfWeek: 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+ * - startTime/endTime: HH:MM format (e.g., "09:00", "17:30")
+ * - isActive: false = temporarily disabled
+ */
+export interface ScheduleReadModel {
+  id: string;
+  businessId: string;
+  dayOfWeek: number; // 0-6 (0 = Sunday)
+  startTime: string; // HH:MM format
+  endTime: string; // HH:MM format
+  isActive: boolean;
+  createdAt: string; // ISO 8601 string
+  updatedAt: string; // ISO 8601 string
+}
+
+/**
+ * Blockout Read Model - Bloqueos de fechas específicas
+ *
+ * @remarks
+ * - Used for vacations, holidays, special closures
+ * - startDate/endDate: ISO 8601 date strings
+ * - reason: Optional explanation for the blockout
+ */
+export interface BlockoutReadModel {
+  id: string;
+  businessId: string;
+  startDate: string; // ISO 8601 date string
+  endDate: string; // ISO 8601 date string
+  reason: string | null;
+  createdAt: string; // ISO 8601 string
+}
+
+// ============================================================================
+// CONVERSATIONS & MESSAGES
+// ============================================================================
+
+/**
+ * Conversation Status types
+ */
+export type ConversationStatus = "ACTIVE" | "AWAITING_ADMIN" | "RESOLVED";
+
+/**
+ * Message Direction types
+ */
+export type MessageDirection = "INBOUND" | "OUTBOUND";
+
+/**
+ * Message Type types
+ */
+export type MessageType = "TEXT" | "BUTTON" | "LOCATION";
+
+/**
+ * Conversation DTO - Representa una conversación con un cliente
+ */
+export interface ConversationDto {
+  id: string;
+  businessId: string;
+  customerId: string;
+  status: ConversationStatus;
+  lastMessageAt: string; // ISO 8601 string
+  createdAt: string; // ISO 8601 string
+}
+
+/**
+ * Conversation Read Model - Modelo de lectura enriquecido para queries
+ *
+ * @remarks
+ * - customerName denormalized from Customer BC
+ * - customerPhone denormalized from Customer BC
+ * - status: ACTIVE, AWAITING_ADMIN, RESOLVED
+ * - lastMessageAt: timestamp of most recent message
+ * - Used in admin panel to display pending conversations
+ */
+export interface ConversationReadModel {
+  id: string;
+  businessId: string;
+  customerId: string;
+  customerName: string | null; // Denormalized from Customer
+  customerPhone: string; // Denormalized from Customer
+  status: ConversationStatus;
+  lastMessageAt: string; // ISO 8601 string
+  createdAt: string; // ISO 8601 string
+}
+
+/**
+ * Message DTO - Representa un mensaje en una conversación
+ */
+export interface MessageDto {
+  id: string;
+  conversationId: string;
+  direction: MessageDirection;
+  content: string;
+  messageType: MessageType;
+  sentAt: string; // ISO 8601 string
+  isFromAdmin: boolean;
+}
+
+/**
+ * Message Read Model - Mensaje individual en conversación
+ *
+ * @remarks
+ * - direction: INBOUND (from customer), OUTBOUND (to customer)
+ * - messageType: TEXT, BUTTON, LOCATION
+ * - isFromAdmin: true if sent by admin, false if automated
+ * - sentAt: ISO 8601 string for frontend compatibility
+ * - Used in conversation history display
+ */
+export interface MessageReadModel {
+  id: string;
+  conversationId: string;
+  direction: MessageDirection;
+  content: string;
+  messageType: MessageType;
+  sentAt: string; // ISO 8601 string
+  isFromAdmin: boolean;
+}
+
+/**
+ * Conversation Detail - Conversación con sus mensajes
+ */
+export interface ConversationDetailDto {
+  conversation: ConversationDto;
+  customerName: string | null;
+  customerPhone: string;
+  messages: MessageDto[];
+}
+
+/**
+ * DTO para responder a una consulta de cliente
+ */
+export interface RespondToQueryRequestDto {
+  id: string; // Conversation ID
+  message: string;
+}
+
+/**
+ * DTO para enviar respuesta de admin
+ */
+export interface SendAdminResponseDto {
+  content: string;
 }
 
 // ============================================================================

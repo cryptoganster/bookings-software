@@ -1,5 +1,6 @@
 import { CommandHandler, ICommandHandler, QueryBus, CommandBus } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
+import { PinoLogger } from 'nestjs-pino';
 import { ProcessIncomingMessageCommand } from '@conversation/app/commands/process-incoming-message/command';
 import { IWhatsAppClient, Button } from '@conversation/domain/interfaces/external/whatsapp-client';
 import { Conversation } from '@conversation/domain/aggregates/conversation';
@@ -9,33 +10,57 @@ import { NoAvailableSlotsException } from '@booking/domain/exceptions/no-availab
 import { GetActiveOfferingsQuery } from '@offering/app/queries/get-active-offerings';
 import { OfferingReadModel } from '@offering/domain/read-models/offering';
 import { IdentifyCustomerCommand } from '@customer/app/commands/identify-customer';
-
-/**
- * TEMPORARY: This handler still uses the mock repository directly
- * because there's no real persistence layer yet.
- *
- * TODO: When real persistence is implemented:
- * 1. Inject IConversationFactory instead of IConversationWriteRepository
- * 2. Use factory.loadByCustomerIdAndBusinessId() to load conversations
- * 3. Keep using IConversationWriteRepository only for save()
- */
-interface MockConversationRepository {
-  findByCustomerIdAndBusinessId(customerId: UUID, businessId: UUID): Promise<Conversation | null>;
-  save(conversation: Conversation): Promise<void>;
-}
+import { IConversationFactory } from '@conversation/domain/interfaces/factories/conversation-factory';
+import { IConversationWriteRepository } from '@conversation/domain/interfaces/repositories/conversation-write';
+import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 
 @CommandHandler(ProcessIncomingMessageCommand)
 export class ProcessIncomingMessageHandler implements ICommandHandler<ProcessIncomingMessageCommand> {
   constructor(
+    @Inject('IConversationFactory')
+    private readonly conversationFactory: IConversationFactory,
     @Inject('IConversationWriteRepository')
-    private readonly conversationRepository: MockConversationRepository,
+    private readonly conversationRepository: IConversationWriteRepository,
     @Inject('IWhatsAppClient')
     private readonly whatsappClient: IWhatsAppClient,
     private readonly queryBus: QueryBus,
     private readonly commandBus: CommandBus,
-  ) {}
+    private readonly logger: PinoLogger,
+  ) {
+    this.logger.setContext(ProcessIncomingMessageHandler.name);
+  }
 
   async execute(command: ProcessIncomingMessageCommand): Promise<void> {
+    const maxRetries = 3;
+    let attempt = 0;
+    let lastError: Error | null = null;
+
+    while (attempt < maxRetries) {
+      try {
+        await this.processMessage(command);
+        return; // Éxito
+      } catch (error) {
+        lastError = error as Error;
+        if (error instanceof ConcurrencyException) {
+          attempt++;
+          if (attempt >= maxRetries) {
+            throw new Error(
+              'Unable to process message after multiple attempts due to concurrency. Please try again.',
+            );
+          }
+          // Exponential backoff: 100ms, 200ms, 400ms
+          await new Promise((resolve) => setTimeout(resolve, 100 * Math.pow(2, attempt)));
+        } else {
+          // Para otros errores, propagar inmediatamente con contexto
+          throw new Error(
+            `Failed to process message: ${lastError.message}. Stack: ${lastError.stack}`,
+          );
+        }
+      }
+    }
+  }
+
+  private async processMessage(command: ProcessIncomingMessageCommand): Promise<void> {
     // 1. Identificar o crear customer (anónimo) antes de procesar conversación
     // Esto garantiza que el customer existe en la BD antes de crear la conversación
     const identifyResult = await this.commandBus.execute(
@@ -71,8 +96,8 @@ export class ProcessIncomingMessageHandler implements ICommandHandler<ProcessInc
      * **Requirements: 8.3**
      */
 
-    // 2. Obtener o crear conversación
-    let conversation = await this.conversationRepository.findByCustomerIdAndBusinessId(
+    // 2. Obtener o crear conversación usando factory
+    let conversation = await this.conversationFactory.loadByCustomerIdAndBusinessId(
       customerId,
       businessId,
     );
@@ -85,7 +110,7 @@ export class ProcessIncomingMessageHandler implements ICommandHandler<ProcessInc
         customerId,
         command.customerPhone,
       );
-      await this.conversationRepository.save(conversation);
+      // NO guardar aquí - se guardará después de transicionar el estado
     }
 
     // Máquina de estados: procesar según estado actual
@@ -94,7 +119,7 @@ export class ProcessIncomingMessageHandler implements ICommandHandler<ProcessInc
     if (state.isInitial()) {
       // Transicionar a selección de servicio
       conversation.transitionToSelectingService();
-      await this.conversationRepository.save(conversation);
+      await this.conversationRepository.save(conversation); // Guardar una sola vez
 
       // Enviar botones de servicios disponibles
       await this.sendServiceSelectionButtons(command.customerPhone, businessId.getValue());
@@ -144,13 +169,24 @@ export class ProcessIncomingMessageHandler implements ICommandHandler<ProcessInc
         // Crear cita
         try {
           // Combinar fecha y hora seleccionadas
-          const appointmentDateTime = new Date(conversation.getSelectedDate()!);
-          const selectedTime = conversation.getSelectedTime()!;
-          appointmentDateTime.setUTCHours(
-            selectedTime.getUTCHours(),
-            selectedTime.getUTCMinutes(),
-            0,
-            0,
+          const selectedDate = conversation.getSelectedDate();
+          const selectedTime = conversation.getSelectedTime();
+
+          const appointmentDateTime = new Date(selectedDate!);
+
+          // Parse time string "HH:MM" to hours and minutes
+          const [hours, minutes] = selectedTime!.split(':').map(Number);
+
+          appointmentDateTime.setUTCHours(hours, minutes, 0, 0);
+
+          this.logger.info(
+            {
+              selectedDate: conversation.getSelectedDate(),
+              selectedTime: conversation.getSelectedTime(),
+              appointmentDateTime: appointmentDateTime.toISOString(),
+              offeringId: conversation.getSelectedOfferingId(),
+            },
+            'Creating appointment with combined date/time',
           );
 
           const result = await this.commandBus.execute(
@@ -246,11 +282,13 @@ export class ProcessIncomingMessageHandler implements ICommandHandler<ProcessInc
   private async sendDateSelectionButtons(customerPhone: string): Promise<void> {
     // TODO: Obtener fechas disponibles desde GetAvailableDatesQuery
     const today = new Date();
+    today.setUTCHours(0, 0, 0, 0); // Normalize to midnight UTC
+
     const buttons: Button[] = [];
 
     for (let i = 1; i <= 3; i++) {
       const date = new Date(today);
-      date.setDate(today.getDate() + i);
+      date.setUTCDate(today.getUTCDate() + i); // Use UTC methods
       buttons.push({
         id: `date-${date.toISOString().split('T')[0]}`,
         title: this.formatDate(date),
@@ -289,7 +327,7 @@ export class ProcessIncomingMessageHandler implements ICommandHandler<ProcessInc
     customerPhone: string,
     offeringId: string,
     date: Date,
-    time: Date,
+    time: string,
   ): Promise<void> {
     const buttons: Button[] = [
       { id: 'confirm', title: 'Confirmar' },
@@ -309,21 +347,20 @@ export class ProcessIncomingMessageHandler implements ICommandHandler<ProcessInc
   private parseDateFromButtonId(buttonId: string): Date {
     // buttonId format: "date-YYYY-MM-DD"
     const dateStr = buttonId.replace('date-', '');
-    return new Date(dateStr);
+    // Parse as UTC to avoid timezone issues
+    // new Date('YYYY-MM-DD') creates midnight in local timezone
+    // We need midnight UTC to match capacity records
+    const [year, month, day] = dateStr.split('-').map(Number);
+    return new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
   }
 
-  private parseTimeFromButtonId(buttonId: string): Date {
+  private parseTimeFromButtonId(buttonId: string): string {
     // buttonId format: "time-HH:MM"
     const timeStr = buttonId.replace('time-', '');
-    const [hours, minutes] = timeStr.split(':').map(Number);
-
-    // Create a date object with just the time (use epoch date to avoid timezone issues)
-    const date = new Date(0); // Epoch: 1970-01-01T00:00:00.000Z
-    date.setUTCHours(hours, minutes, 0, 0);
-    return date;
+    return timeStr; // Return as "HH:MM" string
   }
 
-  private formatDate(date: Date): string {
+  private formatDate(date: Date | string): string {
     const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
     const months = [
       'Enero',
@@ -340,12 +377,25 @@ export class ProcessIncomingMessageHandler implements ICommandHandler<ProcessInc
       'Diciembre',
     ];
 
-    return `${days[date.getDay()]} ${date.getDate()} de ${months[date.getMonth()]}`;
+    // Ensure date is a Date object
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+
+    // Use UTC methods to match the UTC date stored in the database
+    return `${days[dateObj.getUTCDay()]} ${dateObj.getUTCDate()} de ${months[dateObj.getUTCMonth()]}`;
   }
 
-  private formatTime(date: Date): string {
-    const hours = date.getHours();
-    const minutes = date.getMinutes();
+  private formatTime(time: Date | string): string {
+    // If time is already a string in "HH:MM" format, parse it
+    if (typeof time === 'string') {
+      const [hours, minutes] = time.split(':').map(Number);
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      const displayHours = hours % 12 || 12;
+      return `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+    }
+
+    // If time is a Date object, extract hours and minutes
+    const hours = time.getHours();
+    const minutes = time.getMinutes();
     const ampm = hours >= 12 ? 'PM' : 'AM';
     const displayHours = hours % 12 || 12;
 

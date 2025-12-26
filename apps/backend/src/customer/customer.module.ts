@@ -36,6 +36,8 @@ import { ExportCustomerDataHandler } from '@customer/app/queries/export-customer
 
 // Domain Services
 import { CustomerDeduplicationService } from '@customer/domain/services/customer-deduplication.service';
+import { CustomerExistenceChecker } from '@customer/domain/services/customer-existence-checker.service';
+import { CustomerAppointmentChecker } from '@customer/domain/services/customer-appointment-checker.service';
 
 // Controllers
 import { CustomerCrudController } from '@customer/presentation/controllers/customer-crud';
@@ -62,7 +64,17 @@ const queryHandlers = [
   ExportCustomerDataHandler,
 ];
 
-const domainServices = [CustomerDeduplicationService];
+const domainServices = [
+  CustomerDeduplicationService,
+  {
+    provide: 'ICustomerExistenceChecker',
+    useClass: CustomerExistenceChecker,
+  },
+  {
+    provide: 'ICustomerAppointmentChecker',
+    useClass: CustomerAppointmentChecker,
+  },
+];
 
 const factories = [
   {
@@ -114,6 +126,12 @@ const repositories = [
     ...factories,
     ...repositories,
   ],
-  exports: ['ICustomerFactory', 'ICustomerWriteRepository', 'ICustomerReadRepository'],
+  exports: [
+    'ICustomerFactory',
+    'ICustomerWriteRepository',
+    'ICustomerReadRepository',
+    'ICustomerExistenceChecker',
+    'ICustomerAppointmentChecker',
+  ],
 })
 export class CustomerModule {}

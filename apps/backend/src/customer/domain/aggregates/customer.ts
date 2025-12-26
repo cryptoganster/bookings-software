@@ -1,6 +1,6 @@
 import { VersionedAggregateRoot } from '@shared/kernel/versioned-aggregate-root';
 import { UUID } from '@shared/vo/uuid';
-import { WhatsAppPhone } from '@customer/domain/vo/whatsapp-phone';
+import { WhatsAppPhone } from '@shared/vo/whatsapp-phone';
 import {
   CustomerCreated,
   CustomerNameUpdated,

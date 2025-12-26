@@ -176,7 +176,7 @@ export class CustomerSearchController {
 
       // Transform to response DTO
       return {
-        customers: result.customers.map((c) => ({
+        customers: result.customers.map((c: any) => ({
           id: c.id,
           businessId: c.businessId,
           userId: c.userId,
@@ -291,7 +291,7 @@ export class CustomerSearchController {
         registeredCount: stats.registeredCount,
         newThisWeek: stats.newThisWeek,
         newThisMonth: stats.newThisMonth,
-        topCustomers: stats.topCustomers.map((c) => ({
+        topCustomers: stats.topCustomers.map((c: any) => ({
           id: c.id,
           name: c.name || 'Unknown',
           appointmentCount: c.appointmentCount,

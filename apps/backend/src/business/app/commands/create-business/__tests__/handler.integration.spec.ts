@@ -8,9 +8,13 @@ import { BusinessModel } from '@business/infra/persistence/models/business.model
 import { BusinessFactory } from '@business/infra/persistence/factories/business.factory';
 import { BusinessWriteRepository } from '@business/infra/persistence/repositories/business-write.repository';
 import { BusinessReadRepository } from '@business/infra/persistence/repositories/business-read.repository';
+import { BusinessUniquenessChecker } from '@business/domain/services/business-uniqueness-checker.service';
+import { BusinessLimitChecker } from '@business/domain/services/business-limit-checker.service';
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { UUID } from '@shared/vo/uuid';
 import { WhatsAppPhoneAlreadyExistsException } from '@shared/kernel/exceptions/whatsapp-phone-already-exists';
+import { MaxBusinessesExceededException } from '@business/domain/exceptions/max-businesses-exceeded';
+import { createTestUser, cleanDatabase } from '@test-utils/e2e-helpers';
 
 /**
  * Integration tests for CreateBusinessHandler
@@ -40,6 +44,7 @@ describe('CreateBusinessHandler Integration Tests', () => {
       }),
     };
 
+    // Mock QueryBus to return BusinessOwner data for limit checking
     const mockQueryBus = {
       execute: jest.fn().mockResolvedValue({
         id: UUID.generate().getValue(),
@@ -47,6 +52,21 @@ describe('CreateBusinessHandler Integration Tests', () => {
         subscriptionPlanName: 'PRO',
         subscriptionPlanMaxBusinesses: 3,
         subscriptionPlanMaxAppointmentsPerMonth: 2000,
+        subscriptionPlanPrice: 79,
+        subscriptionStatus: 'ACTIVE',
+        onboardingCompleted: true,
+        createdAt: new Date(),
+      }),
+    };
+
+    // Mock IBusinessOwnerReadRepository for BusinessLimitChecker
+    const mockBusinessOwnerReadRepo = {
+      findByUserId: jest.fn().mockResolvedValue({
+        id: UUID.generate().getValue(),
+        userId: UUID.generate().getValue(),
+        subscriptionPlanName: 'PRO',
+        maxBusinesses: 3, // ← This is what BusinessLimitChecker accesses
+        maxAppointmentsPerMonth: 2000,
         subscriptionPlanPrice: 79,
         subscriptionStatus: 'ACTIVE',
         onboardingCompleted: true,
@@ -63,9 +83,9 @@ describe('CreateBusinessHandler Integration Tests', () => {
           port: parseInt(process.env.DB_PORT || '5432', 10),
           username: process.env.DB_USERNAME || 'postgres',
           password: process.env.DB_PASSWORD || 'postgres',
-          database: process.env.DB_DATABASE || 'bookings_test',
+          database: process.env.DB_DATABASE || 'postgres_test',
           entities: [BusinessModel],
-          synchronize: true,
+          synchronize: false,
           dropSchema: false,
         }),
         TypeOrmModule.forFeature([BusinessModel]),
@@ -83,6 +103,18 @@ describe('CreateBusinessHandler Integration Tests', () => {
         {
           provide: 'IBusinessReadRepository',
           useClass: BusinessReadRepository,
+        },
+        {
+          provide: 'IBusinessUniquenessChecker',
+          useClass: BusinessUniquenessChecker,
+        },
+        {
+          provide: 'IBusinessLimitChecker',
+          useClass: BusinessLimitChecker,
+        },
+        {
+          provide: 'IBusinessOwnerReadRepository',
+          useValue: mockBusinessOwnerReadRepo,
         },
         {
           provide: 'IUnitOfWork',
@@ -114,12 +146,14 @@ describe('CreateBusinessHandler Integration Tests', () => {
   });
 
   afterEach(async () => {
-    await dataSource.getRepository(BusinessModel).clear();
+    await cleanDatabase(dataSource);
   });
 
   describe('Create new business', () => {
     it('should create new business with valid data', async () => {
       // Arrange
+      await createTestUser(dataSource, ownerId);
+
       const command = new CreateBusinessCommand(
         ownerId,
         'Bufete López',
@@ -162,6 +196,8 @@ describe('CreateBusinessHandler Integration Tests', () => {
 
     it('should create business with minimal address (only street and city)', async () => {
       // Arrange
+      await createTestUser(dataSource, ownerId);
+
       const command = new CreateBusinessCommand(
         ownerId,
         'Consultorio Médico',
@@ -193,6 +229,8 @@ describe('CreateBusinessHandler Integration Tests', () => {
 
     it('should create business with different timezone', async () => {
       // Arrange
+      await createTestUser(dataSource, ownerId);
+
       const command = new CreateBusinessCommand(
         ownerId,
         'Tech Startup',
@@ -223,6 +261,8 @@ describe('CreateBusinessHandler Integration Tests', () => {
     it('should reject duplicate WhatsAppPhone', async () => {
       // Arrange - Create first business
       const existingId = UUID.generate().getValue();
+      await createTestUser(dataSource, ownerId);
+
       await dataSource.getRepository(BusinessModel).insert({
         id: existingId,
         ownerId: ownerId,
@@ -269,6 +309,8 @@ describe('CreateBusinessHandler Integration Tests', () => {
 
     it('should allow same owner to create multiple businesses with different phones', async () => {
       // Arrange
+      await createTestUser(dataSource, ownerId);
+
       const command1 = new CreateBusinessCommand(
         ownerId,
         'Business 1',
@@ -317,6 +359,8 @@ describe('CreateBusinessHandler Integration Tests', () => {
     it('should store ownerId as User.id', async () => {
       // Arrange
       const userId = UUID.generate().getValue();
+      await createTestUser(dataSource, userId);
+
       const command = new CreateBusinessCommand(
         userId,
         'Legal Services',
@@ -346,6 +390,8 @@ describe('CreateBusinessHandler Integration Tests', () => {
   describe('Multi-business support', () => {
     it('should allow creating multiple businesses for same owner', async () => {
       // Arrange
+      await createTestUser(dataSource, ownerId);
+
       const commands = [
         new CreateBusinessCommand(
           ownerId,
@@ -401,11 +447,70 @@ describe('CreateBusinessHandler Integration Tests', () => {
       expect(businesses).toHaveLength(3);
       expect(businesses.every((b) => b.ownerId === ownerId)).toBe(true);
     });
+
+    it('should reject business creation when limit exceeded', async () => {
+      // Arrange - Get the mock and update it to return a plan with maxBusinesses = 1
+      await createTestUser(dataSource, ownerId);
+
+      const mockBusinessOwnerReadRepo = module.get('IBusinessOwnerReadRepository');
+      jest.spyOn(mockBusinessOwnerReadRepo, 'findByUserId').mockResolvedValue({
+        id: UUID.generate().getValue(),
+        userId: ownerId,
+        subscriptionPlanName: 'FREE',
+        maxBusinesses: 1, // ← Limit of 1 business
+        maxAppointmentsPerMonth: 100,
+        subscriptionPlanPrice: 0,
+        subscriptionStatus: 'ACTIVE',
+        onboardingCompleted: true,
+        createdAt: new Date(),
+      });
+
+      // Create first business (should succeed)
+      const command1 = new CreateBusinessCommand(
+        ownerId,
+        'First Business',
+        '+18095556666',
+        {
+          street: 'Calle 1',
+          city: 'Santo Domingo',
+          state: null,
+          country: 'DO',
+          postalCode: null,
+        },
+        'America/Santo_Domingo',
+      );
+
+      await commandBus.execute(command1);
+
+      // Try to create second business (should fail)
+      const command2 = new CreateBusinessCommand(
+        ownerId,
+        'Second Business',
+        '+18095557777',
+        {
+          street: 'Calle 2',
+          city: 'Santiago',
+          state: null,
+          country: 'DO',
+          postalCode: null,
+        },
+        'America/Santo_Domingo',
+      );
+
+      // Act & Assert
+      await expect(commandBus.execute(command2)).rejects.toThrow(MaxBusinessesExceededException);
+
+      // Verify only one business was created
+      const businesses = await dataSource.getRepository(BusinessModel).find({ where: { ownerId } });
+      expect(businesses).toHaveLength(1);
+    });
   });
 
   describe('Default values', () => {
     it('should set isActive=true by default', async () => {
       // Arrange
+      await createTestUser(dataSource, ownerId);
+
       const command = new CreateBusinessCommand(
         ownerId,
         'New Business',
@@ -433,6 +538,8 @@ describe('CreateBusinessHandler Integration Tests', () => {
 
     it('should set version=1 for new business', async () => {
       // Arrange
+      await createTestUser(dataSource, ownerId);
+
       const command = new CreateBusinessCommand(
         ownerId,
         'Version Test',

@@ -1,7 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { CqrsModule } from '@nestjs/cqrs';
-import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+import { describe, it, expect, beforeAll, beforeEach, afterAll } from '@jest/globals';
 import { CreateBusinessOwnerHandler } from '../handler';
 import { CreateBusinessOwnerCommand } from '../command';
 import { BusinessOwnerWriteRepository } from '@account/infra/persistence/repositories/business-owner-write.repository';
@@ -11,6 +9,12 @@ import { SubscriptionPlan } from '@account/domain/vo/subscription-plan';
 import { UUID } from '@shared/vo/uuid';
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { DataSource } from 'typeorm';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import {
+  createIntegrationTestDataSource,
+  cleanDatabase,
+} from '@test-utils/integration-test-helper';
+import { createTestUser } from '@test-utils/e2e-helpers';
 
 /**
  * Integration Test for CreateBusinessOwnerHandler
@@ -23,23 +27,11 @@ describe('CreateBusinessOwnerHandler - Integration Test', () => {
   let dataSource: DataSource;
   let factory: BusinessOwnerFactory;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
+    // Create shared DataSource with all entities
+    dataSource = await createIntegrationTestDataSource();
+
     module = await Test.createTestingModule({
-      imports: [
-        TypeOrmModule.forRoot({
-          type: 'postgres',
-          host: process.env.DB_HOST || 'localhost',
-          port: parseInt(process.env.DB_PORT || '5432', 10),
-          username: process.env.DB_USERNAME || 'postgres',
-          password: process.env.DB_PASSWORD || 'postgres',
-          database: process.env.DB_DATABASE_TEST || 'bookings_test',
-          entities: [BusinessOwnerModel],
-          synchronize: true, // Only for tests
-          dropSchema: true, // Clean database before each test
-        }),
-        TypeOrmModule.forFeature([BusinessOwnerModel]),
-        CqrsModule,
-      ],
       providers: [
         CreateBusinessOwnerHandler,
         BusinessOwnerWriteRepository,
@@ -57,15 +49,28 @@ describe('CreateBusinessOwnerHandler - Integration Test', () => {
           provide: 'IUnitOfWork',
           useClass: TypeOrmUnitOfWork,
         },
+        {
+          provide: DataSource,
+          useValue: dataSource,
+        },
+        {
+          provide: getRepositoryToken(BusinessOwnerModel),
+          useFactory: (dataSource: DataSource) => dataSource.getRepository(BusinessOwnerModel),
+          inject: [DataSource],
+        },
       ],
     }).compile();
 
     handler = module.get<CreateBusinessOwnerHandler>(CreateBusinessOwnerHandler);
-    dataSource = module.get<DataSource>(DataSource);
     factory = module.get<BusinessOwnerFactory>(BusinessOwnerFactory);
   });
 
-  afterEach(async () => {
+  beforeEach(async () => {
+    // Clean database before each test
+    await cleanDatabase(dataSource);
+  });
+
+  afterAll(async () => {
     await dataSource.destroy();
     await module.close();
   });
@@ -73,6 +78,8 @@ describe('CreateBusinessOwnerHandler - Integration Test', () => {
   it('should create BusinessOwner and persist to database', async () => {
     // Arrange
     const userId = UUID.generate();
+    await createTestUser(dataSource, userId.getValue());
+
     const command = new CreateBusinessOwnerCommand(userId.getValue(), 'FREE');
 
     // Act
@@ -94,6 +101,8 @@ describe('CreateBusinessOwnerHandler - Integration Test', () => {
   it('should create BusinessOwner with BASIC plan', async () => {
     // Arrange
     const userId = UUID.generate();
+    await createTestUser(dataSource, userId.getValue());
+
     const command = new CreateBusinessOwnerCommand(userId.getValue(), 'BASIC');
 
     // Act
@@ -108,6 +117,9 @@ describe('CreateBusinessOwnerHandler - Integration Test', () => {
     // Arrange
     const userId1 = UUID.generate();
     const userId2 = UUID.generate();
+    await createTestUser(dataSource, userId1.getValue());
+    await createTestUser(dataSource, userId2.getValue());
+
     const command1 = new CreateBusinessOwnerCommand(userId1.getValue(), 'FREE');
     const command2 = new CreateBusinessOwnerCommand(userId2.getValue(), 'PRO');
 

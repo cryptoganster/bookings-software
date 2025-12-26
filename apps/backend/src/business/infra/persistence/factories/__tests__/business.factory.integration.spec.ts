@@ -30,9 +30,9 @@ describe('BusinessFactory Integration Tests', () => {
           port: parseInt(process.env.DB_PORT || '5432', 10),
           username: process.env.DB_USERNAME || 'postgres',
           password: process.env.DB_PASSWORD || 'postgres',
-          database: process.env.DB_DATABASE || 'bookings_test',
+          database: process.env.DB_DATABASE || 'postgres_test',
           entities: [BusinessModel],
-          synchronize: true, // ← Changed from false to true to auto-create tables
+          synchronize: false, // ← Changed from false to true to auto-create tables
         }),
         TypeOrmModule.forFeature([BusinessModel]),
       ],
@@ -53,9 +53,29 @@ describe('BusinessFactory Integration Tests', () => {
   });
 
   beforeEach(async () => {
-    // Clean up businesses table before each test
-    await dataSource.query('DELETE FROM businesses');
+    // Clean database before each test
+    await dbHelper.clearData();
   });
+
+  /**
+   * Helper to create a user in the database
+   */
+  async function createUser(userId: string): Promise<void> {
+    await dataSource.query(
+      `INSERT INTO users (id, email, password, name, roles, is_active, email_verified, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+       ON CONFLICT (id) DO NOTHING`,
+      [
+        userId,
+        `user-${userId}@test.com`,
+        'hashed_password',
+        'Test User',
+        ['BUSINESS_OWNER'],
+        true,
+        true,
+      ],
+    );
+  }
 
   describe('loadById()', () => {
     it('should return null when business not found', async () => {
@@ -73,6 +93,9 @@ describe('BusinessFactory Integration Tests', () => {
       // Arrange
       const businessId = UUID.generate().getValue();
       const ownerId = UUID.generate().getValue();
+
+      // Create user first
+      await createUser(ownerId);
 
       await dataSource.getRepository(BusinessModel).insert({
         id: businessId,
@@ -107,6 +130,9 @@ describe('BusinessFactory Integration Tests', () => {
       const businessId = UUID.generate().getValue();
       const ownerId = UUID.generate().getValue();
 
+      // Create user first
+      await createUser(ownerId);
+
       await dataSource.getRepository(BusinessModel).insert({
         id: businessId,
         ownerId: ownerId,
@@ -133,6 +159,9 @@ describe('BusinessFactory Integration Tests', () => {
       // Arrange
       const businessId = UUID.generate().getValue();
       const ownerId = UUID.generate().getValue();
+
+      // Create user first
+      await createUser(ownerId);
 
       await dataSource.getRepository(BusinessModel).insert({
         id: businessId,
@@ -163,6 +192,9 @@ describe('BusinessFactory Integration Tests', () => {
       const businessId = UUID.generate().getValue();
       const ownerId = UUID.generate().getValue();
 
+      // Create user first
+      await createUser(ownerId);
+
       await dataSource.getRepository(BusinessModel).insert({
         id: businessId,
         ownerId: ownerId,
@@ -189,6 +221,9 @@ describe('BusinessFactory Integration Tests', () => {
       // Arrange
       const businessId = UUID.generate().getValue();
       const ownerId = UUID.generate().getValue();
+
+      // Create user first
+      await createUser(ownerId);
 
       await dataSource.getRepository(BusinessModel).insert({
         id: businessId,
@@ -218,6 +253,9 @@ describe('BusinessFactory Integration Tests', () => {
       // Arrange
       const businessId = UUID.generate().getValue();
       const ownerId = UUID.generate().getValue();
+
+      // Create user first
+      await createUser(ownerId);
 
       await dataSource.getRepository(BusinessModel).insert({
         id: businessId,
@@ -249,6 +287,9 @@ describe('BusinessFactory Integration Tests', () => {
       // Arrange
       const businessId = UUID.generate().getValue();
       const ownerId = UUID.generate().getValue();
+
+      // Create user first
+      await createUser(ownerId);
 
       await dataSource.getRepository(BusinessModel).insert({
         id: businessId,

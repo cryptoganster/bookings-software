@@ -12,7 +12,7 @@ describe('CreateAppointmentHandler - Property Tests', () => {
   let appointmentRepository: jest.Mocked<IAppointmentWriteRepository>;
   let capacityFactory: any;
   let capacityWriteRepository: any;
-  let customerReadRepository: any;
+  let customerExistenceChecker: any;
   let uow: jest.Mocked<IUnitOfWork>;
 
   beforeEach(async () => {
@@ -30,13 +30,9 @@ describe('CreateAppointmentHandler - Property Tests', () => {
       save: jest.fn(),
     };
 
-    customerReadRepository = {
-      findById: jest.fn(),
-      findByWhatsAppPhone: jest.fn(),
-      findByBusinessId: jest.fn(),
-      findByUserId: jest.fn(),
-      findAnonymousByBusinessId: jest.fn(),
-      getFullData: jest.fn(),
+    customerExistenceChecker = {
+      exists: jest.fn().mockResolvedValue(true), // Mock customer exists for all tests
+      getCustomer: jest.fn(),
     };
 
     uow = {
@@ -68,8 +64,8 @@ describe('CreateAppointmentHandler - Property Tests', () => {
           useValue: capacityWriteRepository,
         },
         {
-          provide: 'ICustomerReadRepository',
-          useValue: customerReadRepository,
+          provide: 'ICustomerExistenceChecker',
+          useValue: customerExistenceChecker,
         },
         {
           provide: PinoLogger,
@@ -105,7 +101,7 @@ describe('CreateAppointmentHandler - Property Tests', () => {
           };
 
           capacityFactory.loadByOfferingAndDate.mockResolvedValue(mockCapacity);
-          customerReadRepository.findById.mockResolvedValue({ id: customerId }); // Mock customer exists
+          customerExistenceChecker.exists.mockResolvedValue(true); // Mock customer exists
           appointmentRepository.save.mockResolvedValue();
           capacityWriteRepository.save.mockResolvedValue();
 

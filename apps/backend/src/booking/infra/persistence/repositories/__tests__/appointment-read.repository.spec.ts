@@ -230,4 +230,142 @@ describe('AppointmentReadRepository Integration Tests', () => {
       expect(new Date(appointments[0].dateTime).getTime()).toBeGreaterThan(now.getTime());
     });
   });
+
+  describe('findToday', () => {
+    it('should return only appointments scheduled for today', async () => {
+      // Arrange
+      const businessId = UUID.generate().getValue();
+      const today = new Date();
+      const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0);
+      const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
+
+      const customer1Id = UUID.generate().getValue();
+      const customer2Id = UUID.generate().getValue();
+      const customer3Id = UUID.generate().getValue();
+      const customer4Id = UUID.generate().getValue();
+
+      // Create customers first
+      await dataSource.getRepository(CustomerModel).insert([
+        {
+          id: customer1Id,
+          user_id: null,
+          business_id: businessId,
+          whatsapp_phone: '+18095559101',
+          name: 'Customer Today 1',
+          version: 1,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+        {
+          id: customer2Id,
+          user_id: null,
+          business_id: businessId,
+          whatsapp_phone: '+18095559102',
+          name: 'Customer Today 2',
+          version: 1,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+        {
+          id: customer3Id,
+          user_id: null,
+          business_id: businessId,
+          whatsapp_phone: '+18095559103',
+          name: 'Customer Tomorrow',
+          version: 1,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+        {
+          id: customer4Id,
+          user_id: null,
+          business_id: businessId,
+          whatsapp_phone: '+18095559104',
+          name: 'Customer Yesterday',
+          version: 1,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+      ]);
+
+      // Create appointments: 2 today, 1 tomorrow, 1 yesterday, 1 today but cancelled
+      await dataSource.getRepository(AppointmentModel).insert([
+        {
+          id: UUID.generate().getValue(),
+          businessId,
+          customerId: customer1Id,
+          offeringId: UUID.generate().getValue(),
+          dateTime: new Date(startOfDay.getTime() + 3600000), // Today at 1 AM
+          status: 'CONFIRMED',
+          version: 1,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          cancelledAt: null,
+        },
+        {
+          id: UUID.generate().getValue(),
+          businessId,
+          customerId: customer2Id,
+          offeringId: UUID.generate().getValue(),
+          dateTime: new Date(startOfDay.getTime() + 43200000), // Today at 12 PM
+          status: 'CONFIRMED',
+          version: 1,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          cancelledAt: null,
+        },
+        {
+          id: UUID.generate().getValue(),
+          businessId,
+          customerId: customer3Id,
+          offeringId: UUID.generate().getValue(),
+          dateTime: new Date(endOfDay.getTime() + 3600000), // Tomorrow
+          status: 'CONFIRMED',
+          version: 1,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          cancelledAt: null,
+        },
+        {
+          id: UUID.generate().getValue(),
+          businessId,
+          customerId: customer4Id,
+          offeringId: UUID.generate().getValue(),
+          dateTime: new Date(startOfDay.getTime() - 3600000), // Yesterday
+          status: 'CONFIRMED',
+          version: 1,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          cancelledAt: null,
+        },
+        {
+          id: UUID.generate().getValue(),
+          businessId,
+          customerId: customer1Id,
+          offeringId: UUID.generate().getValue(),
+          dateTime: new Date(startOfDay.getTime() + 7200000), // Today at 2 AM but cancelled
+          status: 'CANCELLED',
+          version: 1,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          cancelledAt: new Date(),
+        },
+      ]);
+
+      // Act
+      const appointments = await repository.findToday(businessId);
+
+      // Assert
+      expect(appointments).toHaveLength(2);
+      expect(appointments.every((a) => a.status === 'CONFIRMED')).toBe(true);
+      expect(
+        appointments.every((a) => {
+          const appointmentDate = new Date(a.dateTime);
+          return appointmentDate >= startOfDay && appointmentDate <= endOfDay;
+        }),
+      ).toBe(true);
+      expect(appointments[0].customerName).toBe('Customer Today 1');
+      expect(appointments[1].customerName).toBe('Customer Today 2');
+    });
+  });
 });

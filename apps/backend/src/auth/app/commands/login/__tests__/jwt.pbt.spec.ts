@@ -99,6 +99,10 @@ describe('Property 5: JWT tokens contain valid user data with roles', () => {
       }),
     };
 
+    const mockUniquenessChecker = {
+      isEmailUnique: jest.fn().mockResolvedValue(true),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         RegisterHandler,
@@ -108,8 +112,8 @@ describe('Property 5: JWT tokens contain valid user data with roles', () => {
           useValue: mockUserWriteRepository,
         },
         {
-          provide: 'IUserReadRepository',
-          useValue: mockUserReadRepository,
+          provide: 'IUserUniquenessChecker',
+          useValue: mockUniquenessChecker,
         },
         {
           provide: 'IUserFactory',

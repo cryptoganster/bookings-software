@@ -1,4 +1,4 @@
-import { Query } from '@nestjs/cqrs';
+import { Query } from '@shared/kernel';
 import { AppointmentReadModel } from '@booking/domain/read-models/appointment';
 
 export class GetUpcomingAppointmentsQuery extends Query<AppointmentReadModel[]> {

@@ -37,7 +37,8 @@ export async function seedCustomer(
   const testUsers: string[] = [userId]; // testUserId1 (already exists from auth seed)
   const hashedPassword = await bcrypt.hash('Test123!', 10);
 
-  for (let i = 2; i <= 8; i++) {
+  // Start from test3 to avoid conflict with test2 from Account seed
+  for (let i = 3; i <= 9; i++) {
     const testUserId = uuidv4();
     await dataSource.query(
       `INSERT INTO users (id, email, password, name, roles, is_active, email_verified, version, created_at)

@@ -1,6 +1,6 @@
 import { EventsHandler, IEventHandler, CommandBus } from '@nestjs/cqrs';
 import { AppointmentCreated } from '@booking/domain/events/appointment-created';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 // Placeholder commands - these will be implemented in future bounded contexts
 class ScheduleReminderCommand {
@@ -20,6 +20,8 @@ class SendWhatsAppMessageCommand {
 @Injectable()
 @EventsHandler(AppointmentCreated)
 export class OnAppointmentCreatedHandler implements IEventHandler<AppointmentCreated> {
+  private readonly logger = new Logger(OnAppointmentCreatedHandler.name);
+
   constructor(private readonly commandBus: CommandBus) {}
 
   async handle(event: AppointmentCreated): Promise<void> {
@@ -37,8 +39,17 @@ export class OnAppointmentCreatedHandler implements IEventHandler<AppointmentCre
         ),
       );
     } catch (error) {
-      // Log error pero no propagar - los event handlers no deben propagar errores
-      console.error('Error handling AppointmentCreated:', error);
+      // Log error but don't propagate - event handlers should not throw
+      this.logger.error(
+        'Error handling AppointmentCreated',
+        error instanceof Error ? error.stack : String(error),
+        {
+          appointmentId: event.appointmentId,
+          businessId: event.businessId,
+          customerId: event.customerId,
+          error: error instanceof Error ? error.message : String(error),
+        },
+      );
     }
   }
 }

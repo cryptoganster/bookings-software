@@ -8,6 +8,7 @@ import { BusinessModel } from '@business/infra/persistence/models/business.model
 import { BusinessReadRepository } from '@business/infra/persistence/repositories/business-read.repository';
 import { BusinessNotFoundException } from '@business/domain/exceptions/business-not-found';
 import { UUID } from '@shared/vo/uuid';
+import { createTestUser, cleanDatabase } from '@test-utils/e2e-helpers';
 
 /**
  * Integration tests for GetBusinessHandler
@@ -34,9 +35,9 @@ describe('GetBusinessHandler Integration Tests', () => {
           port: parseInt(process.env.DB_PORT || '5432', 10),
           username: process.env.DB_USERNAME || 'postgres',
           password: process.env.DB_PASSWORD || 'postgres',
-          database: process.env.DB_DATABASE || 'bookings_test',
+          database: process.env.DB_DATABASE || 'postgres_test',
           entities: [BusinessModel],
-          synchronize: true,
+          synchronize: false,
           dropSchema: false,
         }),
         TypeOrmModule.forFeature([BusinessModel]),
@@ -56,13 +57,14 @@ describe('GetBusinessHandler Integration Tests', () => {
     dataSource = module.get<DataSource>(DataSource);
   }, 30000);
 
-  afterAll(async () => {
-    await dataSource.destroy();
-    await module.close();
+  beforeEach(async () => {
+    await cleanDatabase(dataSource);
   });
 
-  afterEach(async () => {
-    await dataSource.getRepository(BusinessModel).clear();
+  afterAll(async () => {
+    await cleanDatabase(dataSource);
+    await dataSource.destroy();
+    await module.close();
   });
 
   describe('Find existing business', () => {
@@ -70,6 +72,7 @@ describe('GetBusinessHandler Integration Tests', () => {
       // Arrange
       const businessId = UUID.generate().getValue();
       const ownerId = UUID.generate().getValue();
+      await createTestUser(dataSource, ownerId);
 
       await dataSource.getRepository(BusinessModel).insert({
         id: businessId,
@@ -111,10 +114,12 @@ describe('GetBusinessHandler Integration Tests', () => {
     it('should return business with minimal address', async () => {
       // Arrange
       const businessId = UUID.generate().getValue();
+      const ownerId = UUID.generate().getValue();
+      await createTestUser(dataSource, ownerId);
 
       await dataSource.getRepository(BusinessModel).insert({
         id: businessId,
-        ownerId: UUID.generate().getValue(),
+        ownerId: ownerId,
         name: 'Minimal Business',
         whatsappPhone: '+18095555678',
         addressStreet: 'Calle Minimal',
@@ -157,10 +162,12 @@ describe('GetBusinessHandler Integration Tests', () => {
     it('should return inactive business', async () => {
       // Arrange
       const businessId = UUID.generate().getValue();
+      const ownerId = UUID.generate().getValue();
+      await createTestUser(dataSource, ownerId);
 
       await dataSource.getRepository(BusinessModel).insert({
         id: businessId,
-        ownerId: UUID.generate().getValue(),
+        ownerId: ownerId,
         name: 'Inactive Business',
         whatsappPhone: '+18095559999',
         addressStreet: 'Calle Inactive',

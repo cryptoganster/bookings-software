@@ -10,7 +10,10 @@ import { CustomerWriteRepository } from '@customer/infra/persistence/repositorie
 import { CustomerReadRepository } from '@customer/infra/persistence/repositories/customer-read.repository';
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { UUID } from '@shared/vo/uuid';
-import { WhatsAppPhone } from '@customer/domain/vo/whatsapp-phone';
+import {
+  createIntegrationTestDataSource,
+  cleanDatabase,
+} from '@test-utils/integration-test-helper';
 
 /**
  * Integration tests for IdentifyCustomerHandler
@@ -31,20 +34,12 @@ describe('IdentifyCustomerHandler Integration Tests', () => {
   let businessId: string;
 
   beforeAll(async () => {
+    dataSource = await createIntegrationTestDataSource();
+
     module = await Test.createTestingModule({
       imports: [
         CqrsModule,
-        TypeOrmModule.forRoot({
-          type: 'postgres',
-          host: process.env.DB_HOST || 'localhost',
-          port: parseInt(process.env.DB_PORT || '5432', 10),
-          username: process.env.DB_USERNAME || 'postgres',
-          password: process.env.DB_PASSWORD || 'postgres',
-          database: process.env.DB_DATABASE || 'bookings_test',
-          entities: [CustomerModel],
-          synchronize: true,
-          dropSchema: false,
-        }),
+        TypeOrmModule.forRoot(dataSource.options as any),
         TypeOrmModule.forFeature([CustomerModel]),
       ],
       providers: [
@@ -72,18 +67,17 @@ describe('IdentifyCustomerHandler Integration Tests', () => {
     await module.init();
 
     commandBus = module.get<CommandBus>(CommandBus);
-    dataSource = module.get<DataSource>(DataSource);
 
     businessId = UUID.generate().getValue();
   }, 30000);
 
   afterAll(async () => {
-    await dataSource.destroy();
+    // Don't destroy shared DataSource - it's reused across tests
     await module.close();
   });
 
   afterEach(async () => {
-    await dataSource.getRepository(CustomerModel).clear();
+    await cleanDatabase(dataSource);
   });
 
   describe('Create new customer', () => {

@@ -12,6 +12,7 @@ import { UserModel } from '@auth/infra/persistence/models/user';
 import { UserWriteRepository } from '@auth/infra/persistence/repositories/user-write';
 import { UserReadRepository } from '@auth/infra/persistence/repositories/user-read';
 import { UserFactory } from '@auth/infra/persistence/factories/user-factory';
+import { UserUniquenessChecker } from '@auth/domain/services/user-uniqueness-checker.service';
 import { RegisterHandler } from '@auth/app/commands/register';
 import { LoginHandler } from '@auth/app/commands/login';
 import { AddUserRoleHandler } from '@auth/app/commands/add-user-role';
@@ -57,6 +58,12 @@ import { AuthController } from '@auth/presentation/controllers/auth';
 
     // Event Handlers
     OnCustomerLinkedToUserHandler,
+
+    // Domain Services
+    {
+      provide: 'IUserUniquenessChecker',
+      useClass: UserUniquenessChecker,
+    },
 
     // Repositories
     {

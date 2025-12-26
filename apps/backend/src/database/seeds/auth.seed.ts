@@ -2,13 +2,10 @@ import { DataSource } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import * as bcrypt from 'bcrypt';
 
-export async function seedAuth(
-  dataSource: DataSource,
-): Promise<{ userId: string; businessId: string }> {
+export async function seedAuth(dataSource: DataSource): Promise<{ userId: string }> {
   console.log('👤 Seeding Auth BC...');
 
   const userId = uuidv4();
-  const businessId = uuidv4(); // TODO: Temporary: Will come from Business BC in the future
   const hashedPassword = await bcrypt.hash('Test123!', 10);
 
   // Create test user with BUSINESS_OWNER role
@@ -31,7 +28,6 @@ export async function seedAuth(
   console.log('   Email: test@example.com');
   console.log('   Password: Test123!');
   console.log('   Roles: BUSINESS_OWNER');
-  console.log('   Note: businessId is temporary until Business BC is implemented');
 
-  return { userId, businessId };
+  return { userId };
 }

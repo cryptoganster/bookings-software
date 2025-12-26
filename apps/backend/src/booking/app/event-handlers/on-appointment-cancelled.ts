@@ -1,6 +1,6 @@
 import { EventsHandler, IEventHandler, CommandBus } from '@nestjs/cqrs';
 import { AppointmentCancelled } from '@booking/domain/events/appointment-cancelled';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 // Placeholder commands - these will be implemented in future bounded contexts
 class CancelReminderCommand {
@@ -17,6 +17,8 @@ class SendWhatsAppMessageCommand {
 @Injectable()
 @EventsHandler(AppointmentCancelled)
 export class OnAppointmentCancelledHandler implements IEventHandler<AppointmentCancelled> {
+  private readonly logger = new Logger(OnAppointmentCancelledHandler.name);
+
   constructor(private readonly commandBus: CommandBus) {}
 
   async handle(event: AppointmentCancelled): Promise<void> {
@@ -31,8 +33,15 @@ export class OnAppointmentCancelledHandler implements IEventHandler<AppointmentC
         new SendWhatsAppMessageCommand('customer-id-placeholder', 'Tu cita ha sido cancelada'),
       );
     } catch (error) {
-      // Log error pero no propagar - los event handlers no deben propagar errores
-      console.error('Error handling AppointmentCancelled:', error);
+      // Log error but don't propagate - event handlers should not throw
+      this.logger.error(
+        'Error handling AppointmentCancelled',
+        error instanceof Error ? error.stack : String(error),
+        {
+          appointmentId: event.appointmentId,
+          error: error instanceof Error ? error.message : String(error),
+        },
+      );
     }
   }
 }

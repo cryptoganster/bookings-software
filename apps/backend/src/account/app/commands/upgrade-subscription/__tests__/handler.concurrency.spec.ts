@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { createTestUser } from '@test-utils/e2e-helpers';
 import { DataSource, Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { UpgradeSubscriptionHandler } from '../handler';
@@ -9,6 +10,11 @@ import { BusinessOwnerModel } from '@account/infra/persistence/models/business-o
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 import { UUID } from '@shared/vo/uuid';
+import {
+  createIntegrationTestDataSource,
+  cleanDatabase,
+  generateTestId,
+} from '@test-utils/integration-test-helper';
 
 describe('UpgradeSubscriptionHandler - Concurrency Tests', () => {
   let module: TestingModule;
@@ -18,6 +24,9 @@ describe('UpgradeSubscriptionHandler - Concurrency Tests', () => {
   let repository: Repository<BusinessOwnerModel>;
 
   beforeAll(async () => {
+    // Create shared DataSource with ALL entities
+    dataSource = await createIntegrationTestDataSource();
+
     module = await Test.createTestingModule({
       providers: [
         UpgradeSubscriptionHandler,
@@ -40,26 +49,12 @@ describe('UpgradeSubscriptionHandler - Concurrency Tests', () => {
         },
         {
           provide: DataSource,
-          useFactory: async () => {
-            const AppDataSource = new DataSource({
-              type: 'postgres',
-              host: process.env.DB_HOST || 'localhost',
-              port: parseInt(process.env.DB_PORT || '5432'),
-              username: process.env.DB_USERNAME || 'postgres',
-              password: process.env.DB_PASSWORD || 'postgres',
-              database: process.env.DB_DATABASE || 'bookings_test',
-              entities: [BusinessOwnerModel],
-              synchronize: true,
-              dropSchema: true,
-            });
-            return AppDataSource.initialize();
-          },
+          useValue: dataSource,
         },
       ],
     }).compile();
 
     handler = module.get<UpgradeSubscriptionHandler>(UpgradeSubscriptionHandler);
-    dataSource = module.get<DataSource>(DataSource);
     factory = module.get<BusinessOwnerFactory>('IBusinessOwnerFactory');
     repository = module.get<Repository<BusinessOwnerModel>>(getRepositoryToken(BusinessOwnerModel));
   });
@@ -70,7 +65,7 @@ describe('UpgradeSubscriptionHandler - Concurrency Tests', () => {
   });
 
   beforeEach(async () => {
-    await repository.clear();
+    await cleanDatabase(dataSource);
   });
 
   describe('Concurrent Subscription Upgrades', () => {
@@ -79,6 +74,7 @@ describe('UpgradeSubscriptionHandler - Concurrency Tests', () => {
       const businessOwnerId = UUID.generate().getValue();
       const userId = UUID.generate().getValue();
 
+      await createTestUser(dataSource, userId);
       await dataSource.query(
         `INSERT INTO business_owners (id, user_id, subscription_plan, subscription_status, onboarding_completed, version, created_at)
          VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
@@ -120,6 +116,7 @@ describe('UpgradeSubscriptionHandler - Concurrency Tests', () => {
       const businessOwnerId = UUID.generate().getValue();
       const userId = UUID.generate().getValue();
 
+      await createTestUser(dataSource, userId);
       await dataSource.query(
         `INSERT INTO business_owners (id, user_id, subscription_plan, subscription_status, onboarding_completed, version, created_at)
          VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
@@ -148,6 +145,7 @@ describe('UpgradeSubscriptionHandler - Concurrency Tests', () => {
       const businessOwnerId = UUID.generate().getValue();
       const userId = UUID.generate().getValue();
 
+      await createTestUser(dataSource, userId);
       await dataSource.query(
         `INSERT INTO business_owners (id, user_id, subscription_plan, subscription_status, onboarding_completed, version, created_at)
          VALUES ($1, $2, $3, $4, $5, $6, NOW())`,

@@ -7,7 +7,7 @@ import { Customer } from '@customer/domain/aggregates/customer';
 import { CustomerNotFoundException } from '@customer/domain/exceptions/customer-not-found';
 import { CustomerAlreadyLinkedToUserException } from '@customer/domain/exceptions/customer-already-linked-to-user';
 import { UUID } from '@shared/vo/uuid';
-import { WhatsAppPhone } from '@customer/domain/vo/whatsapp-phone';
+import { WhatsAppPhone } from '@shared/vo/whatsapp-phone';
 
 /**
  * Unit tests for LinkCustomerToUserHandler

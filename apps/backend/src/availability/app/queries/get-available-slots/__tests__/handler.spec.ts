@@ -1,159 +1,208 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { GetAvailableSlotsHandler } from '../handler';
 import { GetAvailableSlotsQuery } from '../query';
+import { IAvailabilityChecker } from '@availability/domain/interfaces/services/availability-checker.service';
 import { ICapacityReadRepository } from '@availability/domain/interfaces/repositories/capacity-read';
-import { CapacityReadModel } from '@availability/domain/read-models/capacity';
+import { TimeSlot } from '@availability/domain/read-models/capacity';
 
 describe('GetAvailableSlotsHandler', () => {
   let handler: GetAvailableSlotsHandler;
+  let availabilityChecker: jest.Mocked<IAvailabilityChecker>;
   let capacityReadRepository: jest.Mocked<ICapacityReadRepository>;
 
   beforeEach(async () => {
-    const mockCapacityReadRepository = {
+    // Mock AvailabilityChecker
+    availabilityChecker = {
+      isDateAvailable: jest.fn(),
+      getAvailableTimeSlots: jest.fn(),
+    } as any;
+
+    // Mock CapacityReadRepository
+    capacityReadRepository = {
       findByOfferingAndDate: jest.fn(),
-      findById: jest.fn(),
-    };
+      findByBusinessId: jest.fn(),
+    } as any;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GetAvailableSlotsHandler,
         {
+          provide: 'IAvailabilityChecker',
+          useValue: availabilityChecker,
+        },
+        {
           provide: 'ICapacityReadRepository',
-          useValue: mockCapacityReadRepository,
+          useValue: capacityReadRepository,
         },
       ],
     }).compile();
 
     handler = module.get<GetAvailableSlotsHandler>(GetAvailableSlotsHandler);
-    capacityReadRepository = module.get('ICapacityReadRepository');
   });
 
-  it('should be defined', () => {
-    expect(handler).toBeDefined();
-  });
+  describe('execute', () => {
+    it('should return available time slots with capacity', async () => {
+      // Arrange
+      const date = new Date('2024-12-20');
+      const query = new GetAvailableSlotsQuery('offering-id', 'business-id', date, 60);
 
-  it('should return empty array when capacity not found', async () => {
-    // Arrange
-    const query = new GetAvailableSlotsQuery('offering-id', new Date('2024-12-20'));
-    capacityReadRepository.findByOfferingAndDate.mockResolvedValue(null);
+      const mockTimeStrings = ['09:00', '10:00', '11:00'];
+      availabilityChecker.getAvailableTimeSlots.mockResolvedValue(mockTimeStrings);
 
-    // Act
-    const result = await handler.execute(query);
+      capacityReadRepository.findByOfferingAndDate.mockResolvedValue({
+        id: 'capacity-id',
+        offeringId: 'offering-id',
+        date: date,
+        totalSlots: 10,
+        availableSlots: 5,
+        bookedSlots: 2,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
 
-    // Assert
-    expect(result).toEqual([]);
-    expect(capacityReadRepository.findByOfferingAndDate).toHaveBeenCalledWith(
-      'offering-id',
-      query.date,
-    );
-  });
+      // Act
+      const result = await handler.execute(query);
 
-  it('should return empty array when no available slots', async () => {
-    // Arrange
-    const query = new GetAvailableSlotsQuery('offering-id', new Date('2024-12-20'));
-    const capacity: CapacityReadModel = {
-      id: 'capacity-id',
-      offeringId: 'offering-id',
-      date: new Date('2024-12-20'),
-      totalSlots: 10,
-      availableSlots: 0,
-      bookedSlots: 10,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    capacityReadRepository.findByOfferingAndDate.mockResolvedValue(capacity);
-
-    // Act
-    const result = await handler.execute(query);
-
-    // Assert
-    expect(result).toEqual([]);
-  });
-
-  it('should return time slots when capacity is available', async () => {
-    // Arrange
-    const testDate = new Date('2024-12-20');
-    const query = new GetAvailableSlotsQuery('offering-id', testDate);
-    const capacity: CapacityReadModel = {
-      id: 'capacity-id',
-      offeringId: 'offering-id',
-      date: testDate,
-      totalSlots: 10,
-      availableSlots: 5,
-      bookedSlots: 5,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    capacityReadRepository.findByOfferingAndDate.mockResolvedValue(capacity);
-
-    // Act
-    const result = await handler.execute(query);
-
-    // Assert
-    expect(result).toBeDefined();
-    expect(result.length).toBeGreaterThan(0);
-    expect(result[0]).toHaveProperty('time');
-    expect(result[0]).toHaveProperty('availableSlots');
-    expect(result[0].availableSlots).toBe(5);
-  });
-
-  it('should generate slots from 9 AM to 6 PM with 1.5 hour intervals', async () => {
-    // Arrange
-    const testDate = new Date('2024-12-20');
-    const query = new GetAvailableSlotsQuery('offering-id', testDate);
-    const capacity: CapacityReadModel = {
-      id: 'capacity-id',
-      offeringId: 'offering-id',
-      date: testDate,
-      totalSlots: 10,
-      availableSlots: 5,
-      bookedSlots: 5,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    capacityReadRepository.findByOfferingAndDate.mockResolvedValue(capacity);
-
-    // Act
-    const result = await handler.execute(query);
-
-    // Assert
-    expect(result.length).toBeGreaterThan(0);
-
-    // Verificar que el primer slot es a las 9 AM
-    const firstSlot = result[0];
-    expect(firstSlot.time.getHours()).toBe(9);
-    expect(firstSlot.time.getMinutes()).toBe(0);
-
-    // Verificar que todos los slots tienen la misma cantidad de slots disponibles
-    result.forEach((slot) => {
-      expect(slot.availableSlots).toBe(5);
+      // Assert
+      expect(result).toHaveLength(3);
+      expect(result[0].time.getUTCHours()).toBe(9);
+      expect(result[0].availableSlots).toBe(5);
+      expect(result[1].time.getUTCHours()).toBe(10);
+      expect(result[1].availableSlots).toBe(5);
+      expect(result[2].time.getUTCHours()).toBe(11);
+      expect(result[2].availableSlots).toBe(5);
     });
-  });
 
-  it('should use the correct date for slots', async () => {
-    // Arrange
-    const testDate = new Date('2024-12-20');
-    const query = new GetAvailableSlotsQuery('offering-id', testDate);
-    const capacity: CapacityReadModel = {
-      id: 'capacity-id',
-      offeringId: 'offering-id',
-      date: testDate,
-      totalSlots: 10,
-      availableSlots: 5,
-      bookedSlots: 5,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    capacityReadRepository.findByOfferingAndDate.mockResolvedValue(capacity);
+    it('should return empty array when no slots available', async () => {
+      // Arrange
+      const date = new Date('2024-12-20');
+      const query = new GetAvailableSlotsQuery('offering-id', 'business-id', date, 60);
 
-    // Act
-    const result = await handler.execute(query);
+      availabilityChecker.getAvailableTimeSlots.mockResolvedValue([]);
 
-    // Assert
-    result.forEach((slot) => {
-      expect(slot.time.getFullYear()).toBe(testDate.getFullYear());
-      expect(slot.time.getMonth()).toBe(testDate.getMonth());
-      expect(slot.time.getDate()).toBe(testDate.getDate());
+      // Act
+      const result = await handler.execute(query);
+
+      // Assert
+      expect(result).toEqual([]);
+      expect(capacityReadRepository.findByOfferingAndDate).not.toHaveBeenCalled();
+    });
+
+    it('should return empty array when capacity not found', async () => {
+      // Arrange
+      const date = new Date('2024-12-20');
+      const query = new GetAvailableSlotsQuery('offering-id', 'business-id', date, 60);
+
+      availabilityChecker.getAvailableTimeSlots.mockResolvedValue(['09:00', '10:00']);
+      capacityReadRepository.findByOfferingAndDate.mockResolvedValue(null);
+
+      // Act
+      const result = await handler.execute(query);
+
+      // Assert
+      expect(result).toEqual([]);
+    });
+
+    it('should handle different duration values', async () => {
+      // Arrange
+      const date = new Date('2024-12-20');
+      const query = new GetAvailableSlotsQuery('offering-id', 'business-id', date, 30);
+
+      availabilityChecker.getAvailableTimeSlots.mockResolvedValue(['09:00', '09:30']);
+      capacityReadRepository.findByOfferingAndDate.mockResolvedValue({
+        id: 'capacity-id',
+        offeringId: 'offering-id',
+        date: date,
+        totalSlots: 5,
+        availableSlots: 3,
+        bookedSlots: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      // Act
+      const result = await handler.execute(query);
+
+      // Assert
+      expect(result).toHaveLength(2);
+      expect(result[0].time.getUTCHours()).toBe(9);
+      expect(result[0].time.getUTCMinutes()).toBe(0);
+      expect(result[1].time.getUTCHours()).toBe(9);
+      expect(result[1].time.getUTCMinutes()).toBe(30);
+    });
+
+    it('should pass correct parameters to AvailabilityChecker', async () => {
+      // Arrange
+      const date = new Date('2024-12-20T10:00:00Z');
+      const query = new GetAvailableSlotsQuery('offering-123', 'business-456', date, 90);
+
+      availabilityChecker.getAvailableTimeSlots.mockResolvedValue([]);
+
+      // Act
+      await handler.execute(query);
+
+      // Assert
+      expect(availabilityChecker.getAvailableTimeSlots).toHaveBeenCalledWith(
+        'business-456',
+        'offering-123',
+        date,
+        90,
+      );
+    });
+
+    it('should convert time strings to Date objects correctly', async () => {
+      // Arrange
+      const date = new Date('2024-12-20');
+      const query = new GetAvailableSlotsQuery('offering-id', 'business-id', date, 60);
+
+      availabilityChecker.getAvailableTimeSlots.mockResolvedValue(['14:30', '15:30']);
+      capacityReadRepository.findByOfferingAndDate.mockResolvedValue({
+        id: 'capacity-id',
+        offeringId: 'offering-id',
+        date: date,
+        totalSlots: 5,
+        availableSlots: 2,
+        bookedSlots: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      // Act
+      const result = await handler.execute(query);
+
+      // Assert
+      expect(result).toHaveLength(2);
+      expect(result[0].time.getUTCHours()).toBe(14);
+      expect(result[0].time.getUTCMinutes()).toBe(30);
+      expect(result[1].time.getUTCHours()).toBe(15);
+      expect(result[1].time.getUTCMinutes()).toBe(30);
+    });
+
+    it('should include capacity count in all slots', async () => {
+      // Arrange
+      const date = new Date('2024-12-20');
+      const query = new GetAvailableSlotsQuery('offering-id', 'business-id', date, 45);
+
+      availabilityChecker.getAvailableTimeSlots.mockResolvedValue(['09:00', '09:45', '10:30']);
+      capacityReadRepository.findByOfferingAndDate.mockResolvedValue({
+        id: 'capacity-id',
+        offeringId: 'offering-id',
+        date: date,
+        totalSlots: 10,
+        availableSlots: 7,
+        bookedSlots: 3,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      // Act
+      const result = await handler.execute(query);
+
+      // Assert
+      expect(result).toHaveLength(3);
+      result.forEach((slot) => {
+        expect(slot.availableSlots).toBe(7);
+      });
     });
   });
 });

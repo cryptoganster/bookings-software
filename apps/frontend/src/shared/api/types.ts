@@ -51,58 +51,14 @@ export interface AppointmentFilters {
 }
 
 /**
- * Schedule read model (not yet in shared-types)
- * TODO: Move to shared-types when backend implements schedules
+ * ✅ ConversationReadModel and MessageReadModel are now in @packages/shared-types
+ * Import them directly:
+ *
+ * import type {
+ *   ConversationReadModel,
+ *   MessageReadModel
+ * } from '@packages/shared-types';
  */
-export interface ScheduleReadModel {
-  id: string;
-  businessId: string;
-  dayOfWeek: number;
-  startTime: string;
-  endTime: string;
-  isActive: boolean;
-}
-
-/**
- * Blockout read model (not yet in shared-types)
- * TODO: Move to shared-types when backend implements blockouts
- */
-export interface BlockoutReadModel {
-  id: string;
-  businessId: string;
-  startDate: Date;
-  endDate: Date;
-  reason: string;
-}
-
-/**
- * Conversation read model (not yet in shared-types)
- * TODO: Move to shared-types when backend implements conversations
- */
-export interface ConversationReadModel {
-  id: string;
-  businessId: string;
-  customerId: string;
-  customerPhone: string;
-  customerName: string | null;
-  status: "ACTIVE" | "AWAITING_ADMIN" | "RESOLVED";
-  lastMessageAt: Date;
-  unreadCount: number;
-}
-
-/**
- * Message read model (not yet in shared-types)
- * TODO: Move to shared-types when backend implements messages
- */
-export interface MessageReadModel {
-  id: string;
-  conversationId: string;
-  direction: "INBOUND" | "OUTBOUND";
-  content: string;
-  messageType: "TEXT" | "BUTTON" | "LOCATION";
-  sentAt: Date;
-  isFromAdmin: boolean;
-}
 
 // ============================================================================
 // EJEMPLO DE USO CORRECTO

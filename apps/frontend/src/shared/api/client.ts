@@ -1,5 +1,6 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
 import { env } from "@shared/config/env";
+import { logger } from "@shared/lib/logger";
 
 /**
  * Axios instance configured for the backend API
@@ -30,7 +31,7 @@ apiClient.interceptors.request.use(
           config.headers.Authorization = `Bearer ${token}`;
         }
       } catch (error) {
-        console.error("Error parsing auth storage:", error);
+        logger.error("Error parsing auth storage", { error });
       }
     }
 
@@ -58,12 +59,15 @@ apiClient.interceptors.response.use(
 
     // Handle 404 Not Found
     if (error.response?.status === 404) {
-      console.error("Resource not found:", error.config?.url);
+      logger.error("Resource not found", { url: error.config?.url });
     }
 
     // Handle 500 Server Error
     if (error.response?.status && error.response.status >= 500) {
-      console.error("Server error:", error.message);
+      logger.error("Server error", {
+        message: error.message,
+        status: error.response?.status,
+      });
     }
 
     return Promise.reject(error);

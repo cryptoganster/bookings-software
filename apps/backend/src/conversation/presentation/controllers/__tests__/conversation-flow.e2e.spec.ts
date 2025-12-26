@@ -7,9 +7,9 @@ import { ProcessIncomingMessageCommand } from '@conversation/app/commands/proces
 import { IWhatsAppClient, Button } from '@conversation/domain/interfaces/external/whatsapp-client';
 import { UUID } from '@shared/vo/uuid';
 import { AppointmentModel } from '@booking/infra/persistence/models/appointment';
-import { conversationsStore } from '@conversation/conversation.module';
 import { createCapacityForTomorrow, createActiveOffering } from '@test-utils/e2e-helpers';
 import { CapacityModel } from '@availability/infra/persistence/models/capacity';
+import { ConversationModel } from '@conversation/infra/persistence/models/conversation.model';
 
 describe('Conversational Booking Flow (e2e)', () => {
   let app: INestApplication;
@@ -62,9 +62,47 @@ describe('Conversational Booking Flow (e2e)', () => {
     testBusinessId = UUID.generate().getValue();
     testCustomerId = UUID.generate().getValue();
     testOfferingId = UUID.generate().getValue();
+    const testOwnerId = UUID.generate().getValue();
+
+    // Crear User necesario para foreign key constraint de Business
+    await dataSource.query(
+      `INSERT INTO users (id, email, password, name, roles, is_active, email_verified)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [
+        testOwnerId,
+        'test@example.com',
+        'hashed_password',
+        'Test Owner',
+        ['BUSINESS_OWNER'],
+        true,
+        true,
+      ],
+    );
+
+    // Crear Business necesario para foreign key constraint
+    await dataSource.query(
+      `INSERT INTO businesses (
+        id, owner_id, name, whatsapp_phone, 
+        address_street, address_city, timezone, 
+        is_active, created_at, updated_at, version
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW(), 0)`,
+      [
+        testBusinessId,
+        testOwnerId,
+        'Test Business',
+        '+1234567890',
+        '123 Test St',
+        'Test City',
+        'America/New_York',
+        true,
+      ],
+    );
   });
 
   afterAll(async () => {
+    // Limpiar en orden inverso debido a foreign keys
+    await dataSource.query('DELETE FROM businesses WHERE id = $1', [testBusinessId]);
+    await dataSource.query('DELETE FROM users WHERE email = $1', ['test@example.com']);
     await dataSource.destroy();
     await app.close();
   });
@@ -81,8 +119,9 @@ describe('Conversational Booking Flow (e2e)', () => {
     await dataSource.query('DELETE FROM offerings');
     await dataSource.query('DELETE FROM customers');
 
-    // Limpiar conversaciones en memoria
-    conversationsStore.clear();
+    // Limpiar mensajes antes de conversaciones (foreign key constraint)
+    await dataSource.query('DELETE FROM messages');
+    await dataSource.query('DELETE FROM conversations');
   });
 
   describe('Flujo completo: mensaje inicial → selección servicio → fecha → hora → confirmación', () => {

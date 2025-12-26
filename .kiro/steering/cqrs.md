@@ -494,6 +494,292 @@ describe('GetCustomerAppointmentsHandler', () => {
 export class BookingModule {}
 ```
 
+## CQRS Estricto: Separación con Domain Services y Factories
+
+### Problema: Command Handlers usando Read Repositories
+
+En CQRS estricto, los Command Handlers NO deben usar Read Repositories directamente porque:
+
+1. ❌ Viola la separación de responsabilidades
+2. ❌ Mezcla lógica de escritura con lectura
+3. ❌ Dificulta la optimización independiente
+4. ❌ Hace difícil escalar read y write por separado
+
+### Solución 1: Domain Services para Validaciones
+
+**Problema:**
+
+```typescript
+// ❌ INCORRECTO: Command Handler usando Read Repository
+@CommandHandler(CreateBusinessCommand)
+export class CreateBusinessHandler {
+  constructor(
+    @Inject('IBusinessReadRepository')
+    private readonly readRepo: IBusinessReadRepository, // ❌ Violación CQRS
+    @Inject('IBusinessWriteRepository')
+    private readonly writeRepo: IBusinessWriteRepository,
+  ) {}
+
+  async execute(command: CreateBusinessCommand) {
+    // ❌ Command Handler haciendo query
+    const existing = await this.readRepo.findByWhatsAppPhone(command.phone);
+    if (existing) {
+      throw new WhatsAppPhoneAlreadyExistsException();
+    }
+
+    const business = Business.create(...);
+    await this.writeRepo.save(business);
+  }
+}
+```
+
+**Solución con Domain Service:**
+
+```typescript
+// ✅ CORRECTO: Usar Domain Service
+@CommandHandler(CreateBusinessCommand)
+export class CreateBusinessHandler {
+  constructor(
+    @Inject('IBusinessUniquenessChecker')
+    private readonly uniquenessChecker: IBusinessUniquenessChecker, // ✅ Domain Service
+    @Inject('IBusinessWriteRepository')
+    private readonly writeRepo: IBusinessWriteRepository,
+  ) {}
+
+  async execute(command: CreateBusinessCommand) {
+    // ✅ Domain Service encapsula la validación
+    const isUnique = await this.uniquenessChecker.isWhatsAppPhoneUnique(
+      command.phone,
+    );
+
+    if (!isUnique) {
+      throw new WhatsAppPhoneAlreadyExistsException();
+    }
+
+    const business = Business.create(...);
+    await this.writeRepo.save(business);
+  }
+}
+
+// Domain Service (en domain layer)
+export interface IBusinessUniquenessChecker {
+  isWhatsAppPhoneUnique(phone: string, excludeId?: string): Promise<boolean>;
+}
+
+// Implementación (en infrastructure layer)
+@Injectable()
+export class BusinessUniquenessChecker implements IBusinessUniquenessChecker {
+  constructor(
+    @Inject('IBusinessReadRepository')
+    private readonly readRepo: IBusinessReadRepository, // ✅ Read Repo solo en Domain Service
+  ) {}
+
+  async isWhatsAppPhoneUnique(phone: string, excludeId?: string): Promise<boolean> {
+    const existing = await this.readRepo.findByWhatsAppPhone(phone);
+    if (!existing) return true;
+    if (excludeId && existing.id === excludeId) return true;
+    return false;
+  }
+}
+```
+
+### Solución 2: Factories para Cargar Aggregates
+
+**Problema:**
+
+```typescript
+// ❌ INCORRECTO: Write Repository con método de lectura
+export interface IConversationWriteRepository {
+  save(conversation: Conversation): Promise<void>;
+  findById(id: string): Promise<Conversation | null>; // ❌ Método de lectura en Write Repo
+}
+
+@CommandHandler(SendAdminResponseCommand)
+export class SendAdminResponseHandler {
+  constructor(
+    @Inject("IConversationWriteRepository")
+    private readonly writeRepo: IConversationWriteRepository, // ❌ Tiene método de lectura
+  ) {}
+
+  async execute(command: SendAdminResponseCommand) {
+    // ❌ Write Repository cargando aggregate
+    const conversation = await this.writeRepo.findById(command.conversationId);
+    conversation.resolveAdminQuery();
+    await this.writeRepo.save(conversation);
+  }
+}
+```
+
+**Solución con Factory:**
+
+```typescript
+// ✅ CORRECTO: Factory para cargar, Write Repository para persistir
+export interface IConversationFactory {
+  loadById(id: string): Promise<Conversation | null>; // ✅ Factory carga aggregates
+}
+
+export interface IConversationWriteRepository {
+  save(conversation: Conversation): Promise<void>; // ✅ Solo escritura
+}
+
+@CommandHandler(SendAdminResponseCommand)
+export class SendAdminResponseHandler {
+  constructor(
+    @Inject("IConversationFactory")
+    private readonly factory: IConversationFactory, // ✅ Factory para cargar
+    @Inject("IConversationWriteRepository")
+    private readonly writeRepo: IConversationWriteRepository, // ✅ Write Repo para persistir
+  ) {}
+
+  async execute(command: SendAdminResponseCommand) {
+    // ✅ Factory carga aggregate con lógica de negocio
+    const conversation = await this.factory.loadById(command.conversationId);
+
+    if (!conversation) {
+      throw new ConversationNotFoundException(command.conversationId);
+    }
+
+    // ✅ Ejecutar lógica de negocio
+    conversation.resolveAdminQuery();
+
+    // ✅ Write Repository persiste
+    await this.writeRepo.save(conversation);
+  }
+}
+
+// Factory Implementation (en infrastructure layer)
+@Injectable()
+export class ConversationFactory implements IConversationFactory {
+  constructor(
+    @InjectRepository(ConversationModel)
+    private readonly repository: Repository<ConversationModel>,
+  ) {}
+
+  async loadById(id: string): Promise<Conversation | null> {
+    const model = await this.repository.findOne({ where: { id } });
+    if (!model) return null;
+
+    // ✅ Reconstruir aggregate con lógica de negocio
+    return Conversation.fromPersistence(
+      UUID.fromString(model.id),
+      // ... otros campos
+      model.version, // ← Preserva versión para optimistic locking
+    );
+  }
+}
+```
+
+### Comparación: Domain Service vs Factory
+
+| Aspecto         | Domain Service                   | Factory                                   |
+| --------------- | -------------------------------- | ----------------------------------------- |
+| **Propósito**   | Validaciones de negocio          | Cargar aggregates para modificar          |
+| **Retorna**     | boolean, primitivos, VOs         | Domain Aggregate (con lógica)             |
+| **Usado en**    | Command Handlers (validación)    | Command Handlers (modificación)           |
+| **Inyecta**     | Read Repositories                | TypeORM Repository                        |
+| **Ejemplo**     | `isWhatsAppPhoneUnique()`        | `loadById()`                              |
+| **Cuándo usar** | Validar antes de crear/modificar | Cargar aggregate existente para modificar |
+
+### Flujo Completo con CQRS Estricto
+
+```typescript
+// ============================================
+// COMMAND: Crear Business
+// ============================================
+
+@CommandHandler(CreateBusinessCommand)
+export class CreateBusinessHandler {
+  constructor(
+    @Inject('IBusinessUniquenessChecker')
+    private readonly uniquenessChecker: IBusinessUniquenessChecker, // ✅ Domain Service
+    @Inject('IBusinessLimitChecker')
+    private readonly limitChecker: IBusinessLimitChecker, // ✅ Domain Service
+    @Inject('IBusinessWriteRepository')
+    private readonly writeRepo: IBusinessWriteRepository, // ✅ Write Repository
+  ) {}
+
+  async execute(command: CreateBusinessCommand) {
+    // 1. Validar con Domain Services
+    const isUnique = await this.uniquenessChecker.isWhatsAppPhoneUnique(command.phone);
+    if (!isUnique) throw new WhatsAppPhoneAlreadyExistsException();
+
+    const canCreate = await this.limitChecker.canCreateBusiness(command.ownerId);
+    if (!canCreate) throw new BusinessLimitExceededException();
+
+    // 2. Crear aggregate
+    const business = Business.create(...);
+
+    // 3. Persistir con Write Repository
+    await this.writeRepo.save(business);
+
+    return { businessId: business.getId().getValue() };
+  }
+}
+
+// ============================================
+// COMMAND: Modificar Business
+// ============================================
+
+@CommandHandler(ConfigureWhatsAppCommand)
+export class ConfigureWhatsAppHandler {
+  constructor(
+    @Inject('IBusinessFactory')
+    private readonly factory: IBusinessFactory, // ✅ Factory para cargar
+    @Inject('IBusinessUniquenessChecker')
+    private readonly uniquenessChecker: IBusinessUniquenessChecker, // ✅ Domain Service
+    @Inject('IBusinessWriteRepository')
+    private readonly writeRepo: IBusinessWriteRepository, // ✅ Write Repository
+  ) {}
+
+  async execute(command: ConfigureWhatsAppCommand) {
+    // 1. Cargar aggregate con Factory
+    const business = await this.factory.loadById(command.businessId);
+    if (!business) throw new BusinessNotFoundException();
+
+    // 2. Validar con Domain Service (excluir business actual)
+    const isUnique = await this.uniquenessChecker.isWhatsAppPhoneUnique(
+      command.phone,
+      command.businessId, // ← Excluir business actual
+    );
+    if (!isUnique) throw new WhatsAppPhoneAlreadyExistsException();
+
+    // 3. Ejecutar lógica de negocio
+    business.configureWhatsApp(command.phone);
+
+    // 4. Persistir con Write Repository
+    await this.writeRepo.save(business);
+  }
+}
+
+// ============================================
+// QUERY: Obtener Business
+// ============================================
+
+@QueryHandler(GetBusinessQuery)
+export class GetBusinessHandler {
+  constructor(
+    @Inject('IBusinessReadRepository')
+    private readonly readRepo: IBusinessReadRepository, // ✅ Read Repository
+  ) {}
+
+  async execute(query: GetBusinessQuery): Promise<BusinessReadModel> {
+    // ✅ Read Repository retorna DTO
+    const business = await this.readRepo.findById(query.businessId);
+    if (!business) throw new BusinessNotFoundException();
+    return business; // ← DTO, no aggregate
+  }
+}
+```
+
+### Beneficios de CQRS Estricto
+
+1. ✅ **Separación Clara:** Commands usan Domain Services/Factories, Queries usan Read Repositories
+2. ✅ **Optimización Independiente:** Read y Write pueden optimizarse por separado
+3. ✅ **Escalabilidad:** Read replicas, Write master
+4. ✅ **Testeable:** Domain Services y Factories se testean independientemente
+5. ✅ **Mantenible:** Cambios en validaciones no afectan queries
+6. ✅ **SOLID:** Dependency Inversion, Single Responsibility
+
 ## Anti-Patterns
 
 ❌ **No hacer:**

@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { AppModule } from '../../../../app.module';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
@@ -10,8 +10,11 @@ import { IWhatsAppClient, Button } from '@conversation/domain/interfaces/externa
 import { UUID } from '@shared/vo/uuid';
 import { AppointmentModel } from '@booking/infra/persistence/models/appointment';
 import { CustomerModel } from '@customer/infra/persistence/models/customer.model';
-import { conversationsStore } from '@conversation/conversation.module';
-import { createCapacityForTomorrow, createActiveOffering } from '@test-utils/e2e-helpers';
+import {
+  createCapacityForTomorrow,
+  createActiveOffering,
+  E2EAuthHelper,
+} from '@test-utils/e2e-helpers';
 
 describe('Customer Flow E2E', () => {
   let app: INestApplication;
@@ -19,6 +22,7 @@ describe('Customer Flow E2E', () => {
   let queryBus: QueryBus;
   let dataSource: DataSource;
   let mockWhatsAppClient: jest.Mocked<IWhatsAppClient>;
+  let authHelper: E2EAuthHelper;
 
   // Test data
   let sentMessages: Array<{ phone: string; message: string; buttons?: Button[] }> = [];
@@ -50,18 +54,40 @@ describe('Customer Flow E2E', () => {
       .compile();
 
     app = moduleFixture.createNestApplication();
+
+    // Apply same validation pipe as main.ts
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+        transformOptions: {
+          enableImplicitConversion: true,
+        },
+      }),
+    );
+
+    // Set global prefix like in main.ts
+    app.setGlobalPrefix('api');
+
     await app.init();
 
     commandBus = app.get(CommandBus);
     queryBus = app.get(QueryBus);
     dataSource = app.get(DataSource);
 
-    // Generate test IDs
-    testBusinessId = UUID.generate().getValue();
-    testOfferingId = UUID.generate().getValue();
+    // Create auth helper and test business owner
+    authHelper = new E2EAuthHelper(app);
+    const testUser = await authHelper.createBusinessOwner();
+    testBusinessId = testUser.businessId!;
+
+    // Create active offering for foreign key constraint
+    const offering = await createActiveOffering(dataSource, testBusinessId);
+    testOfferingId = offering.id;
   });
 
   afterAll(async () => {
+    await authHelper.cleanupTestUsers();
     await dataSource.destroy();
     await app.close();
   });
@@ -78,12 +104,20 @@ describe('Customer Flow E2E', () => {
     await dataSource.query('DELETE FROM capacities');
     await dataSource.query('DELETE FROM offerings');
 
-    // Clear in-memory conversations
-    conversationsStore.clear();
+    // Clear conversations from database
+    await dataSource.query('DELETE FROM conversations');
+    await dataSource.query('DELETE FROM messages');
+
+    // Recreate the test offering after cleanup
+    const offering = await createActiveOffering(dataSource, testBusinessId);
+    testOfferingId = offering.id;
   });
 
   describe('Requirement 7.1: Customer Identification', () => {
     it('should automatically identify/create customer from WhatsApp message', async () => {
+      // Arrange: Create offering so conversation flow can proceed
+      await createActiveOffering(dataSource, testBusinessId, testOfferingId);
+
       // Act: Customer sends first message
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
@@ -109,6 +143,9 @@ describe('Customer Flow E2E', () => {
     });
 
     it('should reuse existing customer on subsequent messages', async () => {
+      // Arrange: Create offering so conversation flow can proceed
+      await createActiveOffering(dataSource, testBusinessId, testOfferingId);
+
       // Arrange: Send first message to create customer
       await commandBus.execute(
         new ProcessIncomingMessageCommand(testBusinessId, '', testCustomerPhone, 'Hola', undefined),
@@ -230,9 +267,18 @@ describe('Customer Flow E2E', () => {
 
   describe('Requirement 7.3: Multi-tenant Isolation', () => {
     it('should isolate customers by business', async () => {
-      const business1Id = UUID.generate().getValue();
-      const business2Id = UUID.generate().getValue();
+      // Arrange: Create two real business owners with their businesses
+      const authHelper2 = new E2EAuthHelper(app);
+      const testUser2 = await authHelper2.createBusinessOwner();
+      const business1Id = testBusinessId; // Use existing test business
+      const business2Id = testUser2.businessId!; // Use second test business
+      const offering1Id = testOfferingId; // Use existing test offering
+      const offering2Id = UUID.generate().getValue();
       const phone = '+1234567890';
+
+      // Arrange: Create offerings for both businesses
+      await createActiveOffering(dataSource, business1Id, offering1Id);
+      await createActiveOffering(dataSource, business2Id, offering2Id);
 
       // Act: Create customer in business 1
       await commandBus.execute(
@@ -255,14 +301,22 @@ describe('Customer Flow E2E', () => {
       expect(customer1!.id).not.toBe(customer2!.id);
       expect(customer1!.businessId).toBe(business1Id);
       expect(customer2!.businessId).toBe(business2Id);
+
+      // Cleanup second test user
+      await authHelper2.cleanupTestUsers();
     });
 
     it('should not allow cross-business customer queries', async () => {
-      const business1Id = UUID.generate().getValue();
-      const business2Id = UUID.generate().getValue();
+      // Arrange: Create two real business owners with their businesses
+      const authHelper2 = new E2EAuthHelper(app);
+      const testUser2 = await authHelper2.createBusinessOwner();
+      const business1Id = testBusinessId; // Use existing test business
+      const business2Id = testUser2.businessId!; // Use second test business
+      const offering1Id = testOfferingId; // Use existing test offering
       const phone = '+1234567890';
 
-      // Arrange: Create customer in business 1
+      // Arrange: Create offering for business 1 and create customer
+      await createActiveOffering(dataSource, business1Id, offering1Id);
       await commandBus.execute(
         new ProcessIncomingMessageCommand(business1Id, '', phone, 'Hola', undefined),
       );
@@ -272,6 +326,9 @@ describe('Customer Flow E2E', () => {
 
       // Assert: Should not find customer
       expect(result).toBeNull();
+
+      // Cleanup second test user
+      await authHelper2.cleanupTestUsers();
     });
   });
 
@@ -335,6 +392,9 @@ describe('Customer Flow E2E', () => {
 
   describe('Requirement 7.5: Idempotency', () => {
     it('should handle concurrent customer identification gracefully', async () => {
+      // Arrange: Create offering so conversation flow can proceed
+      await createActiveOffering(dataSource, testBusinessId, testOfferingId);
+
       // Act: Send multiple messages concurrently
       // Some may fail due to unique constraint, but that's expected
       const promises = Array.from({ length: 5 }, () =>

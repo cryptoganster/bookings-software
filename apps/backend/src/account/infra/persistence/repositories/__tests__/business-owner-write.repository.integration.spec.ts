@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { createTestUser } from '@test-utils/e2e-helpers';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { BusinessOwnerWriteRepository } from '../business-owner-write.repository';
@@ -10,6 +11,10 @@ import { UUID } from '@shared/vo/uuid';
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 import { DataSource } from 'typeorm';
+import {
+  createIntegrationTestDataSource,
+  cleanDatabase,
+} from '@test-utils/integration-test-helper';
 
 /**
  * Integration Test for BusinessOwnerWriteRepository
@@ -23,6 +28,9 @@ describe('BusinessOwnerWriteRepository - Integration Test (Optimistic Locking)',
   let dataSource: DataSource;
 
   beforeEach(async () => {
+    // Use shared DataSource with all entities
+    dataSource = await createIntegrationTestDataSource();
+
     module = await Test.createTestingModule({
       imports: [
         TypeOrmModule.forRoot({
@@ -31,10 +39,9 @@ describe('BusinessOwnerWriteRepository - Integration Test (Optimistic Locking)',
           port: parseInt(process.env.DB_PORT || '5432', 10),
           username: process.env.DB_USERNAME || 'postgres',
           password: process.env.DB_PASSWORD || 'postgres',
-          database: process.env.DB_DATABASE_TEST || 'bookings_test',
+          database: process.env.DB_DATABASE || 'postgres_test',
           entities: [BusinessOwnerModel],
-          synchronize: true, // Only for tests
-          dropSchema: true, // Clean database before each test
+          synchronize: false,
         }),
         TypeOrmModule.forFeature([BusinessOwnerModel]),
       ],
@@ -46,12 +53,18 @@ describe('BusinessOwnerWriteRepository - Integration Test (Optimistic Locking)',
           provide: 'IUnitOfWork',
           useClass: TypeOrmUnitOfWork,
         },
+        {
+          provide: DataSource,
+          useValue: dataSource, // Use the shared DataSource
+        },
       ],
     }).compile();
 
     repository = module.get<BusinessOwnerWriteRepository>(BusinessOwnerWriteRepository);
     factory = module.get<BusinessOwnerFactory>(BusinessOwnerFactory);
-    dataSource = module.get<DataSource>(DataSource);
+
+    // Clean all tables with RESTART IDENTITY CASCADE
+    await cleanDatabase(dataSource);
   });
 
   afterEach(async () => {
@@ -61,11 +74,9 @@ describe('BusinessOwnerWriteRepository - Integration Test (Optimistic Locking)',
 
   it('should save BusinessOwner successfully', async () => {
     // Arrange
-    const businessOwner = BusinessOwner.create(
-      UUID.generate(),
-      UUID.generate(),
-      SubscriptionPlan.free(),
-    );
+    const userId = UUID.generate();
+    await createTestUser(dataSource, userId.getValue());
+    const businessOwner = BusinessOwner.create(UUID.generate(), userId, SubscriptionPlan.free());
 
     // Act
     await repository.save(businessOwner);
@@ -78,11 +89,9 @@ describe('BusinessOwnerWriteRepository - Integration Test (Optimistic Locking)',
 
   it('should increment version on save', async () => {
     // Arrange
-    const businessOwner = BusinessOwner.create(
-      UUID.generate(),
-      UUID.generate(),
-      SubscriptionPlan.free(),
-    );
+    const userId = UUID.generate();
+    await createTestUser(dataSource, userId.getValue());
+    const businessOwner = BusinessOwner.create(UUID.generate(), userId, SubscriptionPlan.free());
     await repository.save(businessOwner);
 
     // Act
@@ -97,11 +106,9 @@ describe('BusinessOwnerWriteRepository - Integration Test (Optimistic Locking)',
 
   it('should throw ConcurrencyException when version mismatch (optimistic locking)', async () => {
     // Arrange
-    const businessOwner = BusinessOwner.create(
-      UUID.generate(),
-      UUID.generate(),
-      SubscriptionPlan.free(),
-    );
+    const userId = UUID.generate();
+    await createTestUser(dataSource, userId.getValue());
+    const businessOwner = BusinessOwner.create(UUID.generate(), userId, SubscriptionPlan.free());
     await repository.save(businessOwner);
 
     // Load same BusinessOwner twice (simulating two concurrent requests)
@@ -120,11 +127,9 @@ describe('BusinessOwnerWriteRepository - Integration Test (Optimistic Locking)',
 
   it('should handle concurrent modifications correctly', async () => {
     // Arrange
-    const businessOwner = BusinessOwner.create(
-      UUID.generate(),
-      UUID.generate(),
-      SubscriptionPlan.free(),
-    );
+    const userId = UUID.generate();
+    await createTestUser(dataSource, userId.getValue());
+    const businessOwner = BusinessOwner.create(UUID.generate(), userId, SubscriptionPlan.free());
     await repository.save(businessOwner);
 
     // Load same BusinessOwner twice
@@ -158,11 +163,9 @@ describe('BusinessOwnerWriteRepository - Integration Test (Optimistic Locking)',
 
   it('should allow retry after ConcurrencyException', async () => {
     // Arrange
-    const businessOwner = BusinessOwner.create(
-      UUID.generate(),
-      UUID.generate(),
-      SubscriptionPlan.free(),
-    );
+    const userId = UUID.generate();
+    await createTestUser(dataSource, userId.getValue());
+    const businessOwner = BusinessOwner.create(UUID.generate(), userId, SubscriptionPlan.free());
     await repository.save(businessOwner);
 
     // Load same BusinessOwner twice
@@ -192,11 +195,9 @@ describe('BusinessOwnerWriteRepository - Integration Test (Optimistic Locking)',
 
   it('should handle multiple sequential saves correctly', async () => {
     // Arrange
-    const businessOwner = BusinessOwner.create(
-      UUID.generate(),
-      UUID.generate(),
-      SubscriptionPlan.free(),
-    );
+    const userId = UUID.generate();
+    await createTestUser(dataSource, userId.getValue());
+    const businessOwner = BusinessOwner.create(UUID.generate(), userId, SubscriptionPlan.free());
     await repository.save(businessOwner);
 
     // Act - Sequential modifications

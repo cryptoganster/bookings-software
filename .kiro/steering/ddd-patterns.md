@@ -142,7 +142,235 @@ export class Customer {
 
 ## Domain Services
 
-**Definición:** Lógica de dominio que no pertenece a un aggregate o value object. **Reglas:** ✅ Lógica multi-aggregate, sin estado, inyección de repositories, nombres descriptivos | ❌ Lógica que pertenece a aggregate, estado mutable, lógica de aplicación, acceso directo a BD
+**Definición:** Lógica de dominio que no pertenece a un aggregate o value object.
+
+**Cuándo usar Domain Services:**
+
+- Lógica que involucra múltiples aggregates
+- Validaciones que requieren consultar datos externos
+- Operaciones que no tienen un "dueño" natural en un aggregate
+- Mantener CQRS estricto (evitar Read Repositories en Command Handlers)
+
+**Reglas:** ✅ Lógica multi-aggregate, sin estado, inyección de repositories, nombres descriptivos | ❌ Lógica que pertenece a aggregate, estado mutable, lógica de aplicación, acceso directo a BD
+
+### Tipos de Domain Services
+
+#### 1. Uniqueness Checkers (Validación de Unicidad)
+
+**Propósito:** Validar que un valor sea único sin violar CQRS estricto.
+
+```typescript
+// Domain interface
+export interface IBusinessUniquenessChecker {
+  /**
+   * Checks if a WhatsApp phone number is unique across all businesses
+   * @param phone - WhatsApp phone number to check
+   * @param excludeBusinessId - Optional business ID to exclude from check (for updates)
+   * @returns true if phone is unique, false otherwise
+   */
+  isWhatsAppPhoneUnique(
+    phone: string,
+    excludeBusinessId?: string,
+  ): Promise<boolean>;
+}
+
+// Domain service implementation
+@Injectable()
+export class BusinessUniquenessChecker implements IBusinessUniquenessChecker {
+  constructor(
+    @Inject('IBusinessReadRepository')
+    private readonly businessReadRepo: IBusinessReadRepository,
+  ) {}
+
+  async isWhatsAppPhoneUnique(
+    phone: string,
+    excludeBusinessId?: string,
+  ): Promise<boolean> {
+    const existing = await this.businessReadRepo.findByWhatsAppPhone(phone);
+
+    if (!existing) {
+      return true; // Phone not found, is unique
+    }
+
+    // If updating same business, phone is still "unique"
+    if (excludeBusinessId && existing.id === excludeBusinessId) {
+      return true;
+    }
+
+    return false; // Phone exists for different business
+  }
+}
+
+// Uso en Command Handler
+@CommandHandler(CreateBusinessCommand)
+export class CreateBusinessHandler {
+  constructor(
+    @Inject('IBusinessUniquenessChecker')
+    private readonly uniquenessChecker: IBusinessUniquenessChecker,
+    @Inject('IBusinessWriteRepository')
+    private readonly writeRepo: IBusinessWriteRepository,
+  ) {}
+
+  async execute(command: CreateBusinessCommand): Promise<{ businessId: string }> {
+    // ✅ Usar Domain Service en lugar de Read Repository
+    const isUnique = await this.uniquenessChecker.isWhatsAppPhoneUnique(
+      command.whatsappPhone,
+    );
+
+    if (!isUnique) {
+      throw new WhatsAppPhoneAlreadyExistsException(command.whatsappPhone);
+    }
+
+    const business = Business.create(...);
+    await this.writeRepo.save(business);
+
+    return { businessId: business.getId().getValue() };
+  }
+}
+```
+
+#### 2. Limit Checkers (Validación de Límites)
+
+**Propósito:** Validar límites de negocio que dependen de múltiples aggregates.
+
+```typescript
+// Domain interface
+export interface IBusinessLimitChecker {
+  /**
+   * Checks if a business owner can create another business
+   * @param ownerId - Business owner ID
+   * @returns true if owner can create business, false otherwise
+   */
+  canCreateBusiness(ownerId: string): Promise<boolean>;
+
+  /**
+   * Gets the current business count for an owner
+   */
+  getBusinessCount(ownerId: string): Promise<number>;
+
+  /**
+   * Gets the maximum businesses allowed for an owner
+   */
+  getMaxBusinessesAllowed(ownerId: string): Promise<number>;
+}
+
+// Domain service implementation
+@Injectable()
+export class BusinessLimitChecker implements IBusinessLimitChecker {
+  constructor(
+    @Inject('IBusinessReadRepository')
+    private readonly businessReadRepo: IBusinessReadRepository,
+    @Inject('IBusinessOwnerReadRepository')
+    private readonly ownerReadRepo: IBusinessOwnerReadRepository,
+  ) {}
+
+  async canCreateBusiness(ownerId: string): Promise<boolean> {
+    const count = await this.getBusinessCount(ownerId);
+    const maxAllowed = await this.getMaxBusinessesAllowed(ownerId);
+    return count < maxAllowed;
+  }
+
+  async getBusinessCount(ownerId: string): Promise<number> {
+    const businesses = await this.businessReadRepo.findByOwnerId(ownerId);
+    return businesses.length;
+  }
+
+  async getMaxBusinessesAllowed(ownerId: string): Promise<number> {
+    const owner = await this.ownerReadRepo.findById(ownerId);
+    if (!owner) {
+      throw new BusinessOwnerNotFoundException(ownerId);
+    }
+    return owner.subscriptionPlan.maxBusinesses;
+  }
+}
+
+// Uso en Command Handler
+@CommandHandler(CreateBusinessCommand)
+export class CreateBusinessHandler {
+  constructor(
+    @Inject('IBusinessLimitChecker')
+    private readonly limitChecker: IBusinessLimitChecker,
+    @Inject('IBusinessWriteRepository')
+    private readonly writeRepo: IBusinessWriteRepository,
+  ) {}
+
+  async execute(command: CreateBusinessCommand): Promise<{ businessId: string }> {
+    // ✅ Usar Domain Service para validar límites
+    const canCreate = await this.limitChecker.canCreateBusiness(command.ownerId);
+
+    if (!canCreate) {
+      const count = await this.limitChecker.getBusinessCount(command.ownerId);
+      const max = await this.limitChecker.getMaxBusinessesAllowed(command.ownerId);
+      throw new BusinessLimitExceededException(count, max);
+    }
+
+    const business = Business.create(...);
+    await this.writeRepo.save(business);
+
+    return { businessId: business.getId().getValue() };
+  }
+}
+```
+
+#### 3. Existence Checkers (Validación de Existencia Cross-BC)
+
+**Propósito:** Validar existencia de aggregates de otros Bounded Contexts sin violar boundaries.
+
+```typescript
+// Domain interface (en Customer BC)
+export interface ICustomerExistenceChecker {
+  /**
+   * Checks if a customer exists
+   * @param customerId - Customer ID to check
+   * @returns true if customer exists, false otherwise
+   */
+  exists(customerId: string): Promise<boolean>;
+}
+
+// Domain service implementation
+@Injectable()
+export class CustomerExistenceChecker implements ICustomerExistenceChecker {
+  constructor(
+    @Inject('ICustomerReadRepository')
+    private readonly customerReadRepo: ICustomerReadRepository,
+  ) {}
+
+  async exists(customerId: string): Promise<boolean> {
+    const customer = await this.customerReadRepo.findById(customerId);
+    return customer !== null;
+  }
+}
+
+// Uso en Command Handler de otro BC (Booking BC)
+@CommandHandler(CreateAppointmentCommand)
+export class CreateAppointmentHandler {
+  constructor(
+    // ✅ Inyectar Domain Service de otro BC (via interface)
+    @Inject('ICustomerExistenceChecker')
+    private readonly customerChecker: ICustomerExistenceChecker,
+    @Inject('IAppointmentWriteRepository')
+    private readonly writeRepo: IAppointmentWriteRepository,
+  ) {}
+
+  async execute(command: CreateAppointmentCommand): Promise<{ appointmentId: string }> {
+    // ✅ Validar existencia sin importar aggregate de otro BC
+    const customerExists = await this.customerChecker.exists(command.customerId);
+
+    if (!customerExists) {
+      throw new CustomerNotFoundException(command.customerId);
+    }
+
+    const appointment = Appointment.create(...);
+    await this.writeRepo.save(appointment);
+
+    return { appointmentId: appointment.getId().getValue() };
+  }
+}
+```
+
+#### 4. Availability Checkers (Validación de Disponibilidad)
+
+**Propósito:** Validar disponibilidad que involucra múltiples aggregates.
 
 ```typescript
 @Injectable()
@@ -178,6 +406,57 @@ export class AvailabilityChecker {
   }
 }
 ```
+
+### Domain Services vs Queries
+
+| Aspecto               | Domain Service                                   | Query                                |
+| --------------------- | ------------------------------------------------ | ------------------------------------ |
+| **Propósito**         | Validación/lógica de negocio                     | Obtener datos para mostrar           |
+| **Usado en**          | Command Handlers                                 | Query Handlers, UI                   |
+| **Retorna**           | boolean, primitivos, VOs                         | Read Models (DTOs)                   |
+| **Lógica de negocio** | ✅ Sí (validaciones, cálculos)                   | ❌ No (solo transformación de datos) |
+| **Inyecta**           | Read Repositories (via interfaces)               | Read Repositories                    |
+| **Ejemplo**           | `isWhatsAppPhoneUnique()`, `canCreateBusiness()` | `GetBusinessQuery`, `GetUserQuery`   |
+
+### Registro en Módulo
+
+```typescript
+@Module({
+  imports: [CqrsModule],
+  providers: [
+    // Domain Services
+    {
+      provide: "IBusinessUniquenessChecker",
+      useClass: BusinessUniquenessChecker,
+    },
+    {
+      provide: "IBusinessLimitChecker",
+      useClass: BusinessLimitChecker,
+    },
+
+    // Repositories
+    {
+      provide: "IBusinessReadRepository",
+      useClass: BusinessReadRepository,
+    },
+    {
+      provide: "IBusinessWriteRepository",
+      useClass: BusinessWriteRepository,
+    },
+  ],
+  exports: ["IBusinessUniquenessChecker", "IBusinessLimitChecker"],
+})
+export class BusinessModule {}
+```
+
+### Beneficios de Domain Services
+
+1. ✅ **CQRS Estricto:** Command Handlers no usan Read Repositories directamente
+2. ✅ **Testeable:** Services se testean independientemente con mocks
+3. ✅ **Reutilizable:** Misma lógica en múltiples handlers
+4. ✅ **Boundaries:** Validación cross-BC sin violar arquitectura
+5. ✅ **Single Responsibility:** Cada service una responsabilidad clara
+6. ✅ **Dependency Inversion:** Handlers dependen de interfaces, no implementaciones
 
 ## Repositories
 

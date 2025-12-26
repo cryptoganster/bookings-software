@@ -1,4 +1,4 @@
-import { Command } from '@nestjs/cqrs';
+import { Command } from '@shared/kernel';
 
 export class DeactivateOfferingCommand extends Command<void> {
   constructor(

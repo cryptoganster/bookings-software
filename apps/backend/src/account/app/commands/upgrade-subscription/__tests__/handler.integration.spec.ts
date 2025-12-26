@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { createTestUser } from '@test-utils/e2e-helpers';
 import { CommandBus } from '@nestjs/cqrs';
 import { DataSource, Repository } from 'typeorm';
-import { v4 as uuidv4 } from 'uuid';
 import { UpgradeSubscriptionHandler } from '../handler';
 import { UpgradeSubscriptionCommand } from '../command';
 import { BusinessOwnerFactory } from '@account/infra/persistence/factories/business-owner.factory';
@@ -12,6 +12,11 @@ import { AlreadyOnThisPlanException } from '@account/domain/exceptions/already-o
 import { CannotDowngradeSubscriptionException } from '@account/domain/exceptions/cannot-downgrade-subscription.exception';
 import { BusinessOwnerNotFoundException } from '@account/domain/exceptions/business-owner-not-found.exception';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import {
+  createIntegrationTestDataSource,
+  cleanDatabase,
+  generateTestId,
+} from '@test-utils/integration-test-helper';
 
 describe('UpgradeSubscriptionHandler (Integration)', () => {
   let module: TestingModule;
@@ -21,6 +26,9 @@ describe('UpgradeSubscriptionHandler (Integration)', () => {
   let commandBus: CommandBus;
 
   beforeAll(async () => {
+    // Create shared DataSource with all entities
+    dataSource = await createIntegrationTestDataSource();
+
     module = await Test.createTestingModule({
       providers: [
         UpgradeSubscriptionHandler,
@@ -43,20 +51,7 @@ describe('UpgradeSubscriptionHandler (Integration)', () => {
         },
         {
           provide: DataSource,
-          useFactory: async () => {
-            const AppDataSource = new DataSource({
-              type: 'postgres',
-              host: process.env.DB_HOST || 'localhost',
-              port: parseInt(process.env.DB_PORT || '5432'),
-              username: process.env.DB_USERNAME || 'postgres',
-              password: process.env.DB_PASSWORD || 'postgres',
-              database: process.env.DB_DATABASE || 'bookings_test',
-              entities: [BusinessOwnerModel],
-              synchronize: true,
-              dropSchema: true,
-            });
-            return AppDataSource.initialize();
-          },
+          useValue: dataSource,
         },
         {
           provide: CommandBus,
@@ -69,7 +64,6 @@ describe('UpgradeSubscriptionHandler (Integration)', () => {
 
     handler = module.get<UpgradeSubscriptionHandler>(UpgradeSubscriptionHandler);
     repository = module.get<Repository<BusinessOwnerModel>>(getRepositoryToken(BusinessOwnerModel));
-    dataSource = module.get<DataSource>(DataSource);
     commandBus = module.get<CommandBus>(CommandBus);
   });
 
@@ -79,14 +73,16 @@ describe('UpgradeSubscriptionHandler (Integration)', () => {
   });
 
   beforeEach(async () => {
-    await repository.clear();
+    // Clean database before each test
+    await cleanDatabase(dataSource);
   });
 
   describe('execute', () => {
     it('should upgrade subscription from FREE to BASIC successfully', async () => {
       // Arrange
-      const boId = uuidv4();
-      const userId = uuidv4();
+      const boId = generateTestId();
+      const userId = generateTestId();
+      await createTestUser(dataSource, userId);
       const businessOwnerModel = repository.create({
         id: boId,
         userId: userId,
@@ -112,9 +108,12 @@ describe('UpgradeSubscriptionHandler (Integration)', () => {
 
     it('should upgrade subscription from BASIC to PRO successfully', async () => {
       // Arrange
+      const boId = generateTestId();
+      const userId = generateTestId();
+      await createTestUser(dataSource, userId);
       const businessOwnerModel = repository.create({
-        id: 'be67026b-b1e5-4104-b66c-f23d86098321',
-        userId: '65f818ad-9782-40bd-b8ed-16251f31f511',
+        id: boId,
+        userId: userId,
         subscriptionPlan: 'BASIC',
         subscriptionStatus: 'ACTIVE',
         onboardingCompleted: true,
@@ -123,14 +122,14 @@ describe('UpgradeSubscriptionHandler (Integration)', () => {
       });
       await repository.save(businessOwnerModel);
 
-      const command = new UpgradeSubscriptionCommand('be67026b-b1e5-4104-b66c-f23d86098321', 'PRO');
+      const command = new UpgradeSubscriptionCommand(boId, 'PRO');
 
       // Act
       await handler.execute(command);
 
       // Assert
       const updated = await repository.findOne({
-        where: { id: 'be67026b-b1e5-4104-b66c-f23d86098321' },
+        where: { id: boId },
       });
       expect(updated).toBeDefined();
       expect(updated!.subscriptionPlan).toBe('PRO');
@@ -139,9 +138,12 @@ describe('UpgradeSubscriptionHandler (Integration)', () => {
 
     it('should upgrade subscription from PRO to ENTERPRISE successfully', async () => {
       // Arrange
+      const boId = generateTestId();
+      const userId = generateTestId();
+      await createTestUser(dataSource, userId);
       const businessOwnerModel = repository.create({
-        id: 'be67026b-b1e5-4104-b66c-f23d86098321',
-        userId: '65f818ad-9782-40bd-b8ed-16251f31f511',
+        id: boId,
+        userId: userId,
         subscriptionPlan: 'PRO',
         subscriptionStatus: 'ACTIVE',
         onboardingCompleted: true,
@@ -150,17 +152,14 @@ describe('UpgradeSubscriptionHandler (Integration)', () => {
       });
       await repository.save(businessOwnerModel);
 
-      const command = new UpgradeSubscriptionCommand(
-        'be67026b-b1e5-4104-b66c-f23d86098321',
-        'ENTERPRISE',
-      );
+      const command = new UpgradeSubscriptionCommand(boId, 'ENTERPRISE');
 
       // Act
       await handler.execute(command);
 
       // Assert
       const updated = await repository.findOne({
-        where: { id: 'be67026b-b1e5-4104-b66c-f23d86098321' },
+        where: { id: boId },
       });
       expect(updated).toBeDefined();
       expect(updated!.subscriptionPlan).toBe('ENTERPRISE');
@@ -169,9 +168,12 @@ describe('UpgradeSubscriptionHandler (Integration)', () => {
 
     it('should throw AlreadyOnThisPlanException when upgrading to same plan', async () => {
       // Arrange
+      const boId = generateTestId();
+      const userId = generateTestId();
+      await createTestUser(dataSource, userId);
       const businessOwnerModel = repository.create({
-        id: 'be67026b-b1e5-4104-b66c-f23d86098321',
-        userId: '65f818ad-9782-40bd-b8ed-16251f31f511',
+        id: boId,
+        userId: userId,
         subscriptionPlan: 'BASIC',
         subscriptionStatus: 'ACTIVE',
         onboardingCompleted: true,
@@ -180,10 +182,7 @@ describe('UpgradeSubscriptionHandler (Integration)', () => {
       });
       await repository.save(businessOwnerModel);
 
-      const command = new UpgradeSubscriptionCommand(
-        'be67026b-b1e5-4104-b66c-f23d86098321',
-        'BASIC',
-      );
+      const command = new UpgradeSubscriptionCommand(boId, 'BASIC');
 
       // Act & Assert
       await expect(handler.execute(command)).rejects.toThrow(AlreadyOnThisPlanException);
@@ -191,9 +190,12 @@ describe('UpgradeSubscriptionHandler (Integration)', () => {
 
     it('should throw CannotDowngradeSubscriptionException when downgrading from PRO to BASIC', async () => {
       // Arrange
+      const boId = generateTestId();
+      const userId = generateTestId();
+      await createTestUser(dataSource, userId);
       const businessOwnerModel = repository.create({
-        id: 'be67026b-b1e5-4104-b66c-f23d86098321',
-        userId: '65f818ad-9782-40bd-b8ed-16251f31f511',
+        id: boId,
+        userId: userId,
         subscriptionPlan: 'PRO',
         subscriptionStatus: 'ACTIVE',
         onboardingCompleted: true,
@@ -202,10 +204,7 @@ describe('UpgradeSubscriptionHandler (Integration)', () => {
       });
       await repository.save(businessOwnerModel);
 
-      const command = new UpgradeSubscriptionCommand(
-        'be67026b-b1e5-4104-b66c-f23d86098321',
-        'BASIC',
-      );
+      const command = new UpgradeSubscriptionCommand(boId, 'BASIC');
 
       // Act & Assert
       await expect(handler.execute(command)).rejects.toThrow(CannotDowngradeSubscriptionException);
@@ -213,9 +212,12 @@ describe('UpgradeSubscriptionHandler (Integration)', () => {
 
     it('should throw CannotDowngradeSubscriptionException when downgrading from ENTERPRISE to PRO', async () => {
       // Arrange
+      const boId = generateTestId();
+      const userId = generateTestId();
+      await createTestUser(dataSource, userId);
       const businessOwnerModel = repository.create({
-        id: 'be67026b-b1e5-4104-b66c-f23d86098321',
-        userId: '65f818ad-9782-40bd-b8ed-16251f31f511',
+        id: boId,
+        userId: userId,
         subscriptionPlan: 'ENTERPRISE',
         subscriptionStatus: 'ACTIVE',
         onboardingCompleted: true,
@@ -224,7 +226,7 @@ describe('UpgradeSubscriptionHandler (Integration)', () => {
       });
       await repository.save(businessOwnerModel);
 
-      const command = new UpgradeSubscriptionCommand('be67026b-b1e5-4104-b66c-f23d86098321', 'PRO');
+      const command = new UpgradeSubscriptionCommand(boId, 'PRO');
 
       // Act & Assert
       await expect(handler.execute(command)).rejects.toThrow(CannotDowngradeSubscriptionException);
@@ -232,10 +234,8 @@ describe('UpgradeSubscriptionHandler (Integration)', () => {
 
     it('should throw BusinessOwnerNotFoundException if not found', async () => {
       // Arrange
-      const command = new UpgradeSubscriptionCommand(
-        '11111111-1111-1111-1111-111111111111',
-        'BASIC',
-      );
+      const nonExistentId = generateTestId();
+      const command = new UpgradeSubscriptionCommand(nonExistentId, 'BASIC');
 
       // Act & Assert
       await expect(handler.execute(command)).rejects.toThrow(BusinessOwnerNotFoundException);
@@ -243,9 +243,12 @@ describe('UpgradeSubscriptionHandler (Integration)', () => {
 
     it('should persist changes to database', async () => {
       // Arrange
+      const boId = generateTestId();
+      const userId = generateTestId();
+      await createTestUser(dataSource, userId);
       const businessOwnerModel = repository.create({
-        id: 'be67026b-b1e5-4104-b66c-f23d86098321',
-        userId: '65f818ad-9782-40bd-b8ed-16251f31f511',
+        id: boId,
+        userId: userId,
         subscriptionPlan: 'FREE',
         subscriptionStatus: 'ACTIVE',
         onboardingCompleted: true,
@@ -254,17 +257,14 @@ describe('UpgradeSubscriptionHandler (Integration)', () => {
       });
       await repository.save(businessOwnerModel);
 
-      const command = new UpgradeSubscriptionCommand(
-        'be67026b-b1e5-4104-b66c-f23d86098321',
-        'BASIC',
-      );
+      const command = new UpgradeSubscriptionCommand(boId, 'BASIC');
 
       // Act
       await handler.execute(command);
 
       // Assert - Verify persistence
       const persisted = await repository.findOne({
-        where: { id: 'be67026b-b1e5-4104-b66c-f23d86098321' },
+        where: { id: boId },
       });
       expect(persisted).toBeDefined();
       expect(persisted!.subscriptionPlan).toBe('BASIC');

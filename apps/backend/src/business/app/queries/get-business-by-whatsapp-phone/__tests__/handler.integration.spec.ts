@@ -7,6 +7,7 @@ import { GetBusinessByWhatsAppPhoneQuery } from '../query';
 import { BusinessModel } from '@business/infra/persistence/models/business.model';
 import { BusinessReadRepository } from '@business/infra/persistence/repositories/business-read.repository';
 import { UUID } from '@shared/vo/uuid';
+import { createTestUser, cleanDatabase } from '@test-utils/e2e-helpers';
 
 /**
  * Integration tests for GetBusinessByWhatsAppPhoneHandler
@@ -33,9 +34,9 @@ describe('GetBusinessByWhatsAppPhoneHandler Integration Tests', () => {
           port: parseInt(process.env.DB_PORT || '5432', 10),
           username: process.env.DB_USERNAME || 'postgres',
           password: process.env.DB_PASSWORD || 'postgres',
-          database: process.env.DB_DATABASE || 'bookings_test',
+          database: process.env.DB_DATABASE || 'postgres_test',
           entities: [BusinessModel],
-          synchronize: true,
+          synchronize: false,
           dropSchema: false,
         }),
         TypeOrmModule.forFeature([BusinessModel]),
@@ -55,13 +56,14 @@ describe('GetBusinessByWhatsAppPhoneHandler Integration Tests', () => {
     dataSource = module.get<DataSource>(DataSource);
   }, 30000);
 
-  afterAll(async () => {
-    await dataSource.destroy();
-    await module.close();
+  beforeEach(async () => {
+    await cleanDatabase(dataSource);
   });
 
-  afterEach(async () => {
-    await dataSource.getRepository(BusinessModel).clear();
+  afterAll(async () => {
+    await cleanDatabase(dataSource);
+    await dataSource.destroy();
+    await module.close();
   });
 
   describe('Find business by WhatsApp phone', () => {
@@ -70,6 +72,7 @@ describe('GetBusinessByWhatsAppPhoneHandler Integration Tests', () => {
       const businessId = UUID.generate().getValue();
       const ownerId = UUID.generate().getValue();
       const whatsappPhone = '+18095551234';
+      await createTestUser(dataSource, ownerId);
 
       await dataSource.getRepository(BusinessModel).insert({
         id: businessId,
@@ -117,10 +120,12 @@ describe('GetBusinessByWhatsAppPhoneHandler Integration Tests', () => {
       // Arrange
       const businessId = UUID.generate().getValue();
       const whatsappPhone = '+18095555678';
+      const ownerId = UUID.generate().getValue();
+      await createTestUser(dataSource, ownerId);
 
       await dataSource.getRepository(BusinessModel).insert({
         id: businessId,
-        ownerId: UUID.generate().getValue(),
+        ownerId: ownerId,
         name: 'Format Test Business',
         whatsappPhone: whatsappPhone,
         addressStreet: 'Calle Format',
@@ -151,10 +156,12 @@ describe('GetBusinessByWhatsAppPhoneHandler Integration Tests', () => {
       // Arrange - Simulate incoming WhatsApp message scenario
       const businessId = UUID.generate().getValue();
       const whatsappPhone = '+18095551111';
+      const ownerId = UUID.generate().getValue();
+      await createTestUser(dataSource, ownerId);
 
       await dataSource.getRepository(BusinessModel).insert({
         id: businessId,
-        ownerId: UUID.generate().getValue(),
+        ownerId: ownerId,
         name: 'Message Routing Business',
         whatsappPhone: whatsappPhone,
         addressStreet: 'Calle Routing',
@@ -197,10 +204,12 @@ describe('GetBusinessByWhatsAppPhoneHandler Integration Tests', () => {
     it('should return inactive business (Conversation BC handles state)', async () => {
       // Arrange
       const whatsappPhone = '+18095552222';
+      const ownerId = UUID.generate().getValue();
+      await createTestUser(dataSource, ownerId);
 
       await dataSource.getRepository(BusinessModel).insert({
         id: UUID.generate().getValue(),
-        ownerId: UUID.generate().getValue(),
+        ownerId: ownerId,
         name: 'Inactive Business',
         whatsappPhone: whatsappPhone,
         addressStreet: 'Calle Inactive',

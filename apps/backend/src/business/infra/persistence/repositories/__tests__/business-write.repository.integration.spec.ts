@@ -36,9 +36,9 @@ describe('BusinessWriteRepository Integration Tests', () => {
           port: parseInt(process.env.DB_PORT || '5432', 10),
           username: process.env.DB_USERNAME || 'postgres',
           password: process.env.DB_PASSWORD || 'postgres',
-          database: process.env.DB_DATABASE || 'bookings_test',
+          database: process.env.DB_DATABASE || 'postgres_test',
           entities: [BusinessModel],
-          synchronize: true, // ← Changed from false to true to auto-create tables
+          synchronize: false, // ← Changed from false to true to auto-create tables
         }),
         TypeOrmModule.forFeature([BusinessModel]),
       ],
@@ -72,12 +72,35 @@ describe('BusinessWriteRepository Integration Tests', () => {
     await dbHelper.clearData();
   });
 
+  /**
+   * Helper to create a user in the database
+   */
+  async function createUser(userId: string): Promise<void> {
+    await dataSource.query(
+      `INSERT INTO users (id, email, password, name, roles, is_active, email_verified, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+       ON CONFLICT (id) DO NOTHING`,
+      [
+        userId,
+        `user-${userId}@test.com`,
+        'hashed_password',
+        'Test User',
+        ['BUSINESS_OWNER'],
+        true,
+        true,
+      ],
+    );
+  }
+
   describe('save() - Optimistic Locking', () => {
     it('should save new business successfully', async () => {
       // Arrange
+      const ownerId = UUID.generate();
+      await createUser(ownerId.getValue()); // Create user first
+
       const business = Business.create(
         UUID.generate(),
-        UUID.generate(),
+        ownerId,
         'Test Business',
         WhatsAppPhone.fromString('+18095551234'),
         BusinessAddress.create('Calle Test 123', 'Santo Domingo', 'DN', 'DO', '10100'),
@@ -101,6 +124,7 @@ describe('BusinessWriteRepository Integration Tests', () => {
       // Arrange
       const businessId = UUID.generate();
       const ownerId = UUID.generate();
+      await createUser(ownerId.getValue()); // Create user first
 
       // Create initial business
       const business = Business.create(
@@ -156,6 +180,7 @@ describe('BusinessWriteRepository Integration Tests', () => {
       // Arrange
       const businessId = UUID.generate();
       const ownerId = UUID.generate();
+      await createUser(ownerId.getValue()); // Create user first
 
       // Create initial business
       const business = Business.create(
@@ -214,6 +239,7 @@ describe('BusinessWriteRepository Integration Tests', () => {
       // Arrange
       const businessId = UUID.generate();
       const ownerId = UUID.generate();
+      await createUser(ownerId.getValue()); // Create user first
 
       const business = Business.create(
         businessId,
@@ -272,9 +298,12 @@ describe('BusinessWriteRepository Integration Tests', () => {
   describe('save() - Business state changes', () => {
     it('should save business deactivation', async () => {
       // Arrange
+      const ownerId = UUID.generate();
+      await createUser(ownerId.getValue()); // Create user first
+
       const business = Business.create(
         UUID.generate(),
-        UUID.generate(),
+        ownerId,
         'Test Business',
         WhatsAppPhone.fromString('+18095551234'),
         BusinessAddress.create('Calle Test 123', 'Santo Domingo', 'DN', 'DO', '10100'),
@@ -320,9 +349,12 @@ describe('BusinessWriteRepository Integration Tests', () => {
 
     it('should save WhatsApp configuration change', async () => {
       // Arrange
+      const ownerId = UUID.generate();
+      await createUser(ownerId.getValue()); // Create user first
+
       const business = Business.create(
         UUID.generate(),
-        UUID.generate(),
+        ownerId,
         'Test Business',
         WhatsAppPhone.fromString('+18095551234'),
         BusinessAddress.create('Calle Test 123', 'Santo Domingo', 'DN', 'DO', '10100'),

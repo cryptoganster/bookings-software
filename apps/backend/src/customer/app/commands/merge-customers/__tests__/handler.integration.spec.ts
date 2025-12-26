@@ -8,7 +8,7 @@ import { ICustomerWriteRepository } from '@customer/domain/interfaces/repositori
 import { CustomerModel } from '@customer/infra/persistence/models';
 import { Customer } from '@customer/domain/aggregates/customer';
 import { UUID } from '@shared/vo/uuid';
-import { WhatsAppPhone } from '@customer/domain/vo/whatsapp-phone';
+import { WhatsAppPhone } from '@shared/vo/whatsapp-phone';
 import { CustomerNotFoundException } from '@customer/domain/exceptions';
 
 /**

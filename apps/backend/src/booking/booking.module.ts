@@ -21,6 +21,7 @@ import { GetAppointmentHandler } from '@booking/app/queries/get-appointment/hand
 import { GetCustomerAppointmentsHandler } from '@booking/app/queries/get-customer-appointments/handler';
 import { GetBusinessAppointmentsHandler } from '@booking/app/queries/get-business-appointments/handler';
 import { GetUpcomingAppointmentsHandler } from '@booking/app/queries/get-upcoming-appointments/handler';
+import { GetTodayAppointmentsHandler } from '@booking/app/queries/get-today-appointments/handler';
 import { GetAppointmentStatsHandler } from '@booking/app/queries/get-appointment-stats/handler';
 
 // Event Handlers
@@ -51,6 +52,7 @@ const QueryHandlers = [
   GetCustomerAppointmentsHandler,
   GetBusinessAppointmentsHandler,
   GetUpcomingAppointmentsHandler,
+  GetTodayAppointmentsHandler,
   GetAppointmentStatsHandler,
 ];
 

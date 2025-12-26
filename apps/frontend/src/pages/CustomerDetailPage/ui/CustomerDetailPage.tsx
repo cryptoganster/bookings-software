@@ -27,6 +27,8 @@ import {
   Title,
   Divider,
   Card,
+  Modal,
+  Select,
 } from "@mantine/core";
 import {
   IconAlertCircle,
@@ -39,17 +41,22 @@ import {
   IconPhone,
   IconUser,
 } from "@tabler/icons-react";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { notifications } from "@mantine/notifications";
 import { useCustomer } from "@entities/customer";
 import {
   formatCustomerName,
   formatCustomerPhone,
   getCustomerInitials,
 } from "@shared/lib/customer/formatters";
+import { logger } from "@shared/lib/logger";
 
 export function CustomerDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [exportModalOpened, setExportModalOpened] = useState(false);
+  const [exportFormat, setExportFormat] = useState<string>("json");
 
   const { data: customer, isLoading, isError, error } = useCustomer(id!);
 
@@ -59,22 +66,104 @@ export function CustomerDetailPage() {
 
   const handleEdit = () => {
     // TODO: Implement edit functionality
-    console.log("Edit customer:", id);
+    logger.debug("Edit customer action triggered", { customerId: id });
+    notifications.show({
+      title: "Funcionalidad en desarrollo",
+      message: "La edición de clientes estará disponible próximamente",
+      color: "blue",
+    });
   };
 
   const handleMerge = () => {
     // TODO: Implement merge functionality
-    console.log("Merge customer:", id);
+    logger.debug("Merge customer action triggered", { customerId: id });
+    notifications.show({
+      title: "Funcionalidad en desarrollo",
+      message: "La fusión de clientes estará disponible próximamente",
+      color: "blue",
+    });
   };
 
   const handleDelete = () => {
     // TODO: Implement delete functionality
-    console.log("Delete customer:", id);
+    logger.debug("Delete customer action triggered", { customerId: id });
+    notifications.show({
+      title: "Funcionalidad en desarrollo",
+      message: "La eliminación de clientes estará disponible próximamente",
+      color: "blue",
+    });
   };
 
   const handleExport = () => {
-    // TODO: Implement export functionality
-    console.log("Export customer data:", id);
+    setExportModalOpened(true);
+  };
+
+  const handleExportConfirm = () => {
+    if (!customer) return;
+
+    try {
+      let content: string;
+      let filename: string;
+      let mimeType: string;
+
+      if (exportFormat === "json") {
+        content = JSON.stringify(customer, null, 2);
+        filename = `customer-${customer.id}.json`;
+        mimeType = "application/json";
+      } else {
+        // CSV format
+        const headers = [
+          "ID",
+          "Nombre",
+          "Teléfono",
+          "User ID",
+          "Fecha de Registro",
+          "Número de Citas",
+        ];
+        const values = [
+          customer.id,
+          formatCustomerName(customer),
+          formatCustomerPhone(customer.whatsappPhone),
+          customer.userId || "N/A",
+          new Date(customer.createdAt).toLocaleDateString("es-ES"),
+          customer.appointmentCount?.toString() || "0",
+        ];
+        content = `${headers.join(",")}\n${values.join(",")}`;
+        filename = `customer-${customer.id}.csv`;
+        mimeType = "text/csv";
+      }
+
+      // Create blob and download
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      logger.info("Customer data exported", {
+        customerId: customer.id,
+        format: exportFormat,
+      });
+
+      notifications.show({
+        title: "Exportación exitosa",
+        message: `Datos del cliente exportados en formato ${exportFormat.toUpperCase()}`,
+        color: "green",
+      });
+
+      setExportModalOpened(false);
+    } catch (error) {
+      logger.error("Failed to export customer data", { error, customerId: id });
+      notifications.show({
+        title: "Error al exportar",
+        message: "No se pudo exportar los datos del cliente",
+        color: "red",
+      });
+    }
   };
 
   // Loading state
@@ -303,6 +392,47 @@ export function CustomerDetailPage() {
           </Stack>
         </Paper>
       </Stack>
+
+      {/* Export Modal */}
+      <Modal
+        opened={exportModalOpened}
+        onClose={() => setExportModalOpened(false)}
+        title="Exportar datos del cliente"
+        centered
+      >
+        <Stack gap="md">
+          <Text size="sm" c="dimmed">
+            Selecciona el formato en el que deseas exportar los datos del
+            cliente.
+          </Text>
+
+          <Select
+            label="Formato de exportación"
+            placeholder="Selecciona un formato"
+            value={exportFormat}
+            onChange={(value) => setExportFormat(value || "json")}
+            data={[
+              { value: "json", label: "JSON" },
+              { value: "csv", label: "CSV" },
+            ]}
+          />
+
+          <Group justify="flex-end" gap="sm">
+            <Button
+              variant="subtle"
+              onClick={() => setExportModalOpened(false)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              leftSection={<IconDownload size={16} />}
+              onClick={handleExportConfirm}
+            >
+              Exportar
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
     </Container>
   );
 }

@@ -1,4 +1,4 @@
-import { Query } from '@nestjs/cqrs';
+import { Query } from '@shared/kernel';
 
 /**
  * Customer Data Export structure (GDPR compliance)

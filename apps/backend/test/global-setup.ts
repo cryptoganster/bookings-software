@@ -1,32 +1,16 @@
 import { DataSource } from 'typeorm';
 import { config } from 'dotenv';
 import { join } from 'path';
-import { AppointmentModel } from '../src/booking/infra/persistence/models/appointment';
-import { CapacityModel } from '../src/availability/infra/persistence/models/capacity';
-import { OfferingModel } from '../src/offering/infra/persistence/models/offering';
-import { CustomerModel } from '../src/customer/infra/persistence/models/customer.model';
-import { BusinessModel } from '../src/business/infra/persistence/models/business.model';
-import { BusinessOwnerModel } from '../src/account/infra/persistence/models/business-owner.model';
-import { UserModel } from '../src/auth/infra/persistence/models/user';
-
-/**
- * All entities in the system
- * Must match the list in test-utils/e2e-helpers/database.ts
- */
-const ALL_ENTITIES = [
-  AppointmentModel,
-  CapacityModel,
-  OfferingModel,
-  CustomerModel,
-  BusinessModel,
-  BusinessOwnerModel,
-  UserModel,
-];
 
 /**
  * Jest Global Setup
  * Runs once before all test suites
- * Creates database tables using TypeORM synchronize
+ * Executes migrations to create database schema
+ *
+ * This approach:
+ * 1. Validates that migrations work correctly
+ * 2. Ensures test schema matches production schema
+ * 3. Allows migration tests to validate the migration table
  */
 export default async function globalSetup() {
   console.log('🔧 Running global setup...');
@@ -34,16 +18,17 @@ export default async function globalSetup() {
   // Load test environment variables
   config({ path: join(__dirname, '..', '.env.test') });
 
-  // Create DataSource for test database
+  // Create DataSource for test database with migrations
   const dataSource = new DataSource({
     type: 'postgres',
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT || '5432', 10),
-    username: process.env.DB_USERNAME || 'test',
-    password: process.env.DB_PASSWORD || 'test',
-    database: process.env.DB_DATABASE || 'bookings_test',
-    entities: ALL_ENTITIES,
-    synchronize: true, // Auto-create schema in tests
+    username: process.env.DB_USERNAME || 'postgres',
+    password: process.env.DB_PASSWORD || 'postgres',
+    database: process.env.DB_DATABASE || 'postgres_test',
+    migrations: [join(__dirname, '..', 'src', 'database', 'migrations', '*.ts')],
+    migrationsRun: false, // We'll run them manually
+    synchronize: false, // Use migrations instead
     logging: false,
   });
 
@@ -52,17 +37,19 @@ export default async function globalSetup() {
     await dataSource.initialize();
     console.log('✅ Database connection established');
 
-    // Log entities found
-    const entities = dataSource.entityMetadatas;
-    console.log(`📦 Found ${entities.length} entities:`);
-    entities.forEach((entity) => {
-      console.log(`   - ${entity.name} (${entity.tableName})`);
-    });
+    // Drop all tables (clean slate)
+    await dataSource.dropDatabase();
+    console.log('✅ Database dropped');
 
-    // Drop and recreate all tables
-    // This ensures a clean state for all tests
-    await dataSource.synchronize(true); // dropBeforeSync = true
-    console.log('✅ Database tables created');
+    // Run all migrations
+    await dataSource.runMigrations();
+    console.log('✅ Migrations executed');
+
+    // Log migrations
+    const executedMigrations = await dataSource.query(
+      'SELECT name, timestamp FROM migrations ORDER BY timestamp',
+    );
+    console.log(`📦 Executed ${executedMigrations.length} migrations`);
 
     // Close connection
     await dataSource.destroy();

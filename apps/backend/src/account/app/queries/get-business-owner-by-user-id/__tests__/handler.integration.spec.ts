@@ -1,10 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { createTestUser } from '@test-utils/e2e-helpers';
 import { DataSource, Repository } from 'typeorm';
 import { GetBusinessOwnerByUserIdHandler } from '../handler';
 import { GetBusinessOwnerByUserIdQuery } from '../query';
 import { BusinessOwnerReadRepository } from '@account/infra/persistence/repositories/business-owner-read.repository';
 import { BusinessOwnerModel } from '@account/infra/persistence/models/business-owner.model';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import {
+  createIntegrationTestDataSource,
+  cleanDatabase,
+} from '@test-utils/integration-test-helper';
 
 describe('GetBusinessOwnerByUserIdHandler (Integration)', () => {
   let module: TestingModule;
@@ -13,6 +18,9 @@ describe('GetBusinessOwnerByUserIdHandler (Integration)', () => {
   let dataSource: DataSource;
 
   beforeAll(async () => {
+    // Use shared DataSource with all entities
+    dataSource = await createIntegrationTestDataSource();
+
     module = await Test.createTestingModule({
       providers: [
         GetBusinessOwnerByUserIdHandler,
@@ -27,27 +35,13 @@ describe('GetBusinessOwnerByUserIdHandler (Integration)', () => {
         },
         {
           provide: DataSource,
-          useFactory: async () => {
-            const AppDataSource = new DataSource({
-              type: 'postgres',
-              host: process.env.DB_HOST || 'localhost',
-              port: parseInt(process.env.DB_PORT || '5432'),
-              username: process.env.DB_USERNAME || 'postgres',
-              password: process.env.DB_PASSWORD || 'postgres',
-              database: process.env.DB_DATABASE || 'bookings_test',
-              entities: [BusinessOwnerModel],
-              synchronize: true,
-              dropSchema: true,
-            });
-            return AppDataSource.initialize();
-          },
+          useValue: dataSource, // Use the shared DataSource
         },
       ],
     }).compile();
 
     handler = module.get<GetBusinessOwnerByUserIdHandler>(GetBusinessOwnerByUserIdHandler);
     repository = module.get<Repository<BusinessOwnerModel>>(getRepositoryToken(BusinessOwnerModel));
-    dataSource = module.get<DataSource>(DataSource);
   });
 
   afterAll(async () => {
@@ -56,7 +50,8 @@ describe('GetBusinessOwnerByUserIdHandler (Integration)', () => {
   });
 
   beforeEach(async () => {
-    await repository.clear();
+    // Clean all tables with RESTART IDENTITY CASCADE
+    await cleanDatabase(dataSource);
   });
 
   describe('execute', () => {
@@ -71,6 +66,7 @@ describe('GetBusinessOwnerByUserIdHandler (Integration)', () => {
         version: 1,
         createdAt: new Date('2024-03-15'),
       });
+      await createTestUser(dataSource, '65f818ad-9782-40bd-b8ed-16251f31f511');
       await repository.save(businessOwnerModel);
 
       const query = new GetBusinessOwnerByUserIdQuery('65f818ad-9782-40bd-b8ed-16251f31f511');
@@ -109,6 +105,7 @@ describe('GetBusinessOwnerByUserIdHandler (Integration)', () => {
         version: 1,
         createdAt: new Date('2024-12-01'),
       });
+      await createTestUser(dataSource, '61e339a2-b501-4ca3-88e0-be8af02d9f09');
       await repository.save(businessOwnerModel);
 
       const query = new GetBusinessOwnerByUserIdQuery('61e339a2-b501-4ca3-88e0-be8af02d9f09');
@@ -138,6 +135,7 @@ describe('GetBusinessOwnerByUserIdHandler (Integration)', () => {
         version: 1,
         createdAt: new Date(),
       });
+      await createTestUser(dataSource, 'e9dc7b8f-4b12-4bfd-a89f-9ab01f640385');
       await repository.save(businessOwnerModel);
 
       const query = new GetBusinessOwnerByUserIdQuery('e9dc7b8f-4b12-4bfd-a89f-9ab01f640385');

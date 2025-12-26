@@ -40,12 +40,15 @@ export class E2EAuthHelper {
 
       const body = response.body as LoginResponse;
       return body.token; // Changed from accessToken to token
-    } catch (error: any) {
-      if (error.status === 401) {
-        throw new Error('Authentication failed: Invalid credentials');
-      }
-      if (error.status === 500) {
-        throw new Error('Authentication failed: Server error');
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'status' in error) {
+        const httpError = error as { status: number };
+        if (httpError.status === 401) {
+          throw new Error('Authentication failed: Invalid credentials');
+        }
+        if (httpError.status === 500) {
+          throw new Error('Authentication failed: Server error');
+        }
       }
       throw error;
     }
@@ -75,15 +78,18 @@ export class E2EAuthHelper {
         token: body.token,
         userId: body.userId,
       };
-    } catch (error: any) {
-      if (error.status === 400) {
-        console.error('Registration 400 error:', error.body);
-        throw new Error(
-          `Registration failed: ${JSON.stringify(error.body?.message || error.body || 'Invalid data')}`,
-        );
-      }
-      if (error.status === 409) {
-        throw new Error('Registration failed: Email already exists');
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'status' in error) {
+        const httpError = error as { status: number; body?: { message?: string } };
+        if (httpError.status === 400) {
+          console.error('Registration 400 error:', httpError.body);
+          throw new Error(
+            `Registration failed: ${JSON.stringify(httpError.body?.message || httpError.body || 'Invalid data')}`,
+          );
+        }
+        if (httpError.status === 409) {
+          throw new Error('Registration failed: Email already exists');
+        }
       }
       throw error;
     }
@@ -100,9 +106,12 @@ export class E2EAuthHelper {
         .expect(200);
 
       return response.body.token; // Changed from accessToken to token
-    } catch (error: any) {
-      if (error.status === 401) {
-        throw new Error('Token refresh failed: Invalid refresh token');
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'status' in error) {
+        const httpError = error as { status: number };
+        if (httpError.status === 401) {
+          throw new Error('Token refresh failed: Invalid refresh token');
+        }
       }
       throw error;
     }
@@ -134,12 +143,39 @@ export class E2EAuthHelper {
 
     // If BUSINESS_OWNER, wait for BusinessOwner to be created by event handler, then create Business
     if (role === UserRole.BUSINESS_OWNER) {
-      // Wait for OnUserRegisteredHandler to create BusinessOwner (asynchronous event handler)
-      // Simple delay to allow event processing (event handlers are async)
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // Wait for OnUserRegisteredHandler to create BusinessOwner and complete onboarding
+      // Poll until BusinessOwner exists with onboarding completed (max 10 seconds)
+      const maxAttempts = 100; // 100 attempts * 100ms = 10 seconds max
+      let attempts = 0;
+      let businessOwnerReady = false;
+      let lastError: Error | null = null;
 
-      const business = await this.createTestBusiness(token, options?.businessData);
-      testUser.businessId = business.id;
+      while (attempts < maxAttempts && !businessOwnerReady) {
+        try {
+          // Try to create business - if it succeeds, BusinessOwner is ready
+          const business = await this.createTestBusiness(token, options?.businessData);
+          testUser.businessId = business.id;
+          businessOwnerReady = true;
+        } catch (error) {
+          lastError = error as Error;
+          // If error is about BusinessOwner not found or onboarding not completed, wait and retry
+          attempts++;
+          if (attempts < maxAttempts) {
+            await new Promise((resolve) => setTimeout(resolve, 100));
+          } else {
+            // Max attempts reached, throw the error with context
+            console.error(
+              `Failed to create business after ${maxAttempts} attempts (${maxAttempts * 100}ms)`,
+            );
+            console.error('Last error:', lastError);
+            throw new Error(
+              `Failed to create business after ${maxAttempts} attempts. ` +
+                `This usually means the OnUserRegisteredHandler event handler is not running or is too slow. ` +
+                `Last error: ${lastError?.message || 'Unknown error'}`,
+            );
+          }
+        }
+      }
 
       // Login again to get updated token with businessId
       const updatedToken = await this.login(email, password);
@@ -194,8 +230,8 @@ export class E2EAuthHelper {
           await dataSource.query('DELETE FROM customers WHERE id = $1', [testUser.customerId]);
         }
 
-        // Delete business_owners if exists (using camelCase column name)
-        await dataSource.query('DELETE FROM business_owners WHERE "userId" = $1', [testUser.id]);
+        // Delete business_owners if exists (using snake_case column name)
+        await dataSource.query('DELETE FROM business_owners WHERE user_id = $1', [testUser.id]);
 
         // Delete user
         await dataSource.query('DELETE FROM users WHERE id = $1', [testUser.id]);
@@ -233,6 +269,7 @@ export class E2EAuthHelper {
       businessData?.whatsappNumber || `+1809555${Math.floor(1000 + Math.random() * 9000)}`;
 
     try {
+      console.log('Attempting to create business with token:', token.substring(0, 20) + '...');
       const response = await request(this.app.getHttpServer())
         .post('/api/businesses')
         .set('Authorization', `Bearer ${token}`)
@@ -247,17 +284,27 @@ export class E2EAuthHelper {
             postalCode: null,
           },
           timezone: businessData?.timezone || 'America/Santo_Domingo',
-        })
-        .expect(201);
+        });
+
+      console.log('Create business response status:', response.status);
+      console.log('Create business response body:', response.body);
+
+      if (response.status !== 201) {
+        throw new Error(`Expected 201, got ${response.status}: ${JSON.stringify(response.body)}`);
+      }
 
       return { id: response.body.id };
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Log the error response for debugging
-      if (error.response) {
+      if (error && typeof error === 'object' && 'response' in error) {
+        const httpError = error as { response: { status: number; body: unknown; text?: string } };
         console.error('Create business failed:', {
-          status: error.response.status,
-          body: error.response.body,
+          status: httpError.response.status,
+          body: httpError.response.body,
+          text: httpError.response.text,
         });
+      } else {
+        console.error('Create business failed with unknown error:', error);
       }
       throw error;
     }

@@ -30,7 +30,7 @@ import { OfferingModule } from '@offering/offering.module';
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
       autoLoadEntities: true,
-      synchronize: process.env.NODE_ENV === 'test', // Auto-sync in tests, use migrations in production
+      synchronize: false, // Always use migrations, never auto-sync
     }),
     CqrsModule.forRoot(),
     SharedModule,

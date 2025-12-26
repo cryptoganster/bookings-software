@@ -11,6 +11,13 @@ export const ENDPOINTS = {
     LOGOUT: "/auth/logout",
   },
 
+  ACCOUNT: {
+    PROFILE: "/account/profile",
+    SUBSCRIPTION: "/account/subscription",
+    UPGRADE_SUBSCRIPTION: "/account/subscription/upgrade",
+    COMPLETE_ONBOARDING: "/account/onboarding/complete",
+  },
+
   APPOINTMENTS: {
     LIST: "/appointments",
     DETAIL: (id: string) => `/appointments/${id}`,
@@ -21,6 +28,7 @@ export const ENDPOINTS = {
 
   OFFERINGS: {
     LIST: "/offerings",
+    ACTIVE: "/offerings/active",
     DETAIL: (id: string) => `/offerings/${id}`,
     CREATE: "/offerings",
     UPDATE: (id: string) => `/offerings/${id}`,
@@ -41,14 +49,24 @@ export const ENDPOINTS = {
     DELETE: (id: string) => `/blockouts/${id}`,
   },
 
-  BUSINESS: {
-    GET: "/business",
-    UPDATE: "/business",
-    CONFIGURE_WHATSAPP: "/business/whatsapp",
+  AVAILABILITY: {
+    DATES: "/availability/dates",
+    SLOTS: "/availability/slots",
   },
 
-  ADMIN_QUERIES: {
+  BUSINESS: {
+    LIST: "/businesses",
+    DETAIL: (id: string) => `/businesses/${id}`,
+    CREATE: "/businesses",
+    UPDATE: (id: string) => `/businesses/${id}`,
+    CONFIGURE_WHATSAPP: (id: string) => `/businesses/${id}/whatsapp`,
+    DEACTIVATE: (id: string) => `/businesses/${id}`,
+    ACTIVATE: (id: string) => `/businesses/${id}/activate`,
+  },
+
+  CONVERSATIONS: {
     PENDING: "/admin-queries/pending",
+    DETAIL: (id: string) => `/admin-queries/${id}`,
     RESPOND: (id: string) => `/admin-queries/${id}/respond`,
   },
 

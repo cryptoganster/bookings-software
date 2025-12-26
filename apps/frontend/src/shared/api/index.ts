@@ -24,11 +24,12 @@ export { ENDPOINTS } from "./endpoints";
 export * as customersApi from "./customers";
 
 // Solo tipos específicos del frontend (NO DTOs del backend)
+export type { DashboardStats, AppointmentFilters } from "./types";
+
+// Re-export common types from shared-types for convenience
 export type {
-  DashboardStats,
-  AppointmentFilters,
   ScheduleReadModel,
   BlockoutReadModel,
   ConversationReadModel,
   MessageReadModel,
-} from "./types";
+} from "@packages/shared-types";
