@@ -82,7 +82,8 @@ describe('Customer Flow E2E', () => {
     testBusinessId = testUser.businessId!;
 
     // Create active offering for foreign key constraint
-    testOfferingId = await createActiveOffering(dataSource, testBusinessId);
+    const offering = await createActiveOffering(dataSource, testBusinessId);
+    testOfferingId = offering.id;
   });
 
   afterAll(async () => {
