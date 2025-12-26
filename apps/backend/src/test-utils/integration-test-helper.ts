@@ -56,6 +56,54 @@ export function generateTestEmail(): string {
 }
 
 /**
+ * Create a test user in the database
+ * Required for foreign key constraints
+ */
+export async function createTestUser(dataSource: DataSource, userId?: string): Promise<string> {
+  const id = userId || generateTestId();
+  const email = generateTestEmail();
+
+  await dataSource.query(
+    `INSERT INTO users (id, email, password, name, roles, is_active, email_verified, version, created_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())`,
+    [id, email, 'hashed_password', 'Test User', ['BUSINESS_OWNER'], true, true, 0],
+  );
+
+  return id;
+}
+
+/**
+ * Create a test business in the database
+ * Required for foreign key constraints
+ */
+export async function createTestBusiness(
+  dataSource: DataSource,
+  businessId?: string,
+  ownerId?: string,
+): Promise<string> {
+  const id = businessId || generateTestId();
+  const owner = ownerId || (await createTestUser(dataSource));
+
+  await dataSource.query(
+    `INSERT INTO businesses (id, owner_id, name, whatsapp_phone, address_street, address_city, timezone, is_active, version, created_at, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())`,
+    [
+      id,
+      owner,
+      'Test Business',
+      `+1${Math.floor(Math.random() * 10000000000)}`, // Random phone
+      '123 Test St',
+      'Test City',
+      'America/New_York',
+      true,
+      0,
+    ],
+  );
+
+  return id;
+}
+
+/**
  * Shared DataSource singleton for all integration tests
  * This prevents multiple connections from interfering with each other
  */

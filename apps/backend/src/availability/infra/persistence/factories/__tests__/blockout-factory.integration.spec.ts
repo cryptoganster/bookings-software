@@ -7,6 +7,7 @@ import {
   createIntegrationTestDataSource,
   cleanDatabase,
   generateTestId,
+  createTestBusiness,
 } from '@test-utils/integration-test-helper';
 
 describe('BlockoutFactory (Integration)', () => {
@@ -14,6 +15,7 @@ describe('BlockoutFactory (Integration)', () => {
   let factory: BlockoutFactory;
   let repository: Repository<BlockoutModel>;
   let dataSource: DataSource;
+  let testBusinessId: string; // Shared business ID for all tests
 
   beforeAll(async () => {
     // Create shared DataSource with ALL entities
@@ -45,19 +47,21 @@ describe('BlockoutFactory (Integration)', () => {
 
   beforeEach(async () => {
     await cleanDatabase(dataSource);
+    // Create a test business for foreign key constraints
+    testBusinessId = await createTestBusiness(dataSource);
   });
 
   describe('loadById', () => {
     it('should return aggregate with business logic', async () => {
       // Arrange
       const id = generateTestId();
-      const businessId = generateTestId();
+      // businessId is now testBusinessId (created in beforeEach)
       const futureDate = new Date();
       futureDate.setDate(futureDate.getDate() + 30); // 30 days from now
 
       const blockoutModel = repository.create({
         id,
-        businessId,
+        businessId: testBusinessId,
         startDate: futureDate,
         endDate: new Date(futureDate.getTime() + 7 * 24 * 60 * 60 * 1000), // +7 days
         reason: 'Summer vacation',
@@ -72,7 +76,7 @@ describe('BlockoutFactory (Integration)', () => {
       expect(aggregate).toBeDefined();
       expect(aggregate).not.toBeNull();
       expect(aggregate!.getId().getValue()).toBe(id);
-      expect(aggregate!.getBusinessId().getValue()).toBe(businessId);
+      expect(aggregate!.getBusinessId().getValue()).toBe(testBusinessId);
       expect(aggregate!.getReason()).toBe('Summer vacation');
     });
 
@@ -87,13 +91,13 @@ describe('BlockoutFactory (Integration)', () => {
     it('should load aggregate that can execute domain methods', async () => {
       // Arrange
       const id = generateTestId();
-      const businessId = generateTestId();
+      // businessId is now testBusinessId (created in beforeEach)
       const futureDate = new Date();
       futureDate.setDate(futureDate.getDate() + 60); // 60 days from now
 
       const blockoutModel = repository.create({
         id,
-        businessId,
+        businessId: testBusinessId,
         startDate: futureDate,
         endDate: new Date(futureDate.getTime() + 3 * 24 * 60 * 60 * 1000), // +3 days
         reason: 'Holiday',
@@ -113,13 +117,13 @@ describe('BlockoutFactory (Integration)', () => {
     it('should handle single-day blockouts', async () => {
       // Arrange
       const id = generateTestId();
-      const businessId = generateTestId();
+      // businessId is now testBusinessId (created in beforeEach)
       const futureDate = new Date();
       futureDate.setDate(futureDate.getDate() + 15); // 15 days from now
 
       const blockoutModel = repository.create({
         id,
-        businessId,
+        businessId: testBusinessId,
         startDate: futureDate,
         endDate: futureDate, // Same day
         reason: 'Staff meeting',
@@ -139,7 +143,7 @@ describe('BlockoutFactory (Integration)', () => {
     it('should handle multi-day blockouts', async () => {
       // Arrange
       const id = generateTestId();
-      const businessId = generateTestId();
+      // businessId is now testBusinessId (created in beforeEach)
       const startDate = new Date();
       startDate.setDate(startDate.getDate() + 90); // 90 days from now
       const endDate = new Date(startDate);
@@ -147,7 +151,7 @@ describe('BlockoutFactory (Integration)', () => {
 
       const blockoutModel = repository.create({
         id,
-        businessId,
+        businessId: testBusinessId,
         startDate,
         endDate,
         reason: 'Extended vacation',
@@ -170,7 +174,7 @@ describe('BlockoutFactory (Integration)', () => {
 
     it('should handle different blockout reasons', async () => {
       // Arrange
-      const businessId = generateTestId();
+      // businessId is now testBusinessId (created in beforeEach)
       const testData = [
         {
           id: generateTestId(),
@@ -200,7 +204,7 @@ describe('BlockoutFactory (Integration)', () => {
 
         const model = repository.create({
           id,
-          businessId,
+          businessId: testBusinessId,
           startDate: futureDate,
           endDate: futureDate,
           reason,
@@ -220,7 +224,7 @@ describe('BlockoutFactory (Integration)', () => {
     it('should preserve date precision from database', async () => {
       // Arrange - Create dates entirely in UTC
       const id = generateTestId();
-      const businessId = generateTestId();
+      // businessId is now testBusinessId (created in beforeEach)
       const now = new Date();
       const startDate = new Date(
         Date.UTC(
@@ -248,7 +252,7 @@ describe('BlockoutFactory (Integration)', () => {
 
       const blockoutModel = repository.create({
         id,
-        businessId,
+        businessId: testBusinessId,
         startDate,
         endDate,
         reason: 'Scheduled maintenance',
@@ -273,28 +277,28 @@ describe('BlockoutFactory (Integration)', () => {
       const testData = [
         {
           id: generateTestId(),
-          businessId: generateTestId(),
+          businessId: testBusinessId,
           daysOffset: 20,
         },
         {
           id: generateTestId(),
-          businessId: generateTestId(),
+          businessId: testBusinessId,
           daysOffset: 25,
         },
         {
           id: generateTestId(),
-          businessId: generateTestId(),
+          businessId: testBusinessId,
           daysOffset: 30,
         },
       ];
 
-      for (const { id, businessId, daysOffset } of testData) {
+      for (const { id, businessId: testBusinessId, daysOffset } of testData) {
         const futureDate = new Date();
         futureDate.setDate(futureDate.getDate() + daysOffset);
 
         const model = repository.create({
           id,
-          businessId,
+          businessId: testBusinessId,
           startDate: futureDate,
           endDate: futureDate,
           reason: 'Business-specific blockout',
@@ -307,14 +311,14 @@ describe('BlockoutFactory (Integration)', () => {
       for (const { id, businessId } of testData) {
         const aggregate = await factory.loadById(id);
         expect(aggregate).toBeDefined();
-        expect(aggregate!.getBusinessId().getValue()).toBe(businessId);
+        expect(aggregate!.getBusinessId().getValue()).toBe(testBusinessId);
       }
     });
 
     it('should verify isDateBlocked method works correctly', async () => {
       // Arrange - Create dates entirely in UTC
       const id = generateTestId();
-      const businessId = generateTestId();
+      // businessId is now testBusinessId (created in beforeEach)
       const now = new Date();
       const startDate = new Date(
         Date.UTC(
@@ -342,7 +346,7 @@ describe('BlockoutFactory (Integration)', () => {
 
       const blockoutModel = repository.create({
         id,
-        businessId,
+        businessId: testBusinessId,
         startDate,
         endDate,
         reason: 'Test blockout',
