@@ -198,8 +198,10 @@ describe('IdentifyCustomerHandler - Concurrency Tests', () => {
       );
 
       expect(allCustomers).toHaveLength(2);
-      expect(allCustomers[0].business_id).toBe(business1);
-      expect(allCustomers[1].business_id).toBe(business2);
+      // Check that both businesses are present (order doesn't matter)
+      const businessIds = allCustomers.map((c: any) => c.business_id);
+      expect(businessIds).toContain(business1);
+      expect(businessIds).toContain(business2);
     });
   });
 
