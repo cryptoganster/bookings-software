@@ -230,7 +230,7 @@ describe('Blockout Repositories (Integration)', () => {
         // Assert
         expect(readModel).toBeDefined();
         expect(readModel!.id).toBe('550e8400-e29b-41d4-a716-446655440000');
-        expect(readModel!.businessId).toBe('550e8400-e29b-41d4-a716-446655440001');
+        expect(readModel!.businessId).toBe(testBusinessId);
         expect(readModel!.reason).toBe('Test blockout');
       });
 
