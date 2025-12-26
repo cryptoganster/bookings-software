@@ -107,6 +107,10 @@ describe('Customer Flow E2E', () => {
     // Clear conversations from database
     await dataSource.query('DELETE FROM conversations');
     await dataSource.query('DELETE FROM messages');
+
+    // Recreate the test offering after cleanup
+    const offering = await createActiveOffering(dataSource, testBusinessId);
+    testOfferingId = offering.id;
   });
 
   describe('Requirement 7.1: Customer Identification', () => {
