@@ -7,6 +7,7 @@ import {
   createIntegrationTestDataSource,
   cleanDatabase,
   generateTestId,
+  createTestBusiness,
 } from '@test-utils/integration-test-helper';
 
 describe('ScheduleFactory (Integration)', () => {
@@ -43,8 +44,12 @@ describe('ScheduleFactory (Integration)', () => {
     await module.close();
   });
 
+  let testBusinessId: string;
+
   beforeEach(async () => {
     await cleanDatabase(dataSource);
+    // Create test business for foreign key constraint
+    testBusinessId = await createTestBusiness(dataSource);
   });
 
   describe('loadById', () => {
@@ -54,7 +59,7 @@ describe('ScheduleFactory (Integration)', () => {
       const businessId = generateTestId();
       const scheduleModel = repository.create({
         id,
-        businessId,
+        businessId: testBusinessId,
         dayOfWeek: 1, // Monday
         startTime: '09:00',
         endTime: '17:00',

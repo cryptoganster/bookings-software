@@ -12,6 +12,7 @@ import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import {
   createIntegrationTestDataSource,
   cleanDatabase,
+  createTestBusiness,
 } from '@test-utils/integration-test-helper';
 
 describe('Schedule Repositories (Integration)', () => {
@@ -53,8 +54,12 @@ describe('Schedule Repositories (Integration)', () => {
     await module.close();
   });
 
+  let testBusinessId: string;
+
   beforeEach(async () => {
     await cleanDatabase(dataSource);
+    // Create test business for foreign key constraint
+    testBusinessId = await createTestBusiness(dataSource);
   });
 
   describe('ScheduleWriteRepository', () => {
@@ -63,7 +68,7 @@ describe('Schedule Repositories (Integration)', () => {
         // Arrange
         const schedule = Schedule.create(
           UUID.generate(),
-          UUID.generate(),
+          UUID.fromString(testBusinessId),
           DayOfWeek.create(1), // Monday
           TimeSlot.create('09:00', '17:00'),
         );

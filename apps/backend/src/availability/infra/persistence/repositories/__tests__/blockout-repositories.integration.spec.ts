@@ -12,6 +12,7 @@ import {
   createIntegrationTestDataSource,
   cleanDatabase,
   generateTestId,
+  createTestBusiness,
 } from '@test-utils/integration-test-helper';
 
 describe('Blockout Repositories (Integration)', () => {
@@ -53,8 +54,12 @@ describe('Blockout Repositories (Integration)', () => {
     await module.close();
   });
 
+  let testBusinessId: string;
+
   beforeEach(async () => {
     await cleanDatabase(dataSource);
+    // Create test business for foreign key constraint
+    testBusinessId = await createTestBusiness(dataSource);
   });
 
   describe('BlockoutWriteRepository', () => {
@@ -68,7 +73,7 @@ describe('Blockout Repositories (Integration)', () => {
 
         const blockout = Blockout.create(
           UUID.generate(),
-          UUID.generate(),
+          UUID.fromString(testBusinessId),
           DateRange.create(startDate, endDate),
           'Summer vacation',
         );
@@ -94,7 +99,7 @@ describe('Blockout Repositories (Integration)', () => {
 
         const blockout = Blockout.create(
           UUID.generate(),
-          UUID.generate(),
+          UUID.fromString(testBusinessId),
           DateRange.create(date, date), // Same day
           'Staff meeting',
         );
@@ -119,7 +124,7 @@ describe('Blockout Repositories (Integration)', () => {
 
         const blockout = Blockout.create(
           UUID.generate(),
-          UUID.generate(),
+          UUID.fromString(testBusinessId),
           DateRange.create(startDate, endDate),
           'Extended vacation',
         );
@@ -147,7 +152,7 @@ describe('Blockout Repositories (Integration)', () => {
 
         const blockout = Blockout.create(
           UUID.generate(),
-          UUID.generate(),
+          UUID.fromString(testBusinessId),
           DateRange.create(startDate, endDate),
           'Holiday',
         );
@@ -175,7 +180,7 @@ describe('Blockout Repositories (Integration)', () => {
 
         const blockout = Blockout.create(
           UUID.generate(),
-          UUID.generate(),
+          UUID.fromString(testBusinessId),
           DateRange.create(startDate, endDate),
           'Temporary closure',
         );
@@ -211,7 +216,7 @@ describe('Blockout Repositories (Integration)', () => {
 
         const blockoutModel = repository.create({
           id: '550e8400-e29b-41d4-a716-446655440000',
-          businessId: '550e8400-e29b-41d4-a716-446655440001',
+          businessId: testBusinessId,
           startDate,
           endDate,
           reason: 'Test blockout',
@@ -241,7 +246,7 @@ describe('Blockout Repositories (Integration)', () => {
     describe('findByBusinessId', () => {
       it('should return all blockouts for a business', async () => {
         // Arrange
-        const businessId = '550e8400-e29b-41d4-a716-446655440100';
+        const businessId = testBusinessId;
 
         // Create multiple blockouts
         const blockouts = [
@@ -304,8 +309,8 @@ describe('Blockout Repositories (Integration)', () => {
 
       it('should only return blockouts for specified business', async () => {
         // Arrange
-        const business1 = '550e8400-e29b-41d4-a716-446655440300';
-        const business2 = '550e8400-e29b-41d4-a716-446655440301';
+        const business1 = testBusinessId;
+        const business2 = await createTestBusiness(dataSource);
 
         const startDate = new Date();
         startDate.setDate(startDate.getDate() + 40);
@@ -344,7 +349,7 @@ describe('Blockout Repositories (Integration)', () => {
     describe('findByBusinessAndDateRange', () => {
       it('should return blockouts within date range', async () => {
         // Arrange
-        const businessId = '550e8400-e29b-41d4-a716-446655440400';
+        const businessId = testBusinessId;
 
         // Create blockout from day 30 to day 35
         const blockoutStart = new Date();
@@ -381,7 +386,7 @@ describe('Blockout Repositories (Integration)', () => {
 
       it('should return empty array when no blockouts overlap', async () => {
         // Arrange
-        const businessId = '550e8400-e29b-41d4-a716-446655440500';
+        const businessId = testBusinessId;
 
         // Create blockout from day 50 to day 55
         const blockoutStart = new Date();
@@ -417,7 +422,7 @@ describe('Blockout Repositories (Integration)', () => {
 
       it('should return multiple overlapping blockouts', async () => {
         // Arrange
-        const businessId = '550e8400-e29b-41d4-a716-446655440600';
+        const businessId = testBusinessId;
 
         // Create 3 blockouts with different overlaps
         const blockouts = [
@@ -476,7 +481,7 @@ describe('Blockout Repositories (Integration)', () => {
 
       it('should handle exact date match', async () => {
         // Arrange
-        const businessId = '550e8400-e29b-41d4-a716-446655440700';
+        const businessId = testBusinessId;
 
         const date = new Date();
         date.setDate(date.getDate() + 60);
