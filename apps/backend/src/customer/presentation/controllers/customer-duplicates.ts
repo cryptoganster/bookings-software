@@ -116,7 +116,7 @@ export class CustomerDuplicatesController {
 
       // Transform to response DTO
       return {
-        pairs: pairs.map((pair) => ({
+        pairs: pairs.map((pair: any) => ({
           customer1: {
             id: pair.customer1.id,
             businessId: pair.customer1.businessId,

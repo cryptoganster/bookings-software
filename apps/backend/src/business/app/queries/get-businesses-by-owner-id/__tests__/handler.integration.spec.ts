@@ -131,10 +131,10 @@ describe('GetBusinessesByOwnerIdHandler Integration Tests', () => {
 
       // Assert
       expect(result).toHaveLength(3);
-      expect(result.every((b) => b.ownerId === ownerId)).toBe(true);
-      expect(result.map((b) => b.name)).toContain('Business 1');
-      expect(result.map((b) => b.name)).toContain('Business 2');
-      expect(result.map((b) => b.name)).toContain('Business 3');
+      expect(result.every((b: any) => b.ownerId === ownerId)).toBe(true);
+      expect(result.map((b: any) => b.name)).toContain('Business 1');
+      expect(result.map((b: any) => b.name)).toContain('Business 2');
+      expect(result.map((b: any) => b.name)).toContain('Business 3');
     });
 
     it('should return empty list when owner has no businesses', async () => {
@@ -252,8 +252,8 @@ describe('GetBusinessesByOwnerIdHandler Integration Tests', () => {
 
       // Assert
       expect(result).toHaveLength(2);
-      expect(result.find((b) => b.name === 'Active Business')?.isActive).toBe(true);
-      expect(result.find((b) => b.name === 'Inactive Business')?.isActive).toBe(false);
+      expect(result.find((b: any) => b.name === 'Active Business')?.isActive).toBe(true);
+      expect(result.find((b: any) => b.name === 'Inactive Business')?.isActive).toBe(false);
     });
   });
 });

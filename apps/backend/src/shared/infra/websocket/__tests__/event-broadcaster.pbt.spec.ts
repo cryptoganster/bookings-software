@@ -297,10 +297,10 @@ describe('WebSocketEventBroadcaster (Property-Based Tests)', () => {
               if (eventData.type === 'created') {
                 const event = new AppointmentCreated(
                   eventData.appointmentId,
-                  eventData.businessId,
-                  eventData.customerId,
-                  eventData.offeringId,
-                  eventData.dateTime,
+                  (eventData as any).businessId,
+                  (eventData as any).customerId,
+                  (eventData as any).offeringId,
+                  (eventData as any).dateTime,
                 );
                 eventBusSubject.next(event);
               } else if (eventData.type === 'cancelled') {
@@ -309,7 +309,7 @@ describe('WebSocketEventBroadcaster (Property-Based Tests)', () => {
               } else if (eventData.type === 'modified') {
                 const event = new AppointmentModified(
                   eventData.appointmentId,
-                  eventData.newDateTime,
+                  (eventData as any).newDateTime,
                 );
                 eventBusSubject.next(event);
               }

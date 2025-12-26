@@ -231,7 +231,7 @@ export class CustomerCrudController {
       );
 
       // Transform to response
-      return customers.map((c) => ({
+      return customers.map((c: any) => ({
         id: c.id,
         businessId: c.businessId,
         userId: c.userId,
