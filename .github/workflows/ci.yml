@@ -369,7 +369,7 @@ jobs:
           key: ${{ runner.os }}-pnpm-v2-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Run Backend Tests
-        run: pnpm --filter backend test:coverage
+        run: pnpm --filter backend test:cov
         env:
           DB_HOST: localhost
           DB_PORT: 5432
