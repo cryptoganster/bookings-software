@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner, Table, TableIndex } from 'typeorm';
+import { MigrationInterface, QueryRunner, Table, TableIndex, TableForeignKey } from 'typeorm';
 
 /**
  * CreateCustomersTable Migration
@@ -102,12 +102,42 @@ export class CreateCustomersTable1702554000000 implements MigrationInterface {
         columnNames: ['user_id'],
       }),
     );
+
+    // Add foreign keys
+    await queryRunner.createForeignKey(
+      'customers',
+      new TableForeignKey({
+        name: 'fk_customers_user',
+        columnNames: ['user_id'],
+        referencedTableName: 'users',
+        referencedColumnNames: ['id'],
+        onDelete: 'SET NULL', // Allow anonymous customers
+      }),
+    );
+
+    await queryRunner.createForeignKey(
+      'customers',
+      new TableForeignKey({
+        name: 'fk_customers_business',
+        columnNames: ['business_id'],
+        referencedTableName: 'businesses',
+        referencedColumnNames: ['id'],
+        onDelete: 'CASCADE',
+      }),
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    // Drop foreign keys
+    await queryRunner.dropForeignKey('customers', 'fk_customers_business');
+    await queryRunner.dropForeignKey('customers', 'fk_customers_user');
+
+    // Drop indexes
     await queryRunner.dropIndex('customers', 'IDX_CUSTOMERS_USER_ID');
     await queryRunner.dropIndex('customers', 'IDX_CUSTOMERS_BUSINESS_ID');
     await queryRunner.dropIndex('customers', 'IDX_CUSTOMERS_BUSINESS_WHATSAPP_UNIQUE');
+
+    // Drop table
     await queryRunner.dropTable('customers');
   }
 }

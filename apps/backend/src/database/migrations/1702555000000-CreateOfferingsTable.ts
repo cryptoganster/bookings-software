@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner, Table, TableIndex } from 'typeorm';
+import { MigrationInterface, QueryRunner, Table, TableIndex, TableForeignKey } from 'typeorm';
 
 export class CreateOfferingsTable1702555000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -93,12 +93,30 @@ export class CreateOfferingsTable1702555000000 implements MigrationInterface {
         isUnique: true,
       }),
     );
+
+    // Add foreign key
+    await queryRunner.createForeignKey(
+      'offerings',
+      new TableForeignKey({
+        name: 'fk_offerings_business',
+        columnNames: ['business_id'],
+        referencedTableName: 'businesses',
+        referencedColumnNames: ['id'],
+        onDelete: 'CASCADE',
+      }),
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    // Drop foreign key
+    await queryRunner.dropForeignKey('offerings', 'fk_offerings_business');
+
+    // Drop indexes
     await queryRunner.dropIndex('offerings', 'IDX_OFFERINGS_BUSINESS_ID_NAME_UNIQUE');
     await queryRunner.dropIndex('offerings', 'IDX_OFFERINGS_IS_ACTIVE');
     await queryRunner.dropIndex('offerings', 'IDX_OFFERINGS_BUSINESS_ID');
+
+    // Drop table
     await queryRunner.dropTable('offerings');
   }
 }

@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner, Table, TableIndex } from 'typeorm';
+import { MigrationInterface, QueryRunner, Table, TableIndex, TableForeignKey } from 'typeorm';
 
 export class CreateSchedulesTable1702556000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -95,13 +95,31 @@ export class CreateSchedulesTable1702556000000 implements MigrationInterface {
         columnNames: ['is_active'],
       }),
     );
+
+    // Add foreign key
+    await queryRunner.createForeignKey(
+      'schedules',
+      new TableForeignKey({
+        name: 'fk_schedules_business',
+        columnNames: ['business_id'],
+        referencedTableName: 'businesses',
+        referencedColumnNames: ['id'],
+        onDelete: 'CASCADE',
+      }),
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    // Drop foreign key
+    await queryRunner.dropForeignKey('schedules', 'fk_schedules_business');
+
+    // Drop indexes
     await queryRunner.dropIndex('schedules', 'IDX_SCHEDULES_IS_ACTIVE');
     await queryRunner.dropIndex('schedules', 'IDX_SCHEDULES_BUSINESS_DAY_UNIQUE');
     await queryRunner.dropIndex('schedules', 'IDX_SCHEDULES_DAY_OF_WEEK');
     await queryRunner.dropIndex('schedules', 'IDX_SCHEDULES_BUSINESS_ID');
+
+    // Drop table
     await queryRunner.dropTable('schedules');
   }
 }

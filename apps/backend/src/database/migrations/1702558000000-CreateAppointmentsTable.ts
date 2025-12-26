@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner, Table, TableIndex } from 'typeorm';
+import { MigrationInterface, QueryRunner, Table, TableIndex, TableForeignKey } from 'typeorm';
 
 export class CreateAppointmentsTable1702558000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -82,11 +82,53 @@ export class CreateAppointmentsTable1702558000000 implements MigrationInterface 
         columnNames: ['customer_id'],
       }),
     );
+
+    // Add foreign keys
+    await queryRunner.createForeignKey(
+      'appointments',
+      new TableForeignKey({
+        name: 'fk_appointments_business',
+        columnNames: ['business_id'],
+        referencedTableName: 'businesses',
+        referencedColumnNames: ['id'],
+        onDelete: 'CASCADE',
+      }),
+    );
+
+    await queryRunner.createForeignKey(
+      'appointments',
+      new TableForeignKey({
+        name: 'fk_appointments_customer',
+        columnNames: ['customer_id'],
+        referencedTableName: 'customers',
+        referencedColumnNames: ['id'],
+        onDelete: 'CASCADE',
+      }),
+    );
+
+    await queryRunner.createForeignKey(
+      'appointments',
+      new TableForeignKey({
+        name: 'fk_appointments_offering',
+        columnNames: ['offering_id'],
+        referencedTableName: 'offerings',
+        referencedColumnNames: ['id'],
+        onDelete: 'CASCADE',
+      }),
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    // Drop foreign keys
+    await queryRunner.dropForeignKey('appointments', 'fk_appointments_offering');
+    await queryRunner.dropForeignKey('appointments', 'fk_appointments_customer');
+    await queryRunner.dropForeignKey('appointments', 'fk_appointments_business');
+
+    // Drop indexes
     await queryRunner.dropIndex('appointments', 'IDX_APPOINTMENTS_CUSTOMER_ID');
     await queryRunner.dropIndex('appointments', 'IDX_APPOINTMENTS_BUSINESS_ID');
+
+    // Drop table
     await queryRunner.dropTable('appointments');
   }
 }

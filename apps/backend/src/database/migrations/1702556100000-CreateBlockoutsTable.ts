@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner, Table, TableIndex } from 'typeorm';
+import { MigrationInterface, QueryRunner, Table, TableIndex, TableForeignKey } from 'typeorm';
 
 export class CreateBlockoutsTable1702556100000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -89,13 +89,31 @@ export class CreateBlockoutsTable1702556100000 implements MigrationInterface {
         columnNames: ['business_id', 'start_date', 'end_date'],
       }),
     );
+
+    // Add foreign key
+    await queryRunner.createForeignKey(
+      'blockouts',
+      new TableForeignKey({
+        name: 'fk_blockouts_business',
+        columnNames: ['business_id'],
+        referencedTableName: 'businesses',
+        referencedColumnNames: ['id'],
+        onDelete: 'CASCADE',
+      }),
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    // Drop foreign key
+    await queryRunner.dropForeignKey('blockouts', 'fk_blockouts_business');
+
+    // Drop indexes
     await queryRunner.dropIndex('blockouts', 'IDX_BLOCKOUTS_BUSINESS_DATE_RANGE');
     await queryRunner.dropIndex('blockouts', 'IDX_BLOCKOUTS_END_DATE');
     await queryRunner.dropIndex('blockouts', 'IDX_BLOCKOUTS_START_DATE');
     await queryRunner.dropIndex('blockouts', 'IDX_BLOCKOUTS_BUSINESS_ID');
+
+    // Drop table
     await queryRunner.dropTable('blockouts');
   }
 }
