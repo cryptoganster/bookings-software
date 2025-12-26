@@ -22,6 +22,10 @@ describe('Availability Query (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+
+    // Set global prefix like in main.ts
+    app.setGlobalPrefix('api');
+
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -39,7 +43,13 @@ describe('Availability Query (e2e)', () => {
     const testUser = await authHelper.createBusinessOwner({
       name: 'Test Availability Business',
       whatsappNumber: '+18095559012',
-      address: '789 Test Blvd, Test City, DO', // ✅ Fixed: address is a string
+      address: {
+        street: '789 Test Blvd',
+        city: 'Test City',
+        state: null,
+        country: 'DO',
+        postalCode: null,
+      },
       timezone: 'America/Santo_Domingo',
     });
 
@@ -61,7 +71,7 @@ describe('Availability Query (e2e)', () => {
     // 3. Create schedules for testing (Monday to Friday, 9-17)
     for (let day = 1; day <= 5; day++) {
       await request(app.getHttpServer())
-        .post('/schedules')
+        .post('/api/schedules')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           businessId,
@@ -113,7 +123,7 @@ describe('Availability Query (e2e)', () => {
       endDate.setDate(endDate.getDate() + 7);
 
       const response = await request(app.getHttpServer())
-        .get('/availability/dates')
+        .get('/api/availability/dates')
         .query({
           offeringId,
           businessId,
@@ -142,7 +152,7 @@ describe('Availability Query (e2e)', () => {
 
       // Create blockout for tomorrow
       await request(app.getHttpServer())
-        .post('/blockouts')
+        .post('/api/blockouts')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           businessId,
@@ -156,7 +166,7 @@ describe('Availability Query (e2e)', () => {
       endDate.setDate(endDate.getDate() + 3);
 
       const response = await request(app.getHttpServer())
-        .get('/availability/dates')
+        .get('/api/availability/dates')
         .query({
           offeringId,
           businessId,
@@ -173,17 +183,36 @@ describe('Availability Query (e2e)', () => {
     });
 
     it('should exclude dates outside schedule', async () => {
-      // Schedules are Monday-Friday, so weekend should be excluded
-      const nextSunday = new Date();
-      nextSunday.setDate(nextSunday.getDate() + (7 - nextSunday.getDay()));
+      // Schedules are Monday-Friday (days 1-5), so weekend (Sunday=0, Saturday=6) should be excluded
+      // Find the next Sunday (day 0)
+      const today = new Date();
+      today.setUTCHours(0, 0, 0, 0);
 
+      // Calculate days until next Sunday (0 = Sunday)
+      const currentDay = today.getUTCDay();
+      const daysUntilSunday = currentDay === 0 ? 7 : 7 - currentDay; // If today is Sunday, get next Sunday
+
+      const nextSunday = new Date(today);
+      nextSunday.setUTCDate(today.getUTCDate() + daysUntilSunday);
+
+      // Verify it's actually Sunday
+      expect(nextSunday.getUTCDay()).toBe(0);
+
+      // Ensure we have capacity for this Sunday (create it if needed)
+      const { v4: uuidv4 } = require('uuid');
+      await dataSource.query(
+        'INSERT INTO capacities (id, offering_id, date, total_slots, available_slots, version, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW()) ON CONFLICT DO NOTHING',
+        [uuidv4(), offeringId, nextSunday, 10, 10, 0],
+      );
+
+      // Query for dates around Sunday (Saturday, Sunday, Monday)
       const startDate = new Date(nextSunday);
-      startDate.setDate(startDate.getDate() - 1);
+      startDate.setUTCDate(startDate.getUTCDate() - 1); // Saturday
       const endDate = new Date(nextSunday);
-      endDate.setDate(endDate.getDate() + 1);
+      endDate.setUTCDate(endDate.getUTCDate() + 1); // Monday
 
       const response = await request(app.getHttpServer())
-        .get('/availability/dates')
+        .get('/api/availability/dates')
         .query({
           offeringId,
           businessId,
@@ -193,15 +222,23 @@ describe('Availability Query (e2e)', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
-      // Sunday should not be in the list
+      // Sunday should NOT be in the list (no schedule for day 0)
+      // Monday SHOULD be in the list (has schedule for day 1)
       const sundayStr = nextSunday.toISOString().split('T')[0];
       const hasSunday = response.body.some((date: string) => date.startsWith(sundayStr));
       expect(hasSunday).toBe(false);
+
+      // Verify Monday is included (sanity check)
+      const monday = new Date(nextSunday);
+      monday.setUTCDate(monday.getUTCDate() + 1);
+      const mondayStr = monday.toISOString().split('T')[0];
+      const hasMonday = response.body.some((date: string) => date.startsWith(mondayStr));
+      expect(hasMonday).toBe(true);
     });
 
     it('should fail with missing required parameters', async () => {
       await request(app.getHttpServer())
-        .get('/availability/dates')
+        .get('/api/availability/dates')
         .query({
           offeringId,
           // Missing businessId, startDate, endDate
@@ -216,7 +253,7 @@ describe('Availability Query (e2e)', () => {
       endDate.setDate(endDate.getDate() + 7);
 
       await request(app.getHttpServer())
-        .get('/availability/dates')
+        .get('/api/availability/dates')
         .query({
           offeringId,
           businessId,
@@ -232,7 +269,7 @@ describe('Availability Query (e2e)', () => {
       endDate.setDate(endDate.getDate() + 7);
 
       await request(app.getHttpServer())
-        .get('/availability/dates')
+        .get('/api/availability/dates')
         .query({
           offeringId: 'invalid-uuid',
           businessId,
@@ -246,15 +283,26 @@ describe('Availability Query (e2e)', () => {
 
   describe('GET /availability/slots', () => {
     it('should return available time slots for a date', async () => {
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 2); // Use day after tomorrow to avoid blockout
+      // Find next Monday (day 1) to ensure we have a schedule
+      const today = new Date();
+      const daysUntilMonday = (1 - today.getDay() + 7) % 7 || 7; // If today is Monday, get next Monday
+      const nextMonday = new Date(today);
+      nextMonday.setDate(today.getDate() + daysUntilMonday);
+      nextMonday.setUTCHours(0, 0, 0, 0);
+
+      // Ensure we have capacity for this Monday
+      const { v4: uuidv4 } = require('uuid');
+      await dataSource.query(
+        'INSERT INTO capacities (id, offering_id, date, total_slots, available_slots, version, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW()) ON CONFLICT DO NOTHING',
+        [uuidv4(), offeringId, nextMonday, 10, 10, 0],
+      );
 
       const response = await request(app.getHttpServer())
-        .get('/availability/slots')
+        .get('/api/availability/slots')
         .query({
           offeringId,
           businessId,
-          date: tomorrow.toISOString().split('T')[0],
+          date: nextMonday.toISOString().split('T')[0],
           durationMinutes: 60,
         })
         .set('Authorization', `Bearer ${authToken}`)
@@ -274,15 +322,26 @@ describe('Availability Query (e2e)', () => {
     });
 
     it('should return slots within schedule hours (9-17)', async () => {
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 2);
+      // Find next Tuesday (day 2) to ensure we have a schedule
+      const today = new Date();
+      const daysUntilTuesday = (2 - today.getDay() + 7) % 7 || 7;
+      const nextTuesday = new Date(today);
+      nextTuesday.setDate(today.getDate() + daysUntilTuesday);
+      nextTuesday.setUTCHours(0, 0, 0, 0);
+
+      // Ensure we have capacity for this Tuesday
+      const { v4: uuidv4 } = require('uuid');
+      await dataSource.query(
+        'INSERT INTO capacities (id, offering_id, date, total_slots, available_slots, version, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW()) ON CONFLICT DO NOTHING',
+        [uuidv4(), offeringId, nextTuesday, 10, 10, 0],
+      );
 
       const response = await request(app.getHttpServer())
-        .get('/availability/slots')
+        .get('/api/availability/slots')
         .query({
           offeringId,
           businessId,
-          date: tomorrow.toISOString().split('T')[0],
+          date: nextTuesday.toISOString().split('T')[0],
           durationMinutes: 60,
         })
         .set('Authorization', `Bearer ${authToken}`)
@@ -302,7 +361,7 @@ describe('Availability Query (e2e)', () => {
       tomorrow.setDate(tomorrow.getDate() + 1); // This date has blockout
 
       const response = await request(app.getHttpServer())
-        .get('/availability/slots')
+        .get('/api/availability/slots')
         .query({
           offeringId,
           businessId,
@@ -317,27 +376,38 @@ describe('Availability Query (e2e)', () => {
     });
 
     it('should adjust slots based on duration', async () => {
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 2);
+      // Find next Wednesday (day 3) to ensure we have a schedule
+      const today = new Date();
+      const daysUntilWednesday = (3 - today.getDay() + 7) % 7 || 7;
+      const nextWednesday = new Date(today);
+      nextWednesday.setDate(today.getDate() + daysUntilWednesday);
+      nextWednesday.setUTCHours(0, 0, 0, 0);
+
+      // Ensure we have capacity for this Wednesday
+      const { v4: uuidv4 } = require('uuid');
+      await dataSource.query(
+        'INSERT INTO capacities (id, offering_id, date, total_slots, available_slots, version, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW()) ON CONFLICT DO NOTHING',
+        [uuidv4(), offeringId, nextWednesday, 10, 10, 0],
+      );
 
       // 30-minute slots should have more slots than 60-minute
       const response30 = await request(app.getHttpServer())
-        .get('/availability/slots')
+        .get('/api/availability/slots')
         .query({
           offeringId,
           businessId,
-          date: tomorrow.toISOString().split('T')[0],
+          date: nextWednesday.toISOString().split('T')[0],
           durationMinutes: 30,
         })
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
       const response60 = await request(app.getHttpServer())
-        .get('/availability/slots')
+        .get('/api/availability/slots')
         .query({
           offeringId,
           businessId,
-          date: tomorrow.toISOString().split('T')[0],
+          date: nextWednesday.toISOString().split('T')[0],
           durationMinutes: 60,
         })
         .set('Authorization', `Bearer ${authToken}`)
@@ -348,7 +418,7 @@ describe('Availability Query (e2e)', () => {
 
     it('should fail with missing required parameters', async () => {
       await request(app.getHttpServer())
-        .get('/availability/slots')
+        .get('/api/availability/slots')
         .query({
           offeringId,
           // Missing businessId, date, durationMinutes
@@ -362,7 +432,7 @@ describe('Availability Query (e2e)', () => {
       tomorrow.setDate(tomorrow.getDate() + 1);
 
       await request(app.getHttpServer())
-        .get('/availability/slots')
+        .get('/api/availability/slots')
         .query({
           offeringId,
           businessId,
@@ -378,7 +448,7 @@ describe('Availability Query (e2e)', () => {
       tomorrow.setDate(tomorrow.getDate() + 1);
 
       await request(app.getHttpServer())
-        .get('/availability/slots')
+        .get('/api/availability/slots')
         .query({
           offeringId,
           businessId,
@@ -398,7 +468,7 @@ describe('Availability Query (e2e)', () => {
       endDate.setDate(endDate.getDate() + 25);
 
       await request(app.getHttpServer())
-        .post('/blockouts')
+        .post('/api/blockouts')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           businessId,
@@ -408,7 +478,7 @@ describe('Availability Query (e2e)', () => {
         });
 
       const response = await request(app.getHttpServer())
-        .get('/availability/dates')
+        .get('/api/availability/dates')
         .query({
           offeringId,
           businessId,
@@ -427,7 +497,7 @@ describe('Availability Query (e2e)', () => {
       tomorrow.setDate(tomorrow.getDate() + 3);
 
       const response = await request(app.getHttpServer())
-        .get('/availability/dates')
+        .get('/api/availability/dates')
         .query({
           offeringId,
           businessId,

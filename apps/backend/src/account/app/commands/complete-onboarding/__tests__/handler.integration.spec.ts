@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { createTestUser } from '@test-utils/e2e-helpers';
 import { CommandBus } from '@nestjs/cqrs';
 import { DataSource, Repository } from 'typeorm';
 import { CompleteOnboardingHandler } from '../handler';
@@ -80,6 +81,7 @@ describe('CompleteOnboardingHandler (Integration)', () => {
       // Arrange
       const boId = generateTestId();
       const userId = generateTestId();
+      await createTestUser(dataSource, userId);
       const businessOwnerModel = repository.create({
         id: boId,
         userId: userId,
@@ -118,6 +120,7 @@ describe('CompleteOnboardingHandler (Integration)', () => {
       // Arrange
       const boId = generateTestId();
       const userId = generateTestId();
+      await createTestUser(dataSource, userId);
       const businessOwnerModel = repository.create({
         id: boId,
         userId: userId,
@@ -139,6 +142,7 @@ describe('CompleteOnboardingHandler (Integration)', () => {
       // Arrange
       const boId = generateTestId();
       const userId = generateTestId();
+      await createTestUser(dataSource, userId);
       const businessOwnerModel = repository.create({
         id: boId,
         userId: userId,

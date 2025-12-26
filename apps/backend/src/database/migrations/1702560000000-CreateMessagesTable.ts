@@ -12,7 +12,7 @@ import { MigrationInterface, QueryRunner, Table, TableIndex, TableForeignKey } f
  * - message_type: TEXT, BUTTON, LOCATION
  * - is_from_admin: true if sent by admin from panel
  */
-export class CreateMessagesTable1735000000000 implements MigrationInterface {
+export class CreateMessagesTable1702560000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Create messages table
     await queryRunner.createTable(

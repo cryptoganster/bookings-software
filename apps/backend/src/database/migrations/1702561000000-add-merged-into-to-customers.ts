@@ -10,7 +10,7 @@ import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm';
  * @see .kiro/specs/customer-bc-enhancements/requirements.md - Requirement 5.5
  * @see .kiro/specs/customer-bc-enhancements/design.md - Section 2.4
  */
-export class AddMergedIntoToCustomers1766128110000 implements MigrationInterface {
+export class AddMergedIntoToCustomers1702561000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Add merged_into column
     await queryRunner.addColumn(

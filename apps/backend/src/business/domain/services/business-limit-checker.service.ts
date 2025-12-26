@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { IBusinessLimitChecker } from '../interfaces/services/business-limit-checker.interface';
-import { IBusinessReadRepository } from '../interfaces/repositories/business-read';
+import { IBusinessLimitChecker } from '@business/domain/interfaces/services/business-limit-checker.interface';
+import { IBusinessReadRepository } from '@business/domain/interfaces/repositories/business-read';
 import { IBusinessOwnerReadRepository } from '@account/domain/interfaces/repositories/business-owner-read.interface';
-import { BusinessOwnerNotFoundException } from '../exceptions/business-owner-not-found';
+import { BusinessOwnerNotFoundException } from '@business/domain/exceptions/business-owner-not-found';
 
 /**
  * Domain Service: BusinessLimitChecker

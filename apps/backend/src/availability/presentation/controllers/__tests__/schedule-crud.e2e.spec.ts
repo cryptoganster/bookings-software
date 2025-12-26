@@ -20,6 +20,10 @@ describe('Schedule CRUD (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+
+    // Set global prefix like in main.ts
+    app.setGlobalPrefix('api');
+
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -48,7 +52,7 @@ describe('Schedule CRUD (e2e)', () => {
   describe('POST /schedules', () => {
     it('should create a new schedule', async () => {
       const response = await request(app.getHttpServer())
-        .post('/schedules')
+        .post('/api/schedules')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           businessId,
@@ -65,7 +69,7 @@ describe('Schedule CRUD (e2e)', () => {
 
     it('should fail with invalid day of week', async () => {
       await request(app.getHttpServer())
-        .post('/schedules')
+        .post('/api/schedules')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           businessId,
@@ -78,7 +82,7 @@ describe('Schedule CRUD (e2e)', () => {
 
     it('should fail with invalid time range (end before start)', async () => {
       await request(app.getHttpServer())
-        .post('/schedules')
+        .post('/api/schedules')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           businessId,
@@ -91,7 +95,7 @@ describe('Schedule CRUD (e2e)', () => {
 
     it('should fail with duplicate schedule (same business + day)', async () => {
       await request(app.getHttpServer())
-        .post('/schedules')
+        .post('/api/schedules')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           businessId,
@@ -104,7 +108,7 @@ describe('Schedule CRUD (e2e)', () => {
 
     it('should fail without authentication', async () => {
       await request(app.getHttpServer())
-        .post('/schedules')
+        .post('/api/schedules')
         .send({
           businessId,
           dayOfWeek: 3,
@@ -116,7 +120,7 @@ describe('Schedule CRUD (e2e)', () => {
 
     it('should fail with missing required fields', async () => {
       await request(app.getHttpServer())
-        .post('/schedules')
+        .post('/api/schedules')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           businessId,
@@ -130,7 +134,7 @@ describe('Schedule CRUD (e2e)', () => {
   describe('GET /schedules', () => {
     it('should get all schedules for business', async () => {
       const response = await request(app.getHttpServer())
-        .get('/schedules')
+        .get('/api/schedules')
         .query({ businessId })
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
@@ -146,7 +150,7 @@ describe('Schedule CRUD (e2e)', () => {
 
     it('should return empty array for business with no schedules', async () => {
       const response = await request(app.getHttpServer())
-        .get('/schedules')
+        .get('/api/schedules')
         .query({ businessId: generateTestId() })
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
@@ -156,12 +160,12 @@ describe('Schedule CRUD (e2e)', () => {
     });
 
     it('should fail without authentication', async () => {
-      await request(app.getHttpServer()).get('/schedules').query({ businessId }).expect(401);
+      await request(app.getHttpServer()).get('/api/schedules').query({ businessId }).expect(401);
     });
 
     it('should fail with invalid businessId format', async () => {
       await request(app.getHttpServer())
-        .get('/schedules')
+        .get('/api/schedules')
         .query({ businessId: 'invalid-uuid' })
         .set('Authorization', `Bearer ${authToken}`)
         .expect(500); // UUID validation error returns 500 (needs global exception filter)
@@ -171,7 +175,7 @@ describe('Schedule CRUD (e2e)', () => {
   describe('PUT /schedules/:id', () => {
     it('should update an existing schedule', async () => {
       await request(app.getHttpServer())
-        .put(`/schedules/${scheduleId}`)
+        .put(`/api/schedules/${scheduleId}`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           startTime: '08:00',
@@ -181,7 +185,7 @@ describe('Schedule CRUD (e2e)', () => {
 
       // Verify update
       const response = await request(app.getHttpServer())
-        .get('/schedules')
+        .get('/api/schedules')
         .query({ businessId })
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
@@ -193,7 +197,7 @@ describe('Schedule CRUD (e2e)', () => {
 
     it('should fail with invalid time range', async () => {
       await request(app.getHttpServer())
-        .put(`/schedules/${scheduleId}`)
+        .put(`/api/schedules/${scheduleId}`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           startTime: '18:00',
@@ -204,7 +208,7 @@ describe('Schedule CRUD (e2e)', () => {
 
     it('should fail with non-existent schedule id', async () => {
       await request(app.getHttpServer())
-        .put('/schedules/00000000-0000-0000-0000-000000000000')
+        .put('/api/schedules/00000000-0000-0000-0000-000000000000')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           startTime: '09:00',
@@ -215,7 +219,7 @@ describe('Schedule CRUD (e2e)', () => {
 
     it('should fail without authentication', async () => {
       await request(app.getHttpServer())
-        .put(`/schedules/${scheduleId}`)
+        .put(`/api/schedules/${scheduleId}`)
         .send({
           startTime: '09:00',
           endTime: '17:00',
@@ -227,13 +231,13 @@ describe('Schedule CRUD (e2e)', () => {
   describe('DELETE /schedules/:id', () => {
     it('should delete (deactivate) a schedule', async () => {
       await request(app.getHttpServer())
-        .delete(`/schedules/${scheduleId}`)
+        .delete(`/api/schedules/${scheduleId}`)
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
       // Verify schedule is deactivated
       const response = await request(app.getHttpServer())
-        .get('/schedules')
+        .get('/api/schedules')
         .query({ businessId })
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
@@ -244,13 +248,13 @@ describe('Schedule CRUD (e2e)', () => {
 
     it('should fail with non-existent schedule id', async () => {
       await request(app.getHttpServer())
-        .delete('/schedules/00000000-0000-0000-0000-000000000000')
+        .delete('/api/schedules/00000000-0000-0000-0000-000000000000')
         .set('Authorization', `Bearer ${authToken}`)
         .expect(404);
     });
 
     it('should fail without authentication', async () => {
-      await request(app.getHttpServer()).delete(`/schedules/${scheduleId}`).expect(401);
+      await request(app.getHttpServer()).delete(`/api/schedules/${scheduleId}`).expect(401);
     });
   });
 });

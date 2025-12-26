@@ -4,6 +4,8 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { MessageWriteRepository } from '@conversation/infra/persistence/repositories/message-write.repository';
 import { MessageModel } from '@conversation/infra/persistence/models/message.model';
 import { ConversationModel } from '@conversation/infra/persistence/models/conversation.model';
+import { BusinessModel } from '@business/infra/persistence/models/business.model';
+import { CustomerModel } from '@customer/infra/persistence/models/customer.model';
 import { Message } from '@conversation/domain/aggregates/message';
 import { UUID } from '@shared/vo/uuid';
 import { MessageDirection } from '@conversation/domain/vo/message-direction';
@@ -21,14 +23,57 @@ describe('MessageWriteRepository (Integration)', () => {
   let dataSource: DataSource;
   let uow: TypeOrmUnitOfWork;
 
-  // Helper function to create a conversation
+  // Helper function to create a conversation with all dependencies
   const createConversation = async (conversationId: UUID): Promise<void> => {
+    const businessId = UUID.generate().getValue();
+    const customerId = UUID.generate().getValue();
+    const ownerId = generateTestId();
+
+    // Create user first (foreign key requirement for business)
+    await dataSource.query(
+      `INSERT INTO users (id, email, password, name, roles, is_active, email_verified, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())`,
+      [
+        ownerId,
+        `test-${ownerId}@example.com`,
+        'hashed_password',
+        'Test Owner',
+        ['BUSINESS_OWNER'],
+        true,
+        true,
+      ],
+    );
+
+    // Create business (foreign key requirement)
+    const business = new BusinessModel();
+    business.id = businessId;
+    business.ownerId = ownerId;
+    business.name = 'Test Business';
+    business.whatsappPhone = `+1${businessId.substring(0, 10)}`;
+    business.addressStreet = '123 Test St';
+    business.addressCity = 'Test City';
+    business.addressState = 'Test State';
+    business.addressCountry = 'Test Country';
+    business.addressPostalCode = '12345';
+    business.timezone = 'America/New_York';
+    business.isActive = true;
+    await dataSource.getRepository(BusinessModel).save(business);
+
+    // Create customer (foreign key requirement)
+    const customer = new CustomerModel();
+    customer.id = customerId;
+    customer.business_id = businessId;
+    customer.whatsapp_phone = `+1${customerId.substring(0, 10)}`;
+    customer.name = 'Test Customer';
+    await dataSource.getRepository(CustomerModel).save(customer);
+
+    // Create conversation
     const conversationRepo = dataSource.getRepository(ConversationModel);
     await conversationRepo.save({
       id: conversationId.getValue(),
-      businessId: UUID.generate().getValue(),
-      customerId: UUID.generate().getValue(),
-      customerPhone: '+18095551234',
+      businessId: businessId,
+      customerId: customerId,
+      customerPhone: `+1${customerId.substring(0, 10)}`,
       status: 'ACTIVE',
       state: 'AWAITING_SERVICE_SELECTION',
       version: 0,

@@ -18,6 +18,10 @@ describe('Blockout CRUD (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+
+    // Set global prefix like in main.ts
+    app.setGlobalPrefix('api');
+
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -31,7 +35,7 @@ describe('Blockout CRUD (e2e)', () => {
     dataSource = moduleFixture.get<DataSource>(DataSource);
 
     // 1. Register a test user
-    const registerResponse = await request(app.getHttpServer()).post('/auth/register').send({
+    const registerResponse = await request(app.getHttpServer()).post('/api/auth/register').send({
       email: 'blockout-test@example.com',
       password: 'Test1234!',
       name: 'Blockout Test User',
@@ -45,7 +49,7 @@ describe('Blockout CRUD (e2e)', () => {
 
     // 3. Create a business for testing
     const businessResponse = await request(app.getHttpServer())
-      .post('/businesses')
+      .post('/api/businesses')
       .set('Authorization', `Bearer ${authToken}`)
       .send({
         name: 'Test Blockout Business',
@@ -81,7 +85,7 @@ describe('Blockout CRUD (e2e)', () => {
       dayAfter.setDate(dayAfter.getDate() + 2);
 
       const response = await request(app.getHttpServer())
-        .post('/blockouts')
+        .post('/api/blockouts')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           businessId,
@@ -102,7 +106,7 @@ describe('Blockout CRUD (e2e)', () => {
       const today = new Date();
 
       await request(app.getHttpServer())
-        .post('/blockouts')
+        .post('/api/blockouts')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           businessId,
@@ -119,7 +123,7 @@ describe('Blockout CRUD (e2e)', () => {
       const today = new Date();
 
       await request(app.getHttpServer())
-        .post('/blockouts')
+        .post('/api/blockouts')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           businessId,
@@ -135,7 +139,7 @@ describe('Blockout CRUD (e2e)', () => {
       tomorrow.setDate(tomorrow.getDate() + 3);
 
       const response = await request(app.getHttpServer())
-        .post('/blockouts')
+        .post('/api/blockouts')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           businessId,
@@ -153,7 +157,7 @@ describe('Blockout CRUD (e2e)', () => {
       tomorrow.setDate(tomorrow.getDate() + 1);
 
       await request(app.getHttpServer())
-        .post('/blockouts')
+        .post('/api/blockouts')
         .send({
           businessId,
           startDate: tomorrow.toISOString().split('T')[0],
@@ -165,7 +169,7 @@ describe('Blockout CRUD (e2e)', () => {
 
     it('should fail with missing required fields', async () => {
       await request(app.getHttpServer())
-        .post('/blockouts')
+        .post('/api/blockouts')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           businessId,
@@ -176,7 +180,7 @@ describe('Blockout CRUD (e2e)', () => {
 
     it('should fail with invalid date format', async () => {
       await request(app.getHttpServer())
-        .post('/blockouts')
+        .post('/api/blockouts')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           businessId,
@@ -191,7 +195,7 @@ describe('Blockout CRUD (e2e)', () => {
   describe('GET /blockouts', () => {
     it('should get all blockouts for business', async () => {
       const response = await request(app.getHttpServer())
-        .get('/blockouts')
+        .get('/api/blockouts')
         .query({ businessId })
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
@@ -206,7 +210,7 @@ describe('Blockout CRUD (e2e)', () => {
 
     it('should return empty array for business with no blockouts', async () => {
       const response = await request(app.getHttpServer())
-        .get('/blockouts')
+        .get('/api/blockouts')
         .query({ businessId: '00000000-0000-0000-0000-000000000000' })
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
@@ -216,12 +220,12 @@ describe('Blockout CRUD (e2e)', () => {
     });
 
     it('should fail without authentication', async () => {
-      await request(app.getHttpServer()).get('/blockouts').query({ businessId }).expect(401);
+      await request(app.getHttpServer()).get('/api/blockouts').query({ businessId }).expect(401);
     });
 
     it('should fail with invalid businessId format', async () => {
       await request(app.getHttpServer())
-        .get('/blockouts')
+        .get('/api/blockouts')
         .query({ businessId: 'invalid-uuid' })
         .set('Authorization', `Bearer ${authToken}`)
         .expect(500); // UUID validation error returns 500 (needs global exception filter)
@@ -231,13 +235,13 @@ describe('Blockout CRUD (e2e)', () => {
   describe('DELETE /blockouts/:id', () => {
     it('should delete a blockout', async () => {
       await request(app.getHttpServer())
-        .delete(`/blockouts/${blockoutId}`)
+        .delete(`/api/blockouts/${blockoutId}`)
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
       // Verify blockout is deleted
       const response = await request(app.getHttpServer())
-        .get('/blockouts')
+        .get('/api/blockouts')
         .query({ businessId })
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
@@ -248,18 +252,18 @@ describe('Blockout CRUD (e2e)', () => {
 
     it('should fail with non-existent blockout id', async () => {
       await request(app.getHttpServer())
-        .delete('/blockouts/00000000-0000-0000-0000-000000000000')
+        .delete('/api/blockouts/00000000-0000-0000-0000-000000000000')
         .set('Authorization', `Bearer ${authToken}`)
         .expect(404);
     });
 
     it('should fail without authentication', async () => {
-      await request(app.getHttpServer()).delete(`/blockouts/${blockoutId}`).expect(401);
+      await request(app.getHttpServer()).delete(`/api/blockouts/${blockoutId}`).expect(401);
     });
 
     it('should fail with invalid blockout id format', async () => {
       await request(app.getHttpServer())
-        .delete('/blockouts/invalid-uuid')
+        .delete('/api/blockouts/invalid-uuid')
         .set('Authorization', `Bearer ${authToken}`)
         .expect(500); // UUID validation error returns 500 (needs global exception filter)
     });
@@ -274,7 +278,7 @@ describe('Blockout CRUD (e2e)', () => {
 
       // Create first blockout
       const response1 = await request(app.getHttpServer())
-        .post('/blockouts')
+        .post('/api/blockouts')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           businessId,
@@ -291,7 +295,7 @@ describe('Blockout CRUD (e2e)', () => {
       overlapEnd.setDate(overlapEnd.getDate() + 17);
 
       const response2 = await request(app.getHttpServer())
-        .post('/blockouts')
+        .post('/api/blockouts')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           businessId,

@@ -3,6 +3,8 @@ import { DataSource } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ConversationFactory } from '../conversation-factory';
 import { ConversationModel } from '@conversation/infra/persistence/models/conversation.model';
+import { BusinessModel } from '@business/infra/persistence/models/business.model';
+import { CustomerModel } from '@customer/infra/persistence/models/customer.model';
 import { UUID } from '@shared/vo/uuid';
 import {
   createIntegrationTestDataSource,
@@ -60,6 +62,45 @@ describe('ConversationFactory', () => {
       const conversationId = generateTestId();
       const businessId = generateTestId();
       const customerId = generateTestId();
+      const ownerId = generateTestId();
+
+      // Create user first (foreign key requirement for business)
+      await dataSource.query(
+        `INSERT INTO users (id, email, password, name, roles, is_active, email_verified, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())`,
+        [
+          ownerId,
+          'test@example.com',
+          'hashed_password',
+          'Test Owner',
+          ['BUSINESS_OWNER'],
+          true,
+          true,
+        ],
+      );
+
+      // Create business (foreign key requirement)
+      const business = new BusinessModel();
+      business.id = businessId;
+      business.ownerId = ownerId;
+      business.name = 'Test Business';
+      business.whatsappPhone = '+1234567890';
+      business.addressStreet = '123 Test St';
+      business.addressCity = 'Test City';
+      business.addressState = 'Test State';
+      business.addressCountry = 'Test Country';
+      business.addressPostalCode = '12345';
+      business.timezone = 'America/New_York';
+      business.isActive = true;
+      await dataSource.getRepository(BusinessModel).save(business);
+
+      // Create customer (foreign key requirement)
+      const customer = new CustomerModel();
+      customer.id = customerId;
+      customer.business_id = businessId;
+      customer.whatsapp_phone = '+1234567890';
+      customer.name = 'Test Customer';
+      await dataSource.getRepository(CustomerModel).save(customer);
 
       const model = new ConversationModel();
       model.id = conversationId;
@@ -101,6 +142,45 @@ describe('ConversationFactory', () => {
       const conversationId = generateTestId();
       const businessId = generateTestId();
       const customerId = generateTestId();
+      const ownerId = generateTestId();
+
+      // Create user first (foreign key requirement for business)
+      await dataSource.query(
+        `INSERT INTO users (id, email, password, name, roles, is_active, email_verified, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())`,
+        [
+          ownerId,
+          'test@example.com',
+          'hashed_password',
+          'Test Owner',
+          ['BUSINESS_OWNER'],
+          true,
+          true,
+        ],
+      );
+
+      // Create business (foreign key requirement)
+      const business = new BusinessModel();
+      business.id = businessId;
+      business.ownerId = ownerId;
+      business.name = 'Test Business';
+      business.whatsappPhone = '+1234567890';
+      business.addressStreet = '123 Test St';
+      business.addressCity = 'Test City';
+      business.addressState = 'Test State';
+      business.addressCountry = 'Test Country';
+      business.addressPostalCode = '12345';
+      business.timezone = 'America/New_York';
+      business.isActive = true;
+      await dataSource.getRepository(BusinessModel).save(business);
+
+      // Create customer (foreign key requirement)
+      const customer = new CustomerModel();
+      customer.id = customerId;
+      customer.business_id = businessId;
+      customer.whatsapp_phone = '+1234567890';
+      customer.name = 'Test Customer';
+      await dataSource.getRepository(CustomerModel).save(customer);
 
       const model = new ConversationModel();
       model.id = conversationId;

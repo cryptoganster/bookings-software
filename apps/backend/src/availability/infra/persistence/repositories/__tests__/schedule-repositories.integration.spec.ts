@@ -9,6 +9,10 @@ import { UUID } from '@shared/vo/uuid';
 import { DayOfWeek } from '@availability/domain/vo/day-of-week.vo';
 import { TimeSlot } from '@availability/domain/vo/time-slot.vo';
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
+import {
+  createIntegrationTestDataSource,
+  cleanDatabase,
+} from '@test-utils/integration-test-helper';
 
 describe('Schedule Repositories (Integration)', () => {
   let module: TestingModule;
@@ -19,6 +23,9 @@ describe('Schedule Repositories (Integration)', () => {
   let uow: TypeOrmUnitOfWork;
 
   beforeAll(async () => {
+    // Use integration test helper to create DataSource with ALL entities
+    dataSource = await createIntegrationTestDataSource();
+
     module = await Test.createTestingModule({
       providers: [
         ScheduleWriteRepository,
@@ -26,25 +33,11 @@ describe('Schedule Repositories (Integration)', () => {
         TypeOrmUnitOfWork,
         {
           provide: getRepositoryToken(ScheduleModel),
-          useFactory: (dataSource: DataSource) => dataSource.getRepository(ScheduleModel),
-          inject: [DataSource],
+          useFactory: () => dataSource.getRepository(ScheduleModel),
         },
         {
           provide: DataSource,
-          useFactory: async () => {
-            const AppDataSource = new DataSource({
-              type: 'postgres',
-              host: process.env.DB_HOST || 'localhost',
-              port: parseInt(process.env.DB_PORT || '5432'),
-              username: process.env.DB_USERNAME || 'postgres',
-              password: process.env.DB_PASSWORD || 'postgres',
-              database: process.env.DB_DATABASE || 'postgres_test',
-              entities: [ScheduleModel],
-              synchronize: false,
-              dropSchema: true,
-            });
-            return AppDataSource.initialize();
-          },
+          useValue: dataSource,
         },
       ],
     }).compile();
@@ -52,17 +45,16 @@ describe('Schedule Repositories (Integration)', () => {
     writeRepo = module.get<ScheduleWriteRepository>(ScheduleWriteRepository);
     readRepo = module.get<ScheduleReadRepository>(ScheduleReadRepository);
     repository = module.get<Repository<ScheduleModel>>(getRepositoryToken(ScheduleModel));
-    dataSource = module.get<DataSource>(DataSource);
     uow = module.get<TypeOrmUnitOfWork>(TypeOrmUnitOfWork);
   });
 
   afterAll(async () => {
-    await dataSource.destroy();
+    // Don't destroy shared DataSource - it's reused across tests
     await module.close();
   });
 
   beforeEach(async () => {
-    await repository.clear();
+    await cleanDatabase(dataSource);
   });
 
   describe('ScheduleWriteRepository', () => {

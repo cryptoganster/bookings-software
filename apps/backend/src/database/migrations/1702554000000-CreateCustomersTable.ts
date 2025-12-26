@@ -13,7 +13,7 @@ import { MigrationInterface, QueryRunner, Table, TableIndex } from 'typeorm';
  *
  * @see .kiro/steering/user-customer-businessowner-architecture.md
  */
-export class CreateCustomersTable1734482000000 implements MigrationInterface {
+export class CreateCustomersTable1702554000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({

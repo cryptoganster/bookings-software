@@ -506,9 +506,190 @@ describe("AppointmentFactory PBT", () => {
 5. ✅ **Lógica de Negocio:** Aggregates cargados tienen toda su lógica
 6. ✅ **Escalabilidad:** Read y write pueden optimizarse independientemente
 
+## Ejemplo Adicional: ConversationFactory
+
+### Caso de Uso: Resolver Consulta de Admin
+
+**Escenario:** Admin responde a consulta de cliente, necesitamos actualizar el estado de la conversación.
+
+```typescript
+// ============================================
+// DOMAIN LAYER
+// ============================================
+
+// 1. Factory Interface
+export interface IConversationFactory {
+  /**
+   * Loads a Conversation aggregate for modification
+   * @returns Domain aggregate with business logic and version
+   */
+  loadById(id: string): Promise<Conversation | null>;
+}
+
+// 2. Aggregate con método de negocio
+export class Conversation extends VersionedAggregateRoot {
+  private id: UUID;
+  private status: string;
+  private customerPhone: string;
+  // ... otros campos
+
+  /**
+   * Resolves an admin query by updating status
+   * @throws ConversationAlreadyResolvedException if already resolved
+   */
+  resolveAdminQuery(): void {
+    if (this.status === "RESOLVED") {
+      throw new ConversationAlreadyResolvedException(this.id.getValue());
+    }
+
+    this.status = "RESOLVED";
+    this.incrementVersion(); // ← Incrementa versión para optimistic locking
+    this.apply(new AdminQueryResolved(this.id.getValue()));
+  }
+
+  getCustomerPhone(): string {
+    return this.customerPhone;
+  }
+
+  // Factory method para reconstruir desde BD
+  static fromPersistence(
+    id: UUID,
+    businessId: UUID,
+    customerId: UUID,
+    customerPhone: string,
+    status: string,
+    state: ConversationState,
+    lastMessageAt: Date,
+    version: number, // ← Preservar versión
+  ): Conversation {
+    const conversation = new Conversation();
+    conversation.id = id;
+    conversation.businessId = businessId;
+    conversation.customerId = customerId;
+    conversation.customerPhone = customerPhone;
+    conversation.status = status;
+    conversation.state = state;
+    conversation.lastMessageAt = lastMessageAt;
+    conversation.setVersion(version); // ← Restaurar versión
+    return conversation;
+  }
+}
+
+// ============================================
+// INFRASTRUCTURE LAYER
+// ============================================
+
+// 3. Factory Implementation
+@Injectable()
+export class ConversationFactory implements IConversationFactory {
+  constructor(
+    @InjectRepository(ConversationModel)
+    private readonly repository: Repository<ConversationModel>,
+  ) {}
+
+  async loadById(id: string): Promise<Conversation | null> {
+    const model = await this.repository.findOne({ where: { id } });
+
+    if (!model) {
+      return null;
+    }
+
+    // Reconstruct aggregate with business logic
+    return Conversation.fromPersistence(
+      UUID.fromString(model.id),
+      UUID.fromString(model.businessId),
+      UUID.fromString(model.customerId),
+      model.customerPhone,
+      model.status,
+      ConversationState.fromString(model.state),
+      model.lastMessageAt,
+      model.version, // ← Preserva versión
+    );
+  }
+}
+
+// ============================================
+// APPLICATION LAYER
+// ============================================
+
+// 4. Command Handler con Retry Logic
+@CommandHandler(SendAdminResponseCommand)
+export class SendAdminResponseHandler implements ICommandHandler<SendAdminResponseCommand> {
+  constructor(
+    @Inject("IConversationFactory")
+    private readonly factory: IConversationFactory,
+    @Inject("IConversationWriteRepository")
+    private readonly writeRepo: IConversationWriteRepository,
+    private readonly commandBus: CommandBus,
+  ) {}
+
+  async execute(command: SendAdminResponseCommand): Promise<void> {
+    const maxRetries = 3;
+    let attempt = 0;
+
+    while (attempt < maxRetries) {
+      try {
+        // 1. Load aggregate using factory
+        const conversation = await this.factory.loadById(
+          command.conversationId,
+        );
+
+        if (!conversation) {
+          throw new ConversationNotFoundException(command.conversationId);
+        }
+
+        // 2. Execute business logic
+        conversation.resolveAdminQuery(); // ← Incrementa version + apply(event)
+
+        // 3. Persist using write repository (with optimistic locking)
+        await this.writeRepo.save(conversation);
+
+        // 4. Send WhatsApp message
+        await this.commandBus.execute(
+          new SendWhatsAppMessageCommand(
+            conversation.getCustomerPhone(),
+            command.message,
+          ),
+        );
+
+        return; // Success
+      } catch (error) {
+        if (error instanceof ConcurrencyException) {
+          attempt++;
+          if (attempt >= maxRetries) {
+            throw new Error(
+              "Unable to send admin response after multiple attempts. Please try again.",
+            );
+          }
+          // Exponential backoff
+          await new Promise((resolve) =>
+            setTimeout(resolve, 100 * Math.pow(2, attempt)),
+          );
+        } else {
+          throw error; // Other errors propagate immediately
+        }
+      }
+    }
+  }
+}
+```
+
+### Beneficios de este Patrón
+
+1. ✅ **CQRS Estricto:** Factory carga aggregate, Write Repository persiste
+2. ✅ **Lógica de Negocio:** `resolveAdminQuery()` encapsula validación y estado
+3. ✅ **Optimistic Locking:** Version preservada y verificada en save
+4. ✅ **Retry Logic:** Manejo automático de conflictos de concurrencia
+5. ✅ **Testeable:** Factory, aggregate y handler se testean independientemente
+6. ✅ **Eventos:** `AdminQueryResolved` publicado automáticamente
+
 ## Referencias
 
-- **Implementación de referencia:** `src/availability/infra/persistence/factories/capacity-factory.ts`
-- **Interfaz de referencia:** `src/availability/domain/interfaces/factories/capacity-factory.ts`
+- **Implementación de referencia:**
+  - `src/availability/infra/persistence/factories/capacity-factory.ts`
+  - `src/conversation/infra/persistence/factories/conversation-factory.ts`
+- **Interfaz de referencia:**
+  - `src/availability/domain/interfaces/factories/capacity-factory.ts`
+  - `src/conversation/domain/interfaces/factories/conversation-factory.ts`
 - **Steering relacionado:** `.kiro/steering/ddd-patterns.md`
-- **Spec:** `.kiro/specs/factory-pattern-cqrs/`
+- **Spec:** `.kiro/specs/factory-pattern-cqrs/`, `.kiro/specs/architecture-compliance-refactor/`

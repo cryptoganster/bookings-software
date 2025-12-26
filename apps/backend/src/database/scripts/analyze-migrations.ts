@@ -121,11 +121,11 @@ async function analyzeMigrations(): Promise<AnalysisReport> {
       WHERE table_schema = 'public'
     `);
 
-    const existingTableNames = existingTables.map((row: any) => row.table_name);
+    const existingTableNames = existingTables.map((row: { table_name: string }) => row.table_name);
     missingTables = EXPECTED_TABLES.filter((table) => !existingTableNames.includes(table));
 
     await AppDataSource.destroy();
-  } catch (error) {
+  } catch {
     console.error('⚠️  Could not connect to database to check tables');
   }
 

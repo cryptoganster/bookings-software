@@ -108,8 +108,8 @@ describe('Admin Query Controller E2E', () => {
     conversation.businessId = testBusinessId;
     conversation.customerId = testCustomerId;
     conversation.customerPhone = '+1234567890';
-    conversation.status = 'AWAITING_ADMIN';
-    conversation.state = 'AWAITING_ADMIN_RESPONSE';
+    conversation.status = 'AWAITING_ADMIN'; // Admin query status
+    conversation.state = 'INITIAL'; // Conversation flow state (must be valid ConversationState)
     conversation.lastMessageAt = new Date();
     await dataSource.getRepository(ConversationModel).save(conversation);
     testConversationId = conversation.id;

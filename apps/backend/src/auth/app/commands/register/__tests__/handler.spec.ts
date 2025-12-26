@@ -6,14 +6,14 @@ import { EventPublisher } from '@nestjs/cqrs';
 import { RegisterHandler } from '../handler';
 import { RegisterCommand } from '../command';
 import { IUserWriteRepository } from '@auth/domain/interfaces/repositories/user-write';
-import { IUserReadRepository } from '@auth/domain/interfaces/repositories/user-read';
+import { IUserUniquenessChecker } from '@auth/domain/interfaces/services/user-uniqueness-checker.interface';
 import { UUID } from '@shared/vo/uuid';
 import { UserRole } from '@auth/domain/vo/user-role';
 
 describe('RegisterHandler', () => {
   let handler: RegisterHandler;
   let userWriteRepository: jest.Mocked<IUserWriteRepository>;
-  let userReadRepository: jest.Mocked<IUserReadRepository>;
+  let uniquenessChecker: jest.Mocked<IUserUniquenessChecker>;
   let jwtService: jest.Mocked<JwtService>;
   let eventPublisher: jest.Mocked<EventPublisher>;
 
@@ -24,9 +24,8 @@ describe('RegisterHandler', () => {
       findByEmail: jest.fn(),
     };
 
-    const mockUserReadRepository = {
-      findById: jest.fn(),
-      findByEmail: jest.fn(),
+    const mockUniquenessChecker = {
+      isEmailUnique: jest.fn(),
     };
 
     const mockJwtService = {
@@ -57,8 +56,8 @@ describe('RegisterHandler', () => {
           useValue: mockUserWriteRepository,
         },
         {
-          provide: 'IUserReadRepository',
-          useValue: mockUserReadRepository,
+          provide: 'IUserUniquenessChecker',
+          useValue: mockUniquenessChecker,
         },
         {
           provide: JwtService,
@@ -77,7 +76,7 @@ describe('RegisterHandler', () => {
 
     handler = module.get<RegisterHandler>(RegisterHandler);
     userWriteRepository = module.get('IUserWriteRepository');
-    userReadRepository = module.get('IUserReadRepository');
+    uniquenessChecker = module.get('IUserUniquenessChecker');
     jwtService = module.get(JwtService);
     eventPublisher = module.get(EventPublisher);
   });
@@ -90,7 +89,7 @@ describe('RegisterHandler', () => {
       'Test User',
       UserRole.BUSINESS_OWNER,
     );
-    userReadRepository.findByEmail.mockResolvedValue(null);
+    uniquenessChecker.isEmailUnique.mockResolvedValue(true);
     jwtService.sign.mockReturnValue('mock-jwt-token');
 
     // Act
@@ -100,7 +99,7 @@ describe('RegisterHandler', () => {
     expect(result).toHaveProperty('userId');
     expect(result).toHaveProperty('token');
     expect(result.token).toBe('mock-jwt-token');
-    expect(userReadRepository.findByEmail).toHaveBeenCalledWith('test@example.com');
+    expect(uniquenessChecker.isEmailUnique).toHaveBeenCalledWith('test@example.com');
     expect(userWriteRepository.save).toHaveBeenCalled();
     expect(jwtService.sign).toHaveBeenCalled();
     expect(eventPublisher.mergeObjectContext).toHaveBeenCalled();
@@ -114,16 +113,7 @@ describe('RegisterHandler', () => {
       'Test User',
       UserRole.BUSINESS_OWNER,
     );
-    const existingUserReadModel = {
-      id: UUID.generate().getValue(),
-      email: 'existing@example.com',
-      name: 'Existing User',
-      roles: [UserRole.BUSINESS_OWNER],
-      isActive: true,
-      emailVerified: false,
-      createdAt: new Date(),
-    };
-    userReadRepository.findByEmail.mockResolvedValue(existingUserReadModel);
+    uniquenessChecker.isEmailUnique.mockResolvedValue(false);
 
     // Act & Assert
     await expect(handler.execute(command)).rejects.toThrow(ConflictException);
@@ -138,7 +128,7 @@ describe('RegisterHandler', () => {
       'Test User',
       UserRole.BUSINESS_OWNER,
     );
-    userReadRepository.findByEmail.mockResolvedValue(null);
+    uniquenessChecker.isEmailUnique.mockResolvedValue(true);
     jwtService.sign.mockReturnValue('mock-jwt-token');
 
     // Act
@@ -159,7 +149,7 @@ describe('RegisterHandler', () => {
       'Test User',
       UserRole.BUSINESS_OWNER,
     );
-    userReadRepository.findByEmail.mockResolvedValue(null);
+    uniquenessChecker.isEmailUnique.mockResolvedValue(true);
     jwtService.sign.mockReturnValue('mock-jwt-token');
 
     // Act
@@ -179,7 +169,7 @@ describe('RegisterHandler', () => {
       'Test User',
       UserRole.BUSINESS_OWNER,
     );
-    userReadRepository.findByEmail.mockResolvedValue(null);
+    uniquenessChecker.isEmailUnique.mockResolvedValue(true);
     jwtService.sign.mockReturnValue('mock-jwt-token');
 
     // Act
@@ -201,7 +191,7 @@ describe('RegisterHandler', () => {
       'Customer User',
       UserRole.CUSTOMER,
     );
-    userReadRepository.findByEmail.mockResolvedValue(null);
+    uniquenessChecker.isEmailUnique.mockResolvedValue(true);
     jwtService.sign.mockReturnValue('mock-jwt-token');
 
     // Act
@@ -228,7 +218,7 @@ describe('RegisterHandler', () => {
       'Admin User',
       UserRole.ADMIN,
     );
-    userReadRepository.findByEmail.mockResolvedValue(null);
+    uniquenessChecker.isEmailUnique.mockResolvedValue(true);
     jwtService.sign.mockReturnValue('mock-jwt-token');
 
     // Act
@@ -258,7 +248,7 @@ describe('RegisterHandler', () => {
     for (const testCase of testCases) {
       // Reset mocks
       jest.clearAllMocks();
-      userReadRepository.findByEmail.mockResolvedValue(null);
+      uniquenessChecker.isEmailUnique.mockResolvedValue(true);
       jwtService.sign.mockReturnValue('mock-jwt-token');
 
       const command = new RegisterCommand(

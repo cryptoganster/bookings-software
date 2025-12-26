@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { createTestUser } from '@test-utils/e2e-helpers';
 import { CommandBus } from '@nestjs/cqrs';
 import { DataSource, Repository } from 'typeorm';
 import { SuspendSubscriptionHandler } from '../handler';
@@ -78,6 +79,7 @@ describe('SuspendSubscriptionHandler (Integration)', () => {
       // Arrange
       const boId = generateTestId();
       const userId = generateTestId();
+      await createTestUser(dataSource, userId);
       const businessOwnerModel = repository.create({
         id: boId,
         userId: userId,
@@ -116,6 +118,7 @@ describe('SuspendSubscriptionHandler (Integration)', () => {
       // Arrange
       const boId = generateTestId();
       const userId = generateTestId();
+      await createTestUser(dataSource, userId);
       const businessOwnerModel = repository.create({
         id: boId,
         userId: userId,

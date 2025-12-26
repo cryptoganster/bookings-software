@@ -77,6 +77,10 @@ describe('Property 7: initialRole propagates correctly through registration', ()
       }),
     };
 
+    const mockUniquenessChecker = {
+      isEmailUnique: jest.fn().mockResolvedValue(true),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         RegisterHandler,
@@ -85,8 +89,8 @@ describe('Property 7: initialRole propagates correctly through registration', ()
           useValue: mockUserWriteRepository,
         },
         {
-          provide: 'IUserReadRepository',
-          useValue: mockUserReadRepository,
+          provide: 'IUserUniquenessChecker',
+          useValue: mockUniquenessChecker,
         },
         {
           provide: JwtService,

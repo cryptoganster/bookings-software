@@ -14,6 +14,7 @@ import {
   createIntegrationTestDataSource,
   cleanDatabase,
 } from '@test-utils/integration-test-helper';
+import { createTestUser } from '@test-utils/e2e-helpers';
 
 /**
  * Integration Test for CreateBusinessOwnerHandler
@@ -77,6 +78,8 @@ describe('CreateBusinessOwnerHandler - Integration Test', () => {
   it('should create BusinessOwner and persist to database', async () => {
     // Arrange
     const userId = UUID.generate();
+    await createTestUser(dataSource, userId.getValue());
+
     const command = new CreateBusinessOwnerCommand(userId.getValue(), 'FREE');
 
     // Act
@@ -98,6 +101,8 @@ describe('CreateBusinessOwnerHandler - Integration Test', () => {
   it('should create BusinessOwner with BASIC plan', async () => {
     // Arrange
     const userId = UUID.generate();
+    await createTestUser(dataSource, userId.getValue());
+
     const command = new CreateBusinessOwnerCommand(userId.getValue(), 'BASIC');
 
     // Act
@@ -112,6 +117,9 @@ describe('CreateBusinessOwnerHandler - Integration Test', () => {
     // Arrange
     const userId1 = UUID.generate();
     const userId2 = UUID.generate();
+    await createTestUser(dataSource, userId1.getValue());
+    await createTestUser(dataSource, userId2.getValue());
+
     const command1 = new CreateBusinessOwnerCommand(userId1.getValue(), 'FREE');
     const command2 = new CreateBusinessOwnerCommand(userId2.getValue(), 'PRO');
 

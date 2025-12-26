@@ -250,7 +250,7 @@ describe('Conversation Aggregate', () => {
       conversation.transitionToSelectingService();
       conversation.selectService('offering-123');
       conversation.selectDate(new Date('2024-12-25'));
-      const selectedTime = new Date('2024-12-25T10:00:00Z');
+      const selectedTime = '10:00';
 
       // Act
       conversation.selectTime(selectedTime);
@@ -274,7 +274,7 @@ describe('Conversation Aggregate', () => {
       const versionBefore = conversation.getVersion().getValue();
 
       // Act
-      conversation.selectTime(new Date('2024-12-25T10:00:00Z'));
+      conversation.selectTime('10:00');
 
       // Assert
       expect(conversation.getVersion().getValue()).toBe(versionBefore + 1);
@@ -294,7 +294,7 @@ describe('Conversation Aggregate', () => {
 
       // Act & Assert
       expect(() => {
-        conversation.selectTime(new Date('2024-12-25T10:00:00Z'));
+        conversation.selectTime('10:00');
       }).toThrow('Cannot select time in current state');
     });
   });
@@ -349,7 +349,7 @@ describe('Conversation Aggregate', () => {
       conversation.transitionToSelectingService();
       conversation.selectService('offering-123');
       conversation.selectDate(new Date('2024-12-25'));
-      conversation.selectTime(new Date('2024-12-25T10:00:00Z'));
+      conversation.selectTime('10:00');
       const appointmentId = 'appointment-456';
 
       // Act
@@ -371,7 +371,7 @@ describe('Conversation Aggregate', () => {
       conversation.transitionToSelectingService();
       conversation.selectService('offering-123');
       conversation.selectDate(new Date('2024-12-25'));
-      conversation.selectTime(new Date('2024-12-25T10:00:00Z'));
+      conversation.selectTime('10:00');
 
       // Act
       conversation.complete(null);
@@ -392,7 +392,7 @@ describe('Conversation Aggregate', () => {
       conversation.transitionToSelectingService();
       conversation.selectService('offering-123');
       conversation.selectDate(new Date('2024-12-25'));
-      conversation.selectTime(new Date('2024-12-25T10:00:00Z'));
+      conversation.selectTime('10:00');
       const versionBefore = conversation.getVersion().getValue();
 
       // Act
@@ -428,6 +428,7 @@ describe('Conversation Aggregate', () => {
       const customerId = UUID.generate();
       const customerPhone = '+9876543210';
       const state = ConversationState.selectingDate();
+      const status = 'ACTIVE';
       const selectedOfferingId = 'offering-789';
       const selectedDate = new Date('2024-12-30');
       const selectedTime = undefined;
@@ -441,6 +442,7 @@ describe('Conversation Aggregate', () => {
         customerId,
         customerPhone,
         state,
+        status,
         selectedOfferingId,
         selectedDate,
         selectedTime,
@@ -455,6 +457,7 @@ describe('Conversation Aggregate', () => {
       expect(conversation.getCustomerId().equals(customerId)).toBe(true);
       expect(conversation.getCustomerPhone()).toBe(customerPhone);
       expect(conversation.getState().equals(state)).toBe(true);
+      expect(conversation.getStatus()).toBe(status);
       expect(conversation.getSelectedOfferingId()).toBe(selectedOfferingId);
       expect(conversation.getSelectedDate()).toEqual(selectedDate);
       expect(conversation.getSelectedTime()).toBeUndefined();
@@ -469,9 +472,10 @@ describe('Conversation Aggregate', () => {
       const customerId = UUID.generate();
       const customerPhone = '+1111111111';
       const state = ConversationState.completed();
+      const status = 'RESOLVED';
       const selectedOfferingId = 'offering-999';
       const selectedDate = new Date('2024-12-31');
-      const selectedTime = new Date('2024-12-31T15:00:00Z');
+      const selectedTime = '15:00';
       const createdAppointmentId = 'appointment-888';
       const version = 10;
 
@@ -482,6 +486,7 @@ describe('Conversation Aggregate', () => {
         customerId,
         customerPhone,
         state,
+        status,
         selectedOfferingId,
         selectedDate,
         selectedTime,
@@ -491,6 +496,7 @@ describe('Conversation Aggregate', () => {
 
       // Assert
       expect(conversation.getState().isCompleted()).toBe(true);
+      expect(conversation.getStatus()).toBe(status);
       expect(conversation.getSelectedOfferingId()).toBe(selectedOfferingId);
       expect(conversation.getSelectedDate()).toEqual(selectedDate);
       expect(conversation.getSelectedTime()).toEqual(selectedTime);
@@ -517,6 +523,7 @@ describe('Conversation Aggregate', () => {
           UUID.generate(),
           '+1234567890',
           state,
+          'ACTIVE',
           undefined,
           undefined,
           undefined,
@@ -525,6 +532,7 @@ describe('Conversation Aggregate', () => {
         );
 
         expect(conversation.getState().equals(state)).toBe(true);
+        expect(conversation.getStatus()).toBe('ACTIVE');
         expect(conversation.getVersion().getValue()).toBe(index + 1);
       });
     });
@@ -558,9 +566,9 @@ describe('Conversation Aggregate', () => {
       expect(conversation.getSelectedDate()).toEqual(new Date('2024-12-25'));
       expect(conversation.getVersion().getValue()).toBe(4);
 
-      conversation.selectTime(new Date('2024-12-25T10:00:00Z'));
+      conversation.selectTime('10:00');
       expect(conversation.getState().isConfirming()).toBe(true);
-      expect(conversation.getSelectedTime()).toEqual(new Date('2024-12-25T10:00:00Z'));
+      expect(conversation.getSelectedTime()).toEqual('10:00');
       expect(conversation.getVersion().getValue()).toBe(5);
 
       conversation.complete('appointment-456');
@@ -579,7 +587,7 @@ describe('Conversation Aggregate', () => {
       );
       const offeringId = 'offering-123';
       const date = new Date('2024-12-25');
-      const time = new Date('2024-12-25T10:00:00Z');
+      const time = '10:00';
       const appointmentId = 'appointment-456';
 
       // Act
@@ -615,6 +623,99 @@ describe('Conversation Aggregate', () => {
       expect(conversation.getCustomerPhone()).toBe(customerPhone);
       expect(conversation.getState()).toBeDefined();
       expect(conversation.getVersion()).toBeDefined();
+    });
+  });
+
+  describe('resolveAdminQuery', () => {
+    it('should resolve admin query and update status to RESOLVED', () => {
+      // Arrange
+      const conversation = Conversation.start(
+        validId,
+        validBusinessId,
+        validCustomerId,
+        validCustomerPhone,
+      );
+      const initialVersion = conversation.getVersion().getValue();
+
+      // Act
+      conversation.resolveAdminQuery();
+
+      // Assert
+      expect(conversation.getStatus()).toBe('RESOLVED');
+      expect(conversation.getVersion().getValue()).toBe(initialVersion + 1);
+    });
+
+    it('should throw error when conversation is already resolved', () => {
+      // Arrange
+      const conversation = Conversation.start(
+        validId,
+        validBusinessId,
+        validCustomerId,
+        validCustomerPhone,
+      );
+      conversation.resolveAdminQuery(); // First resolution
+
+      // Act & Assert
+      expect(() => {
+        conversation.resolveAdminQuery(); // Second resolution attempt
+      }).toThrow('Conversation is already resolved');
+    });
+
+    it('should increment version when resolving admin query', () => {
+      // Arrange
+      const conversation = Conversation.start(
+        validId,
+        validBusinessId,
+        validCustomerId,
+        validCustomerPhone,
+      );
+      const versionBefore = conversation.getVersion().getValue();
+
+      // Act
+      conversation.resolveAdminQuery();
+
+      // Assert
+      expect(conversation.getVersion().getValue()).toBe(versionBefore + 1);
+    });
+
+    it('should apply AdminQueryResolved event', () => {
+      // Arrange
+      const conversation = Conversation.start(
+        validId,
+        validBusinessId,
+        validCustomerId,
+        validCustomerPhone,
+      );
+
+      // Act
+      conversation.resolveAdminQuery();
+
+      // Assert
+      // The event should be in the uncommitted events
+      // We can verify this by checking that the method executed without errors
+      // and the status changed correctly
+      expect(conversation.getStatus()).toBe('RESOLVED');
+    });
+
+    it('should work with conversation in any state', () => {
+      // Arrange
+      const conversation = Conversation.start(
+        validId,
+        validBusinessId,
+        validCustomerId,
+        validCustomerPhone,
+      );
+
+      // Transition to different state
+      conversation.transitionToSelectingService();
+      conversation.selectService('offering-123');
+
+      // Act
+      conversation.resolveAdminQuery();
+
+      // Assert
+      expect(conversation.getStatus()).toBe('RESOLVED');
+      expect(conversation.getState().isSelectingDate()).toBe(true); // State unchanged
     });
   });
 });

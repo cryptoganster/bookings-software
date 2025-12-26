@@ -39,6 +39,7 @@ export class ConversationWriteRepository implements IConversationWriteRepository
     await this.uow.transaction(async () => {
       const model = ConversationWriteMapper.toModel(conversation);
       const currentVersion = conversation.getVersion().getValue();
+      const loadedVersion = conversation.getLoadedVersion().getValue();
 
       // Check if conversation exists
       const existing = await this.repository.findOne({
@@ -51,6 +52,8 @@ export class ConversationWriteRepository implements IConversationWriteRepository
         await this.repository.save(model);
       } else {
         // UPDATE: Existing conversation with optimistic locking
+        // Use loadedVersion for WHERE clause (version when loaded from DB)
+        // Use currentVersion for SET clause (new version after modifications)
         const result = await this.repository
           .createQueryBuilder()
           .update(ConversationModel)
@@ -64,15 +67,15 @@ export class ConversationWriteRepository implements IConversationWriteRepository
             selectedDate: model.selectedDate,
             selectedTime: model.selectedTime,
             createdAppointmentId: model.createdAppointmentId,
-            version: currentVersion + 1,
+            version: currentVersion, // New version
           })
           .where('id = :id', { id: model.id })
-          .andWhere('version = :version', { version: currentVersion })
+          .andWhere('version = :version', { version: loadedVersion }) // Version when loaded
           .execute();
 
         if (result.affected === 0) {
           throw new ConcurrencyException(
-            `Conversation ${model.id} was modified by another transaction`,
+            `Conversation ${model.id} was modified by another transaction (expected version ${loadedVersion}, current version ${currentVersion})`,
           );
         }
       }

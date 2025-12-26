@@ -1,6 +1,6 @@
 import { MigrationInterface, QueryRunner, Table, TableIndex } from 'typeorm';
 
-export class CreateBlockoutsTable1734650100000 implements MigrationInterface {
+export class CreateBlockoutsTable1702556100000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({

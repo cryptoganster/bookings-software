@@ -39,7 +39,7 @@ describe('ScheduleFactory (Integration)', () => {
   });
 
   afterAll(async () => {
-    await dataSource.destroy();
+    // Don't destroy shared DataSource - it's reused across tests
     await module.close();
   });
 

@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { createTestUser } from '@test-utils/e2e-helpers';
 import { DataSource, Repository } from 'typeorm';
 import { GetBusinessOwnerHandler } from '../handler';
 import { GetBusinessOwnerQuery } from '../query';
@@ -65,6 +66,7 @@ describe('GetBusinessOwnerHandler (Integration)', () => {
         version: 1,
         createdAt: new Date('2024-01-01'),
       });
+      await createTestUser(dataSource, '65f818ad-9782-40bd-b8ed-16251f31f511');
       await repository.save(businessOwnerModel);
 
       const query = new GetBusinessOwnerQuery('be67026b-b1e5-4104-b66c-f23d86098321');
@@ -104,6 +106,7 @@ describe('GetBusinessOwnerHandler (Integration)', () => {
         version: 3,
         createdAt: new Date('2024-06-15'),
       });
+      await createTestUser(dataSource, '7c956221-da3a-49db-b00e-2a25aae38ca7');
       await repository.save(businessOwnerModel);
 
       const query = new GetBusinessOwnerQuery('cc6f68fc-eb33-4f68-8766-373718cb24fa');

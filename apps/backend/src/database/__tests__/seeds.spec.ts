@@ -1,7 +1,13 @@
 import { DataSource } from 'typeorm';
 import * as path from 'path';
 
-describe('Seed Execution', () => {
+/**
+ * Database schema validation tests
+ * Validates that migrations created all required tables with correct structure
+ * Test environment uses migrations only (executed in global-setup.ts)
+ * These tests verify table existence and structure, not seed data
+ */
+describe('Database Schema Validation', () => {
   let dataSource: DataSource;
 
   beforeAll(async () => {
@@ -28,400 +34,439 @@ describe('Seed Execution', () => {
     }
   });
 
-  describe('Seed Data Validation', () => {
-    it('should have users seeded', async () => {
+  describe('Table Existence', () => {
+    it('should have users table', async () => {
       const queryRunner = dataSource.createQueryRunner();
 
       try {
-        const result = await queryRunner.query('SELECT COUNT(*) as count FROM users');
-        const count = parseInt(result[0].count, 10);
-
-        expect(count).toBeGreaterThan(0);
-        expect(count).toBeGreaterThanOrEqual(2); // At least 2 users
+        const result = await queryRunner.query(`
+          SELECT EXISTS (
+            SELECT FROM information_schema.tables 
+            WHERE table_schema = 'public' 
+            AND table_name = 'users'
+          );
+        `);
+        expect(result[0].exists).toBe(true);
       } finally {
         await queryRunner.release();
       }
     });
 
-    it('should have business_owners seeded', async () => {
+    it('should have business_owners table', async () => {
       const queryRunner = dataSource.createQueryRunner();
 
       try {
-        const result = await queryRunner.query('SELECT COUNT(*) as count FROM business_owners');
-        const count = parseInt(result[0].count, 10);
-
-        expect(count).toBeGreaterThan(0);
-        expect(count).toBeGreaterThanOrEqual(2); // At least 2 business owners
+        const result = await queryRunner.query(`
+          SELECT EXISTS (
+            SELECT FROM information_schema.tables 
+            WHERE table_schema = 'public' 
+            AND table_name = 'business_owners'
+          );
+        `);
+        expect(result[0].exists).toBe(true);
       } finally {
         await queryRunner.release();
       }
     });
 
-    it('should have businesses seeded', async () => {
+    it('should have businesses table', async () => {
       const queryRunner = dataSource.createQueryRunner();
 
       try {
-        const result = await queryRunner.query('SELECT COUNT(*) as count FROM businesses');
-        const count = parseInt(result[0].count, 10);
-
-        expect(count).toBeGreaterThan(0);
-        expect(count).toBeGreaterThanOrEqual(1); // At least 1 business
+        const result = await queryRunner.query(`
+          SELECT EXISTS (
+            SELECT FROM information_schema.tables 
+            WHERE table_schema = 'public' 
+            AND table_name = 'businesses'
+          );
+        `);
+        expect(result[0].exists).toBe(true);
       } finally {
         await queryRunner.release();
       }
     });
 
-    it('should have customers seeded', async () => {
+    it('should have customers table', async () => {
       const queryRunner = dataSource.createQueryRunner();
 
       try {
-        const result = await queryRunner.query('SELECT COUNT(*) as count FROM customers');
-        const count = parseInt(result[0].count, 10);
-
-        expect(count).toBeGreaterThan(0);
-        expect(count).toBeGreaterThanOrEqual(10); // At least 10 customers
+        const result = await queryRunner.query(`
+          SELECT EXISTS (
+            SELECT FROM information_schema.tables 
+            WHERE table_schema = 'public' 
+            AND table_name = 'customers'
+          );
+        `);
+        expect(result[0].exists).toBe(true);
       } finally {
         await queryRunner.release();
       }
     });
 
-    it('should have offerings seeded', async () => {
+    it('should have offerings table', async () => {
       const queryRunner = dataSource.createQueryRunner();
 
       try {
-        const result = await queryRunner.query('SELECT COUNT(*) as count FROM offerings');
-        const count = parseInt(result[0].count, 10);
-
-        expect(count).toBeGreaterThan(0);
-        expect(count).toBeGreaterThanOrEqual(5); // At least 5 offerings
+        const result = await queryRunner.query(`
+          SELECT EXISTS (
+            SELECT FROM information_schema.tables 
+            WHERE table_schema = 'public' 
+            AND table_name = 'offerings'
+          );
+        `);
+        expect(result[0].exists).toBe(true);
       } finally {
         await queryRunner.release();
       }
     });
 
-    it('should have schedules seeded', async () => {
+    it('should have schedules table', async () => {
       const queryRunner = dataSource.createQueryRunner();
 
       try {
-        const result = await queryRunner.query('SELECT COUNT(*) as count FROM schedules');
-        const count = parseInt(result[0].count, 10);
-
-        expect(count).toBeGreaterThan(0);
-        expect(count).toBeGreaterThanOrEqual(6); // At least 6 schedules (Mon-Sat)
+        const result = await queryRunner.query(`
+          SELECT EXISTS (
+            SELECT FROM information_schema.tables 
+            WHERE table_schema = 'public' 
+            AND table_name = 'schedules'
+          );
+        `);
+        expect(result[0].exists).toBe(true);
       } finally {
         await queryRunner.release();
       }
     });
 
-    it('should have blockouts seeded', async () => {
+    it('should have blockouts table', async () => {
       const queryRunner = dataSource.createQueryRunner();
 
       try {
-        const result = await queryRunner.query('SELECT COUNT(*) as count FROM blockouts');
-        const count = parseInt(result[0].count, 10);
-
-        expect(count).toBeGreaterThan(0);
-        expect(count).toBeGreaterThanOrEqual(3); // At least 3 blockouts
+        const result = await queryRunner.query(`
+          SELECT EXISTS (
+            SELECT FROM information_schema.tables 
+            WHERE table_schema = 'public' 
+            AND table_name = 'blockouts'
+          );
+        `);
+        expect(result[0].exists).toBe(true);
       } finally {
         await queryRunner.release();
       }
     });
 
-    it('should have capacities seeded', async () => {
+    it('should have capacities table', async () => {
       const queryRunner = dataSource.createQueryRunner();
 
       try {
-        const result = await queryRunner.query('SELECT COUNT(*) as count FROM capacities');
-        const count = parseInt(result[0].count, 10);
-
-        expect(count).toBeGreaterThan(0);
-        expect(count).toBeGreaterThanOrEqual(50); // At least 50 capacity records
+        const result = await queryRunner.query(`
+          SELECT EXISTS (
+            SELECT FROM information_schema.tables 
+            WHERE table_schema = 'public' 
+            AND table_name = 'capacities'
+          );
+        `);
+        expect(result[0].exists).toBe(true);
       } finally {
         await queryRunner.release();
       }
     });
 
-    it('should have appointments seeded', async () => {
+    it('should have appointments table', async () => {
       const queryRunner = dataSource.createQueryRunner();
 
       try {
-        const result = await queryRunner.query('SELECT COUNT(*) as count FROM appointments');
-        const count = parseInt(result[0].count, 10);
-
-        expect(count).toBeGreaterThan(0);
-        expect(count).toBeGreaterThanOrEqual(10); // At least 10 appointments
+        const result = await queryRunner.query(`
+          SELECT EXISTS (
+            SELECT FROM information_schema.tables 
+            WHERE table_schema = 'public' 
+            AND table_name = 'appointments'
+          );
+        `);
+        expect(result[0].exists).toBe(true);
       } finally {
         await queryRunner.release();
       }
     });
 
-    it('should have conversations seeded', async () => {
+    it('should have conversations table', async () => {
       const queryRunner = dataSource.createQueryRunner();
 
       try {
-        const result = await queryRunner.query('SELECT COUNT(*) as count FROM conversations');
-        const count = parseInt(result[0].count, 10);
-
-        expect(count).toBeGreaterThan(0);
-        expect(count).toBeGreaterThanOrEqual(5); // At least 5 conversations
+        const result = await queryRunner.query(`
+          SELECT EXISTS (
+            SELECT FROM information_schema.tables 
+            WHERE table_schema = 'public' 
+            AND table_name = 'conversations'
+          );
+        `);
+        expect(result[0].exists).toBe(true);
       } finally {
         await queryRunner.release();
       }
     });
 
-    it('should have messages seeded', async () => {
+    it('should have messages table', async () => {
       const queryRunner = dataSource.createQueryRunner();
 
       try {
-        const result = await queryRunner.query('SELECT COUNT(*) as count FROM messages');
-        const count = parseInt(result[0].count, 10);
-
-        expect(count).toBeGreaterThan(0);
-        expect(count).toBeGreaterThanOrEqual(10); // At least 10 messages
+        const result = await queryRunner.query(`
+          SELECT EXISTS (
+            SELECT FROM information_schema.tables 
+            WHERE table_schema = 'public' 
+            AND table_name = 'messages'
+          );
+        `);
+        expect(result[0].exists).toBe(true);
       } finally {
         await queryRunner.release();
       }
     });
   });
 
-  describe('Seed Data Integrity', () => {
-    it('should have valid foreign keys in business_owners', async () => {
+  describe('Foreign Key Constraints', () => {
+    it('should have foreign key constraint on business_owners.user_id', async () => {
       const queryRunner = dataSource.createQueryRunner();
 
       try {
-        // Check that all business_owners.user_id references valid users
         const result = await queryRunner.query(`
-          SELECT COUNT(*) as count
-          FROM business_owners bo
-          LEFT JOIN users u ON bo.user_id = u.id
-          WHERE u.id IS NULL
+          SELECT EXISTS (
+            SELECT 1
+            FROM information_schema.table_constraints tc
+            JOIN information_schema.key_column_usage kcu
+              ON tc.constraint_name = kcu.constraint_name
+              AND tc.table_schema = kcu.table_schema
+            WHERE tc.table_name = 'business_owners'
+              AND tc.constraint_type = 'FOREIGN KEY'
+              AND kcu.column_name = 'user_id'
+          );
         `);
-
-        const invalidCount = parseInt(result[0].count, 10);
-        expect(invalidCount).toBe(0);
+        expect(result[0].exists).toBe(true);
       } finally {
         await queryRunner.release();
       }
     });
 
-    it('should have valid foreign keys in businesses', async () => {
+    it('should have foreign key constraint on businesses.owner_id', async () => {
       const queryRunner = dataSource.createQueryRunner();
 
       try {
-        // Check that all businesses.owner_id references valid users
         const result = await queryRunner.query(`
-          SELECT COUNT(*) as count
-          FROM businesses b
-          LEFT JOIN users u ON b.owner_id = u.id
-          WHERE u.id IS NULL
+          SELECT EXISTS (
+            SELECT 1
+            FROM information_schema.table_constraints tc
+            JOIN information_schema.key_column_usage kcu
+              ON tc.constraint_name = kcu.constraint_name
+              AND tc.table_schema = kcu.table_schema
+            WHERE tc.table_name = 'businesses'
+              AND tc.constraint_type = 'FOREIGN KEY'
+              AND kcu.column_name = 'owner_id'
+          );
         `);
-
-        const invalidCount = parseInt(result[0].count, 10);
-        expect(invalidCount).toBe(0);
+        expect(result[0].exists).toBe(true);
       } finally {
         await queryRunner.release();
       }
     });
 
-    it('should have valid foreign keys in customers', async () => {
+    it('should have foreign key constraint on conversations.customer_id', async () => {
       const queryRunner = dataSource.createQueryRunner();
 
       try {
-        // Check that all customers.user_id (when not null) references valid users
         const result = await queryRunner.query(`
-          SELECT COUNT(*) as count
-          FROM customers c
-          LEFT JOIN users u ON c.user_id = u.id
-          WHERE c.user_id IS NOT NULL AND u.id IS NULL
+          SELECT EXISTS (
+            SELECT 1
+            FROM information_schema.table_constraints tc
+            JOIN information_schema.key_column_usage kcu
+              ON tc.constraint_name = kcu.constraint_name
+              AND tc.table_schema = kcu.table_schema
+            WHERE tc.table_name = 'conversations'
+              AND tc.constraint_type = 'FOREIGN KEY'
+              AND kcu.column_name = 'customer_id'
+          );
         `);
-
-        const invalidCount = parseInt(result[0].count, 10);
-        expect(invalidCount).toBe(0);
+        expect(result[0].exists).toBe(true);
       } finally {
         await queryRunner.release();
       }
     });
 
-    it('should have valid foreign keys in appointments', async () => {
+    it('should have foreign key constraint on messages.conversation_id', async () => {
       const queryRunner = dataSource.createQueryRunner();
 
       try {
-        // Check that all appointments.customer_id references valid customers
         const result = await queryRunner.query(`
-          SELECT COUNT(*) as count
-          FROM appointments a
-          LEFT JOIN customers c ON a.customer_id = c.id
-          WHERE c.id IS NULL
+          SELECT EXISTS (
+            SELECT 1
+            FROM information_schema.table_constraints tc
+            JOIN information_schema.key_column_usage kcu
+              ON tc.constraint_name = kcu.constraint_name
+              AND tc.table_schema = kcu.table_schema
+            WHERE tc.table_name = 'messages'
+              AND tc.constraint_type = 'FOREIGN KEY'
+              AND kcu.column_name = 'conversation_id'
+          );
         `);
-
-        const invalidCount = parseInt(result[0].count, 10);
-        expect(invalidCount).toBe(0);
-      } finally {
-        await queryRunner.release();
-      }
-    });
-
-    it('should have valid foreign keys in conversations', async () => {
-      const queryRunner = dataSource.createQueryRunner();
-
-      try {
-        // Check that all conversations.customer_id references valid customers
-        const result = await queryRunner.query(`
-          SELECT COUNT(*) as count
-          FROM conversations conv
-          LEFT JOIN customers c ON conv.customer_id = c.id
-          WHERE c.id IS NULL
-        `);
-
-        const invalidCount = parseInt(result[0].count, 10);
-        expect(invalidCount).toBe(0);
-      } finally {
-        await queryRunner.release();
-      }
-    });
-
-    it('should have valid foreign keys in messages', async () => {
-      const queryRunner = dataSource.createQueryRunner();
-
-      try {
-        // Check that all messages.conversation_id references valid conversations
-        const result = await queryRunner.query(`
-          SELECT COUNT(*) as count
-          FROM messages m
-          LEFT JOIN conversations c ON m.conversation_id = c.id
-          WHERE c.id IS NULL
-        `);
-
-        const invalidCount = parseInt(result[0].count, 10);
-        expect(invalidCount).toBe(0);
+        expect(result[0].exists).toBe(true);
       } finally {
         await queryRunner.release();
       }
     });
   });
 
-  describe('Seed Data Variety', () => {
-    it('should have customers with different types (anonymous and registered)', async () => {
+  describe('Column Constraints', () => {
+    it('should have nullable user_id column in customers table', async () => {
       const queryRunner = dataSource.createQueryRunner();
 
       try {
-        // Check for anonymous customers (user_id IS NULL)
-        const anonymousResult = await queryRunner.query(`
-          SELECT COUNT(*) as count
-          FROM customers
-          WHERE user_id IS NULL
+        const result = await queryRunner.query(`
+          SELECT is_nullable
+          FROM information_schema.columns
+          WHERE table_name = 'customers'
+            AND column_name = 'user_id';
         `);
-        const anonymousCount = parseInt(anonymousResult[0].count, 10);
-
-        // Check for registered customers (user_id IS NOT NULL)
-        const registeredResult = await queryRunner.query(`
-          SELECT COUNT(*) as count
-          FROM customers
-          WHERE user_id IS NOT NULL
-        `);
-        const registeredCount = parseInt(registeredResult[0].count, 10);
-
-        expect(anonymousCount).toBeGreaterThan(0);
-        expect(registeredCount).toBeGreaterThan(0);
+        expect(result[0].is_nullable).toBe('YES');
       } finally {
         await queryRunner.release();
       }
     });
 
-    it('should have offerings with different states (active and inactive)', async () => {
+    it('should have is_active column in offerings table', async () => {
       const queryRunner = dataSource.createQueryRunner();
 
       try {
-        // Check for active offerings
-        const activeResult = await queryRunner.query(`
-          SELECT COUNT(*) as count
-          FROM offerings
-          WHERE is_active = true
+        const result = await queryRunner.query(`
+          SELECT EXISTS (
+            SELECT 1
+            FROM information_schema.columns
+            WHERE table_name = 'offerings'
+              AND column_name = 'is_active'
+          );
         `);
-        const activeCount = parseInt(activeResult[0].count, 10);
-
-        // Check for inactive offerings
-        const inactiveResult = await queryRunner.query(`
-          SELECT COUNT(*) as count
-          FROM offerings
-          WHERE is_active = false
-        `);
-        const inactiveCount = parseInt(inactiveResult[0].count, 10);
-
-        expect(activeCount).toBeGreaterThan(0);
-        expect(inactiveCount).toBeGreaterThan(0);
+        expect(result[0].exists).toBe(true);
       } finally {
         await queryRunner.release();
       }
     });
 
-    it('should have appointments with different statuses', async () => {
+    it('should have status column in appointments table', async () => {
       const queryRunner = dataSource.createQueryRunner();
 
       try {
-        // Check for CONFIRMED appointments
-        const confirmedResult = await queryRunner.query(`
-          SELECT COUNT(*) as count
-          FROM appointments
-          WHERE status = 'CONFIRMED'
+        const result = await queryRunner.query(`
+          SELECT EXISTS (
+            SELECT 1
+            FROM information_schema.columns
+            WHERE table_name = 'appointments'
+              AND column_name = 'status'
+          );
         `);
-        const confirmedCount = parseInt(confirmedResult[0].count, 10);
-
-        // Check for CANCELLED appointments
-        const cancelledResult = await queryRunner.query(`
-          SELECT COUNT(*) as count
-          FROM appointments
-          WHERE status = 'CANCELLED'
-        `);
-        const cancelledCount = parseInt(cancelledResult[0].count, 10);
-
-        // Check for COMPLETED appointments
-        const completedResult = await queryRunner.query(`
-          SELECT COUNT(*) as count
-          FROM appointments
-          WHERE status = 'COMPLETED'
-        `);
-        const completedCount = parseInt(completedResult[0].count, 10);
-
-        expect(confirmedCount).toBeGreaterThan(0);
-        expect(cancelledCount).toBeGreaterThan(0);
-        expect(completedCount).toBeGreaterThan(0);
+        expect(result[0].exists).toBe(true);
       } finally {
         await queryRunner.release();
       }
     });
 
-    it('should have conversations with different statuses', async () => {
+    it('should have status column in conversations table', async () => {
       const queryRunner = dataSource.createQueryRunner();
 
       try {
-        // Check for ACTIVE conversations
-        const activeResult = await queryRunner.query(`
-          SELECT COUNT(*) as count
-          FROM conversations
-          WHERE status = 'ACTIVE'
+        const result = await queryRunner.query(`
+          SELECT EXISTS (
+            SELECT 1
+            FROM information_schema.columns
+            WHERE table_name = 'conversations'
+              AND column_name = 'status'
+          );
         `);
-        const activeCount = parseInt(activeResult[0].count, 10);
+        expect(result[0].exists).toBe(true);
+      } finally {
+        await queryRunner.release();
+      }
+    });
 
-        // Check for AWAITING_ADMIN conversations
-        const awaitingResult = await queryRunner.query(`
-          SELECT COUNT(*) as count
-          FROM conversations
-          WHERE status = 'AWAITING_ADMIN'
+    it('should have version column in appointments table for optimistic locking', async () => {
+      const queryRunner = dataSource.createQueryRunner();
+
+      try {
+        const result = await queryRunner.query(`
+          SELECT EXISTS (
+            SELECT 1
+            FROM information_schema.columns
+            WHERE table_name = 'appointments'
+              AND column_name = 'version'
+          );
         `);
-        const awaitingCount = parseInt(awaitingResult[0].count, 10);
+        expect(result[0].exists).toBe(true);
+      } finally {
+        await queryRunner.release();
+      }
+    });
 
-        // Check for RESOLVED conversations
-        const resolvedResult = await queryRunner.query(`
-          SELECT COUNT(*) as count
-          FROM conversations
-          WHERE status = 'RESOLVED'
+    it('should have version column in capacities table for optimistic locking', async () => {
+      const queryRunner = dataSource.createQueryRunner();
+
+      try {
+        const result = await queryRunner.query(`
+          SELECT EXISTS (
+            SELECT 1
+            FROM information_schema.columns
+            WHERE table_name = 'capacities'
+              AND column_name = 'version'
+          );
         `);
-        const resolvedCount = parseInt(resolvedResult[0].count, 10);
+        expect(result[0].exists).toBe(true);
+      } finally {
+        await queryRunner.release();
+      }
+    });
 
-        expect(activeCount).toBeGreaterThan(0);
-        expect(awaitingCount).toBeGreaterThan(0);
-        expect(resolvedCount).toBeGreaterThan(0);
+    it('should have version column in conversations table for optimistic locking', async () => {
+      const queryRunner = dataSource.createQueryRunner();
+
+      try {
+        const result = await queryRunner.query(`
+          SELECT EXISTS (
+            SELECT 1
+            FROM information_schema.columns
+            WHERE table_name = 'conversations'
+              AND column_name = 'version'
+          );
+        `);
+        expect(result[0].exists).toBe(true);
+      } finally {
+        await queryRunner.release();
+      }
+    });
+
+    it('should have created_at timestamps on all main tables', async () => {
+      const queryRunner = dataSource.createQueryRunner();
+
+      try {
+        const tables = [
+          'users',
+          'business_owners',
+          'businesses',
+          'customers',
+          'offerings',
+          'appointments',
+          'conversations',
+          'messages',
+        ];
+
+        for (const table of tables) {
+          const result = await queryRunner.query(
+            `
+            SELECT EXISTS (
+              SELECT 1
+              FROM information_schema.columns
+              WHERE table_name = $1
+                AND column_name = 'created_at'
+            );
+          `,
+            [table],
+          );
+          expect(result[0].exists).toBe(true);
+        }
       } finally {
         await queryRunner.release();
       }

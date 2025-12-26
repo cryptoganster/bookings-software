@@ -10,7 +10,7 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
  *
  * This ensures consistency with PostgreSQL naming conventions
  */
-export class StandardizeUsersTableNaming1734481000000 implements MigrationInterface {
+export class StandardizeUsersTableNaming1702552200000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Check if createdAt column exists (camelCase)
     const hasCreatedAt = await queryRunner.query(`

@@ -46,30 +46,18 @@ describe('Offering CRUD Controller E2E', () => {
 
     authHelper = new E2EAuthHelper(app);
 
-    // Create test user with BUSINESS_OWNER role
+    // Create test user with BUSINESS_OWNER role and business via API
     const testUser = await authHelper.createTestUser(UserRole.BUSINESS_OWNER, {
       name: 'Business Owner',
     });
 
     authToken = testUser.token;
     userId = testUser.id;
+    businessId = testUser.businessId!;
 
-    // Create a business for the user
-    const businessResponse = await request(app.getHttpServer())
-      .post('/api/businesses')
-      .set('Authorization', `Bearer ${authToken}`)
-      .send({
-        name: 'Test Business',
-        whatsappNumber: '+18095551234',
-        address: {
-          street: '123 Main St',
-          city: 'Santo Domingo',
-          country: 'Dominican Republic',
-        },
-        timezone: 'America/Santo_Domingo',
-      });
-
-    businessId = businessResponse.body.id;
+    if (!businessId) {
+      throw new Error('Failed to create business for test user');
+    }
   });
 
   afterAll(async () => {

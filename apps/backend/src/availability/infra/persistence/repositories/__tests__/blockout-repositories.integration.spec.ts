@@ -23,6 +23,9 @@ describe('Blockout Repositories (Integration)', () => {
   let uow: TypeOrmUnitOfWork;
 
   beforeAll(async () => {
+    // Use integration test helper to create DataSource with ALL entities
+    dataSource = await createIntegrationTestDataSource();
+
     module = await Test.createTestingModule({
       providers: [
         BlockoutWriteRepository,
@@ -30,25 +33,11 @@ describe('Blockout Repositories (Integration)', () => {
         TypeOrmUnitOfWork,
         {
           provide: getRepositoryToken(BlockoutModel),
-          useFactory: (dataSource: DataSource) => dataSource.getRepository(BlockoutModel),
-          inject: [DataSource],
+          useFactory: () => dataSource.getRepository(BlockoutModel),
         },
         {
           provide: DataSource,
-          useFactory: async () => {
-            const AppDataSource = new DataSource({
-              type: 'postgres',
-              host: process.env.DB_HOST || 'localhost',
-              port: parseInt(process.env.DB_PORT || '5432'),
-              username: process.env.DB_USERNAME || 'postgres',
-              password: process.env.DB_PASSWORD || 'postgres',
-              database: process.env.DB_DATABASE || 'postgres_test',
-              entities: [BlockoutModel],
-              synchronize: false,
-              dropSchema: true,
-            });
-            return AppDataSource.initialize();
-          },
+          useValue: dataSource,
         },
       ],
     }).compile();
@@ -56,17 +45,16 @@ describe('Blockout Repositories (Integration)', () => {
     writeRepo = module.get<BlockoutWriteRepository>(BlockoutWriteRepository);
     readRepo = module.get<BlockoutReadRepository>(BlockoutReadRepository);
     repository = module.get<Repository<BlockoutModel>>(getRepositoryToken(BlockoutModel));
-    dataSource = module.get<DataSource>(DataSource);
     uow = module.get<TypeOrmUnitOfWork>(TypeOrmUnitOfWork);
   });
 
   afterAll(async () => {
-    await dataSource.destroy();
+    // Don't destroy shared DataSource - it's reused across tests
     await module.close();
   });
 
   beforeEach(async () => {
-    await repository.clear();
+    await cleanDatabase(dataSource);
   });
 
   describe('BlockoutWriteRepository', () => {

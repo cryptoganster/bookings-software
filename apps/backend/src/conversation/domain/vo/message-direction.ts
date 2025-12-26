@@ -15,7 +15,11 @@ export class MessageDirection extends ValueObject {
 
   private constructor(private readonly value: string) {
     super();
-    if (!MessageDirection.VALID_DIRECTIONS.includes(value as any)) {
+    if (
+      !MessageDirection.VALID_DIRECTIONS.includes(
+        value as (typeof MessageDirection.VALID_DIRECTIONS)[number],
+      )
+    ) {
       throw new InvalidMessageDirectionException(value);
     }
   }
@@ -62,7 +66,7 @@ export class MessageDirection extends ValueObject {
     return this.value;
   }
 
-  protected getEqualityComponents(): any[] {
+  protected getEqualityComponents(): unknown[] {
     return [this.value];
   }
 }

@@ -56,15 +56,28 @@ export function generateTestEmail(): string {
 }
 
 /**
+ * Shared DataSource singleton for all integration tests
+ * This prevents multiple connections from interfering with each other
+ */
+let sharedDataSource: DataSource | null = null;
+
+/**
  * Create a DataSource for integration tests
  *
  * Uses the same postgres_test database as E2E tests.
  * Schema is already created by global setup, so synchronize: false.
+ * Returns a singleton instance to prevent connection conflicts.
  *
  * @returns Initialized DataSource
  */
 export async function createIntegrationTestDataSource(): Promise<DataSource> {
-  const dataSource = new DataSource({
+  // Return existing connection if already initialized
+  if (sharedDataSource && sharedDataSource.isInitialized) {
+    return sharedDataSource;
+  }
+
+  // Create new connection if needed
+  sharedDataSource = new DataSource({
     type: 'postgres',
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT || '5432', 10),
@@ -77,8 +90,8 @@ export async function createIntegrationTestDataSource(): Promise<DataSource> {
     logging: false,
   });
 
-  await dataSource.initialize();
-  return dataSource;
+  await sharedDataSource.initialize();
+  return sharedDataSource;
 }
 
 /**

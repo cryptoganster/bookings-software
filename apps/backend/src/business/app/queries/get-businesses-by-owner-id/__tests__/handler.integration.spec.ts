@@ -7,6 +7,7 @@ import { GetBusinessesByOwnerIdQuery } from '../query';
 import { BusinessModel } from '@business/infra/persistence/models/business.model';
 import { BusinessReadRepository } from '@business/infra/persistence/repositories/business-read.repository';
 import { UUID } from '@shared/vo/uuid';
+import { createTestUser, cleanDatabase } from '@test-utils/e2e-helpers';
 
 /**
  * Integration tests for GetBusinessesByOwnerIdHandler
@@ -61,13 +62,14 @@ describe('GetBusinessesByOwnerIdHandler Integration Tests', () => {
   });
 
   afterEach(async () => {
-    await dataSource.getRepository(BusinessModel).clear();
+    await cleanDatabase(dataSource);
   });
 
   describe('Find businesses by owner', () => {
     it('should return multiple businesses for same owner', async () => {
       // Arrange
       const ownerId = UUID.generate().getValue();
+      await createTestUser(dataSource, ownerId);
 
       const businesses = [
         {
@@ -152,6 +154,8 @@ describe('GetBusinessesByOwnerIdHandler Integration Tests', () => {
       // Arrange
       const owner1 = UUID.generate().getValue();
       const owner2 = UUID.generate().getValue();
+      await createTestUser(dataSource, owner1);
+      await createTestUser(dataSource, owner2);
 
       await dataSource.getRepository(BusinessModel).insert([
         {
@@ -204,6 +208,7 @@ describe('GetBusinessesByOwnerIdHandler Integration Tests', () => {
     it('should return both active and inactive businesses', async () => {
       // Arrange
       const ownerId = UUID.generate().getValue();
+      await createTestUser(dataSource, ownerId);
 
       await dataSource.getRepository(BusinessModel).insert([
         {

@@ -1,10 +1,10 @@
 import { MigrationInterface, QueryRunner, Table, TableIndex } from 'typeorm';
 
-export class CreateCapacitiesTable1702551100000 implements MigrationInterface {
+export class CreateAppointmentsTable1702558000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: 'capacities',
+        name: 'appointments',
         columns: [
           {
             name: 'id',
@@ -13,23 +13,29 @@ export class CreateCapacitiesTable1702551100000 implements MigrationInterface {
             default: 'uuid_generate_v4()',
           },
           {
+            name: 'business_id',
+            type: 'uuid',
+            isNullable: false,
+          },
+          {
+            name: 'customer_id',
+            type: 'uuid',
+            isNullable: false,
+          },
+          {
             name: 'offering_id',
             type: 'uuid',
             isNullable: false,
           },
           {
-            name: 'date',
-            type: 'date',
+            name: 'date_time',
+            type: 'timestamp',
             isNullable: false,
           },
           {
-            name: 'total_slots',
-            type: 'int',
-            isNullable: false,
-          },
-          {
-            name: 'available_slots',
-            type: 'int',
+            name: 'status',
+            type: 'varchar',
+            length: '50',
             isNullable: false,
           },
           {
@@ -50,24 +56,37 @@ export class CreateCapacitiesTable1702551100000 implements MigrationInterface {
             default: 'CURRENT_TIMESTAMP',
             isNullable: false,
           },
+          {
+            name: 'cancelled_at',
+            type: 'timestamp',
+            isNullable: true,
+          },
         ],
       }),
       true,
     );
 
-    // Crear índice único compuesto para offering_id y date
+    // Crear índices
     await queryRunner.createIndex(
-      'capacities',
+      'appointments',
       new TableIndex({
-        name: 'IDX_CAPACITIES_OFFERING_DATE_UNIQUE',
-        columnNames: ['offering_id', 'date'],
-        isUnique: true,
+        name: 'IDX_APPOINTMENTS_BUSINESS_ID',
+        columnNames: ['business_id'],
+      }),
+    );
+
+    await queryRunner.createIndex(
+      'appointments',
+      new TableIndex({
+        name: 'IDX_APPOINTMENTS_CUSTOMER_ID',
+        columnNames: ['customer_id'],
       }),
     );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropIndex('capacities', 'IDX_CAPACITIES_OFFERING_DATE_UNIQUE');
-    await queryRunner.dropTable('capacities');
+    await queryRunner.dropIndex('appointments', 'IDX_APPOINTMENTS_CUSTOMER_ID');
+    await queryRunner.dropIndex('appointments', 'IDX_APPOINTMENTS_BUSINESS_ID');
+    await queryRunner.dropTable('appointments');
   }
 }

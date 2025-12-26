@@ -143,12 +143,39 @@ export class E2EAuthHelper {
 
     // If BUSINESS_OWNER, wait for BusinessOwner to be created by event handler, then create Business
     if (role === UserRole.BUSINESS_OWNER) {
-      // Wait for OnUserRegisteredHandler to create BusinessOwner (asynchronous event handler)
-      // Simple delay to allow event processing (event handlers are async)
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // Wait for OnUserRegisteredHandler to create BusinessOwner and complete onboarding
+      // Poll until BusinessOwner exists with onboarding completed (max 10 seconds)
+      const maxAttempts = 100; // 100 attempts * 100ms = 10 seconds max
+      let attempts = 0;
+      let businessOwnerReady = false;
+      let lastError: Error | null = null;
 
-      const business = await this.createTestBusiness(token, options?.businessData);
-      testUser.businessId = business.id;
+      while (attempts < maxAttempts && !businessOwnerReady) {
+        try {
+          // Try to create business - if it succeeds, BusinessOwner is ready
+          const business = await this.createTestBusiness(token, options?.businessData);
+          testUser.businessId = business.id;
+          businessOwnerReady = true;
+        } catch (error) {
+          lastError = error as Error;
+          // If error is about BusinessOwner not found or onboarding not completed, wait and retry
+          attempts++;
+          if (attempts < maxAttempts) {
+            await new Promise((resolve) => setTimeout(resolve, 100));
+          } else {
+            // Max attempts reached, throw the error with context
+            console.error(
+              `Failed to create business after ${maxAttempts} attempts (${maxAttempts * 100}ms)`,
+            );
+            console.error('Last error:', lastError);
+            throw new Error(
+              `Failed to create business after ${maxAttempts} attempts. ` +
+                `This usually means the OnUserRegisteredHandler event handler is not running or is too slow. ` +
+                `Last error: ${lastError?.message || 'Unknown error'}`,
+            );
+          }
+        }
+      }
 
       // Login again to get updated token with businessId
       const updatedToken = await this.login(email, password);
@@ -242,6 +269,7 @@ export class E2EAuthHelper {
       businessData?.whatsappNumber || `+1809555${Math.floor(1000 + Math.random() * 9000)}`;
 
     try {
+      console.log('Attempting to create business with token:', token.substring(0, 20) + '...');
       const response = await request(this.app.getHttpServer())
         .post('/api/businesses')
         .set('Authorization', `Bearer ${token}`)
@@ -256,18 +284,27 @@ export class E2EAuthHelper {
             postalCode: null,
           },
           timezone: businessData?.timezone || 'America/Santo_Domingo',
-        })
-        .expect(201);
+        });
+
+      console.log('Create business response status:', response.status);
+      console.log('Create business response body:', response.body);
+
+      if (response.status !== 201) {
+        throw new Error(`Expected 201, got ${response.status}: ${JSON.stringify(response.body)}`);
+      }
 
       return { id: response.body.id };
     } catch (error: unknown) {
       // Log the error response for debugging
       if (error && typeof error === 'object' && 'response' in error) {
-        const httpError = error as { response: { status: number; body: unknown } };
+        const httpError = error as { response: { status: number; body: unknown; text?: string } };
         console.error('Create business failed:', {
           status: httpError.response.status,
           body: httpError.response.body,
+          text: httpError.response.text,
         });
+      } else {
+        console.error('Create business failed with unknown error:', error);
       }
       throw error;
     }

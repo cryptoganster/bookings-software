@@ -34,11 +34,11 @@ export class ConversationModel {
   @Column('uuid', { name: 'selected_offering_id', nullable: true })
   selectedOfferingId?: string;
 
-  @Column('date', { name: 'selected_date', nullable: true })
-  selectedDate?: Date;
+  @Column('varchar', { length: 10, name: 'selected_date', nullable: true })
+  selectedDate?: string; // Store as "YYYY-MM-DD" string to avoid timezone issues
 
   @Column('time', { name: 'selected_time', nullable: true })
-  selectedTime?: Date;
+  selectedTime?: string;
 
   @Column('uuid', { name: 'created_appointment_id', nullable: true })
   createdAppointmentId?: string;

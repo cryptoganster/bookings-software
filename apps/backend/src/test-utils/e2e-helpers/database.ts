@@ -51,6 +51,38 @@ export class E2EDatabaseHelper {
   constructor(private readonly dataSource?: DataSource) {}
 
   /**
+   * Create a test user in the database
+   * Required before creating businesses or business_owners due to foreign key constraints
+   */
+  async createTestUser(userId: string): Promise<void> {
+    if (!this.dataSource) {
+      throw new Error('DataSource is required for instance methods');
+    }
+    await E2EDatabaseHelper.createTestUser(this.dataSource, userId);
+  }
+
+  /**
+   * Create a test user in the database (static method)
+   * Required before creating businesses or business_owners due to foreign key constraints
+   */
+  static async createTestUser(dataSource: DataSource, userId: string): Promise<void> {
+    await dataSource.query(
+      `INSERT INTO users (id, email, password, name, roles, is_active, email_verified, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+       ON CONFLICT (id) DO NOTHING`,
+      [
+        userId,
+        `user-${userId}@test.com`,
+        'hashed_password',
+        'Test User',
+        ['BUSINESS_OWNER'],
+        true,
+        true,
+      ],
+    );
+  }
+
+  /**
    * Setup database (instance method)
    * Cleans the database for the test
    */
@@ -250,3 +282,4 @@ export const createTestDataSource = E2EDatabaseHelper.createTestDataSource.bind(
 export const setupTestDatabase = E2EDatabaseHelper.setupTestDatabase.bind(E2EDatabaseHelper);
 export const teardownTestDatabase = E2EDatabaseHelper.teardownTestDatabase.bind(E2EDatabaseHelper);
 export const getTestTypeOrmConfig = E2EDatabaseHelper.getTestTypeOrmConfig.bind(E2EDatabaseHelper);
+export const createTestUser = E2EDatabaseHelper.createTestUser.bind(E2EDatabaseHelper);

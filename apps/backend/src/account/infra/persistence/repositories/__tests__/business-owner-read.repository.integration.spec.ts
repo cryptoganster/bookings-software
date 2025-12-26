@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { createTestUser } from '@test-utils/e2e-helpers';
 import { DataSource, Repository } from 'typeorm';
 import { BusinessOwnerReadRepository } from '../business-owner-read.repository';
 import { BusinessOwnerModel } from '../../models/business-owner.model';
@@ -60,6 +61,7 @@ describe('BusinessOwnerReadRepository (Integration)', () => {
         createdAt: new Date('2024-01-15'),
         updatedAt: new Date('2024-01-15'),
       });
+      await createTestUser(dataSource, '65f818ad-9782-40bd-b8ed-16251f31f511');
       await repository.save(businessOwnerModel);
 
       // Act
@@ -100,6 +102,7 @@ describe('BusinessOwnerReadRepository (Integration)', () => {
         createdAt: new Date('2024-06-01'),
         updatedAt: new Date('2024-06-15'),
       });
+      await createTestUser(dataSource, '7c956221-da3a-49db-b00e-2a25aae38ca7');
       await repository.save(businessOwnerModel);
 
       // Act
@@ -140,6 +143,7 @@ describe('BusinessOwnerReadRepository (Integration)', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       });
+      await createTestUser(dataSource, '61e339a2-b501-4ca3-88e0-be8af02d9f09');
       await repository.save(businessOwnerModel);
 
       // Act
@@ -164,6 +168,7 @@ describe('BusinessOwnerReadRepository (Integration)', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       });
+      await createTestUser(dataSource, '50254344-ff7c-4933-b50a-e66fadd31688');
       await repository.save(businessOwnerModel);
 
       // Act

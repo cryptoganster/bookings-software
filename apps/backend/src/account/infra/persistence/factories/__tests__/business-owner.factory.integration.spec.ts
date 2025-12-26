@@ -7,6 +7,7 @@ import {
   createIntegrationTestDataSource,
   cleanDatabase,
 } from '@test-utils/integration-test-helper';
+import { createTestUser } from '@test-utils/e2e-helpers';
 
 describe('BusinessOwnerFactory (Integration)', () => {
   let module: TestingModule;
@@ -50,9 +51,12 @@ describe('BusinessOwnerFactory (Integration)', () => {
   describe('loadById', () => {
     it('should return aggregate with business logic', async () => {
       // Arrange
+      const userId = '65f818ad-9782-40bd-b8ed-16251f31f511';
+      await createTestUser(dataSource, userId);
+
       const businessOwnerModel = repository.create({
         id: 'be67026b-b1e5-4104-b66c-f23d86098321',
-        userId: '65f818ad-9782-40bd-b8ed-16251f31f511',
+        userId: userId,
         subscriptionPlan: 'PRO',
         subscriptionStatus: 'ACTIVE',
         onboardingCompleted: true,
@@ -74,9 +78,12 @@ describe('BusinessOwnerFactory (Integration)', () => {
 
     it('should preserve version from database', async () => {
       // Arrange
+      const userId = '7c956221-da3a-49db-b00e-2a25aae38ca7';
+      await createTestUser(dataSource, userId);
+
       const businessOwnerModel = repository.create({
         id: 'cc6f68fc-eb33-4f68-8766-373718cb24fa',
-        userId: '7c956221-da3a-49db-b00e-2a25aae38ca7',
+        userId: userId,
         subscriptionPlan: 'ENTERPRISE',
         subscriptionStatus: 'ACTIVE',
         onboardingCompleted: false,
@@ -104,9 +111,12 @@ describe('BusinessOwnerFactory (Integration)', () => {
 
     it('should load aggregate that can execute domain methods', async () => {
       // Arrange
+      const userId = '61e339a2-b501-4ca3-88e0-be8af02d9f09';
+      await createTestUser(dataSource, userId);
+
       const businessOwnerModel = repository.create({
         id: '9660e857-1161-47f5-bf42-ae8c0341ee71',
-        userId: '61e339a2-b501-4ca3-88e0-be8af02d9f09',
+        userId: userId,
         subscriptionPlan: 'FREE',
         subscriptionStatus: 'ACTIVE',
         onboardingCompleted: true,
@@ -152,6 +162,7 @@ describe('BusinessOwnerFactory (Integration)', () => {
       ];
 
       for (const { plan, boId, userId } of testData) {
+        await createTestUser(dataSource, userId);
         const model = repository.create({
           id: boId,
           userId: userId,
@@ -194,6 +205,7 @@ describe('BusinessOwnerFactory (Integration)', () => {
       ];
 
       for (const { status, boId, userId } of testData) {
+        await createTestUser(dataSource, userId);
         const model = repository.create({
           id: boId,
           userId: userId,
@@ -219,9 +231,12 @@ describe('BusinessOwnerFactory (Integration)', () => {
   describe('loadByUserId', () => {
     it('should return aggregate with business logic', async () => {
       // Arrange
+      const userId = '777f368d-b9e1-44f4-b4c4-3c200e6ec960';
+      await createTestUser(dataSource, userId);
+
       const businessOwnerModel = repository.create({
         id: '88d769f4-b41b-45a9-8391-896089054fba',
-        userId: '777f368d-b9e1-44f4-b4c4-3c200e6ec960',
+        userId: userId,
         subscriptionPlan: 'BASIC',
         subscriptionStatus: 'ACTIVE',
         onboardingCompleted: true,
@@ -242,9 +257,12 @@ describe('BusinessOwnerFactory (Integration)', () => {
 
     it('should preserve version from database', async () => {
       // Arrange
+      const userId = '79fc1f94-b7c3-4f3b-b36f-03b7161b45db';
+      await createTestUser(dataSource, userId);
+
       const businessOwnerModel = repository.create({
         id: '8016076f-812f-4cd1-a318-b98a389f0de7',
-        userId: '79fc1f94-b7c3-4f3b-b36f-03b7161b45db',
+        userId: userId,
         subscriptionPlan: 'PRO',
         subscriptionStatus: 'ACTIVE',
         onboardingCompleted: false,
@@ -272,9 +290,12 @@ describe('BusinessOwnerFactory (Integration)', () => {
 
     it('should load aggregate that can execute domain methods', async () => {
       // Arrange
+      const userId = '1071aa6c-1e34-425a-8b95-7552f0152faf';
+      await createTestUser(dataSource, userId);
+
       const businessOwnerModel = repository.create({
         id: 'a2343508-b80a-4bed-bfb1-6f0cc72ac6d6',
-        userId: '1071aa6c-1e34-425a-8b95-7552f0152faf',
+        userId: userId,
         subscriptionPlan: 'ENTERPRISE',
         subscriptionStatus: 'ACTIVE',
         onboardingCompleted: true,

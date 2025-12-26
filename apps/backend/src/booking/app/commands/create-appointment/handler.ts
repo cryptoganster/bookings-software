@@ -5,7 +5,7 @@ import { CreateAppointmentCommand } from '@booking/app/commands/create-appointme
 import { IAppointmentWriteRepository } from '@booking/domain/interfaces/repositories/appointment-write';
 import { ICapacityFactory } from '@availability/domain/interfaces/factories/capacity-factory';
 import { ICapacityWriteRepository } from '@availability/domain/interfaces/repositories/capacity-write';
-import { ICustomerReadRepository } from '@customer/domain/interfaces/repositories/customer-read';
+import { ICustomerExistenceChecker } from '@customer/domain/interfaces/services/customer-existence-checker.interface';
 import { IUnitOfWork } from '@shared/kernel/uow';
 import { Appointment } from '@booking/domain/aggregates/appointment';
 import { UUID } from '@shared/vo/uuid';
@@ -22,8 +22,8 @@ export class CreateAppointmentHandler implements ICommandHandler<CreateAppointme
     private readonly capacityFactory: ICapacityFactory,
     @Inject('ICapacityWriteRepository')
     private readonly capacityWriteRepository: ICapacityWriteRepository,
-    @Inject('ICustomerReadRepository')
-    private readonly customerReadRepository: ICustomerReadRepository,
+    @Inject('ICustomerExistenceChecker')
+    private readonly customerExistenceChecker: ICustomerExistenceChecker,
     @Inject('IUnitOfWork')
     private readonly uow: IUnitOfWork,
     private readonly logger: PinoLogger,
@@ -50,8 +50,8 @@ export class CreateAppointmentHandler implements ICommandHandler<CreateAppointme
     try {
       await this.uow.transaction(async () => {
         // Validate customer exists before creating appointment
-        const customer = await this.customerReadRepository.findById(command.customerId);
-        if (!customer) {
+        const customerExists = await this.customerExistenceChecker.exists(command.customerId);
+        if (!customerExists) {
           throw new CustomerNotFoundException(command.customerId);
         }
 

@@ -16,7 +16,7 @@ export class MessageType extends ValueObject {
 
   private constructor(private readonly value: string) {
     super();
-    if (!MessageType.VALID_TYPES.includes(value as any)) {
+    if (!MessageType.VALID_TYPES.includes(value as (typeof MessageType.VALID_TYPES)[number])) {
       throw new InvalidMessageTypeException(value);
     }
   }
@@ -56,7 +56,7 @@ export class MessageType extends ValueObject {
     return this.value;
   }
 
-  protected getEqualityComponents(): any[] {
+  protected getEqualityComponents(): unknown[] {
     return [this.value];
   }
 }

@@ -11,7 +11,7 @@ import { MigrationInterface, QueryRunner, Table, TableIndex, TableForeignKey } f
  * - Indexes on business_id and customer_id for query performance
  * - last_message_at for sorting conversations by recency
  */
-export class CreateConversationsTable1734999000000 implements MigrationInterface {
+export class CreateConversationsTable1702559000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Create conversations table
     await queryRunner.createTable(

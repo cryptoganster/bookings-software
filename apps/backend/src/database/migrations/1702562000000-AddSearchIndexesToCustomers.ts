@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddSearchIndexesToCustomers1766345899000 implements MigrationInterface {
-  name = 'AddSearchIndexesToCustomers1766345899000';
+export class AddSearchIndexesToCustomers1702562000000 implements MigrationInterface {
+  name = 'AddSearchIndexesToCustomers1702562000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Add index on LOWER(name) for case-insensitive search

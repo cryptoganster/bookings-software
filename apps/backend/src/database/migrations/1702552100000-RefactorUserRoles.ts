@@ -13,7 +13,7 @@ import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm';
  *
  * Related to: Auth BC Roles Refactor Spec
  */
-export class RefactorUserRoles1734480000000 implements MigrationInterface {
+export class RefactorUserRoles1702552100000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Step 1: Add new columns (nullable initially for data migration)
     await queryRunner.addColumn(

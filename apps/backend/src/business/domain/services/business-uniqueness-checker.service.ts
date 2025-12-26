@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { IBusinessUniquenessChecker } from '../interfaces/services/business-uniqueness-checker.interface';
-import { IBusinessReadRepository } from '../interfaces/repositories/business-read';
+import { IBusinessUniquenessChecker } from '@business/domain/interfaces/services/business-uniqueness-checker.interface';
+import { IBusinessReadRepository } from '@business/domain/interfaces/repositories/business-read';
 
 /**
  * Domain Service: BusinessUniquenessChecker

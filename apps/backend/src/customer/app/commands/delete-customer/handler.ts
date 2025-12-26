@@ -3,7 +3,7 @@ import { Inject } from '@nestjs/common';
 import { DeleteCustomerCommand } from '@customer/app/commands/delete-customer/command';
 import { ICustomerFactory } from '@customer/domain/interfaces/factories/customer-factory';
 import { ICustomerWriteRepository } from '@customer/domain/interfaces/repositories/customer-write';
-import { IAppointmentReadRepository } from '@booking/domain/interfaces/repositories/appointment-read';
+import { ICustomerAppointmentChecker } from '@customer/domain/interfaces/services/customer-appointment-checker.interface';
 import { IUnitOfWork } from '@shared/kernel/uow';
 import {
   CustomerNotFoundException,
@@ -33,8 +33,8 @@ export class DeleteCustomerHandler implements ICommandHandler<DeleteCustomerComm
     private readonly customerFactory: ICustomerFactory,
     @Inject('ICustomerWriteRepository')
     private readonly customerWriteRepository: ICustomerWriteRepository,
-    @Inject('IAppointmentReadRepository')
-    private readonly appointmentReadRepository: IAppointmentReadRepository,
+    @Inject('ICustomerAppointmentChecker')
+    private readonly appointmentChecker: ICustomerAppointmentChecker,
     @Inject('IUnitOfWork')
     private readonly uow: IUnitOfWork,
   ) {}
@@ -48,21 +48,16 @@ export class DeleteCustomerHandler implements ICommandHandler<DeleteCustomerComm
         throw new CustomerNotFoundException(command.customerId);
       }
 
-      // 2. Verify no future appointments exist
-      const appointments = await this.appointmentReadRepository.findByCustomerId(
+      // 2. Verify no future appointments exist using domain service
+      const hasFutureAppointments = await this.appointmentChecker.hasFutureAppointments(
         command.customerId,
       );
 
-      const now = new Date();
-      const futureAppointments = appointments.filter(
-        (apt) => apt.status === 'CONFIRMED' && new Date(apt.dateTime) > now,
-      );
-
-      if (futureAppointments.length > 0) {
-        throw new CustomerHasFutureAppointmentsException(
+      if (hasFutureAppointments) {
+        const futureCount = await this.appointmentChecker.getFutureAppointmentsCount(
           command.customerId,
-          futureAppointments.length,
         );
+        throw new CustomerHasFutureAppointmentsException(command.customerId, futureCount);
       }
 
       // 3. Anonymize customer data (includes unlinking from User)

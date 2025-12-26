@@ -9,6 +9,10 @@ import { CustomerReadRepository } from '@customer/infra/persistence/repositories
 import { CustomerModel } from '@customer/infra/persistence/models/customer.model';
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { DataSource } from 'typeorm';
+import {
+  createIntegrationTestDataSource,
+  cleanDatabase,
+} from '@test-utils/integration-test-helper';
 
 /**
  * Concurrency tests for IdentifyCustomerHandler
@@ -27,20 +31,12 @@ describe('IdentifyCustomerHandler - Concurrency Tests', () => {
   let dataSource: DataSource;
 
   beforeAll(async () => {
+    dataSource = await createIntegrationTestDataSource();
+
     module = await Test.createTestingModule({
       imports: [
         CqrsModule,
-        TypeOrmModule.forRoot({
-          type: 'postgres',
-          host: process.env.DB_HOST || 'localhost',
-          port: parseInt(process.env.DB_PORT || '5432', 10),
-          username: process.env.DB_USERNAME || 'postgres',
-          password: process.env.DB_PASSWORD || 'postgres',
-          database: process.env.DB_DATABASE || 'postgres_test',
-          entities: [CustomerModel],
-          synchronize: false, // Enable synchronize for test database
-          dropSchema: false,
-        }),
+        TypeOrmModule.forRoot(dataSource.options as any),
         TypeOrmModule.forFeature([CustomerModel]),
       ],
       providers: [
@@ -65,17 +61,15 @@ describe('IdentifyCustomerHandler - Concurrency Tests', () => {
     }).compile();
 
     handler = module.get<IdentifyCustomerHandler>(IdentifyCustomerHandler);
-    dataSource = module.get<DataSource>(DataSource);
   });
 
   afterAll(async () => {
-    await dataSource.destroy();
+    // Don't destroy shared DataSource - it's reused across tests
     await module.close();
   });
 
   beforeEach(async () => {
-    // Clean up customers table before each test
-    await dataSource.query('DELETE FROM customers');
+    await cleanDatabase(dataSource);
   });
 
   describe('Concurrent customer creation', () => {

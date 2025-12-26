@@ -13,7 +13,8 @@ import { ConversationState } from '@conversation/domain/vo/conversation-state';
  * - Convierte aggregate ↔ model (bidirectional)
  * - Maneja value objects (UUID, ConversationState)
  * - Preserva version para optimistic locking
- * - status y state se mapean al mismo valor (state del aggregate)
+ * - status: Admin query tracking ('ACTIVE', 'AWAITING_ADMIN', 'RESOLVED')
+ * - state: Conversation flow state machine (INITIAL, SELECTING_SERVICE, etc.)
  */
 export class ConversationWriteMapper {
   /**
@@ -30,13 +31,17 @@ export class ConversationWriteMapper {
     model.customerId = conversation.getCustomerId().getValue();
     model.customerPhone = conversation.getCustomerPhone();
 
-    // status y state se mapean al mismo valor por ahora
-    const stateValue = conversation.getState().getValue();
-    model.status = stateValue;
-    model.state = stateValue;
+    // Map both status and state
+    model.status = conversation.getStatus();
+    model.state = conversation.getState().getValue();
 
     model.selectedOfferingId = conversation.getSelectedOfferingId();
-    model.selectedDate = conversation.getSelectedDate();
+
+    // Convert Date to "YYYY-MM-DD" string to avoid timezone issues
+    model.selectedDate = conversation.getSelectedDate()
+      ? conversation.getSelectedDate()!.toISOString().split('T')[0]
+      : undefined;
+
     model.selectedTime = conversation.getSelectedTime();
     model.createdAppointmentId = conversation.getCreatedAppointmentId();
 
@@ -56,15 +61,27 @@ export class ConversationWriteMapper {
    * @returns Aggregate del dominio con lógica de negocio
    */
   static toDomain(model: ConversationModel): Conversation {
+    // Convert "YYYY-MM-DD" string to Date at midnight UTC
+    const selectedDate = model.selectedDate
+      ? (() => {
+          const [year, month, day] = model.selectedDate.split('-').map(Number);
+          return new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+        })()
+      : undefined;
+
+    // selectedTime is stored as string "HH:MM:SS" in the database
+    const selectedTime = model.selectedTime as string | undefined;
+
     return Conversation.fromPersistence(
       UUID.fromString(model.id),
       UUID.fromString(model.businessId),
       UUID.fromString(model.customerId),
       model.customerPhone,
       ConversationState.fromString(model.state),
+      model.status,
       model.selectedOfferingId,
-      model.selectedDate,
-      model.selectedTime,
+      selectedDate,
+      selectedTime,
       model.createdAppointmentId,
       model.version,
     );

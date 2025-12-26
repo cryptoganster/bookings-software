@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { createTestUser } from '@test-utils/e2e-helpers';
 import { DataSource, Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { UpgradeSubscriptionHandler } from '../handler';
@@ -73,6 +74,7 @@ describe('UpgradeSubscriptionHandler - Concurrency Tests', () => {
       const businessOwnerId = UUID.generate().getValue();
       const userId = UUID.generate().getValue();
 
+      await createTestUser(dataSource, userId);
       await dataSource.query(
         `INSERT INTO business_owners (id, user_id, subscription_plan, subscription_status, onboarding_completed, version, created_at)
          VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
@@ -114,6 +116,7 @@ describe('UpgradeSubscriptionHandler - Concurrency Tests', () => {
       const businessOwnerId = UUID.generate().getValue();
       const userId = UUID.generate().getValue();
 
+      await createTestUser(dataSource, userId);
       await dataSource.query(
         `INSERT INTO business_owners (id, user_id, subscription_plan, subscription_status, onboarding_completed, version, created_at)
          VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
@@ -142,6 +145,7 @@ describe('UpgradeSubscriptionHandler - Concurrency Tests', () => {
       const businessOwnerId = UUID.generate().getValue();
       const userId = UUID.generate().getValue();
 
+      await createTestUser(dataSource, userId);
       await dataSource.query(
         `INSERT INTO business_owners (id, user_id, subscription_plan, subscription_status, onboarding_completed, version, created_at)
          VALUES ($1, $2, $3, $4, $5, $6, NOW())`,

@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { createTestUser } from '@test-utils/e2e-helpers';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { BusinessOwnerWriteRepository } from '../business-owner-write.repository';
@@ -73,11 +74,9 @@ describe('BusinessOwnerWriteRepository - Integration Test (Optimistic Locking)',
 
   it('should save BusinessOwner successfully', async () => {
     // Arrange
-    const businessOwner = BusinessOwner.create(
-      UUID.generate(),
-      UUID.generate(),
-      SubscriptionPlan.free(),
-    );
+    const userId = UUID.generate();
+    await createTestUser(dataSource, userId.getValue());
+    const businessOwner = BusinessOwner.create(UUID.generate(), userId, SubscriptionPlan.free());
 
     // Act
     await repository.save(businessOwner);
@@ -90,11 +89,9 @@ describe('BusinessOwnerWriteRepository - Integration Test (Optimistic Locking)',
 
   it('should increment version on save', async () => {
     // Arrange
-    const businessOwner = BusinessOwner.create(
-      UUID.generate(),
-      UUID.generate(),
-      SubscriptionPlan.free(),
-    );
+    const userId = UUID.generate();
+    await createTestUser(dataSource, userId.getValue());
+    const businessOwner = BusinessOwner.create(UUID.generate(), userId, SubscriptionPlan.free());
     await repository.save(businessOwner);
 
     // Act
@@ -109,11 +106,9 @@ describe('BusinessOwnerWriteRepository - Integration Test (Optimistic Locking)',
 
   it('should throw ConcurrencyException when version mismatch (optimistic locking)', async () => {
     // Arrange
-    const businessOwner = BusinessOwner.create(
-      UUID.generate(),
-      UUID.generate(),
-      SubscriptionPlan.free(),
-    );
+    const userId = UUID.generate();
+    await createTestUser(dataSource, userId.getValue());
+    const businessOwner = BusinessOwner.create(UUID.generate(), userId, SubscriptionPlan.free());
     await repository.save(businessOwner);
 
     // Load same BusinessOwner twice (simulating two concurrent requests)
@@ -132,11 +127,9 @@ describe('BusinessOwnerWriteRepository - Integration Test (Optimistic Locking)',
 
   it('should handle concurrent modifications correctly', async () => {
     // Arrange
-    const businessOwner = BusinessOwner.create(
-      UUID.generate(),
-      UUID.generate(),
-      SubscriptionPlan.free(),
-    );
+    const userId = UUID.generate();
+    await createTestUser(dataSource, userId.getValue());
+    const businessOwner = BusinessOwner.create(UUID.generate(), userId, SubscriptionPlan.free());
     await repository.save(businessOwner);
 
     // Load same BusinessOwner twice
@@ -170,11 +163,9 @@ describe('BusinessOwnerWriteRepository - Integration Test (Optimistic Locking)',
 
   it('should allow retry after ConcurrencyException', async () => {
     // Arrange
-    const businessOwner = BusinessOwner.create(
-      UUID.generate(),
-      UUID.generate(),
-      SubscriptionPlan.free(),
-    );
+    const userId = UUID.generate();
+    await createTestUser(dataSource, userId.getValue());
+    const businessOwner = BusinessOwner.create(UUID.generate(), userId, SubscriptionPlan.free());
     await repository.save(businessOwner);
 
     // Load same BusinessOwner twice
@@ -204,11 +195,9 @@ describe('BusinessOwnerWriteRepository - Integration Test (Optimistic Locking)',
 
   it('should handle multiple sequential saves correctly', async () => {
     // Arrange
-    const businessOwner = BusinessOwner.create(
-      UUID.generate(),
-      UUID.generate(),
-      SubscriptionPlan.free(),
-    );
+    const userId = UUID.generate();
+    await createTestUser(dataSource, userId.getValue());
+    const businessOwner = BusinessOwner.create(UUID.generate(), userId, SubscriptionPlan.free());
     await repository.save(businessOwner);
 
     // Act - Sequential modifications

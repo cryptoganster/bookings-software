@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
@@ -9,6 +9,10 @@ import { CapacityModel } from '@availability/infra/persistence/models/capacity';
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { UUID } from '@shared/vo/uuid';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
+import {
+  createIntegrationTestDataSource,
+  cleanDatabase,
+} from '@test-utils/integration-test-helper';
 
 describe('Capacity - Concurrency Tests', () => {
   let module: TestingModule;
@@ -16,20 +20,12 @@ describe('Capacity - Concurrency Tests', () => {
   let capacityWriteRepo: CapacityWriteRepository;
   let capacityFactory: CapacityFactory;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
+    dataSource = await createIntegrationTestDataSource();
+
     module = await Test.createTestingModule({
       imports: [
-        TypeOrmModule.forRoot({
-          type: 'postgres',
-          host: process.env.DB_HOST || 'localhost',
-          port: parseInt(process.env.DB_PORT || '5432', 10),
-          username: process.env.DB_USERNAME || 'postgres',
-          password: process.env.DB_PASSWORD || 'postgres',
-          database: process.env.DB_DATABASE || 'postgres_test',
-          entities: [CapacityModel],
-          synchronize: false,
-          dropSchema: true,
-        }),
+        TypeOrmModule.forRoot(dataSource.options as any),
         TypeOrmModule.forFeature([CapacityModel]),
       ],
       providers: [
@@ -42,14 +38,17 @@ describe('Capacity - Concurrency Tests', () => {
       ],
     }).compile();
 
-    dataSource = module.get<DataSource>(DataSource);
     capacityWriteRepo = module.get<CapacityWriteRepository>(CapacityWriteRepository);
     capacityFactory = module.get<CapacityFactory>(CapacityFactory);
   });
 
-  afterEach(async () => {
-    await dataSource.destroy();
+  afterAll(async () => {
+    // Don't destroy shared DataSource - it's reused across tests
     await module.close();
+  });
+
+  beforeEach(async () => {
+    await cleanDatabase(dataSource);
   });
 
   describe('Property 12: Optimistic locking prevents double booking', () => {
