@@ -1,4 +1,4 @@
-import { Query } from '@nestjs/cqrs';
+import { Query } from '@shared/kernel';
 import { TimeSlot } from '@availability/domain/read-models/capacity';
 
 /**

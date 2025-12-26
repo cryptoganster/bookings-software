@@ -1,4 +1,4 @@
-import { Query } from '@nestjs/cqrs';
+import { Query } from '@shared/kernel';
 import { BlockoutReadModel } from '@availability/domain/read-models/blockout';
 
 export class GetBlockoutsByBusinessQuery extends Query<BlockoutReadModel[]> {

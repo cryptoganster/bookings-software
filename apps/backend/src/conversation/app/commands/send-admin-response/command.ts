@@ -1,4 +1,4 @@
-import { Command } from '@nestjs/cqrs';
+import { Command } from '@shared/kernel';
 
 /**
  * Command to send an admin response

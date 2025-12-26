@@ -1,4 +1,4 @@
-import { Command } from '@nestjs/cqrs';
+import { Command } from '@shared/kernel';
 import { UserRole } from '@auth/domain/vo/user-role';
 
 export class RegisterCommand extends Command<{ userId: string; token: string }> {

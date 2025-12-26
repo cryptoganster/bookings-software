@@ -1,4 +1,4 @@
-import { Query } from '@nestjs/cqrs';
+import { Query } from '@shared/kernel';
 import { CustomerReadModel } from '@customer/domain/read-models/customer';
 
 /**

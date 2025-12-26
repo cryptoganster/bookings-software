@@ -1,4 +1,4 @@
-import { Command } from '@nestjs/cqrs';
+import { Command } from '@shared/kernel';
 
 /**
  * Command to set or update capacity for a specific offering and date
