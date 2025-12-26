@@ -28,6 +28,15 @@ export { TestAuthHelper, generateTestEmail, createTestUserInDb } from './auth';
 export { TestAccountHelper, createBusinessOwnerInDb } from './account';
 
 // ============================================================================
+// Business BC
+// ============================================================================
+export {
+  TestBusinessHelper,
+  generateUniqueWhatsAppNumber,
+  createTestBusinessInDb,
+} from './business';
+
+// ============================================================================
 // Database Utilities
 // ============================================================================
 export {
