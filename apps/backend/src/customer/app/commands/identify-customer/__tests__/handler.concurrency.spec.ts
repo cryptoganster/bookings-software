@@ -12,6 +12,7 @@ import { DataSource } from 'typeorm';
 import {
   createIntegrationTestDataSource,
   cleanDatabase,
+  createTestBusiness,
 } from '@test-utils/integration-test-helper';
 
 /**
@@ -29,6 +30,7 @@ describe('IdentifyCustomerHandler - Concurrency Tests', () => {
   let module: TestingModule;
   let handler: IdentifyCustomerHandler;
   let dataSource: DataSource;
+  let businessId: string;
 
   beforeAll(async () => {
     dataSource = await createIntegrationTestDataSource();
@@ -70,12 +72,13 @@ describe('IdentifyCustomerHandler - Concurrency Tests', () => {
 
   beforeEach(async () => {
     await cleanDatabase(dataSource);
+    // Create a test business for each test to satisfy foreign key constraint
+    businessId = await createTestBusiness(dataSource);
   });
 
   describe('Concurrent customer creation', () => {
     it('should handle concurrent creation attempts for same phone number', async () => {
       // Arrange
-      const businessId = '123e4567-e89b-12d3-a456-426614174000';
       const whatsappPhone = '+18095551234';
       const name = 'John Doe';
 
@@ -106,7 +109,6 @@ describe('IdentifyCustomerHandler - Concurrency Tests', () => {
 
     it('should handle concurrent creation for different phone numbers', async () => {
       // Arrange
-      const businessId = '123e4567-e89b-12d3-a456-426614174000';
       const commands = [
         new IdentifyCustomerCommand(businessId, '+18095551111', 'Customer 1'),
         new IdentifyCustomerCommand(businessId, '+18095552222', 'Customer 2'),
@@ -140,7 +142,6 @@ describe('IdentifyCustomerHandler - Concurrency Tests', () => {
 
     it('should handle concurrent name updates for same customer', async () => {
       // Arrange - Create initial customer
-      const businessId = '123e4567-e89b-12d3-a456-426614174000';
       const whatsappPhone = '+18095551234';
       const initialName = 'Initial Name';
 
@@ -171,9 +172,9 @@ describe('IdentifyCustomerHandler - Concurrency Tests', () => {
     });
 
     it('should maintain multi-tenant isolation under concurrent load', async () => {
-      // Arrange
-      const business1 = '123e4567-e89b-12d3-a456-426614174001';
-      const business2 = '123e4567-e89b-12d3-a456-426614174002';
+      // Arrange - Create two test businesses
+      const business1 = await createTestBusiness(dataSource);
+      const business2 = await createTestBusiness(dataSource);
       const sharedPhone = '+18095551234'; // Same phone, different businesses
 
       const commands = [
@@ -205,7 +206,6 @@ describe('IdentifyCustomerHandler - Concurrency Tests', () => {
   describe('Database constraint enforcement', () => {
     it('should enforce unique constraint on (business_id, whatsapp_phone)', async () => {
       // Arrange
-      const businessId = '123e4567-e89b-12d3-a456-426614174000';
       const whatsappPhone = '+18095551234';
 
       // Create first customer
