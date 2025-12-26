@@ -80,7 +80,9 @@ describe('Customer Flow E2E', () => {
     authHelper = new E2EAuthHelper(app);
     const testUser = await authHelper.createBusinessOwner();
     testBusinessId = testUser.businessId!;
-    testOfferingId = UUID.generate().getValue();
+
+    // Create active offering for foreign key constraint
+    testOfferingId = await createActiveOffering(dataSource, testBusinessId);
   });
 
   afterAll(async () => {
