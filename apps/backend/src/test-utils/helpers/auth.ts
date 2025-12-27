@@ -353,10 +353,13 @@ export async function createTestUserInDb(
   const isActive = options?.isActive ?? true;
   const emailVerified = options?.emailVerified ?? true;
 
+  // Convert roles array to PostgreSQL array format: {value1,value2}
+  const rolesArray = `{${roles.join(',')}}`;
+
   await dataSource.query(
     `INSERT INTO users (id, email, password, name, roles, is_active, email_verified, created_at)
      VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())`,
-    [id, email, password, name, JSON.stringify(roles), isActive, emailVerified],
+    [id, email, password, name, rolesArray, isActive, emailVerified],
   );
 
   return id;

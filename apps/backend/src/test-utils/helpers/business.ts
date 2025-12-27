@@ -252,7 +252,7 @@ export async function createTestBusinessInDb(
   const timezone = businessData?.timezone || 'America/Santo_Domingo';
 
   await dataSource.query(
-    `INSERT INTO businesses (id, owner_id, name, whatsapp_number, address_street, address_city, address_state, address_country, address_postal_code, timezone, is_active, created_at)
+    `INSERT INTO businesses (id, owner_id, name, whatsapp_phone, address_street, address_city, address_state, address_country, address_postal_code, timezone, is_active, created_at)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, true, NOW())`,
     [
       id,

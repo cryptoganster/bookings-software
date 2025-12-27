@@ -124,9 +124,7 @@ export class TestDatabaseHelper {
   /**
    * Create a test DataSource (static method)
    *
-   * Uses worker-specific database when running tests in parallel.
-   * When running with --runInBand, uses bookings_test directly.
-   * In parallel mode, uses bookings_test_${workerId}.
+   * Always uses postgres_test database (configured with maxWorkers: 1 in jest.config).
    *
    * @returns TypeORM DataSource configured for tests
    *
@@ -137,9 +135,8 @@ export class TestDatabaseHelper {
    * ```
    */
   static createTestDataSource(): DataSource {
-    const isRunInBand = process.argv.includes('--runInBand');
-    const workerId = process.env.JEST_WORKER_ID;
-    const database = isRunInBand ? 'bookings_test' : `bookings_test_${workerId || '1'}`;
+    // Always use postgres_test since we run tests with maxWorkers: 1
+    const database = process.env.DB_DATABASE || 'postgres_test';
 
     return new DataSource({
       type: 'postgres',
@@ -235,7 +232,7 @@ export class TestDatabaseHelper {
       port: parseInt(process.env.DB_PORT || '5432', 10),
       username: process.env.DB_USERNAME || 'postgres',
       password: process.env.DB_PASSWORD || 'postgres',
-      database: database || process.env.DB_DATABASE || 'bookings_test',
+      database: database || process.env.DB_DATABASE || 'postgres_test',
       entities: ALL_ENTITIES,
       synchronize: true,
       dropSchema: false,
