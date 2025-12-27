@@ -17,6 +17,8 @@ import { DataSource } from 'typeorm';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { AppointmentModel } from '@booking/infra/persistence/models/appointment';
 import { CapacityModel } from '@availability/infra/persistence/models/capacity';
+import { BlockoutModel } from '@availability/infra/persistence/models/blockout';
+import { ScheduleModel } from '@availability/infra/persistence/models/schedule';
 import { OfferingModel } from '@offering/infra/persistence/models/offering';
 import { CustomerModel } from '@customer/infra/persistence/models/customer.model';
 import { BusinessModel } from '@business/infra/persistence/models/business.model';
@@ -32,6 +34,8 @@ import { MessageModel } from '@conversation/infra/persistence/models/message.mod
 const ALL_ENTITIES = [
   AppointmentModel,
   CapacityModel,
+  BlockoutModel,
+  ScheduleModel,
   OfferingModel,
   CustomerModel,
   BusinessModel,
