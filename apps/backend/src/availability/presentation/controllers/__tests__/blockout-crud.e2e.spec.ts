@@ -265,7 +265,7 @@ describe('Blockout CRUD (e2e)', () => {
       await request(app.getHttpServer())
         .delete('/api/blockouts/invalid-uuid')
         .set('Authorization', `Bearer ${authToken}`)
-        .expect(500); // UUID validation error returns 500 (needs global exception filter)
+        .expect(400); // ParseUUIDPipe validates UUID format
     });
   });
 

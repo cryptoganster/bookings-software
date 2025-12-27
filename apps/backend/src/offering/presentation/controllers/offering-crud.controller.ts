@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Put, Delete, Patch, Body, Param, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Patch,
+  Body,
+  Param,
+  UseGuards,
+  NotFoundException,
+} from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { JwtAuthGuard } from '@auth/infra/guards/jwt-auth';
 import { CurrentUser, UserPayload } from '@auth/presentation/decorators/current-user';
@@ -62,7 +73,7 @@ export class OfferingCrudController {
     const offering = await this.queryBus.execute(new GetOfferingByIdQuery(id, user.businessId));
 
     if (!offering) {
-      throw new Error(`Offering with id ${id} not found`);
+      throw new NotFoundException(`Offering with id ${id} not found`);
     }
 
     return offering;

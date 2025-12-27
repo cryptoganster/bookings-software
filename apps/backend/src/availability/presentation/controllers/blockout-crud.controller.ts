@@ -9,6 +9,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { JwtAuthGuard } from '@auth/infra/guards/jwt-auth';
@@ -64,7 +65,7 @@ export class BlockoutCrudController {
    */
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
-  async delete(@Param('id') id: string): Promise<{ message: string }> {
+  async delete(@Param('id', ParseUUIDPipe) id: string): Promise<{ message: string }> {
     await this.commandBus.execute(new RemoveBlockoutCommand(id));
 
     return { message: 'Blockout deleted successfully' };

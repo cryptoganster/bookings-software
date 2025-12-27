@@ -306,7 +306,7 @@ describe('Offering CRUD Controller E2E', () => {
       await request(app.getHttpServer())
         .get('/api/offerings/00000000-0000-0000-0000-000000000000')
         .set('Authorization', `Bearer ${authToken}`)
-        .expect(500); // Controller throws generic Error, not NotFoundException
+        .expect(404);
     });
   });
 
