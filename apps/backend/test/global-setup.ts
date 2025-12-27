@@ -37,9 +37,17 @@ export default async function globalSetup() {
     await dataSource.initialize();
     console.log('✅ Database connection established');
 
-    // Drop all tables (clean slate)
-    await dataSource.dropDatabase();
-    console.log('✅ Database dropped');
+    // Drop schema and recreate (cleanest approach)
+    const queryRunner = dataSource.createQueryRunner();
+    try {
+      await queryRunner.query('DROP SCHEMA IF EXISTS public CASCADE');
+      await queryRunner.query('CREATE SCHEMA public');
+      await queryRunner.query('GRANT ALL ON SCHEMA public TO postgres');
+      await queryRunner.query('GRANT ALL ON SCHEMA public TO public');
+      console.log('✅ Schema dropped and recreated');
+    } finally {
+      await queryRunner.release();
+    }
 
     // Run all migrations
     await dataSource.runMigrations();
@@ -50,6 +58,15 @@ export default async function globalSetup() {
       'SELECT name, timestamp FROM migrations ORDER BY timestamp',
     );
     console.log(`📦 Executed ${executedMigrations.length} migrations`);
+
+    // Verify foreign keys were created
+    const foreignKeys = await dataSource.query(`
+      SELECT COUNT(*) as count
+      FROM information_schema.table_constraints
+      WHERE constraint_type = 'FOREIGN KEY'
+      AND table_schema = 'public'
+    `);
+    console.log(`🔗 Created ${foreignKeys[0].count} foreign keys`);
 
     // Close connection
     await dataSource.destroy();

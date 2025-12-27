@@ -18,7 +18,7 @@ describe('Database Schema Validation', () => {
       port: parseInt(process.env.DB_PORT || '5432', 10),
       username: process.env.DB_USERNAME || 'postgres',
       password: process.env.DB_PASSWORD || 'postgres',
-      database: process.env.DB_DATABASE || 'bookings-software',
+      database: process.env.DB_DATABASE || 'postgres_test',
       entities: [],
       migrations: [path.join(__dirname, '../migrations/*.ts')],
       synchronize: false,
