@@ -44,9 +44,18 @@ describe('Business Controller E2E', () => {
 
     authHelper = new E2EAuthHelper(app);
 
-    // Create test user with BUSINESS_OWNER role
-    const testUser = await authHelper.createTestUser(UserRole.BUSINESS_OWNER, {
-      name: 'Business Owner',
+    // Create business owner with business (includes User + BusinessOwner + Business)
+    const testUser = await authHelper.createBusinessOwner({
+      name: 'Initial Test Business',
+      whatsappNumber: '+18095550000',
+      address: {
+        street: '123 Initial St',
+        city: 'Santo Domingo',
+        state: null,
+        country: 'Dominican Republic',
+        postalCode: null,
+      },
+      timezone: 'America/Santo_Domingo',
     });
 
     authToken = testUser.token;
