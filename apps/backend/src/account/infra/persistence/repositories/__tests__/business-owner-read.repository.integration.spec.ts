@@ -4,10 +4,7 @@ import { DataSource, Repository } from 'typeorm';
 import { BusinessOwnerReadRepository } from '../business-owner-read.repository';
 import { BusinessOwnerModel } from '../../models/business-owner.model';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import {
-  createIntegrationTestDataSource,
-  cleanDatabase,
-} from '@test-utils/integration-test-helper';
+import { setupTestDatabase, cleanDatabase } from '@test-utils/helpers/database';
 
 describe('BusinessOwnerReadRepository (Integration)', () => {
   let module: TestingModule;
@@ -17,7 +14,7 @@ describe('BusinessOwnerReadRepository (Integration)', () => {
 
   beforeAll(async () => {
     // Use shared DataSource with all entities
-    dataSource = await createIntegrationTestDataSource();
+    dataSource = await setupTestDatabase();
 
     module = await Test.createTestingModule({
       providers: [

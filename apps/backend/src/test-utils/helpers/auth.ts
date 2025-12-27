@@ -14,8 +14,14 @@
 import { INestApplication } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import * as request from 'supertest';
-import { TestUser, UserRole, RegisterDto, LoginResponse, RegisterResponse } from './types';
-import { generateUniqueWhatsAppNumber } from './business';
+import {
+  TestUser,
+  UserRole,
+  RegisterDto,
+  LoginResponse,
+  RegisterResponse,
+} from '@test-utils/helpers/types';
+import { generateUniqueWhatsAppNumber } from '@test-utils/helpers/business';
 
 /**
  * Test Auth Helper Class

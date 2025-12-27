@@ -3,12 +3,8 @@ import { DataSource, Repository } from 'typeorm';
 import { BlockoutFactory } from '../blockout-factory';
 import { BlockoutModel } from '../../models/blockout';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import {
-  createIntegrationTestDataSource,
-  cleanDatabase,
-  generateTestId,
-  createTestBusiness,
-} from '@test-utils/integration-test-helper';
+import { setupTestDatabase, cleanDatabase, generateTestId } from '@test-utils/helpers/database';
+import { createTestBusiness } from '@test-utils/helpers/business';
 
 describe('BlockoutFactory (Integration)', () => {
   let module: TestingModule;
@@ -19,7 +15,7 @@ describe('BlockoutFactory (Integration)', () => {
 
   beforeAll(async () => {
     // Create shared DataSource with ALL entities
-    dataSource = await createIntegrationTestDataSource();
+    dataSource = await setupTestDatabase();
 
     module = await Test.createTestingModule({
       providers: [

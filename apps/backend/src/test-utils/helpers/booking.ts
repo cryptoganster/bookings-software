@@ -1,7 +1,7 @@
 import { DataSource } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
-import { AppointmentModel } from '../../booking/infra/persistence/models/appointment';
-import { CreateAppointmentDto } from './types';
+import { AppointmentModel } from '@booking/infra/persistence/models/appointment';
+import { CreateAppointmentDto } from '@test-utils/helpers/types';
 
 /**
  * TestBookingHelper - Helper for Booking BC in E2E tests

@@ -13,8 +13,8 @@
 import { INestApplication } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import * as request from 'supertest';
-import { CreateBusinessDto, ConfigureWhatsAppDto } from './types';
-import { createTestUserInDb } from './auth';
+import { CreateBusinessDto, ConfigureWhatsAppDto } from '@test-utils/helpers/types';
+import { createTestUserInDb } from '@test-utils/helpers/auth';
 
 /**
  * Test Business Helper Class

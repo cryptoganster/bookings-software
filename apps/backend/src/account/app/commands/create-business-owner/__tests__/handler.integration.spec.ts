@@ -10,10 +10,7 @@ import { UUID } from '@shared/vo/uuid';
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { DataSource } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import {
-  createIntegrationTestDataSource,
-  cleanDatabase,
-} from '@test-utils/integration-test-helper';
+import { setupTestDatabase, cleanDatabase } from '@test-utils/helpers/database';
 import { createTestUser } from '@test-utils/helpers';
 
 /**
@@ -29,7 +26,7 @@ describe('CreateBusinessOwnerHandler - Integration Test', () => {
 
   beforeAll(async () => {
     // Create shared DataSource with all entities
-    dataSource = await createIntegrationTestDataSource();
+    dataSource = await setupTestDatabase();
 
     module = await Test.createTestingModule({
       providers: [

@@ -4,7 +4,7 @@ import * as request from 'supertest';
 import { AppModule } from '@/app.module';
 import { DataSource } from 'typeorm';
 import { E2EAuthHelper } from '@test-utils/helpers';
-import { generateTestId } from '@test-utils/integration-test-helper';
+import { generateTestId } from '@test-utils/helpers/database';
 
 describe('Schedule CRUD (e2e)', () => {
   let app: INestApplication;

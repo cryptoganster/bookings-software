@@ -10,11 +10,7 @@ import { BusinessOwnerModel } from '@account/infra/persistence/models/business-o
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 import { UUID } from '@shared/vo/uuid';
-import {
-  createIntegrationTestDataSource,
-  cleanDatabase,
-  generateTestId,
-} from '@test-utils/integration-test-helper';
+import { setupTestDatabase, cleanDatabase, generateTestId } from '@test-utils/helpers/database';
 
 describe('UpgradeSubscriptionHandler - Concurrency Tests', () => {
   let module: TestingModule;
@@ -25,7 +21,7 @@ describe('UpgradeSubscriptionHandler - Concurrency Tests', () => {
 
   beforeAll(async () => {
     // Create shared DataSource with ALL entities
-    dataSource = await createIntegrationTestDataSource();
+    dataSource = await setupTestDatabase();
 
     module = await Test.createTestingModule({
       providers: [

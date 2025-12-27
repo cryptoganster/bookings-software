@@ -8,12 +8,8 @@ import { Blockout } from '@availability/domain/aggregates/blockout';
 import { UUID } from '@shared/vo/uuid';
 import { DateRange } from '@availability/domain/vo/date-range.vo';
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
-import {
-  createIntegrationTestDataSource,
-  cleanDatabase,
-  generateTestId,
-  createTestBusiness,
-} from '@test-utils/integration-test-helper';
+import { setupTestDatabase, cleanDatabase, generateTestId } from '@test-utils/helpers/database';
+import { createTestBusiness } from '@test-utils/helpers/business';
 
 describe('Blockout Repositories (Integration)', () => {
   let module: TestingModule;
@@ -25,7 +21,7 @@ describe('Blockout Repositories (Integration)', () => {
 
   beforeAll(async () => {
     // Use integration test helper to create DataSource with ALL entities
-    dataSource = await createIntegrationTestDataSource();
+    dataSource = await setupTestDatabase();
 
     module = await Test.createTestingModule({
       providers: [

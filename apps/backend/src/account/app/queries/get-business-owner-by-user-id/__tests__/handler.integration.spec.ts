@@ -6,10 +6,7 @@ import { GetBusinessOwnerByUserIdQuery } from '../query';
 import { BusinessOwnerReadRepository } from '@account/infra/persistence/repositories/business-owner-read.repository';
 import { BusinessOwnerModel } from '@account/infra/persistence/models/business-owner.model';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import {
-  createIntegrationTestDataSource,
-  cleanDatabase,
-} from '@test-utils/integration-test-helper';
+import { setupTestDatabase, cleanDatabase } from '@test-utils/helpers/database';
 
 describe('GetBusinessOwnerByUserIdHandler (Integration)', () => {
   let module: TestingModule;
@@ -19,7 +16,7 @@ describe('GetBusinessOwnerByUserIdHandler (Integration)', () => {
 
   beforeAll(async () => {
     // Use shared DataSource with all entities
-    dataSource = await createIntegrationTestDataSource();
+    dataSource = await setupTestDatabase();
 
     module = await Test.createTestingModule({
       providers: [

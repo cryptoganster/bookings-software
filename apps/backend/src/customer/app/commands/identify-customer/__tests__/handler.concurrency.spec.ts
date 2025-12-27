@@ -9,11 +9,8 @@ import { CustomerReadRepository } from '@customer/infra/persistence/repositories
 import { CustomerModel } from '@customer/infra/persistence/models/customer.model';
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { DataSource } from 'typeorm';
-import {
-  createIntegrationTestDataSource,
-  cleanDatabase,
-  createTestBusiness,
-} from '@test-utils/integration-test-helper';
+import { cleanDatabase, setupTestDatabase } from '@test-utils/helpers/database';
+import { createTestBusiness } from '@test-utils/helpers/business';
 
 /**
  * Concurrency tests for IdentifyCustomerHandler
@@ -33,7 +30,7 @@ describe('IdentifyCustomerHandler - Concurrency Tests', () => {
   let businessId: string;
 
   beforeAll(async () => {
-    dataSource = await createIntegrationTestDataSource();
+    dataSource = await setupTestDatabase();
 
     module = await Test.createTestingModule({
       imports: [

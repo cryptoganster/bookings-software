@@ -12,11 +12,7 @@ import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { OnboardingAlreadyCompletedException } from '@account/domain/exceptions/onboarding-already-completed.exception';
 import { BusinessOwnerNotFoundException } from '@account/domain/exceptions/business-owner-not-found.exception';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import {
-  createIntegrationTestDataSource,
-  cleanDatabase,
-  generateTestId,
-} from '@test-utils/integration-test-helper';
+import { setupTestDatabase, cleanDatabase, generateTestId } from '@test-utils/helpers/database';
 
 describe('CompleteOnboardingHandler (Integration)', () => {
   let module: TestingModule;
@@ -27,7 +23,7 @@ describe('CompleteOnboardingHandler (Integration)', () => {
 
   beforeAll(async () => {
     // Create shared DataSource with all entities
-    dataSource = await createIntegrationTestDataSource();
+    dataSource = await setupTestDatabase();
 
     module = await Test.createTestingModule({
       providers: [

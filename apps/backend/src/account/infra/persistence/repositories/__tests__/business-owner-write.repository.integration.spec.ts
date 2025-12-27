@@ -11,10 +11,7 @@ import { UUID } from '@shared/vo/uuid';
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 import { DataSource } from 'typeorm';
-import {
-  createIntegrationTestDataSource,
-  cleanDatabase,
-} from '@test-utils/integration-test-helper';
+import { setupTestDatabase, cleanDatabase } from '@test-utils/helpers/database';
 
 /**
  * Integration Test for BusinessOwnerWriteRepository
@@ -29,7 +26,7 @@ describe('BusinessOwnerWriteRepository - Integration Test (Optimistic Locking)',
 
   beforeEach(async () => {
     // Use shared DataSource with all entities
-    dataSource = await createIntegrationTestDataSource();
+    dataSource = await setupTestDatabase();
 
     module = await Test.createTestingModule({
       imports: [

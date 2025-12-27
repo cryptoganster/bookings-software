@@ -11,7 +11,7 @@
 import { DataSource } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { ScheduleModel } from '@availability/infra/persistence/models/schedule';
-import { CreateScheduleDto } from '../types';
+import { CreateScheduleDto } from '@test-utils/helpers/types';
 
 /**
  * TestScheduleHelper - Helper for Schedule entity in E2E tests

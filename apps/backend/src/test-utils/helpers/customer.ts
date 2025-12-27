@@ -14,7 +14,7 @@
 import { INestApplication } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import * as request from 'supertest';
-import { CreateCustomerDto } from './types';
+import { CreateCustomerDto } from '@test-utils/helpers/types';
 
 /**
  * Test Customer Helper Class

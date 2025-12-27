@@ -11,7 +11,7 @@
 import { INestApplication } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import * as request from 'supertest';
-import { SubscriptionPlan } from './types';
+import { SubscriptionPlan } from '@test-utils/helpers/types';
 
 /**
  * Test Account Helper Class

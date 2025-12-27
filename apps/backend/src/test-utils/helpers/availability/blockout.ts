@@ -10,7 +10,7 @@
 import { DataSource } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { BlockoutModel } from '@availability/infra/persistence/models/blockout';
-import { CreateBlockoutDto } from '../types';
+import { CreateBlockoutDto } from '@test-utils/helpers/types';
 
 /**
  * TestBlockoutHelper - Helper for Blockout entity in E2E tests

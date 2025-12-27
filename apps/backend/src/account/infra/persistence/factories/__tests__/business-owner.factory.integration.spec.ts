@@ -3,10 +3,7 @@ import { DataSource, Repository } from 'typeorm';
 import { BusinessOwnerFactory } from '../business-owner.factory';
 import { BusinessOwnerModel } from '../../models/business-owner.model';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import {
-  createIntegrationTestDataSource,
-  cleanDatabase,
-} from '@test-utils/integration-test-helper';
+import { setupTestDatabase, cleanDatabase } from '@test-utils/helpers/database';
 import { createTestUser } from '@test-utils/helpers';
 
 describe('BusinessOwnerFactory (Integration)', () => {
@@ -17,7 +14,7 @@ describe('BusinessOwnerFactory (Integration)', () => {
 
   beforeAll(async () => {
     // Use shared DataSource with all entities
-    dataSource = await createIntegrationTestDataSource();
+    dataSource = await setupTestDatabase();
 
     module = await Test.createTestingModule({
       providers: [

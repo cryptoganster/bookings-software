@@ -1,7 +1,7 @@
 import { DataSource } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
-import { MessageModel } from '../../conversation/infra/persistence/models/message.model';
-import { CreateMessageDto } from './types';
+import { MessageModel } from '@conversation/infra/persistence/models/message.model';
+import { CreateMessageDto } from '@test-utils/helpers/types';
 
 /**
  * TestMessageHelper - Helper for Message entity in E2E tests

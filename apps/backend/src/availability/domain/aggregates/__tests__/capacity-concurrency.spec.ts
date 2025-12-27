@@ -9,11 +9,8 @@ import { CapacityModel } from '@availability/infra/persistence/models/capacity';
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { UUID } from '@shared/vo/uuid';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
-import {
-  createIntegrationTestDataSource,
-  cleanDatabase,
-  createTestBusiness,
-} from '@test-utils/integration-test-helper';
+import { setupTestDatabase, cleanDatabase } from '@test-utils/helpers/database';
+import { createTestBusiness } from '@test-utils/helpers/business';
 import { createActiveOffering } from '@test-utils/helpers/offering';
 
 describe('Capacity - Concurrency Tests', () => {
@@ -24,7 +21,7 @@ describe('Capacity - Concurrency Tests', () => {
   let testBusinessId: string;
 
   beforeAll(async () => {
-    dataSource = await createIntegrationTestDataSource();
+    dataSource = await setupTestDatabase();
 
     module = await Test.createTestingModule({
       imports: [
@@ -66,7 +63,7 @@ describe('Capacity - Concurrency Tests', () => {
       date.setUTCHours(0, 0, 0, 0); // Normalize to midnight UTC
 
       // Create offering first (foreign key constraint)
-      await createActiveOffering(dataSource, testBusinessId, offeringId.getValue());
+      await createActiveOffering(dataSource, testBusinessId, { id: offeringId.getValue() });
 
       const capacity = Capacity.create(id, offeringId, date, 2);
       await capacityWriteRepo.save(capacity);
@@ -126,7 +123,7 @@ describe('Capacity - Concurrency Tests', () => {
       date.setUTCHours(0, 0, 0, 0); // Normalize to midnight UTC
 
       // Create offering first (foreign key constraint)
-      await createActiveOffering(dataSource, testBusinessId, offeringId.getValue());
+      await createActiveOffering(dataSource, testBusinessId, { id: offeringId.getValue() });
 
       const capacity = Capacity.create(id, offeringId, date, 5);
       await capacityWriteRepo.save(capacity);
@@ -181,7 +178,7 @@ describe('Capacity - Concurrency Tests', () => {
       date.setUTCHours(0, 0, 0, 0); // Normalize to midnight UTC
 
       // Create offering first (foreign key constraint)
-      await createActiveOffering(dataSource, testBusinessId, offeringId.getValue());
+      await createActiveOffering(dataSource, testBusinessId, { id: offeringId.getValue() });
 
       const capacity = Capacity.create(id, offeringId, date, 10);
       await capacityWriteRepo.save(capacity);
@@ -225,7 +222,7 @@ describe('Capacity - Concurrency Tests', () => {
       date.setUTCHours(0, 0, 0, 0); // Normalize to midnight UTC
 
       // Create offering first (foreign key constraint)
-      await createActiveOffering(dataSource, testBusinessId, offeringId.getValue());
+      await createActiveOffering(dataSource, testBusinessId, { id: offeringId.getValue() });
 
       const capacity = Capacity.create(id, offeringId, date, 10);
       await capacityWriteRepo.save(capacity);
@@ -252,7 +249,7 @@ describe('Capacity - Concurrency Tests', () => {
       date.setUTCHours(0, 0, 0, 0); // Normalize to midnight UTC
 
       // Create offering first (foreign key constraint)
-      await createActiveOffering(dataSource, testBusinessId, offeringId.getValue());
+      await createActiveOffering(dataSource, testBusinessId, { id: offeringId.getValue() });
 
       const capacity = Capacity.create(id, offeringId, date, 10);
       await capacityWriteRepo.save(capacity);
@@ -307,7 +304,7 @@ describe('Capacity - Concurrency Tests', () => {
       date.setUTCHours(0, 0, 0, 0); // Normalize to midnight UTC
 
       // Create offering first (foreign key constraint)
-      await createActiveOffering(dataSource, testBusinessId, offeringId.getValue());
+      await createActiveOffering(dataSource, testBusinessId, { id: offeringId.getValue() });
 
       const capacity = Capacity.create(id, offeringId, date, 5);
       await capacityWriteRepo.save(capacity);

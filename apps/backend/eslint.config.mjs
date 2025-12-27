@@ -9,6 +9,7 @@ export default [
       '**/*.spec.ts',
       '**/*.test.ts',
       '**/*.e2e-spec.ts',
+      'src/test-utils/examples/**', // Example files are templates with intentional incomplete code
       'dist/**',
       'node_modules/**',
       '**/*.backup',

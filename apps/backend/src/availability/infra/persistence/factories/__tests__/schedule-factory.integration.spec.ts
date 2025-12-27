@@ -3,12 +3,8 @@ import { DataSource, Repository } from 'typeorm';
 import { ScheduleFactory } from '../schedule-factory';
 import { ScheduleModel } from '../../models/schedule';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import {
-  createIntegrationTestDataSource,
-  cleanDatabase,
-  generateTestId,
-  createTestBusiness,
-} from '@test-utils/integration-test-helper';
+import { setupTestDatabase, cleanDatabase, generateTestId } from '@test-utils/helpers/database';
+import { createTestBusiness } from '@test-utils/helpers/business';
 
 describe('ScheduleFactory (Integration)', () => {
   let module: TestingModule;
@@ -18,7 +14,7 @@ describe('ScheduleFactory (Integration)', () => {
 
   beforeAll(async () => {
     // Create shared DataSource with ALL entities
-    dataSource = await createIntegrationTestDataSource();
+    dataSource = await setupTestDatabase();
 
     module = await Test.createTestingModule({
       providers: [

@@ -1,7 +1,7 @@
 import { DataSource } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
-import { ConversationModel } from '../../conversation/infra/persistence/models/conversation.model';
-import { CreateConversationDto } from './types';
+import { ConversationModel } from '@conversation/infra/persistence/models/conversation.model';
+import { CreateConversationDto } from '@test-utils/helpers/types';
 
 /**
  * TestConversationHelper - Helper for Conversation BC in E2E tests
