@@ -1,0 +1,175 @@
+import { DataSource } from 'typeorm';
+import { TestScheduleHelper, createScheduleInDb } from '../availability/schedule';
+import { TestBusinessHelper } from '../business';
+import { TestDatabaseHelper } from '../database';
+import { ScheduleModel } from '../../../availability/infra/persistence/models/schedule.model';
+
+describe('TestScheduleHelper', () => {
+  let dataSource: DataSource;
+  let scheduleHelper: TestScheduleHelper;
+  let businessHelper: TestBusinessHelper;
+  let databaseHelper: TestDatabaseHelper;
+
+  beforeAll(async () => {
+    dataSource = await TestDatabaseHelper.createTestDataSource();
+    await dataSource.initialize();
+  });
+
+  afterAll(async () => {
+    await dataSource?.destroy();
+  });
+
+  beforeEach(async () => {
+    scheduleHelper = new TestScheduleHelper(dataSource);
+    businessHelper = new TestBusinessHelper(dataSource);
+    databaseHelper = new TestDatabaseHelper(dataSource);
+    await databaseHelper.cleanDatabase();
+  });
+
+  afterEach(async () => {
+    await scheduleHelper.cleanup();
+    await businessHelper.cleanup();
+  });
+
+  describe('createSchedule', () => {
+    it('should create a schedule with default values', async () => {
+      const business = await businessHelper.createBusiness();
+      const schedule = await scheduleHelper.createSchedule({ businessId: business.id });
+
+      expect(schedule).toBeDefined();
+      expect(schedule.id).toBeDefined();
+      expect(schedule.businessId).toBe(business.id);
+      expect(schedule.dayOfWeek).toBe(1); // Monday
+      expect(schedule.startTime).toBe('09:00:00');
+      expect(schedule.endTime).toBe('17:00:00');
+      expect(schedule.isActive).toBe(true);
+    });
+
+    it('should create a schedule with custom values', async () => {
+      const business = await businessHelper.createBusiness();
+      const schedule = await scheduleHelper.createSchedule({
+        businessId: business.id,
+        dayOfWeek: 5, // Friday
+        startTime: '10:00:00',
+        endTime: '18:00:00',
+        isActive: false,
+      });
+
+      expect(schedule.dayOfWeek).toBe(5);
+      expect(schedule.startTime).toBe('10:00:00');
+      expect(schedule.endTime).toBe('18:00:00');
+      expect(schedule.isActive).toBe(false);
+    });
+
+    it('should track created schedules for cleanup', async () => {
+      const business = await businessHelper.createBusiness();
+      await scheduleHelper.createSchedule({ businessId: business.id });
+      await scheduleHelper.createSchedule({ businessId: business.id, dayOfWeek: 2 });
+
+      const repo = dataSource.getRepository(ScheduleModel);
+      const schedules = await repo.find({ where: { businessId: business.id } });
+      expect(schedules).toHaveLength(2);
+
+      await scheduleHelper.cleanup();
+
+      const schedulesAfterCleanup = await repo.find({ where: { businessId: business.id } });
+      expect(schedulesAfterCleanup).toHaveLength(0);
+    });
+
+    it('should persist schedule to database', async () => {
+      const business = await businessHelper.createBusiness();
+      const schedule = await scheduleHelper.createSchedule({ businessId: business.id });
+
+      const repo = dataSource.getRepository(ScheduleModel);
+      const found = await repo.findOne({ where: { id: schedule.id } });
+
+      expect(found).toBeDefined();
+      expect(found?.id).toBe(schedule.id);
+      expect(found?.businessId).toBe(business.id);
+    });
+  });
+
+  describe('createScheduleInDb', () => {
+    it('should create a schedule directly in database', async () => {
+      const business = await businessHelper.createBusiness();
+      const schedule = await createScheduleInDb(dataSource, { businessId: business.id });
+
+      expect(schedule).toBeDefined();
+      expect(schedule.id).toBeDefined();
+      expect(schedule.businessId).toBe(business.id);
+
+      const repo = dataSource.getRepository(ScheduleModel);
+      const found = await repo.findOne({ where: { id: schedule.id } });
+      expect(found).toBeDefined();
+    });
+
+    it('should create schedule with custom day of week', async () => {
+      const business = await businessHelper.createBusiness();
+      const schedule = await createScheduleInDb(dataSource, {
+        businessId: business.id,
+        dayOfWeek: 0, // Sunday
+      });
+
+      expect(schedule.dayOfWeek).toBe(0);
+    });
+  });
+
+  describe('cleanup', () => {
+    it('should remove all created schedules', async () => {
+      const business = await businessHelper.createBusiness();
+      const schedule1 = await scheduleHelper.createSchedule({ businessId: business.id });
+      const schedule2 = await scheduleHelper.createSchedule({
+        businessId: business.id,
+        dayOfWeek: 2,
+      });
+
+      const repo = dataSource.getRepository(ScheduleModel);
+      let schedules = await repo.find({
+        where: [{ id: schedule1.id }, { id: schedule2.id }],
+      });
+      expect(schedules).toHaveLength(2);
+
+      await scheduleHelper.cleanup();
+
+      schedules = await repo.find({
+        where: [{ id: schedule1.id }, { id: schedule2.id }],
+      });
+      expect(schedules).toHaveLength(0);
+    });
+
+    it('should handle cleanup when no schedules exist', async () => {
+      await expect(scheduleHelper.cleanup()).resolves.not.toThrow();
+    });
+
+    it('should handle cleanup errors gracefully', async () => {
+      const business = await businessHelper.createBusiness();
+      await scheduleHelper.createSchedule({ businessId: business.id });
+
+      // Close connection to simulate error
+      await dataSource.destroy();
+
+      await expect(scheduleHelper.cleanup()).resolves.not.toThrow();
+    });
+  });
+
+  describe('multiple schedules for same business', () => {
+    it('should create schedules for all weekdays', async () => {
+      const business = await businessHelper.createBusiness();
+
+      // Create Monday to Friday schedules
+      for (let day = 1; day <= 5; day++) {
+        await scheduleHelper.createSchedule({
+          businessId: business.id,
+          dayOfWeek: day,
+        });
+      }
+
+      const repo = dataSource.getRepository(ScheduleModel);
+      const schedules = await repo.find({ where: { businessId: business.id } });
+      expect(schedules).toHaveLength(5);
+
+      const days = schedules.map((s) => s.dayOfWeek).sort();
+      expect(days).toEqual([1, 2, 3, 4, 5]);
+    });
+  });
+});

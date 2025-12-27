@@ -131,9 +131,9 @@ export interface CreateScheduleDto {
 
 export interface CreateBlockoutDto {
   businessId: string;
-  startDate: Date;
-  endDate: Date;
-  reason: string;
+  startDate?: Date;
+  endDate?: Date;
+  reason?: string;
 }
 
 // ============================================================================
@@ -141,10 +141,14 @@ export interface CreateBlockoutDto {
 // ============================================================================
 
 export interface CreateAppointmentDto {
+  id?: string;
   businessId: string;
   customerId: string;
   offeringId: string;
-  dateTime: Date;
+  dateTime?: Date;
+  status?: string;
+  version?: number;
+  cancelledAt?: Date | null;
 }
 
 export interface ModifyAppointmentDto {
@@ -156,16 +160,27 @@ export interface ModifyAppointmentDto {
 // ============================================================================
 
 export interface CreateConversationDto {
+  id?: string;
   businessId: string;
   customerId: string;
+  customerPhone: string;
   status?: string;
+  state?: string;
+  selectedOfferingId?: string;
+  selectedDate?: string;
+  selectedTime?: string;
+  createdAppointmentId?: string;
+  lastMessageAt?: Date;
+  version?: number;
 }
 
 export interface CreateMessageDto {
+  id?: string;
   conversationId: string;
-  content: string;
   direction: 'INBOUND' | 'OUTBOUND';
+  content: string;
   messageType?: string;
+  sentAt?: Date;
   isFromAdmin?: boolean;
 }
 

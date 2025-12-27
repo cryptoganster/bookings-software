@@ -127,7 +127,9 @@ describe('Conversational Booking Flow (e2e)', () => {
   describe('Flujo completo: mensaje inicial → selección servicio → fecha → hora → confirmación', () => {
     it('debe completar el flujo de reservación exitosamente', async () => {
       // Crear offering activo
-      const offering = await createActiveOffering(dataSource, testBusinessId, testOfferingId);
+      const offering = await createActiveOffering(dataSource, testBusinessId, {
+        id: testOfferingId,
+      });
       const offeringId = offering.id;
 
       // Create capacity for tomorrow at midnight
@@ -249,7 +251,9 @@ describe('Conversational Booking Flow (e2e)', () => {
 
     it('debe permitir cambiar la selección antes de confirmar', async () => {
       // Crear offering activo
-      const offering = await createActiveOffering(dataSource, testBusinessId, testOfferingId);
+      const offering = await createActiveOffering(dataSource, testBusinessId, {
+        id: testOfferingId,
+      });
       const offeringId = offering.id;
 
       // Create capacity for tomorrow at midnight
@@ -333,7 +337,9 @@ describe('Conversational Booking Flow (e2e)', () => {
   describe('Manejo de slot no disponible', () => {
     it('debe manejar cuando el slot ya no está disponible al confirmar', async () => {
       // Crear offering activo
-      const offering = await createActiveOffering(dataSource, testBusinessId, testOfferingId);
+      const offering = await createActiveOffering(dataSource, testBusinessId, {
+        id: testOfferingId,
+      });
       const offeringId = offering.id;
 
       // Create capacity for tomorrow at midnight with only 1 slot
@@ -427,7 +433,9 @@ describe('Conversational Booking Flow (e2e)', () => {
 
     it('debe permitir seleccionar otro horario después de que uno no esté disponible', async () => {
       // Crear offering activo
-      const offering = await createActiveOffering(dataSource, testBusinessId, testOfferingId);
+      const offering = await createActiveOffering(dataSource, testBusinessId, {
+        id: testOfferingId,
+      });
       const offeringId = offering.id;
 
       // Create capacity for tomorrow at midnight with 2 slots

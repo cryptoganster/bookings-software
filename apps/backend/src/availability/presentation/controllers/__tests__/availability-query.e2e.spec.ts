@@ -3,14 +3,39 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '@/app.module';
 import { DataSource } from 'typeorm';
-import { E2EAuthHelper } from '@test-utils/e2e-helpers/auth';
-import { createActiveOffering } from '@test-utils/e2e-helpers/offering';
-import { UserRole } from '@test-utils/e2e-helpers/types';
+import { TestAuthHelper } from '@test-utils/helpers';
+import { OfferingModel } from '@offering/infra/persistence/models/offering';
+import { UUID } from '@shared/vo/uuid';
+
+/**
+ * Helper to create an active offering for this test
+ * TODO: Move to @test-utils/helpers/offering.ts
+ */
+async function createTestOffering(
+  dataSource: DataSource,
+  businessId: string,
+  name: string = 'Test Service',
+  duration: number = 60,
+  maxCapacityPerSlot: number = 5,
+): Promise<{ id: string }> {
+  const offering = new OfferingModel();
+  offering.id = UUID.generate().getValue();
+  offering.businessId = businessId;
+  offering.name = name;
+  offering.duration = duration;
+  offering.maxCapacityPerSlot = maxCapacityPerSlot;
+  offering.maxDailyCapacity = null;
+  offering.isActive = true;
+
+  await dataSource.getRepository(OfferingModel).save(offering);
+
+  return { id: offering.id };
+}
 
 describe('Availability Query (e2e)', () => {
   let app: INestApplication;
   let dataSource: DataSource;
-  let authHelper: E2EAuthHelper;
+  let authHelper: TestAuthHelper;
   let authToken: string;
   let userId: string;
   let businessId: string;
@@ -37,7 +62,7 @@ describe('Availability Query (e2e)', () => {
     await app.init();
 
     dataSource = moduleFixture.get<DataSource>(DataSource);
-    authHelper = new E2EAuthHelper(app);
+    authHelper = new TestAuthHelper(app);
 
     // 1. Create a BUSINESS_OWNER test user with business
     const testUser = await authHelper.createBusinessOwner({
@@ -55,17 +80,10 @@ describe('Availability Query (e2e)', () => {
 
     authToken = testUser.token;
     userId = testUser.id;
-    businessId = testUser.businessId!;
+    businessId = testUser.businessId;
 
     // 2. Create an offering using helper (direct database insert)
-    const offering = await createActiveOffering(
-      dataSource,
-      businessId,
-      undefined,
-      'Test Service',
-      60,
-      5,
-    );
+    const offering = await createTestOffering(dataSource, businessId, 'Test Service', 60, 5);
     offeringId = offering.id;
 
     // 3. Create schedules for testing (Monday to Friday, 9-17)

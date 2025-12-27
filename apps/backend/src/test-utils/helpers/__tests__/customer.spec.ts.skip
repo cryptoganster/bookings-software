@@ -1,0 +1,168 @@
+/**
+ * Customer BC Test Helper Unit Tests
+ *
+ * Tests for customer.ts helper functions and TestCustomerHelper class.
+ */
+
+import { DataSource } from 'typeorm';
+import { generateUniqueWhatsAppPhone, createCustomerInDb } from '../customer';
+
+describe('Customer Test Helpers', () => {
+  describe('generateUniqueWhatsAppPhone', () => {
+    it('should generate unique WhatsApp phone numbers', async () => {
+      const phone1 = generateUniqueWhatsAppPhone();
+      // Wait 1ms to ensure different timestamp
+      await new Promise(resolve => setTimeout(resolve, 1));
+      const phone2 = generateUniqueWhatsAppPhone();
+
+      // Should start with +1829
+      expect(phone1).toMatch(/^\+1829\d{7}$/);
+      expect(phone2).toMatch(/^\+1829\d{7}$/);
+
+      // Should be different
+      expect(phone1).not.toBe(phone2);
+    });
+
+    it('should generate phone numbers with correct format', () => {
+      const phone = generateUniqueWhatsAppPhone();
+
+      // Should be 12 characters total (+1829 + 7 digits)
+      expect(phone).toHaveLength(12);
+
+      // Should start with +1829
+      expect(phone.startsWith('+1829')).toBe(true);
+
+      // Last 7 characters should be digits
+      const lastSeven = phone.slice(-7);
+      expect(/^\d{7}$/.test(lastSeven)).toBe(true);
+    });
+  });
+
+  describe('createCustomerInDb', () => {
+    let mockDataSource: jest.Mocked<DataSource>;
+
+    beforeEach(() => {
+      mockDataSource = {
+        query: jest.fn(),
+      } as any;
+    });
+
+    it('should create anonymous customer with generated ID', async () => {
+      const businessId = 'business-123';
+
+      await createCustomerInDb(mockDataSource, undefined, businessId);
+
+      expect(mockDataSource.query).toHaveBeenCalledWith(
+        expect.stringContaining('INSERT INTO customers'),
+        expect.arrayContaining([
+          expect.any(String), // id (generated)
+          null, // userId (anonymous)
+          businessId,
+          expect.stringMatching(/^\+1829\d{7}$/), // whatsappPhone
+          null, // name
+        ]),
+      );
+    });
+
+    it('should create anonymous customer with provided ID', async () => {
+      const customerId = 'customer-123';
+      const businessId = 'business-123';
+
+      await createCustomerInDb(mockDataSource, customerId, businessId);
+
+      expect(mockDataSource.query).toHaveBeenCalledWith(
+        expect.stringContaining('INSERT INTO customers'),
+        expect.arrayContaining([
+          customerId,
+          null, // userId (anonymous)
+          businessId,
+          expect.any(String),
+          null,
+        ]),
+      );
+    });
+
+    it('should create registered customer with userId', async () => {
+      const businessId = 'business-123';
+      const userId = 'user-123';
+
+      await createCustomerInDb(mockDataSource, undefined, businessId, {
+        userId,
+        name: 'Test Customer',
+      });
+
+      expect(mockDataSource.query).toHaveBeenCalledWith(
+        expect.stringContaining('INSERT INTO customers'),
+        expect.arrayContaining([
+          expect.any(String), // id
+          userId, // userId (registered)
+          businessId,
+          expect.any(String),
+          'Test Customer',
+        ]),
+      );
+    });
+
+    it('should create customer with custom whatsappPhone', async () => {
+      const businessId = 'business-123';
+      const customPhone = '+18291111111';
+
+      await createCustomerInDb(mockDataSource, undefined, businessId, {
+        whatsappPhone: customPhone,
+      });
+
+      expect(mockDataSource.query).toHaveBeenCalledWith(
+        expect.stringContaining('INSERT INTO customers'),
+        expect.arrayContaining([
+          expect.any(String),
+          null,
+          businessId,
+          customPhone,
+          null,
+        ]),
+      );
+    });
+
+    it('should create customer with custom name', async () => {
+      const businessId = 'business-123';
+      const customName = 'John Doe';
+
+      await createCustomerInDb(mockDataSource, undefined, businessId, {
+        name: customName,
+      });
+
+      expect(mockDataSource.query).toHaveBeenCalledWith(
+        expect.stringContaining('INSERT INTO customers'),
+        expect.arrayContaining([
+          expect.any(String),
+          null,
+          businessId,
+          expect.any(String),
+          customName,
+        ]),
+      );
+    });
+
+    it('should return the created customer ID', async () => {
+      const customerId = 'customer-123';
+      const businessId = 'business-123';
+
+      const result = await createCustomerInDb(mockDataSource, customerId, businessId);
+
+      expect(result).toBe(customerId);
+    });
+
+    it('should set version to 0 for new customer', async () => {
+      const businessId = 'business-123';
+
+      await createCustomerInDb(mockDataSource, undefined, businessId);
+
+      const queryCall = mockDataSource.query.mock.calls[0];
+      const sql = queryCall[0] as string;
+
+      // Check that SQL contains version column set to 0
+      expect(sql).toContain('version');
+      expect(sql).toContain('0)'); // version is hardcoded as 0 in the SQL
+    });
+  });
+});

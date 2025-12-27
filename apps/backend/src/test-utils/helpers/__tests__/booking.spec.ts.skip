@@ -1,0 +1,303 @@
+import { DataSource } from 'typeorm';
+import { createAppointmentInDb } from '../booking';
+import { createTestBusinessInDb } from '../business';
+import { createCustomerInDb } from '../customer';
+import { TestDatabaseHelper } from '../database';
+import { AppointmentModel } from '../../../booking/infra/persistence/models/appointment';
+
+describe('TestBookingHelper - Standalone Functions', () => {
+  let dataSource: DataSource;
+  let createdBusinessIds: string[] = [];
+  let createdCustomerIds: string[] = [];
+  let createdAppointmentIds: string[] = [];
+
+  beforeAll(async () => {
+    dataSource = await TestDatabaseHelper.createTestDataSource();
+    await dataSource.initialize();
+  });
+
+  afterAll(async () => {
+    await dataSource?.destroy();
+  });
+
+  beforeEach(async () => {
+    await TestDatabaseHelper.cleanDatabase(dataSource);
+    createdBusinessIds = [];
+    createdCustomerIds = [];
+    createdAppointmentIds = [];
+  });
+
+  afterEach(async () => {
+    // Cleanup in reverse order of dependencies
+    if (createdAppointmentIds.length > 0) {
+      await dataSource.query('DELETE FROM appointments WHERE id = ANY($1)', [createdAppointmentIds]);
+    }
+    if (createdCustomerIds.length > 0) {
+      await dataSource.query('DELETE FROM customers WHERE id = ANY($1)', [createdCustomerIds]);
+    }
+    if (createdBusinessIds.length > 0) {
+      await dataSource.query('DELETE FROM businesses WHERE id = ANY($1)', [createdBusinessIds]);
+    }
+  });
+
+  describe('createAppointment', () => {
+    it('should create an appointment with default values', async () => {
+      const business = await businessHelper.createBusiness();
+      const customer = await customerHelper.createCustomer({ businessId: business.id });
+
+      const appointment = await bookingHelper.createAppointment({
+        businessId: business.id,
+        customerId: customer.id,
+        offeringId: 'offering-uuid',
+      });
+
+      expect(appointment).toBeDefined();
+      expect(appointment.id).toBeDefined();
+      expect(appointment.businessId).toBe(business.id);
+      expect(appointment.customerId).toBe(customer.id);
+      expect(appointment.offeringId).toBe('offering-uuid');
+      expect(appointment.status).toBe('CONFIRMED');
+      expect(appointment.version).toBe(0);
+      expect(appointment.dateTime).toBeInstanceOf(Date);
+      expect(appointment.cancelledAt).toBeNull();
+    });
+
+    it('should create an appointment with custom values', async () => {
+      const business = await businessHelper.createBusiness();
+      const customer = await customerHelper.createCustomer({ businessId: business.id });
+      const customDate = new Date('2025-12-27T14:00:00Z');
+
+      const appointment = await bookingHelper.createAppointment({
+        businessId: business.id,
+        customerId: customer.id,
+        offeringId: 'offering-uuid',
+        dateTime: customDate,
+        status: 'COMPLETED',
+        version: 5,
+      });
+
+      expect(appointment.dateTime.toISOString()).toBe(customDate.toISOString());
+      expect(appointment.status).toBe('COMPLETED');
+      expect(appointment.version).toBe(5);
+    });
+
+    it('should track created appointments for cleanup', async () => {
+      const business = await businessHelper.createBusiness();
+      const customer = await customerHelper.createCustomer({ businessId: business.id });
+
+      await bookingHelper.createAppointment({
+        businessId: business.id,
+        customerId: customer.id,
+        offeringId: 'offering-1',
+      });
+      await bookingHelper.createAppointment({
+        businessId: business.id,
+        customerId: customer.id,
+        offeringId: 'offering-2',
+      });
+
+      const repo = dataSource.getRepository(AppointmentModel);
+      const appointments = await repo.find({ where: { businessId: business.id } });
+      expect(appointments).toHaveLength(2);
+
+      await bookingHelper.cleanup();
+
+      const appointmentsAfterCleanup = await repo.find({ where: { businessId: business.id } });
+      expect(appointmentsAfterCleanup).toHaveLength(0);
+    });
+
+    it('should persist appointment to database', async () => {
+      const business = await businessHelper.createBusiness();
+      const customer = await customerHelper.createCustomer({ businessId: business.id });
+
+      const appointment = await bookingHelper.createAppointment({
+        businessId: business.id,
+        customerId: customer.id,
+        offeringId: 'offering-uuid',
+      });
+
+      const repo = dataSource.getRepository(AppointmentModel);
+      const found = await repo.findOne({ where: { id: appointment.id } });
+
+      expect(found).toBeDefined();
+      expect(found?.id).toBe(appointment.id);
+      expect(found?.businessId).toBe(business.id);
+    });
+  });
+
+  describe('cancelAppointment', () => {
+    it('should cancel an appointment', async () => {
+      const business = await businessHelper.createBusiness();
+      const customer = await customerHelper.createCustomer({ businessId: business.id });
+
+      const appointment = await bookingHelper.createAppointment({
+        businessId: business.id,
+        customerId: customer.id,
+        offeringId: 'offering-uuid',
+      });
+
+      const cancelled = await bookingHelper.cancelAppointment(appointment.id);
+
+      expect(cancelled.status).toBe('CANCELLED');
+      expect(cancelled.cancelledAt).toBeInstanceOf(Date);
+      expect(cancelled.version).toBe(1); // Incremented from 0
+    });
+
+    it('should throw error if appointment not found', async () => {
+      await expect(bookingHelper.cancelAppointment('non-existent-id')).rejects.toThrow(
+        'Appointment non-existent-id not found',
+      );
+    });
+
+    it('should persist cancellation to database', async () => {
+      const business = await businessHelper.createBusiness();
+      const customer = await customerHelper.createCustomer({ businessId: business.id });
+
+      const appointment = await bookingHelper.createAppointment({
+        businessId: business.id,
+        customerId: customer.id,
+        offeringId: 'offering-uuid',
+      });
+
+      await bookingHelper.cancelAppointment(appointment.id);
+
+      const repo = dataSource.getRepository(AppointmentModel);
+      const found = await repo.findOne({ where: { id: appointment.id } });
+
+      expect(found?.status).toBe('CANCELLED');
+      expect(found?.cancelledAt).toBeInstanceOf(Date);
+    });
+  });
+
+  describe('modifyAppointment', () => {
+    it('should modify appointment dateTime', async () => {
+      const business = await businessHelper.createBusiness();
+      const customer = await customerHelper.createCustomer({ businessId: business.id });
+
+      const appointment = await bookingHelper.createAppointment({
+        businessId: business.id,
+        customerId: customer.id,
+        offeringId: 'offering-uuid',
+      });
+
+      const newDate = new Date('2025-12-28T16:00:00Z');
+      const modified = await bookingHelper.modifyAppointment(appointment.id, newDate);
+
+      expect(modified.dateTime.toISOString()).toBe(newDate.toISOString());
+      expect(modified.version).toBe(1); // Incremented from 0
+    });
+
+    it('should throw error if appointment not found', async () => {
+      const newDate = new Date('2025-12-28T16:00:00Z');
+      await expect(bookingHelper.modifyAppointment('non-existent-id', newDate)).rejects.toThrow(
+        'Appointment non-existent-id not found',
+      );
+    });
+
+    it('should persist modification to database', async () => {
+      const business = await businessHelper.createBusiness();
+      const customer = await customerHelper.createCustomer({ businessId: business.id });
+
+      const appointment = await bookingHelper.createAppointment({
+        businessId: business.id,
+        customerId: customer.id,
+        offeringId: 'offering-uuid',
+      });
+
+      const newDate = new Date('2025-12-28T16:00:00Z');
+      await bookingHelper.modifyAppointment(appointment.id, newDate);
+
+      const repo = dataSource.getRepository(AppointmentModel);
+      const found = await repo.findOne({ where: { id: appointment.id } });
+
+      expect(found?.dateTime.toISOString()).toBe(newDate.toISOString());
+      expect(found?.version).toBe(1);
+    });
+  });
+
+  describe('createAppointmentInDb', () => {
+    it('should create an appointment directly in database', async () => {
+      const business = await businessHelper.createBusiness();
+      const customer = await customerHelper.createCustomer({ businessId: business.id });
+
+      const appointment = await createAppointmentInDb(dataSource, {
+        businessId: business.id,
+        customerId: customer.id,
+        offeringId: 'offering-uuid',
+      });
+
+      expect(appointment).toBeDefined();
+      expect(appointment.id).toBeDefined();
+      expect(appointment.businessId).toBe(business.id);
+
+      const repo = dataSource.getRepository(AppointmentModel);
+      const found = await repo.findOne({ where: { id: appointment.id } });
+      expect(found).toBeDefined();
+    });
+
+    it('should create appointment with custom status', async () => {
+      const business = await businessHelper.createBusiness();
+      const customer = await customerHelper.createCustomer({ businessId: business.id });
+
+      const appointment = await createAppointmentInDb(dataSource, {
+        businessId: business.id,
+        customerId: customer.id,
+        offeringId: 'offering-uuid',
+        status: 'CANCELLED',
+      });
+
+      expect(appointment.status).toBe('CANCELLED');
+    });
+  });
+
+  describe('cleanup', () => {
+    it('should remove all created appointments', async () => {
+      const business = await businessHelper.createBusiness();
+      const customer = await customerHelper.createCustomer({ businessId: business.id });
+
+      const appointment1 = await bookingHelper.createAppointment({
+        businessId: business.id,
+        customerId: customer.id,
+        offeringId: 'offering-1',
+      });
+      const appointment2 = await bookingHelper.createAppointment({
+        businessId: business.id,
+        customerId: customer.id,
+        offeringId: 'offering-2',
+      });
+
+      const repo = dataSource.getRepository(AppointmentModel);
+      let appointments = await repo.find({
+        where: [{ id: appointment1.id }, { id: appointment2.id }],
+      });
+      expect(appointments).toHaveLength(2);
+
+      await bookingHelper.cleanup();
+
+      appointments = await repo.find({
+        where: [{ id: appointment1.id }, { id: appointment2.id }],
+      });
+      expect(appointments).toHaveLength(0);
+    });
+
+    it('should handle cleanup when no appointments exist', async () => {
+      await expect(bookingHelper.cleanup()).resolves.not.toThrow();
+    });
+
+    it('should handle cleanup errors gracefully', async () => {
+      const business = await businessHelper.createBusiness();
+      const customer = await customerHelper.createCustomer({ businessId: business.id });
+
+      await bookingHelper.createAppointment({
+        businessId: business.id,
+        customerId: customer.id,
+        offeringId: 'offering-uuid',
+      });
+
+      // Close connection to simulate error
+      await dataSource.destroy();
+
+      await expect(bookingHelper.cleanup()).resolves.not.toThrow();
+    });
+  });
+});

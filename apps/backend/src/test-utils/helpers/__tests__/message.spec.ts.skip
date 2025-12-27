@@ -1,0 +1,291 @@
+import { DataSource } from 'typeorm';
+import { TestMessageHelper, createMessageInDb } from '../message';
+import { TestConversationHelper } from '../conversation';
+import { TestBusinessHelper } from '../business';
+import { TestCustomerHelper } from '../customer';
+import { TestDatabaseHelper } from '../database';
+import { MessageModel } from '../../../conversation/infra/persistence/models/message.model';
+
+describe('TestMessageHelper', () => {
+  let dataSource: DataSource;
+  let messageHelper: TestMessageHelper;
+  let conversationHelper: TestConversationHelper;
+  let businessHelper: TestBusinessHelper;
+  let customerHelper: TestCustomerHelper;
+  let databaseHelper: TestDatabaseHelper;
+
+  beforeAll(async () => {
+    dataSource = await TestDatabaseHelper.createTestDataSource();
+    await dataSource.initialize();
+  });
+
+  afterAll(async () => {
+    await dataSource?.destroy();
+  });
+
+  beforeEach(async () => {
+    messageHelper = new TestMessageHelper(dataSource);
+    conversationHelper = new TestConversationHelper(dataSource);
+    businessHelper = new TestBusinessHelper(dataSource);
+    customerHelper = new TestCustomerHelper(dataSource);
+    databaseHelper = new TestDatabaseHelper(dataSource);
+    await databaseHelper.cleanDatabase();
+  });
+
+  afterEach(async () => {
+    await messageHelper.cleanup();
+    await conversationHelper.cleanup();
+    await customerHelper.cleanup();
+    await businessHelper.cleanup();
+  });
+
+  describe('createMessage', () => {
+    it('should create a message with default values', async () => {
+      const business = await businessHelper.createBusiness();
+      const customer = await customerHelper.createCustomer({ businessId: business.id });
+      const conversation = await conversationHelper.createConversation({
+        businessId: business.id,
+        customerId: customer.id,
+        customerPhone: customer.whatsappPhone,
+      });
+
+      const message = await messageHelper.createMessage({
+        conversationId: conversation.id,
+        direction: 'INBOUND',
+        content: 'Hello, I want to book an appointment',
+      });
+
+      expect(message).toBeDefined();
+      expect(message.id).toBeDefined();
+      expect(message.conversationId).toBe(conversation.id);
+      expect(message.direction).toBe('INBOUND');
+      expect(message.content).toBe('Hello, I want to book an appointment');
+      expect(message.messageType).toBe('TEXT');
+      expect(message.isFromAdmin).toBe(false);
+      expect(message.sentAt).toBeInstanceOf(Date);
+    });
+
+    it('should create a message with custom values', async () => {
+      const business = await businessHelper.createBusiness();
+      const customer = await customerHelper.createCustomer({ businessId: business.id });
+      const conversation = await conversationHelper.createConversation({
+        businessId: business.id,
+        customerId: customer.id,
+        customerPhone: customer.whatsappPhone,
+      });
+
+      const customDate = new Date('2025-12-27T10:00:00Z');
+      const message = await messageHelper.createMessage({
+        conversationId: conversation.id,
+        direction: 'OUTBOUND',
+        content: 'Your appointment is confirmed',
+        messageType: 'BUTTON',
+        isFromAdmin: true,
+        sentAt: customDate,
+      });
+
+      expect(message.direction).toBe('OUTBOUND');
+      expect(message.messageType).toBe('BUTTON');
+      expect(message.isFromAdmin).toBe(true);
+      expect(message.sentAt.toISOString()).toBe(customDate.toISOString());
+    });
+
+    it('should track created messages for cleanup', async () => {
+      const business = await businessHelper.createBusiness();
+      const customer = await customerHelper.createCustomer({ businessId: business.id });
+      const conversation = await conversationHelper.createConversation({
+        businessId: business.id,
+        customerId: customer.id,
+        customerPhone: customer.whatsappPhone,
+      });
+
+      await messageHelper.createMessage({
+        conversationId: conversation.id,
+        direction: 'INBOUND',
+        content: 'Message 1',
+      });
+      await messageHelper.createMessage({
+        conversationId: conversation.id,
+        direction: 'OUTBOUND',
+        content: 'Message 2',
+      });
+
+      const repo = dataSource.getRepository(MessageModel);
+      const messages = await repo.find({ where: { conversationId: conversation.id } });
+      expect(messages).toHaveLength(2);
+
+      await messageHelper.cleanup();
+
+      const messagesAfterCleanup = await repo.find({ where: { conversationId: conversation.id } });
+      expect(messagesAfterCleanup).toHaveLength(0);
+    });
+
+    it('should persist message to database', async () => {
+      const business = await businessHelper.createBusiness();
+      const customer = await customerHelper.createCustomer({ businessId: business.id });
+      const conversation = await conversationHelper.createConversation({
+        businessId: business.id,
+        customerId: customer.id,
+        customerPhone: customer.whatsappPhone,
+      });
+
+      const message = await messageHelper.createMessage({
+        conversationId: conversation.id,
+        direction: 'INBOUND',
+        content: 'Test message',
+      });
+
+      const repo = dataSource.getRepository(MessageModel);
+      const found = await repo.findOne({ where: { id: message.id } });
+
+      expect(found).toBeDefined();
+      expect(found?.id).toBe(message.id);
+      expect(found?.conversationId).toBe(conversation.id);
+    });
+  });
+
+  describe('createMessageInDb', () => {
+    it('should create a message directly in database', async () => {
+      const business = await businessHelper.createBusiness();
+      const customer = await customerHelper.createCustomer({ businessId: business.id });
+      const conversation = await conversationHelper.createConversation({
+        businessId: business.id,
+        customerId: customer.id,
+        customerPhone: customer.whatsappPhone,
+      });
+
+      const message = await createMessageInDb(dataSource, {
+        conversationId: conversation.id,
+        direction: 'INBOUND',
+        content: 'Test message',
+      });
+
+      expect(message).toBeDefined();
+      expect(message.id).toBeDefined();
+      expect(message.conversationId).toBe(conversation.id);
+
+      const repo = dataSource.getRepository(MessageModel);
+      const found = await repo.findOne({ where: { id: message.id } });
+      expect(found).toBeDefined();
+    });
+
+    it('should create message with custom message type', async () => {
+      const business = await businessHelper.createBusiness();
+      const customer = await customerHelper.createCustomer({ businessId: business.id });
+      const conversation = await conversationHelper.createConversation({
+        businessId: business.id,
+        customerId: customer.id,
+        customerPhone: customer.whatsappPhone,
+      });
+
+      const message = await createMessageInDb(dataSource, {
+        conversationId: conversation.id,
+        direction: 'OUTBOUND',
+        content: 'Location message',
+        messageType: 'LOCATION',
+      });
+
+      expect(message.messageType).toBe('LOCATION');
+    });
+  });
+
+  describe('cleanup', () => {
+    it('should remove all created messages', async () => {
+      const business = await businessHelper.createBusiness();
+      const customer = await customerHelper.createCustomer({ businessId: business.id });
+      const conversation = await conversationHelper.createConversation({
+        businessId: business.id,
+        customerId: customer.id,
+        customerPhone: customer.whatsappPhone,
+      });
+
+      const message1 = await messageHelper.createMessage({
+        conversationId: conversation.id,
+        direction: 'INBOUND',
+        content: 'Message 1',
+      });
+      const message2 = await messageHelper.createMessage({
+        conversationId: conversation.id,
+        direction: 'OUTBOUND',
+        content: 'Message 2',
+      });
+
+      const repo = dataSource.getRepository(MessageModel);
+      let messages = await repo.find({
+        where: [{ id: message1.id }, { id: message2.id }],
+      });
+      expect(messages).toHaveLength(2);
+
+      await messageHelper.cleanup();
+
+      messages = await repo.find({
+        where: [{ id: message1.id }, { id: message2.id }],
+      });
+      expect(messages).toHaveLength(0);
+    });
+
+    it('should handle cleanup when no messages exist', async () => {
+      await expect(messageHelper.cleanup()).resolves.not.toThrow();
+    });
+
+    it('should handle cleanup errors gracefully', async () => {
+      const business = await businessHelper.createBusiness();
+      const customer = await customerHelper.createCustomer({ businessId: business.id });
+      const conversation = await conversationHelper.createConversation({
+        businessId: business.id,
+        customerId: customer.id,
+        customerPhone: customer.whatsappPhone,
+      });
+
+      await messageHelper.createMessage({
+        conversationId: conversation.id,
+        direction: 'INBOUND',
+        content: 'Test message',
+      });
+
+      // Close connection to simulate error
+      await dataSource.destroy();
+
+      await expect(messageHelper.cleanup()).resolves.not.toThrow();
+    });
+  });
+
+  describe('message conversation', () => {
+    it('should create multiple messages for same conversation', async () => {
+      const business = await businessHelper.createBusiness();
+      const customer = await customerHelper.createCustomer({ businessId: business.id });
+      const conversation = await conversationHelper.createConversation({
+        businessId: business.id,
+        customerId: customer.id,
+        customerPhone: customer.whatsappPhone,
+      });
+
+      await messageHelper.createMessage({
+        conversationId: conversation.id,
+        direction: 'INBOUND',
+        content: 'Hello',
+      });
+      await messageHelper.createMessage({
+        conversationId: conversation.id,
+        direction: 'OUTBOUND',
+        content: 'Hi! How can I help you?',
+      });
+      await messageHelper.createMessage({
+        conversationId: conversation.id,
+        direction: 'INBOUND',
+        content: 'I want to book an appointment',
+      });
+
+      const repo = dataSource.getRepository(MessageModel);
+      const messages = await repo.find({
+        where: { conversationId: conversation.id },
+        order: { sentAt: 'ASC' },
+      });
+
+      expect(messages).toHaveLength(3);
+      expect(messages[0].direction).toBe('INBOUND');
+      expect(messages[1].direction).toBe('OUTBOUND');
+      expect(messages[2].direction).toBe('INBOUND');
+    });
+  });
+});

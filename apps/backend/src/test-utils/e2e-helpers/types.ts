@@ -1,4 +1,15 @@
 /**
+ * @deprecated This file is deprecated and will be removed in a future version.
+ * Please use the new test types from '@test-utils/helpers' instead:
+ *
+ * Migration guide:
+ * - Import from: import { UserRole, TestUser, RegisterDto, etc. } from '@test-utils/helpers';
+ * - All types are now organized by Bounded Context in helpers/types.ts
+ *
+ * See: apps/backend/src/test-utils/helpers/types.ts
+ */
+
+/**
  * E2E Testing Types
  *
  * Type definitions for E2E testing infrastructure

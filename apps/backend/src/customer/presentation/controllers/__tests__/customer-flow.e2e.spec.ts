@@ -82,8 +82,8 @@ describe('Customer Flow E2E', () => {
     testBusinessId = testUser.businessId!;
 
     // Create active offering for foreign key constraint
-    const offering = await createActiveOffering(dataSource, testBusinessId);
-    testOfferingId = offering.id;
+    testOfferingId = UUID.generate().getValue();
+    await createActiveOffering(dataSource, testBusinessId, { id: testOfferingId });
   });
 
   afterAll(async () => {
@@ -109,14 +109,13 @@ describe('Customer Flow E2E', () => {
     await dataSource.query('DELETE FROM messages');
 
     // Recreate the test offering after cleanup
-    const offering = await createActiveOffering(dataSource, testBusinessId);
-    testOfferingId = offering.id;
+    await createActiveOffering(dataSource, testBusinessId, { id: testOfferingId });
   });
 
   describe('Requirement 7.1: Customer Identification', () => {
     it('should automatically identify/create customer from WhatsApp message', async () => {
       // Arrange: Create offering so conversation flow can proceed
-      await createActiveOffering(dataSource, testBusinessId, testOfferingId);
+      await createActiveOffering(dataSource, testBusinessId, { id: testOfferingId });
 
       // Act: Customer sends first message
       await commandBus.execute(
@@ -144,7 +143,7 @@ describe('Customer Flow E2E', () => {
 
     it('should reuse existing customer on subsequent messages', async () => {
       // Arrange: Create offering so conversation flow can proceed
-      await createActiveOffering(dataSource, testBusinessId, testOfferingId);
+      await createActiveOffering(dataSource, testBusinessId, { id: testOfferingId });
 
       // Arrange: Send first message to create customer
       await commandBus.execute(
@@ -181,7 +180,7 @@ describe('Customer Flow E2E', () => {
   describe('Requirement 7.2: Customer Info in Appointment Queries', () => {
     it('should include customer name and phone in appointment read model', async () => {
       // Arrange: Create offering and capacity
-      await createActiveOffering(dataSource, testBusinessId, testOfferingId);
+      await createActiveOffering(dataSource, testBusinessId, { id: testOfferingId });
       await createCapacityForTomorrow(dataSource, testOfferingId, 5, 10);
 
       // Act: Complete booking flow
@@ -277,8 +276,8 @@ describe('Customer Flow E2E', () => {
       const phone = '+1234567890';
 
       // Arrange: Create offerings for both businesses
-      await createActiveOffering(dataSource, business1Id, offering1Id);
-      await createActiveOffering(dataSource, business2Id, offering2Id);
+      await createActiveOffering(dataSource, business1Id, { id: offering1Id });
+      await createActiveOffering(dataSource, business2Id, { id: offering2Id });
 
       // Act: Create customer in business 1
       await commandBus.execute(
@@ -316,7 +315,7 @@ describe('Customer Flow E2E', () => {
       const phone = '+1234567890';
 
       // Arrange: Create offering for business 1 and create customer
-      await createActiveOffering(dataSource, business1Id, offering1Id);
+      await createActiveOffering(dataSource, business1Id, { id: offering1Id });
       await commandBus.execute(
         new ProcessIncomingMessageCommand(business1Id, '', phone, 'Hola', undefined),
       );
@@ -335,7 +334,7 @@ describe('Customer Flow E2E', () => {
   describe('Requirement 7.4: Anonymous Customer Flow', () => {
     it('should allow anonymous customer to complete booking', async () => {
       // Arrange: Create offering and capacity
-      await createActiveOffering(dataSource, testBusinessId, testOfferingId);
+      await createActiveOffering(dataSource, testBusinessId, { id: testOfferingId });
       await createCapacityForTomorrow(dataSource, testOfferingId, 5, 10);
 
       // Act: Complete booking flow as anonymous customer
@@ -393,7 +392,7 @@ describe('Customer Flow E2E', () => {
   describe('Requirement 7.5: Idempotency', () => {
     it('should handle concurrent customer identification gracefully', async () => {
       // Arrange: Create offering so conversation flow can proceed
-      await createActiveOffering(dataSource, testBusinessId, testOfferingId);
+      await createActiveOffering(dataSource, testBusinessId, { id: testOfferingId });
 
       // Act: Send multiple messages concurrently
       // Some may fail due to unique constraint, but that's expected

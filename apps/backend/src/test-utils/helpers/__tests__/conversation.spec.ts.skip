@@ -1,0 +1,231 @@
+import { DataSource } from 'typeorm';
+import { TestConversationHelper, createConversationInDb } from '../conversation';
+import { TestBusinessHelper } from '../business';
+import { TestCustomerHelper } from '../customer';
+import { TestDatabaseHelper } from '../database';
+import { ConversationModel } from '../../../conversation/infra/persistence/models/conversation.model';
+
+describe('TestConversationHelper', () => {
+  let dataSource: DataSource;
+  let conversationHelper: TestConversationHelper;
+  let businessHelper: TestBusinessHelper;
+  let customerHelper: TestCustomerHelper;
+  let databaseHelper: TestDatabaseHelper;
+
+  beforeAll(async () => {
+    dataSource = await TestDatabaseHelper.createTestDataSource();
+    await dataSource.initialize();
+  });
+
+  afterAll(async () => {
+    await dataSource?.destroy();
+  });
+
+  beforeEach(async () => {
+    conversationHelper = new TestConversationHelper(dataSource);
+    businessHelper = new TestBusinessHelper(dataSource);
+    customerHelper = new TestCustomerHelper(dataSource);
+    databaseHelper = new TestDatabaseHelper(dataSource);
+    await databaseHelper.cleanDatabase();
+  });
+
+  afterEach(async () => {
+    await conversationHelper.cleanup();
+    await customerHelper.cleanup();
+    await businessHelper.cleanup();
+  });
+
+  describe('createConversation', () => {
+    it('should create a conversation with default values', async () => {
+      const business = await businessHelper.createBusiness();
+      const customer = await customerHelper.createCustomer({ businessId: business.id });
+
+      const conversation = await conversationHelper.createConversation({
+        businessId: business.id,
+        customerId: customer.id,
+        customerPhone: customer.whatsappPhone,
+      });
+
+      expect(conversation).toBeDefined();
+      expect(conversation.id).toBeDefined();
+      expect(conversation.businessId).toBe(business.id);
+      expect(conversation.customerId).toBe(customer.id);
+      expect(conversation.customerPhone).toBe(customer.whatsappPhone);
+      expect(conversation.status).toBe('ACTIVE');
+      expect(conversation.state).toBe('GREETING');
+      expect(conversation.version).toBe(0);
+      expect(conversation.lastMessageAt).toBeInstanceOf(Date);
+    });
+
+    it('should create a conversation with custom values', async () => {
+      const business = await businessHelper.createBusiness();
+      const customer = await customerHelper.createCustomer({ businessId: business.id });
+
+      const conversation = await conversationHelper.createConversation({
+        businessId: business.id,
+        customerId: customer.id,
+        customerPhone: customer.whatsappPhone,
+        status: 'AWAITING_ADMIN',
+        state: 'AWAITING_ADMIN_RESPONSE',
+        selectedOfferingId: 'offering-uuid',
+        selectedDate: '2025-12-27',
+        selectedTime: '10:00:00',
+      });
+
+      expect(conversation.status).toBe('AWAITING_ADMIN');
+      expect(conversation.state).toBe('AWAITING_ADMIN_RESPONSE');
+      expect(conversation.selectedOfferingId).toBe('offering-uuid');
+      expect(conversation.selectedDate).toBe('2025-12-27');
+      expect(conversation.selectedTime).toBe('10:00:00');
+    });
+
+    it('should track created conversations for cleanup', async () => {
+      const business = await businessHelper.createBusiness();
+      const customer1 = await customerHelper.createCustomer({ businessId: business.id });
+      const customer2 = await customerHelper.createCustomer({ businessId: business.id });
+
+      await conversationHelper.createConversation({
+        businessId: business.id,
+        customerId: customer1.id,
+        customerPhone: customer1.whatsappPhone,
+      });
+      await conversationHelper.createConversation({
+        businessId: business.id,
+        customerId: customer2.id,
+        customerPhone: customer2.whatsappPhone,
+      });
+
+      const repo = dataSource.getRepository(ConversationModel);
+      const conversations = await repo.find({ where: { businessId: business.id } });
+      expect(conversations).toHaveLength(2);
+
+      await conversationHelper.cleanup();
+
+      const conversationsAfterCleanup = await repo.find({ where: { businessId: business.id } });
+      expect(conversationsAfterCleanup).toHaveLength(0);
+    });
+
+    it('should persist conversation to database', async () => {
+      const business = await businessHelper.createBusiness();
+      const customer = await customerHelper.createCustomer({ businessId: business.id });
+
+      const conversation = await conversationHelper.createConversation({
+        businessId: business.id,
+        customerId: customer.id,
+        customerPhone: customer.whatsappPhone,
+      });
+
+      const repo = dataSource.getRepository(ConversationModel);
+      const found = await repo.findOne({ where: { id: conversation.id } });
+
+      expect(found).toBeDefined();
+      expect(found?.id).toBe(conversation.id);
+      expect(found?.businessId).toBe(business.id);
+    });
+  });
+
+  describe('createConversationInDb', () => {
+    it('should create a conversation directly in database', async () => {
+      const business = await businessHelper.createBusiness();
+      const customer = await customerHelper.createCustomer({ businessId: business.id });
+
+      const conversation = await createConversationInDb(dataSource, {
+        businessId: business.id,
+        customerId: customer.id,
+        customerPhone: customer.whatsappPhone,
+      });
+
+      expect(conversation).toBeDefined();
+      expect(conversation.id).toBeDefined();
+      expect(conversation.businessId).toBe(business.id);
+
+      const repo = dataSource.getRepository(ConversationModel);
+      const found = await repo.findOne({ where: { id: conversation.id } });
+      expect(found).toBeDefined();
+    });
+
+    it('should create conversation with custom state', async () => {
+      const business = await businessHelper.createBusiness();
+      const customer = await customerHelper.createCustomer({ businessId: business.id });
+
+      const conversation = await createConversationInDb(dataSource, {
+        businessId: business.id,
+        customerId: customer.id,
+        customerPhone: customer.whatsappPhone,
+        state: 'SELECTING_OFFERING',
+      });
+
+      expect(conversation.state).toBe('SELECTING_OFFERING');
+    });
+  });
+
+  describe('cleanup', () => {
+    it('should remove all created conversations', async () => {
+      const business = await businessHelper.createBusiness();
+      const customer1 = await customerHelper.createCustomer({ businessId: business.id });
+      const customer2 = await customerHelper.createCustomer({ businessId: business.id });
+
+      const conversation1 = await conversationHelper.createConversation({
+        businessId: business.id,
+        customerId: customer1.id,
+        customerPhone: customer1.whatsappPhone,
+      });
+      const conversation2 = await conversationHelper.createConversation({
+        businessId: business.id,
+        customerId: customer2.id,
+        customerPhone: customer2.whatsappPhone,
+      });
+
+      const repo = dataSource.getRepository(ConversationModel);
+      let conversations = await repo.find({
+        where: [{ id: conversation1.id }, { id: conversation2.id }],
+      });
+      expect(conversations).toHaveLength(2);
+
+      await conversationHelper.cleanup();
+
+      conversations = await repo.find({
+        where: [{ id: conversation1.id }, { id: conversation2.id }],
+      });
+      expect(conversations).toHaveLength(0);
+    });
+
+    it('should handle cleanup when no conversations exist', async () => {
+      await expect(conversationHelper.cleanup()).resolves.not.toThrow();
+    });
+
+    it('should handle cleanup errors gracefully', async () => {
+      const business = await businessHelper.createBusiness();
+      const customer = await customerHelper.createCustomer({ businessId: business.id });
+
+      await conversationHelper.createConversation({
+        businessId: business.id,
+        customerId: customer.id,
+        customerPhone: customer.whatsappPhone,
+      });
+
+      // Close connection to simulate error
+      await dataSource.destroy();
+
+      await expect(conversationHelper.cleanup()).resolves.not.toThrow();
+    });
+  });
+
+  describe('conversation with appointment', () => {
+    it('should create conversation with created appointment ID', async () => {
+      const business = await businessHelper.createBusiness();
+      const customer = await customerHelper.createCustomer({ businessId: business.id });
+
+      const conversation = await conversationHelper.createConversation({
+        businessId: business.id,
+        customerId: customer.id,
+        customerPhone: customer.whatsappPhone,
+        createdAppointmentId: 'appointment-uuid',
+        state: 'APPOINTMENT_CONFIRMED',
+      });
+
+      expect(conversation.createdAppointmentId).toBe('appointment-uuid');
+      expect(conversation.state).toBe('APPOINTMENT_CONFIRMED');
+    });
+  });
+});

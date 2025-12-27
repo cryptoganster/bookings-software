@@ -14,6 +14,7 @@ import { INestApplication } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import * as request from 'supertest';
 import { CreateBusinessDto, ConfigureWhatsAppDto } from './types';
+import { createTestUserInDb } from './auth';
 
 /**
  * Test Business Helper Class
@@ -178,6 +179,36 @@ export function generateUniqueWhatsAppNumber(): string {
   // Take last 7 digits of timestamp to ensure uniqueness
   const uniquePart = timestamp.slice(-7);
   return `+1809${uniquePart}`;
+}
+
+/**
+ * Create a test business with minimal required data (simplified for tests)
+ *
+ * This is a simplified version that generates all required IDs automatically.
+ * Use this in tests where you don't care about specific IDs.
+ *
+ * @param dataSource - TypeORM DataSource
+ * @param businessData - Optional business data
+ * @returns Business ID
+ *
+ * @example
+ * ```typescript
+ * const businessId = await createTestBusiness(dataSource);
+ * ```
+ */
+export async function createTestBusiness(
+  dataSource: DataSource,
+  businessData?: Partial<CreateBusinessDto>,
+): Promise<string> {
+  const { UUID } = await import('@shared/vo/uuid');
+  const businessId = UUID.generate().getValue();
+  const ownerId = UUID.generate().getValue();
+
+  // First create the user (owner)
+  await createTestUserInDb(dataSource, ownerId);
+
+  // Then create the business
+  return createTestBusinessInDb(dataSource, businessId, ownerId, businessData);
 }
 
 /**

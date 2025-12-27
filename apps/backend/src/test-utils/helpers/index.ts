@@ -33,8 +33,49 @@ export { TestAccountHelper, createBusinessOwnerInDb } from './account';
 export {
   TestBusinessHelper,
   generateUniqueWhatsAppNumber,
+  createTestBusiness,
   createTestBusinessInDb,
 } from './business';
+
+// ============================================================================
+// Customer BC
+// ============================================================================
+export { TestCustomerHelper, createCustomerInDb, generateUniqueWhatsAppPhone } from './customer';
+
+// ============================================================================
+// Availability BC
+// ============================================================================
+export {
+  TestCapacityHelper,
+  createCapacityForTomorrow,
+  createCapacityForDate,
+} from './availability/capacity';
+
+export { TestScheduleHelper, createScheduleInDb } from './availability/schedule';
+
+export { TestBlockoutHelper, createBlockoutInDb } from './availability/blockout';
+
+// ============================================================================
+// Booking BC
+// ============================================================================
+export { TestBookingHelper, createAppointmentInDb } from './booking';
+
+// ============================================================================
+// Offering BC
+// ============================================================================
+export {
+  TestOfferingHelper,
+  createActiveOffering,
+  createMultipleOfferings,
+  createOfferingInDb,
+} from './offering';
+
+// ============================================================================
+// Conversation BC
+// ============================================================================
+export { TestConversationHelper, createConversationInDb } from './conversation';
+
+export { TestMessageHelper, createMessageInDb } from './message';
 
 // ============================================================================
 // Database Utilities

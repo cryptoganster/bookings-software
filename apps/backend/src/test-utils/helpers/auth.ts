@@ -15,6 +15,7 @@ import { INestApplication } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import * as request from 'supertest';
 import { TestUser, UserRole, RegisterDto, LoginResponse, RegisterResponse } from './types';
+import { generateUniqueWhatsAppNumber } from './business';
 
 /**
  * Test Auth Helper Class
@@ -157,6 +158,98 @@ export class TestAuthHelper {
    */
   async createAdmin(options?: { name?: string }): Promise<TestUser> {
     return this.createTestUser(UserRole.ADMIN, options);
+  }
+
+  /**
+   * Create a BUSINESS_OWNER test user with business
+   *
+   * This is a convenience method that:
+   * 1. Creates a User with BUSINESS_OWNER role
+   * 2. Waits for BusinessOwner to be created by event handler
+   * 3. Creates a Business via API
+   * 4. Returns TestUser with businessId populated
+   *
+   * @param businessData - Optional business data (name, whatsappNumber, address, timezone)
+   * @returns Test user with credentials, token, and businessId
+   */
+  async createBusinessOwner(businessData?: {
+    name?: string;
+    whatsappNumber?: string;
+    address?: {
+      street: string;
+      city: string;
+      state: string | null;
+      country: string;
+      postalCode: string | null;
+    };
+    timezone?: string;
+  }): Promise<TestUser & { businessId: string }> {
+    // 1. Create BUSINESS_OWNER user
+    const testUser = await this.createTestUser(UserRole.BUSINESS_OWNER);
+
+    // 2. Wait for OnUserRegisteredHandler to create BusinessOwner and complete onboarding
+    // Poll until BusinessOwner exists with onboarding completed (max 10 seconds)
+    const maxAttempts = 100; // 100 attempts * 100ms = 10 seconds max
+    let attempts = 0;
+    let businessOwnerReady = false;
+    let lastError: Error | null = null;
+    let businessId: string | undefined;
+
+    while (attempts < maxAttempts && !businessOwnerReady) {
+      try {
+        // Try to create business - if it succeeds, BusinessOwner is ready
+        const response = await request(this.app.getHttpServer())
+          .post('/api/businesses')
+          .set('Authorization', `Bearer ${testUser.token}`)
+          .send({
+            name: businessData?.name || 'Test Business',
+            whatsappNumber: businessData?.whatsappNumber || generateUniqueWhatsAppNumber(),
+            address: businessData?.address || {
+              street: '123 Test St',
+              city: 'Test City',
+              state: null,
+              country: 'Test Country',
+              postalCode: null,
+            },
+            timezone: businessData?.timezone || 'America/Santo_Domingo',
+          })
+          .expect(201);
+
+        businessId = response.body.id;
+        businessOwnerReady = true;
+      } catch (error) {
+        lastError = error as Error;
+        // If error is about BusinessOwner not found or onboarding not completed, wait and retry
+        attempts++;
+        if (attempts < maxAttempts) {
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        } else {
+          // Max attempts reached, throw the error with context
+          console.error(
+            `Failed to create business after ${maxAttempts} attempts (${maxAttempts * 100}ms)`,
+          );
+          console.error('Last error:', lastError);
+          throw new Error(
+            `Failed to create business after ${maxAttempts} attempts. ` +
+              `This usually means the OnUserRegisteredHandler event handler is not running or is too slow. ` +
+              `Last error: ${lastError?.message || 'Unknown error'}`,
+          );
+        }
+      }
+    }
+
+    if (!businessId) {
+      throw new Error('Failed to create business: businessId is undefined');
+    }
+
+    // 3. Login again to get updated token with businessId
+    const updatedToken = await this.login(testUser.email, testUser.password);
+
+    return {
+      ...testUser,
+      token: updatedToken,
+      businessId,
+    };
   }
 
   /**

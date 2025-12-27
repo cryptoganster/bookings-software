@@ -1,0 +1,355 @@
+/**
+ * Unit Tests for Availability BC - Capacity Test Helpers
+ *
+ * Tests the TestCapacityHelper class and standalone functions for Capacity.
+ */
+
+import { INestApplication } from '@nestjs/common';
+import { DataSource, Repository } from 'typeorm';
+import { TestCapacityHelper, createCapacityForTomorrow, createCapacityForDate } from '../availability/capacity';
+import { CapacityModel } from '@availability/infra/persistence/models/capacity';
+
+// Mock @shared/vo/uuid
+jest.mock('@shared/vo/uuid', () => ({
+  UUID: {
+    generate: jest.fn(() => ({
+      getValue: () => 'test-capacity-uuid-123',
+    })),
+  },
+}));
+
+describe('TestCapacityHelper', () => {
+  let app: INestApplication;
+  let dataSource: DataSource;
+  let repository: Repository<CapacityModel>;
+  let helper: TestCapacityHelper;
+
+  beforeEach(() => {
+    // Mock Repository
+    repository = {
+      save: jest.fn().mockImplementation((capacity) => Promise.resolve(capacity)),
+    } as unknown as Repository<CapacityModel>;
+
+    // Mock DataSource
+    dataSource = {
+      getRepository: jest.fn(() => repository),
+      query: jest.fn(),
+    } as unknown as DataSource;
+
+    // Mock INestApplication
+    app = {
+      get: jest.fn((token) => {
+        if (token === DataSource) {
+          return dataSource;
+        }
+        return null;
+      }),
+    } as unknown as INestApplication;
+
+    helper = new TestCapacityHelper(app);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('createCapacityForTomorrow', () => {
+    it('should create capacity for tomorrow with default values', async () => {
+      // Act
+      const capacity = await helper.createCapacityForTomorrow('offering-id-123');
+
+      // Assert
+      expect(capacity).toBeDefined();
+      expect(capacity.id).toBe('test-capacity-uuid-123');
+      expect(capacity.offeringId).toBe('offering-id-123');
+      expect(capacity.availableSlots).toBe(5);
+      expect(capacity.totalSlots).toBe(10);
+      expect(capacity.version).toBe(0);
+
+      // Verify date is tomorrow at midnight UTC
+      const tomorrow = new Date();
+      tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+      tomorrow.setUTCHours(0, 0, 0, 0);
+      expect(capacity.date.getTime()).toBe(tomorrow.getTime());
+
+      expect(repository.save).toHaveBeenCalledWith(capacity);
+    });
+
+    it('should create capacity with custom slot values', async () => {
+      // Act
+      const capacity = await helper.createCapacityForTomorrow('offering-id-123', 10, 20);
+
+      // Assert
+      expect(capacity.availableSlots).toBe(10);
+      expect(capacity.totalSlots).toBe(20);
+    });
+
+    it('should track created capacity for cleanup', async () => {
+      // Act
+      await helper.createCapacityForTomorrow('offering-id-123');
+
+      // Assert - verify capacity ID was added to internal array
+      const createdCapacities = (helper as any).createdCapacities;
+      expect(createdCapacities).toContain('test-capacity-uuid-123');
+    });
+  });
+
+  describe('createCapacityForDate', () => {
+    it('should create capacity for specific date', async () => {
+      // Arrange
+      const targetDate = new Date('2025-12-25T15:30:00Z');
+
+      // Act
+      const capacity = await helper.createCapacityForDate('offering-id-123', targetDate);
+
+      // Assert
+      expect(capacity).toBeDefined();
+      expect(capacity.id).toBe('test-capacity-uuid-123');
+      expect(capacity.offeringId).toBe('offering-id-123');
+      expect(capacity.availableSlots).toBe(5);
+      expect(capacity.totalSlots).toBe(10);
+      expect(capacity.version).toBe(0);
+
+      // Verify date is normalized to midnight UTC
+      const expectedDate = new Date('2025-12-25T00:00:00Z');
+      expect(capacity.date.getTime()).toBe(expectedDate.getTime());
+
+      expect(repository.save).toHaveBeenCalledWith(capacity);
+    });
+
+    it('should create capacity with custom slot values', async () => {
+      // Arrange
+      const targetDate = new Date('2025-12-25T15:30:00Z');
+
+      // Act
+      const capacity = await helper.createCapacityForDate('offering-id-123', targetDate, 15, 30);
+
+      // Assert
+      expect(capacity.availableSlots).toBe(15);
+      expect(capacity.totalSlots).toBe(30);
+    });
+
+    it('should normalize date to midnight UTC', async () => {
+      // Arrange - date with time component
+      const targetDate = new Date('2025-12-25T23:59:59.999Z');
+
+      // Act
+      const capacity = await helper.createCapacityForDate('offering-id-123', targetDate);
+
+      // Assert - should be normalized to midnight
+      const expectedDate = new Date('2025-12-25T00:00:00Z');
+      expect(capacity.date.getTime()).toBe(expectedDate.getTime());
+    });
+
+    it('should track created capacity for cleanup', async () => {
+      // Arrange
+      const targetDate = new Date('2025-12-25T15:30:00Z');
+
+      // Act
+      await helper.createCapacityForDate('offering-id-123', targetDate);
+
+      // Assert - verify capacity ID was added to internal array
+      const createdCapacities = (helper as any).createdCapacities;
+      expect(createdCapacities).toContain('test-capacity-uuid-123');
+    });
+  });
+
+  describe('cleanupCapacities', () => {
+    it('should cleanup all created capacities', async () => {
+      // Arrange
+      (dataSource.query as jest.Mock).mockResolvedValue(undefined);
+
+      // Manually add capacities to the internal array
+      (helper as any).createdCapacities = ['capacity-id-1', 'capacity-id-2'];
+
+      // Act
+      await helper.cleanupCapacities();
+
+      // Assert
+      expect(dataSource.query).toHaveBeenCalledWith('DELETE FROM capacities WHERE id = $1', [
+        'capacity-id-1',
+      ]);
+      expect(dataSource.query).toHaveBeenCalledWith('DELETE FROM capacities WHERE id = $1', [
+        'capacity-id-2',
+      ]);
+      expect(dataSource.query).toHaveBeenCalledTimes(2);
+    });
+
+    it('should cleanup specific capacity IDs', async () => {
+      // Arrange
+      (dataSource.query as jest.Mock).mockResolvedValue(undefined);
+      (helper as any).createdCapacities = ['capacity-id-1', 'capacity-id-2', 'capacity-id-3'];
+
+      // Act
+      await helper.cleanupCapacities(['capacity-id-1', 'capacity-id-3']);
+
+      // Assert
+      expect(dataSource.query).toHaveBeenCalledWith('DELETE FROM capacities WHERE id = $1', [
+        'capacity-id-1',
+      ]);
+      expect(dataSource.query).toHaveBeenCalledWith('DELETE FROM capacities WHERE id = $1', [
+        'capacity-id-3',
+      ]);
+      expect(dataSource.query).toHaveBeenCalledTimes(2);
+
+      // Internal array should NOT be cleared when specific IDs are provided
+      expect((helper as any).createdCapacities).toHaveLength(3);
+    });
+
+    it('should handle cleanup errors gracefully', async () => {
+      // Arrange
+      (helper as any).createdCapacities = ['capacity-id-1'];
+      (dataSource.query as jest.Mock).mockRejectedValue(new Error('Database error'));
+
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+
+      // Act
+      await helper.cleanupCapacities();
+
+      // Assert
+      expect(consoleErrorSpy).toHaveBeenCalled();
+      expect(consoleWarnSpy).toHaveBeenCalledWith('Cleanup completed with 1 errors');
+
+      consoleErrorSpy.mockRestore();
+      consoleWarnSpy.mockRestore();
+    });
+
+    it('should clear capacities array after cleanup', async () => {
+      // Arrange
+      (helper as any).createdCapacities = ['capacity-id-1'];
+      (dataSource.query as jest.Mock).mockResolvedValue(undefined);
+
+      // Act
+      await helper.cleanupCapacities();
+      await helper.cleanupCapacities(); // Second cleanup should do nothing
+
+      // Assert - only 1 query from first cleanup
+      expect(dataSource.query).toHaveBeenCalledTimes(1);
+    });
+  });
+});
+
+describe('Standalone Functions', () => {
+  let dataSource: DataSource;
+  let repository: Repository<CapacityModel>;
+
+  beforeEach(() => {
+    // Mock Repository
+    repository = {
+      save: jest.fn().mockImplementation((capacity) => Promise.resolve(capacity)),
+    } as unknown as Repository<CapacityModel>;
+
+    // Mock DataSource
+    dataSource = {
+      getRepository: jest.fn(() => repository),
+    } as unknown as DataSource;
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('createCapacityForTomorrow', () => {
+    it('should create capacity for tomorrow with default values', async () => {
+      // Act
+      const capacity = await createCapacityForTomorrow(dataSource, 'offering-id-123');
+
+      // Assert
+      expect(capacity).toBeDefined();
+      expect(capacity.id).toBe('test-capacity-uuid-123');
+      expect(capacity.offeringId).toBe('offering-id-123');
+      expect(capacity.availableSlots).toBe(5);
+      expect(capacity.totalSlots).toBe(10);
+      expect(capacity.version).toBe(0);
+
+      // Verify date is tomorrow at midnight UTC
+      const tomorrow = new Date();
+      tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+      tomorrow.setUTCHours(0, 0, 0, 0);
+      expect(capacity.date.getTime()).toBe(tomorrow.getTime());
+
+      expect(repository.save).toHaveBeenCalledWith(capacity);
+    });
+
+    it('should create capacity with custom slot values', async () => {
+      // Act
+      const capacity = await createCapacityForTomorrow(dataSource, 'offering-id-123', 10, 20);
+
+      // Assert
+      expect(capacity.availableSlots).toBe(10);
+      expect(capacity.totalSlots).toBe(20);
+    });
+
+    it('should handle repository errors', async () => {
+      // Arrange
+      const dbError = new Error('Database connection failed');
+      (repository.save as jest.Mock).mockRejectedValue(dbError);
+
+      // Act & Assert
+      await expect(
+        createCapacityForTomorrow(dataSource, 'offering-id-123'),
+      ).rejects.toThrow('Database connection failed');
+    });
+  });
+
+  describe('createCapacityForDate', () => {
+    it('should create capacity for specific date', async () => {
+      // Arrange
+      const targetDate = new Date('2025-12-25T15:30:00Z');
+
+      // Act
+      const capacity = await createCapacityForDate(dataSource, 'offering-id-123', targetDate);
+
+      // Assert
+      expect(capacity).toBeDefined();
+      expect(capacity.id).toBe('test-capacity-uuid-123');
+      expect(capacity.offeringId).toBe('offering-id-123');
+      expect(capacity.availableSlots).toBe(5);
+      expect(capacity.totalSlots).toBe(10);
+      expect(capacity.version).toBe(0);
+
+      // Verify date is normalized to midnight UTC
+      const expectedDate = new Date('2025-12-25T00:00:00Z');
+      expect(capacity.date.getTime()).toBe(expectedDate.getTime());
+
+      expect(repository.save).toHaveBeenCalledWith(capacity);
+    });
+
+    it('should create capacity with custom slot values', async () => {
+      // Arrange
+      const targetDate = new Date('2025-12-25T15:30:00Z');
+
+      // Act
+      const capacity = await createCapacityForDate(dataSource, 'offering-id-123', targetDate, 15, 30);
+
+      // Assert
+      expect(capacity.availableSlots).toBe(15);
+      expect(capacity.totalSlots).toBe(30);
+    });
+
+    it('should normalize date to midnight UTC', async () => {
+      // Arrange - date with time component
+      const targetDate = new Date('2025-12-25T23:59:59.999Z');
+
+      // Act
+      const capacity = await createCapacityForDate(dataSource, 'offering-id-123', targetDate);
+
+      // Assert - should be normalized to midnight
+      const expectedDate = new Date('2025-12-25T00:00:00Z');
+      expect(capacity.date.getTime()).toBe(expectedDate.getTime());
+    });
+
+    it('should handle repository errors', async () => {
+      // Arrange
+      const targetDate = new Date('2025-12-25T15:30:00Z');
+      const dbError = new Error('Database connection failed');
+      (repository.save as jest.Mock).mockRejectedValue(dbError);
+
+      // Act & Assert
+      await expect(
+        createCapacityForDate(dataSource, 'offering-id-123', targetDate),
+      ).rejects.toThrow('Database connection failed');
+    });
+  });
+});

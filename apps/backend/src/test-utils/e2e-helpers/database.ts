@@ -1,4 +1,17 @@
 /**
+ * @deprecated This file is deprecated and will be removed in a future version.
+ * Please use the new test helpers from '@test-utils/helpers' instead:
+ *
+ * Migration guide:
+ * - Import from: import { TestDatabaseHelper } from '@test-utils/helpers';
+ * - Use: const helper = new TestDatabaseHelper(dataSource);
+ * - Methods: helper.setup(), helper.cleanup(), helper.createTestUser()
+ * - Static methods: TestDatabaseHelper.cleanDatabase(), TestDatabaseHelper.setupTestDatabase()
+ *
+ * See: apps/backend/src/test-utils/helpers/database.ts
+ */
+
+/**
  * E2E Database Helper
  *
  * Consolidated database utilities for E2E and integration tests.
@@ -46,6 +59,8 @@ const ALL_ENTITIES = [
  *
  * Provides database utilities for E2E and integration tests.
  * Can be used as instance (with DataSource) or static methods.
+ *
+ * @deprecated Use TestDatabaseHelper from '@test-utils/helpers' instead
  */
 export class E2EDatabaseHelper {
   constructor(private readonly dataSource?: DataSource) {}

@@ -1,6 +1,16 @@
 /**
  * E2E Authentication Helper
  *
+ * @deprecated This file is deprecated and will be removed in a future version.
+ * Please use the new helpers from `@test-utils/helpers/auth` instead.
+ *
+ * Migration guide:
+ * - `E2EAuthHelper` → `TestAuthHelper` from `@test-utils/helpers/auth`
+ * - `createTestUser()` → `createTestUserInDb()` from `@test-utils/helpers/auth`
+ * - All methods are available in the new helper with the same API
+ *
+ * See: apps/backend/src/test-utils/helpers/auth.ts
+ *
  * Provides authentication utilities for E2E tests including:
  * - User login and registration
  * - Test user creation with specific roles
@@ -22,6 +32,21 @@ import {
   CreateCustomerDto,
 } from '@test-utils/e2e-helpers/types';
 
+/**
+ * @deprecated Use `TestAuthHelper` from `@test-utils/helpers/auth` instead.
+ * This class will be removed in a future version.
+ *
+ * Migration:
+ * ```typescript
+ * // Old
+ * import { E2EAuthHelper } from '@test-utils/e2e-helpers/auth';
+ * const authHelper = new E2EAuthHelper(app);
+ *
+ * // New
+ * import { TestAuthHelper } from '@test-utils/helpers/auth';
+ * const authHelper = new TestAuthHelper(app);
+ * ```
+ */
 export class E2EAuthHelper {
   private testUsers: TestUser[] = [];
 
