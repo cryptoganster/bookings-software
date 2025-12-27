@@ -12,7 +12,7 @@ DB_HOST=localhost
 DB_PORT=5432
 DB_USERNAME=postgres
 DB_PASSWORD=tu_password_aqui
-DB_DATABASE=bookings_dev
+DB_DATABASE=postgres_dev
 
 # Application
 NODE_ENV=development
@@ -30,7 +30,7 @@ JWT_EXPIRATION=1d
 psql -U postgres
 
 # Crear base de datos
-CREATE DATABASE bookings_dev;
+CREATE DATABASE postgres_dev;
 
 # Salir
 \q
@@ -94,7 +94,7 @@ npm run seed
 ### Conectar a la Base de Datos
 
 ```bash
-psql -U postgres -d bookings_dev
+psql -U postgres -d postgres_dev
 ```
 
 ### Verificar Tablas
@@ -186,7 +186,7 @@ cat .env | grep DB_
 **Solución:** Crear la base de datos
 
 ```bash
-psql -U postgres -c "CREATE DATABASE bookings_dev;"
+psql -U postgres -c "CREATE DATABASE postgres_dev;"
 ```
 
 ### Error: "Cannot find module"
@@ -265,7 +265,7 @@ npm run seed
 ## ✅ Checklist de Setup
 
 - [ ] PostgreSQL instalado y corriendo
-- [ ] Base de datos `bookings_dev` creada
+- [ ] Base de datos `postgres_dev` creada
 - [ ] Archivo `.env` configurado
 - [ ] Dependencias instaladas (`npm install`)
 - [ ] Proyecto compilado (`npm run build`)

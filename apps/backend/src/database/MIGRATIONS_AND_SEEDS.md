@@ -164,7 +164,7 @@ DB_HOST=localhost
 DB_PORT=5432
 DB_USERNAME=postgres
 DB_PASSWORD=tu_password
-DB_DATABASE=bookings_dev
+DB_DATABASE=postgres_dev
 ```
 
 ### Archivo de Configuración
