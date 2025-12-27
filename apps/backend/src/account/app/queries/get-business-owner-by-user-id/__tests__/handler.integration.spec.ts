@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { createTestUser } from '@test-utils/e2e-helpers';
+import { createTestUser } from '@test-utils/helpers';
 import { DataSource, Repository } from 'typeorm';
 import { GetBusinessOwnerByUserIdHandler } from '../handler';
 import { GetBusinessOwnerByUserIdQuery } from '../query';

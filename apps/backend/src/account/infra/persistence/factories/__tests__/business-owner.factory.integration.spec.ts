@@ -7,7 +7,7 @@ import {
   createIntegrationTestDataSource,
   cleanDatabase,
 } from '@test-utils/integration-test-helper';
-import { createTestUser } from '@test-utils/e2e-helpers';
+import { createTestUser } from '@test-utils/helpers';
 
 describe('BusinessOwnerFactory (Integration)', () => {
   let module: TestingModule;

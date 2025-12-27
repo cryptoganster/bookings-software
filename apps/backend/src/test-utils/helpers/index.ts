@@ -22,6 +22,10 @@
 // ============================================================================
 export { TestAuthHelper, generateTestEmail, createTestUserInDb } from './auth';
 
+// Backward compatibility exports (deprecated)
+export { TestAuthHelper as E2EAuthHelper } from './auth';
+export { createTestUserInDb as createTestUser } from './auth';
+
 // ============================================================================
 // Account BC
 // ============================================================================
@@ -89,6 +93,9 @@ export {
   getTestTypeOrmConfig,
   generateTestId,
 } from './database';
+
+// Backward compatibility exports (deprecated)
+export { TestDatabaseHelper as E2EDatabaseHelper } from './database';
 
 // ============================================================================
 // Types

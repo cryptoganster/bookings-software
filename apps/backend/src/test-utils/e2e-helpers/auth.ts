@@ -30,7 +30,7 @@ import {
   RegisterResponse,
   CreateBusinessDto,
   CreateCustomerDto,
-} from '@test-utils/e2e-helpers/types';
+} from '@test-utils/helpers/types';
 
 /**
  * @deprecated Use `TestAuthHelper` from `@test-utils/helpers/auth` instead.

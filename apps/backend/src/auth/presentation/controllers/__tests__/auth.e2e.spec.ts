@@ -3,7 +3,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { DataSource } from 'typeorm';
 import { AppModule } from '../../../../app.module';
-import { E2EDatabaseHelper } from '@test-utils/e2e-helpers';
+import { E2EDatabaseHelper } from '@test-utils/helpers';
 
 describe('Auth Controller E2E', () => {
   let app: INestApplication;

@@ -7,7 +7,7 @@ import { GetBusinessByWhatsAppPhoneQuery } from '../query';
 import { BusinessModel } from '@business/infra/persistence/models/business.model';
 import { BusinessReadRepository } from '@business/infra/persistence/repositories/business-read.repository';
 import { UUID } from '@shared/vo/uuid';
-import { createTestUser, cleanDatabase } from '@test-utils/e2e-helpers';
+import { createTestUser, cleanDatabase } from '@test-utils/helpers';
 
 /**
  * Integration tests for GetBusinessByWhatsAppPhoneHandler

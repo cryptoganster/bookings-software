@@ -14,7 +14,7 @@ import {
   cleanDatabase,
   createTestBusiness,
 } from '@test-utils/integration-test-helper';
-import { createActiveOffering } from '@test-utils/e2e-helpers/offering';
+import { createActiveOffering } from '@test-utils/helpers/offering';
 
 describe('Capacity - Concurrency Tests', () => {
   let module: TestingModule;

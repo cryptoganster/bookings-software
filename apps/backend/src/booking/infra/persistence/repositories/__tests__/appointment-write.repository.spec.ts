@@ -9,7 +9,7 @@ import { DateTime } from '@booking/domain/vo/date-time';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { AppointmentFactory } from '../../factories/appointment-factory';
-import { E2EDatabaseHelper } from '@test-utils/e2e-helpers';
+import { E2EDatabaseHelper } from '@test-utils/helpers';
 
 describe('AppointmentWriteRepository Integration Tests', () => {
   let module: TestingModule;

@@ -14,7 +14,7 @@ import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { UUID } from '@shared/vo/uuid';
 import { WhatsAppPhoneAlreadyExistsException } from '@shared/kernel/exceptions/whatsapp-phone-already-exists';
 import { MaxBusinessesExceededException } from '@business/domain/exceptions/max-businesses-exceeded';
-import { createTestUser, cleanDatabase } from '@test-utils/e2e-helpers';
+import { createTestUser, cleanDatabase } from '@test-utils/helpers';
 
 /**
  * Integration tests for CreateBusinessHandler

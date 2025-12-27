@@ -14,7 +14,7 @@ import {
   createCapacityForTomorrow,
   createActiveOffering,
   E2EAuthHelper,
-} from '@test-utils/e2e-helpers';
+} from '@test-utils/helpers';
 
 describe('Customer Flow E2E', () => {
   let app: INestApplication;

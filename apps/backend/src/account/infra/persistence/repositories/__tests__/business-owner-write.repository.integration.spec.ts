@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { createTestUser } from '@test-utils/e2e-helpers';
+import { createTestUser } from '@test-utils/helpers';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { BusinessOwnerWriteRepository } from '../business-owner-write.repository';

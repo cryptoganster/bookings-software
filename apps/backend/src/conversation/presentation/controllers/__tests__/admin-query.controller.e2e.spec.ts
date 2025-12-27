@@ -21,7 +21,7 @@ import { ConversationModel } from '@conversation/infra/persistence/models/conver
 import { MessageModel } from '@conversation/infra/persistence/models/message.model';
 import { CustomerModel } from '@customer/infra/persistence/models/customer.model';
 import { UUID } from '@shared/vo/uuid';
-import { E2EAuthHelper, TestUser } from '@test-utils/e2e-helpers';
+import { E2EAuthHelper, TestUser } from '@test-utils/helpers';
 
 describe('Admin Query Controller E2E', () => {
   let app: INestApplication;

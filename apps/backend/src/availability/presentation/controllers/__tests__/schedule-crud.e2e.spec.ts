@@ -3,7 +3,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '@/app.module';
 import { DataSource } from 'typeorm';
-import { E2EAuthHelper } from '@test-utils/e2e-helpers';
+import { E2EAuthHelper } from '@test-utils/helpers';
 import { generateTestId } from '@test-utils/integration-test-helper';
 
 describe('Schedule CRUD (e2e)', () => {

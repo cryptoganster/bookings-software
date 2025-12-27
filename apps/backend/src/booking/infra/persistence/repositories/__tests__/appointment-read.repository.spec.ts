@@ -5,7 +5,7 @@ import { AppointmentReadRepository } from '../appointment-read';
 import { AppointmentModel } from '../../models/appointment';
 import { CustomerModel } from '@customer/infra/persistence/models/customer.model';
 import { UUID } from '@shared/vo/uuid';
-import { E2EDatabaseHelper } from '@test-utils/e2e-helpers';
+import { E2EDatabaseHelper } from '@test-utils/helpers';
 
 describe('AppointmentReadRepository Integration Tests', () => {
   let module: TestingModule;

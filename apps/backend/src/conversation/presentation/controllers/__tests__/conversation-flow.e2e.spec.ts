@@ -7,7 +7,7 @@ import { ProcessIncomingMessageCommand } from '@conversation/app/commands/proces
 import { IWhatsAppClient, Button } from '@conversation/domain/interfaces/external/whatsapp-client';
 import { UUID } from '@shared/vo/uuid';
 import { AppointmentModel } from '@booking/infra/persistence/models/appointment';
-import { createCapacityForTomorrow, createActiveOffering } from '@test-utils/e2e-helpers';
+import { createCapacityForTomorrow, createActiveOffering } from '@test-utils/helpers';
 import { CapacityModel } from '@availability/infra/persistence/models/capacity';
 import { ConversationModel } from '@conversation/infra/persistence/models/conversation.model';
 

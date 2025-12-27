@@ -13,7 +13,7 @@ import { DataSource } from 'typeorm';
 import { BusinessReadRepository } from '../business-read.repository';
 import { BusinessModel } from '../../models/business.model';
 import { UUID } from '@shared/vo/uuid';
-import { E2EDatabaseHelper, createTestUser } from '@test-utils/e2e-helpers';
+import { E2EDatabaseHelper, createTestUser } from '@test-utils/helpers';
 
 describe('BusinessReadRepository Integration Tests', () => {
   let module: TestingModule;

@@ -5,7 +5,7 @@ import * as request from 'supertest';
 import { AppModule } from '../../../../app.module';
 import { CustomerModel } from '@customer/infra/persistence/models/customer.model';
 import { UUID } from '@shared/vo/uuid';
-import { E2EAuthHelper, TestUser } from '@test-utils/e2e-helpers';
+import { E2EAuthHelper, TestUser } from '@test-utils/helpers';
 
 /**
  * E2E Tests for Customer Controllers
