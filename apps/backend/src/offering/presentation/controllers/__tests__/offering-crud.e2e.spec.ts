@@ -47,13 +47,13 @@ describe('Offering CRUD Controller E2E', () => {
     authHelper = new E2EAuthHelper(app);
 
     // Create test user with BUSINESS_OWNER role and business via API
-    const testUser = await authHelper.createTestUser(UserRole.BUSINESS_OWNER, {
-      name: 'Business Owner',
+    const testUser = await authHelper.createBusinessOwner({
+      name: 'Test Business',
     });
 
     authToken = testUser.token;
     userId = testUser.id;
-    businessId = testUser.businessId!;
+    businessId = testUser.businessId;
 
     if (!businessId) {
       throw new Error('Failed to create business for test user');

@@ -198,7 +198,7 @@ describe('Integration Testing Examples', () => {
       // Attempt to create business without user should fail
       await expect(
         dataSource.query(
-          `INSERT INTO businesses (id, owner_id, name, whatsapp_number, address_street, address_city, address_country, timezone, is_active)
+          `INSERT INTO businesses (id, owner_id, name, whatsapp_phone, address_street, address_city, address_country, timezone, is_active)
            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true)`,
           [
             'business-123',

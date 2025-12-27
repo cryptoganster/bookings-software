@@ -4,6 +4,7 @@ import { DataSource } from 'typeorm';
 import { OfferingReadRepository } from '../offering-read';
 import { OfferingModel } from '../../models/offering';
 import { UUID } from '@shared/vo/uuid';
+import { createTestBusiness } from '@test-utils/helpers/business';
 
 describe('OfferingReadRepository Integration Tests', () => {
   let module: TestingModule;
@@ -39,14 +40,18 @@ describe('OfferingReadRepository Integration Tests', () => {
   });
 
   afterEach(async () => {
-    await dataSource.getRepository(OfferingModel).clear();
+    // Clean up offerings first, then businesses (to respect FK constraints)
+    await dataSource.query('TRUNCATE TABLE offerings CASCADE;');
+    await dataSource.query('TRUNCATE TABLE businesses CASCADE;');
+    await dataSource.query('TRUNCATE TABLE business_owners CASCADE;');
+    await dataSource.query('TRUNCATE TABLE users CASCADE;');
   });
 
   describe('findById', () => {
     it('should return read model when offering exists', async () => {
       // Arrange
       const id = UUID.generate().getValue();
-      const businessId = UUID.generate().getValue();
+      const businessId = await createTestBusiness(dataSource);
 
       await dataSource.getRepository(OfferingModel).insert({
         id,
@@ -90,7 +95,7 @@ describe('OfferingReadRepository Integration Tests', () => {
   describe('findActiveByBusinessId', () => {
     it('should return only active offerings', async () => {
       // Arrange
-      const businessId = UUID.generate().getValue();
+      const businessId = await createTestBusiness(dataSource);
 
       await dataSource.getRepository(OfferingModel).insert([
         {
@@ -142,7 +147,7 @@ describe('OfferingReadRepository Integration Tests', () => {
 
     it('should return empty array when no active offerings exist', async () => {
       // Arrange
-      const businessId = UUID.generate().getValue();
+      const businessId = await createTestBusiness(dataSource);
 
       await dataSource.getRepository(OfferingModel).insert({
         id: UUID.generate().getValue(),
@@ -166,7 +171,7 @@ describe('OfferingReadRepository Integration Tests', () => {
 
     it('should return offerings sorted alphabetically by name', async () => {
       // Arrange
-      const businessId = UUID.generate().getValue();
+      const businessId = await createTestBusiness(dataSource);
 
       await dataSource.getRepository(OfferingModel).insert([
         {
@@ -221,7 +226,7 @@ describe('OfferingReadRepository Integration Tests', () => {
   describe('findByBusinessId', () => {
     it('should return all offerings including inactive ones', async () => {
       // Arrange
-      const businessId = UUID.generate().getValue();
+      const businessId = await createTestBusiness(dataSource);
 
       await dataSource.getRepository(OfferingModel).insert([
         {
@@ -261,7 +266,7 @@ describe('OfferingReadRepository Integration Tests', () => {
 
     it('should return offerings sorted alphabetically by name', async () => {
       // Arrange
-      const businessId = UUID.generate().getValue();
+      const businessId = await createTestBusiness(dataSource);
 
       await dataSource.getRepository(OfferingModel).insert([
         {
@@ -301,8 +306,8 @@ describe('OfferingReadRepository Integration Tests', () => {
 
     it('should not return offerings from other businesses', async () => {
       // Arrange
-      const businessId1 = UUID.generate().getValue();
-      const businessId2 = UUID.generate().getValue();
+      const businessId1 = await createTestBusiness(dataSource);
+      const businessId2 = await createTestBusiness(dataSource);
 
       await dataSource.getRepository(OfferingModel).insert([
         {
