@@ -106,6 +106,7 @@ describe('Customer Flow E2E', () => {
     await dataSource.query('DELETE FROM appointments');
     await dataSource.query('DELETE FROM customers');
     await dataSource.query('DELETE FROM capacities');
+    await dataSource.query('DELETE FROM schedules');
     await dataSource.query('DELETE FROM offerings');
 
     // Clear conversations from database
@@ -183,9 +184,34 @@ describe('Customer Flow E2E', () => {
 
   describe('Requirement 7.2: Customer Info in Appointment Queries', () => {
     it('should include customer name and phone in appointment read model', async () => {
-      // Arrange: Create offering and capacity
+      // Arrange: Create offering
       await createActiveOffering(dataSource, testBusinessId, { id: testOfferingId });
-      await createCapacityForTomorrow(dataSource, testOfferingId, 5, 10);
+
+      // Create schedules for Monday-Friday (9-17) so conversation flow can find available slots
+      const { createScheduleInDb } = await import('@test-utils/helpers');
+      for (let day = 1; day <= 5; day++) {
+        await createScheduleInDb(dataSource, {
+          businessId: testBusinessId,
+          dayOfWeek: day,
+          startTime: '09:00:00',
+          endTime: '17:00:00',
+        });
+      }
+
+      // Find next Monday (day 1) to ensure we have a schedule
+      const today = new Date();
+      today.setUTCHours(0, 0, 0, 0);
+      const daysUntilMonday = (1 - today.getUTCDay() + 7) % 7 || 7;
+      const nextMonday = new Date(today);
+      nextMonday.setUTCDate(today.getUTCDate() + daysUntilMonday);
+
+      // Create capacity for next Monday (use date string to avoid timezone issues)
+      const mondayStr = nextMonday.toISOString().split('T')[0];
+      const { v4: uuidv4 } = require('uuid');
+      await dataSource.query(
+        'INSERT INTO capacities (id, offering_id, date, total_slots, available_slots, version, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())',
+        [uuidv4(), testOfferingId, mondayStr, 10, 10, 0],
+      );
 
       // Act: Complete booking flow
       await commandBus.execute(
@@ -337,9 +363,34 @@ describe('Customer Flow E2E', () => {
 
   describe('Requirement 7.4: Anonymous Customer Flow', () => {
     it('should allow anonymous customer to complete booking', async () => {
-      // Arrange: Create offering and capacity
+      // Arrange: Create offering
       await createActiveOffering(dataSource, testBusinessId, { id: testOfferingId });
-      await createCapacityForTomorrow(dataSource, testOfferingId, 5, 10);
+
+      // Create schedules for Monday-Friday (9-17) so conversation flow can find available slots
+      const { createScheduleInDb } = await import('@test-utils/helpers');
+      for (let day = 1; day <= 5; day++) {
+        await createScheduleInDb(dataSource, {
+          businessId: testBusinessId,
+          dayOfWeek: day,
+          startTime: '09:00:00',
+          endTime: '17:00:00',
+        });
+      }
+
+      // Find next Monday (day 1) to ensure we have a schedule
+      const today = new Date();
+      today.setUTCHours(0, 0, 0, 0);
+      const daysUntilMonday = (1 - today.getUTCDay() + 7) % 7 || 7;
+      const nextMonday = new Date(today);
+      nextMonday.setUTCDate(today.getUTCDate() + daysUntilMonday);
+
+      // Create capacity for next Monday (use date string to avoid timezone issues)
+      const mondayStr = nextMonday.toISOString().split('T')[0];
+      const { v4: uuidv4 } = require('uuid');
+      await dataSource.query(
+        'INSERT INTO capacities (id, offering_id, date, total_slots, available_slots, version, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())',
+        [uuidv4(), testOfferingId, mondayStr, 10, 10, 0],
+      );
 
       // Act: Complete booking flow as anonymous customer
       await commandBus.execute(
