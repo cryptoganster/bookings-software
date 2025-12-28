@@ -4,18 +4,18 @@ import * as fs from 'fs';
 
 /**
  * Migration Helper for Tests
- * 
+ *
  * Provides a function to run migrations in test process.
  * Must be called from beforeAll() hooks in test files that need migrations.
- * 
+ *
  * IMPORTANT: Jest's setupFiles doesn't wait for async operations,
  * so we can't run migrations there. Instead, test files must call
  * ensureMigrationsRun() in their beforeAll() hooks.
- * 
+ *
  * Usage:
  * ```typescript
  * import { ensureMigrationsRun } from '../../../test/test-setup';
- * 
+ *
  * beforeAll(async () => {
  *   await ensureMigrationsRun();
  *   // ... rest of setup
@@ -27,13 +27,13 @@ const MIGRATIONS_FLAG_FILE = join(__dirname, '.migrations-complete');
 
 /**
  * Run migrations once per test session
- * 
+ *
  * This function:
  * 1. Checks if migrations have already been run (via flag file)
  * 2. If not, runs all migrations
  * 3. Verifies database state (tables and foreign keys)
  * 4. Creates flag file to prevent re-running
- * 
+ *
  * Safe to call multiple times - will only run migrations once.
  */
 export async function ensureMigrationsRun(): Promise<void> {

@@ -6,7 +6,7 @@ import * as fs from 'fs';
 /**
  * Jest Global Setup
  * Runs once before all test suites
- * 
+ *
  * This setup:
  * 1. Drops and recreates the database schema
  * 2. Cleans migration flag file (so migrations run fresh)

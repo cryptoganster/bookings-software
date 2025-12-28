@@ -15,10 +15,17 @@ export class CapacityWriteMapper {
    * @returns Partial CapacityModel for database persistence
    */
   static toModel(capacity: Capacity): Partial<CapacityModel> {
+    // Convert Date to YYYY-MM-DD string for PostgreSQL DATE column
+    // This prevents timezone conversion issues
+    const date = capacity.getDate();
+    const normalizedDate = new Date(date);
+    normalizedDate.setUTCHours(0, 0, 0, 0);
+    const dateStr = normalizedDate.toISOString().split('T')[0];
+
     return {
       id: capacity.getId().getValue(),
       offeringId: capacity.getOfferingId().getValue(),
-      date: capacity.getDate(),
+      date: dateStr as any, // TypeORM will accept string for DATE column
       totalSlots: capacity.getTotalSlots(),
       availableSlots: capacity.getAvailableSlots(),
       version: capacity.getVersion().getValue(),

@@ -6,6 +6,7 @@ import { DataSource } from 'typeorm';
 import { TestAuthHelper } from '@test-utils/helpers';
 import { OfferingModel } from '@offering/infra/persistence/models/offering';
 import { UUID } from '@shared/vo/uuid';
+import { ensureMigrationsRun } from '../../../../../test/test-setup';
 
 /**
  * Helper to create an active offering for this test
@@ -42,6 +43,9 @@ describe('Availability Query (e2e)', () => {
   let offeringId: string;
 
   beforeAll(async () => {
+    // IMPORTANT: Run migrations first (once per test session)
+    await ensureMigrationsRun();
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -106,12 +110,15 @@ describe('Availability Query (e2e)', () => {
       date.setDate(date.getDate() + i);
       date.setUTCHours(0, 0, 0, 0);
 
+      // Convert to YYYY-MM-DD string to avoid timezone issues
+      const dateStr = date.toISOString().split('T')[0];
+
       await dataSource.query(
         'INSERT INTO capacities (id, offering_id, date, total_slots, available_slots, version, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())',
         [
           uuidv4(), // Generate proper UUID
           offeringId,
-          date,
+          dateStr, // Use date string instead of Date object
           10, // total_slots
           10, // available_slots (all available initially)
           0, // version
@@ -216,11 +223,34 @@ describe('Availability Query (e2e)', () => {
       // Verify it's actually Sunday
       expect(nextSunday.getUTCDay()).toBe(0);
 
-      // Ensure we have capacity for this Sunday (create it if needed)
+      // Calculate Monday (next day after Sunday)
+      const monday = new Date(nextSunday);
+      monday.setUTCDate(monday.getUTCDate() + 1);
+
+      // Ensure we have capacity for both Sunday and Monday
       const { v4: uuidv4 } = require('uuid');
+
+      // Convert dates to YYYY-MM-DD strings to avoid timezone issues
+      const sundayStr = nextSunday.toISOString().split('T')[0];
+      const mondayStr = monday.toISOString().split('T')[0];
+
+      // Delete existing capacity for these dates to avoid conflicts
+      await dataSource.query('DELETE FROM capacities WHERE offering_id = $1 AND date IN ($2, $3)', [
+        offeringId,
+        sundayStr,
+        mondayStr,
+      ]);
+
+      // Create capacity for Sunday (should be excluded due to no schedule)
       await dataSource.query(
-        'INSERT INTO capacities (id, offering_id, date, total_slots, available_slots, version, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW()) ON CONFLICT DO NOTHING',
-        [uuidv4(), offeringId, nextSunday, 10, 10, 0],
+        'INSERT INTO capacities (id, offering_id, date, total_slots, available_slots, version, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())',
+        [uuidv4(), offeringId, sundayStr, 10, 10, 0],
+      );
+
+      // Create capacity for Monday (should be included - has schedule)
+      await dataSource.query(
+        'INSERT INTO capacities (id, offering_id, date, total_slots, available_slots, version, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())',
+        [uuidv4(), offeringId, mondayStr, 10, 10, 0],
       );
 
       // Query for dates around Sunday (Saturday, Sunday, Monday)
@@ -241,15 +271,10 @@ describe('Availability Query (e2e)', () => {
         .expect(200);
 
       // Sunday should NOT be in the list (no schedule for day 0)
-      // Monday SHOULD be in the list (has schedule for day 1)
-      const sundayStr = nextSunday.toISOString().split('T')[0];
       const hasSunday = response.body.some((date: string) => date.startsWith(sundayStr));
       expect(hasSunday).toBe(false);
 
-      // Verify Monday is included (sanity check)
-      const monday = new Date(nextSunday);
-      monday.setUTCDate(monday.getUTCDate() + 1);
-      const mondayStr = monday.toISOString().split('T')[0];
+      // Monday SHOULD be in the list (has schedule for day 1)
       const hasMonday = response.body.some((date: string) => date.startsWith(mondayStr));
       expect(hasMonday).toBe(true);
     });
@@ -302,17 +327,32 @@ describe('Availability Query (e2e)', () => {
   describe('GET /availability/slots', () => {
     it('should return available time slots for a date', async () => {
       // Find next Monday (day 1) to ensure we have a schedule
+      // Use a Monday that's at least 7 days in the future to avoid conflicts with other tests
       const today = new Date();
-      const daysUntilMonday = (1 - today.getDay() + 7) % 7 || 7; // If today is Monday, get next Monday
-      const nextMonday = new Date(today);
-      nextMonday.setDate(today.getDate() + daysUntilMonday);
-      nextMonday.setUTCHours(0, 0, 0, 0);
+      today.setUTCHours(0, 0, 0, 0);
 
-      // Ensure we have capacity for this Monday
+      // Calculate days until next Monday, but add 7 days to ensure it's in the future
+      const daysUntilMonday = (1 - today.getUTCDay() + 7) % 7 || 7;
+      const nextMonday = new Date(today);
+      nextMonday.setUTCDate(today.getUTCDate() + daysUntilMonday + 7); // Add 7 days to avoid conflicts
+
+      // Verify it's actually Monday
+      expect(nextMonday.getUTCDay()).toBe(1);
+
+      // Convert to YYYY-MM-DD string to avoid timezone issues
+      const mondayStr = nextMonday.toISOString().split('T')[0];
+
+      // Delete existing capacity for this Monday to avoid conflicts
       const { v4: uuidv4 } = require('uuid');
+      await dataSource.query('DELETE FROM capacities WHERE offering_id = $1 AND date = $2', [
+        offeringId,
+        mondayStr,
+      ]);
+
+      // Create capacity for this Monday - use date string to avoid timezone conversion
       await dataSource.query(
-        'INSERT INTO capacities (id, offering_id, date, total_slots, available_slots, version, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW()) ON CONFLICT DO NOTHING',
-        [uuidv4(), offeringId, nextMonday, 10, 10, 0],
+        'INSERT INTO capacities (id, offering_id, date, total_slots, available_slots, version, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())',
+        [uuidv4(), offeringId, mondayStr, 10, 10, 0],
       );
 
       const response = await request(app.getHttpServer())
@@ -320,7 +360,7 @@ describe('Availability Query (e2e)', () => {
         .query({
           offeringId,
           businessId,
-          date: nextMonday.toISOString().split('T')[0],
+          date: mondayStr,
           durationMinutes: 60,
         })
         .set('Authorization', `Bearer ${authToken}`)
@@ -347,11 +387,14 @@ describe('Availability Query (e2e)', () => {
       nextTuesday.setDate(today.getDate() + daysUntilTuesday);
       nextTuesday.setUTCHours(0, 0, 0, 0);
 
+      // Convert to YYYY-MM-DD string to avoid timezone issues
+      const tuesdayStr = nextTuesday.toISOString().split('T')[0];
+
       // Ensure we have capacity for this Tuesday
       const { v4: uuidv4 } = require('uuid');
       await dataSource.query(
         'INSERT INTO capacities (id, offering_id, date, total_slots, available_slots, version, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW()) ON CONFLICT DO NOTHING',
-        [uuidv4(), offeringId, nextTuesday, 10, 10, 0],
+        [uuidv4(), offeringId, tuesdayStr, 10, 10, 0],
       );
 
       const response = await request(app.getHttpServer())
@@ -359,7 +402,7 @@ describe('Availability Query (e2e)', () => {
         .query({
           offeringId,
           businessId,
-          date: nextTuesday.toISOString().split('T')[0],
+          date: tuesdayStr,
           durationMinutes: 60,
         })
         .set('Authorization', `Bearer ${authToken}`)
@@ -401,11 +444,14 @@ describe('Availability Query (e2e)', () => {
       nextWednesday.setDate(today.getDate() + daysUntilWednesday);
       nextWednesday.setUTCHours(0, 0, 0, 0);
 
+      // Convert to YYYY-MM-DD string to avoid timezone issues
+      const wednesdayStr = nextWednesday.toISOString().split('T')[0];
+
       // Ensure we have capacity for this Wednesday
       const { v4: uuidv4 } = require('uuid');
       await dataSource.query(
         'INSERT INTO capacities (id, offering_id, date, total_slots, available_slots, version, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW()) ON CONFLICT DO NOTHING',
-        [uuidv4(), offeringId, nextWednesday, 10, 10, 0],
+        [uuidv4(), offeringId, wednesdayStr, 10, 10, 0],
       );
 
       // 30-minute slots should have more slots than 60-minute
@@ -414,7 +460,7 @@ describe('Availability Query (e2e)', () => {
         .query({
           offeringId,
           businessId,
-          date: nextWednesday.toISOString().split('T')[0],
+          date: wednesdayStr,
           durationMinutes: 30,
         })
         .set('Authorization', `Bearer ${authToken}`)
@@ -425,7 +471,7 @@ describe('Availability Query (e2e)', () => {
         .query({
           offeringId,
           businessId,
-          date: nextWednesday.toISOString().split('T')[0],
+          date: wednesdayStr,
           durationMinutes: 60,
         })
         .set('Authorization', `Bearer ${authToken}`)
