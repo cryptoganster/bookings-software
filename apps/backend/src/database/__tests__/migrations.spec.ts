@@ -1,11 +1,15 @@
 import { DataSource } from 'typeorm';
 import * as fs from 'fs';
 import * as path from 'path';
+import { ensureMigrationsRun } from '../../../test/test-setup';
 
 describe('Migration Validation', () => {
   let dataSource: DataSource;
 
   beforeAll(async () => {
+    // IMPORTANT: Run migrations first (once per test session)
+    await ensureMigrationsRun();
+
     // Create test database connection
     // IMPORTANT: Must use same database as global-setup (postgres_test)
     dataSource = new DataSource({

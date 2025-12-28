@@ -1,16 +1,20 @@
 import { DataSource } from 'typeorm';
 import * as path from 'path';
+import { ensureMigrationsRun } from '../../../test/test-setup';
 
 /**
  * Database schema validation tests
  * Validates that migrations created all required tables with correct structure
- * Test environment uses migrations only (executed in global-setup.ts)
+ * Test environment uses migrations only (executed in beforeAll)
  * These tests verify table existence and structure, not seed data
  */
 describe('Database Schema Validation', () => {
   let dataSource: DataSource;
 
   beforeAll(async () => {
+    // IMPORTANT: Run migrations first (once per test session)
+    await ensureMigrationsRun();
+
     // Create test database connection
     dataSource = new DataSource({
       type: 'postgres',
