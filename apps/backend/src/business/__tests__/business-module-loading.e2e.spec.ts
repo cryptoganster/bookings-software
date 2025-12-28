@@ -2,11 +2,15 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../../app.module';
+import { ensureMigrationsRun } from '../../../test/test-setup';
 
 describe('Business Module Loading E2E', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
+    // IMPORTANT: Run migrations first (once per test session)
+    await ensureMigrationsRun();
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();

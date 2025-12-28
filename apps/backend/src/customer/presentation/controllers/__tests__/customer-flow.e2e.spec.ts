@@ -15,6 +15,7 @@ import {
   createActiveOffering,
   E2EAuthHelper,
 } from '@test-utils/helpers';
+import { ensureMigrationsRun } from '../../../../../test/test-setup';
 
 describe('Customer Flow E2E', () => {
   let app: INestApplication;
@@ -31,6 +32,9 @@ describe('Customer Flow E2E', () => {
   const testCustomerPhone = '+1234567891'; // Unique phone number for this test suite
 
   beforeAll(async () => {
+    // IMPORTANT: Run migrations first (once per test session)
+    await ensureMigrationsRun();
+
     // Create mock WhatsApp client
     mockWhatsAppClient = {
       sendMessage: jest.fn().mockImplementation((to: string, message: string) => {

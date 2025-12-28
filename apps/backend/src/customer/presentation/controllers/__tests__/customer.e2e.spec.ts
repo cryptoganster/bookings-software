@@ -6,6 +6,7 @@ import { AppModule } from '../../../../app.module';
 import { CustomerModel } from '@customer/infra/persistence/models/customer.model';
 import { UUID } from '@shared/vo/uuid';
 import { E2EAuthHelper, TestUser } from '@test-utils/helpers';
+import { ensureMigrationsRun } from '../../../../../test/test-setup';
 
 /**
  * E2E Tests for Customer Controllers
@@ -28,6 +29,9 @@ describe('Customer Controllers E2E', () => {
   let testCustomerId: string;
 
   beforeAll(async () => {
+    // IMPORTANT: Run migrations first (once per test session)
+    await ensureMigrationsRun();
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
