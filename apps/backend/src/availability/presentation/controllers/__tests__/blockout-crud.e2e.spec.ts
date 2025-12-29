@@ -246,7 +246,7 @@ describe('Blockout CRUD (e2e)', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
-      const deletedBlockout = response.body.find((b: any) => b.id === blockoutId);
+      const deletedBlockout = response.body.find((b: { id: string }) => b.id === blockoutId);
       expect(deletedBlockout).toBeUndefined();
     });
 
@@ -265,7 +265,7 @@ describe('Blockout CRUD (e2e)', () => {
       await request(app.getHttpServer())
         .delete('/api/blockouts/invalid-uuid')
         .set('Authorization', `Bearer ${authToken}`)
-        .expect(500); // UUID validation error returns 500 (needs global exception filter)
+        .expect(400); // ParseUUIDPipe validates UUID format
     });
   });
 

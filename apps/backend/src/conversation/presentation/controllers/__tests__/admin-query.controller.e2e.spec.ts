@@ -21,7 +21,7 @@ import { ConversationModel } from '@conversation/infra/persistence/models/conver
 import { MessageModel } from '@conversation/infra/persistence/models/message.model';
 import { CustomerModel } from '@customer/infra/persistence/models/customer.model';
 import { UUID } from '@shared/vo/uuid';
-import { E2EAuthHelper, TestUser } from '@test-utils/e2e-helpers';
+import { E2EAuthHelper, TestUser } from '@test-utils/helpers';
 
 describe('Admin Query Controller E2E', () => {
   let app: INestApplication;
@@ -247,7 +247,9 @@ describe('Admin Query Controller E2E', () => {
       expect(response.body.length).toBe(3);
 
       // Verify messages are ordered by sentAt ASC
-      const sentAtDates = response.body.map((m: any) => new Date(m.sentAt).getTime());
+      const sentAtDates = response.body.map((m: { sentAt: string }) =>
+        new Date(m.sentAt).getTime(),
+      );
       const sortedDates = [...sentAtDates].sort((a, b) => a - b);
       expect(sentAtDates).toEqual(sortedDates);
 

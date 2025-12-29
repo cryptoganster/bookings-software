@@ -1,6 +1,5 @@
 import { describe, it, expect } from '@jest/globals';
 import { BusinessAddress } from '../business-address';
-import { InvalidBusinessAddressException } from '../../exceptions/invalid-business-address';
 
 describe('BusinessAddress Value Object', () => {
   describe('create', () => {

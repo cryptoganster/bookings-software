@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { createTestUser } from '@test-utils/e2e-helpers';
+import { createTestUser } from '@test-utils/helpers';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { BusinessOwnerWriteRepository } from '../business-owner-write.repository';
@@ -11,10 +11,8 @@ import { UUID } from '@shared/vo/uuid';
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 import { DataSource } from 'typeorm';
-import {
-  createIntegrationTestDataSource,
-  cleanDatabase,
-} from '@test-utils/integration-test-helper';
+import { setupTestDatabase, cleanDatabase } from '@test-utils/helpers/database';
+import { ensureMigrationsRun } from '../../../../../../test/test-setup';
 
 /**
  * Integration Test for BusinessOwnerWriteRepository
@@ -27,9 +25,13 @@ describe('BusinessOwnerWriteRepository - Integration Test (Optimistic Locking)',
   let factory: BusinessOwnerFactory;
   let dataSource: DataSource;
 
+  beforeAll(async () => {
+    await ensureMigrationsRun();
+  });
+
   beforeEach(async () => {
     // Use shared DataSource with all entities
-    dataSource = await createIntegrationTestDataSource();
+    dataSource = await setupTestDatabase();
 
     module = await Test.createTestingModule({
       imports: [

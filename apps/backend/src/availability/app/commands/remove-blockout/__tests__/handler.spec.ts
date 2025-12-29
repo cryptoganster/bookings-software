@@ -18,16 +18,17 @@ describe('RemoveBlockoutHandler', () => {
   beforeEach(async () => {
     mockBlockoutFactory = {
       loadById: jest.fn(),
-    };
+    } as jest.Mocked<IBlockoutFactory>;
 
     mockBlockoutWriteRepository = {
       save: jest.fn(),
       delete: jest.fn(),
-    };
+    } as jest.Mocked<IBlockoutWriteRepository>;
 
     mockUow = {
       transaction: jest.fn((work) => work()),
-    } as any;
+      getQueryRunner: jest.fn(),
+    } as jest.Mocked<IUnitOfWork>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

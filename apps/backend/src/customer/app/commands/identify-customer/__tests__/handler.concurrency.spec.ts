@@ -9,11 +9,9 @@ import { CustomerReadRepository } from '@customer/infra/persistence/repositories
 import { CustomerModel } from '@customer/infra/persistence/models/customer.model';
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { DataSource } from 'typeorm';
-import {
-  createIntegrationTestDataSource,
-  cleanDatabase,
-  createTestBusiness,
-} from '@test-utils/integration-test-helper';
+import { cleanDatabase, setupTestDatabase } from '@test-utils/helpers/database';
+import { createTestBusiness } from '@test-utils/helpers/business';
+import { ensureMigrationsRun } from '../../../../../../test/test-setup';
 
 /**
  * Concurrency tests for IdentifyCustomerHandler
@@ -33,12 +31,14 @@ describe('IdentifyCustomerHandler - Concurrency Tests', () => {
   let businessId: string;
 
   beforeAll(async () => {
-    dataSource = await createIntegrationTestDataSource();
+    await ensureMigrationsRun();
+
+    dataSource = await setupTestDatabase();
 
     module = await Test.createTestingModule({
       imports: [
         CqrsModule,
-        TypeOrmModule.forRoot(dataSource.options as any),
+        TypeOrmModule.forRoot(dataSource.options),
         TypeOrmModule.forFeature([CustomerModel]),
       ],
       providers: [
@@ -131,7 +131,7 @@ describe('IdentifyCustomerHandler - Concurrency Tests', () => {
       );
 
       expect(customers).toHaveLength(5);
-      expect(customers.map((c: any) => c.whatsapp_phone)).toEqual([
+      expect(customers.map((c: { whatsapp_phone: string }) => c.whatsapp_phone)).toEqual([
         '+18095551111',
         '+18095552222',
         '+18095553333',
@@ -199,7 +199,7 @@ describe('IdentifyCustomerHandler - Concurrency Tests', () => {
 
       expect(allCustomers).toHaveLength(2);
       // Check that both businesses are present (order doesn't matter)
-      const businessIds = allCustomers.map((c: any) => c.business_id);
+      const businessIds = allCustomers.map((c: { business_id: string }) => c.business_id);
       expect(businessIds).toContain(business1);
       expect(businessIds).toContain(business2);
     });

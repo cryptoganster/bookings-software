@@ -3,12 +3,9 @@ import { DataSource, Repository } from 'typeorm';
 import { BlockoutFactory } from '../blockout-factory';
 import { BlockoutModel } from '../../models/blockout';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import {
-  createIntegrationTestDataSource,
-  cleanDatabase,
-  generateTestId,
-  createTestBusiness,
-} from '@test-utils/integration-test-helper';
+import { setupTestDatabase, cleanDatabase, generateTestId } from '@test-utils/helpers/database';
+import { createTestBusiness } from '@test-utils/helpers/business';
+import { ensureMigrationsRun } from '../../../../../../test/test-setup';
 
 describe('BlockoutFactory (Integration)', () => {
   let module: TestingModule;
@@ -18,8 +15,10 @@ describe('BlockoutFactory (Integration)', () => {
   let testBusinessId: string; // Shared business ID for all tests
 
   beforeAll(async () => {
+    await ensureMigrationsRun();
+
     // Create shared DataSource with ALL entities
-    dataSource = await createIntegrationTestDataSource();
+    dataSource = await setupTestDatabase();
 
     module = await Test.createTestingModule({
       providers: [
@@ -308,7 +307,7 @@ describe('BlockoutFactory (Integration)', () => {
       }
 
       // Act & Assert
-      for (const { id, businessId } of testData) {
+      for (const { id } of testData) {
         const aggregate = await factory.loadById(id);
         expect(aggregate).toBeDefined();
         expect(aggregate!.getBusinessId().getValue()).toBe(testBusinessId);

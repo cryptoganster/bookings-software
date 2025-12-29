@@ -8,7 +8,8 @@ import { UUID } from '@shared/vo/uuid';
 import { OfferingDuration } from '@offering/domain/vo/offering-duration';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
-import { E2EDatabaseHelper } from '@test-utils/e2e-helpers';
+import { E2EDatabaseHelper, createTestBusiness } from '@test-utils/helpers';
+import { ensureMigrationsRun } from '../../../../../../test/test-setup';
 
 describe('OfferingWriteRepository Integration Tests', () => {
   let module: TestingModule;
@@ -16,6 +17,8 @@ describe('OfferingWriteRepository Integration Tests', () => {
   let dataSource: DataSource;
 
   beforeAll(async () => {
+    await ensureMigrationsRun();
+
     module = await Test.createTestingModule({
       imports: [
         TypeOrmModule.forRoot({
@@ -57,9 +60,10 @@ describe('OfferingWriteRepository Integration Tests', () => {
   describe('save', () => {
     it('should create offering in database', async () => {
       // Arrange
+      const businessId = await createTestBusiness(dataSource);
       const offering = Offering.create(
         UUID.generate(),
-        UUID.generate(),
+        UUID.fromString(businessId),
         'Corte de Pelo',
         OfferingDuration.fromMinutes(30),
         4,
@@ -85,9 +89,10 @@ describe('OfferingWriteRepository Integration Tests', () => {
 
     it('should update existing offering', async () => {
       // Arrange
+      const businessId = await createTestBusiness(dataSource);
       const offering = Offering.create(
         UUID.generate(),
-        UUID.generate(),
+        UUID.fromString(businessId),
         'Corte de Pelo',
         OfferingDuration.fromMinutes(30),
         4,
@@ -117,9 +122,10 @@ describe('OfferingWriteRepository Integration Tests', () => {
 
     it('should throw ConcurrencyException when version is incorrect', async () => {
       // Arrange
+      const businessId = await createTestBusiness(dataSource);
       const offering = Offering.create(
         UUID.generate(),
-        UUID.generate(),
+        UUID.fromString(businessId),
         'Corte de Pelo',
         OfferingDuration.fromMinutes(30),
         4,

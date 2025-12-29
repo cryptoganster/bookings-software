@@ -20,7 +20,7 @@ describe('BusinessOwner Aggregate - Property-Based Tests', () => {
    * - Higher or equal price
    */
   describe('Property 1: Subscription upgrade is monotonic', () => {
-    const planArbitrary = fc.constantFrom(
+    const planArbitrary: fc.Arbitrary<SubscriptionPlan> = fc.constantFrom(
       SubscriptionPlan.free(),
       SubscriptionPlan.basic(),
       SubscriptionPlan.pro(),
@@ -29,7 +29,7 @@ describe('BusinessOwner Aggregate - Property-Based Tests', () => {
 
     it('should always increase or maintain limits when upgrading', () => {
       fc.assert(
-        fc.property(planArbitrary, planArbitrary, (currentPlan: any, newPlan: any) => {
+        fc.property(planArbitrary, planArbitrary, (currentPlan, newPlan) => {
           // Skip if not a valid upgrade
           if (!currentPlan.canUpgradeTo(newPlan)) {
             return true;
@@ -63,7 +63,7 @@ describe('BusinessOwner Aggregate - Property-Based Tests', () => {
 
     it('should never allow downgrade (reverse monotonicity)', () => {
       fc.assert(
-        fc.property(planArbitrary, planArbitrary, (currentPlan: any, newPlan: any) => {
+        fc.property(planArbitrary, planArbitrary, (currentPlan, newPlan) => {
           // If new plan has lower limits, it should not be a valid upgrade
           const currentMaxBusinesses = currentPlan.getMaxBusinesses();
           const newMaxBusinesses = newPlan.getMaxBusinesses();
@@ -84,7 +84,7 @@ describe('BusinessOwner Aggregate - Property-Based Tests', () => {
    * For any BusinessOwner, any state-changing operation should increment version by exactly 1.
    */
   describe('Property 2: Version increments on state changes', () => {
-    const planArbitrary = fc.constantFrom(
+    const planArbitrary: fc.Arbitrary<SubscriptionPlan> = fc.constantFrom(
       SubscriptionPlan.free(),
       SubscriptionPlan.basic(),
       SubscriptionPlan.pro(),
@@ -93,7 +93,7 @@ describe('BusinessOwner Aggregate - Property-Based Tests', () => {
 
     it('should increment version by 1 on completeOnboarding()', () => {
       fc.assert(
-        fc.property(planArbitrary, (plan: any) => {
+        fc.property(planArbitrary, (plan) => {
           const businessOwner = BusinessOwner.create(UUID.generate(), UUID.generate(), plan);
 
           const versionBefore = businessOwner.getVersion().getValue();
@@ -108,7 +108,7 @@ describe('BusinessOwner Aggregate - Property-Based Tests', () => {
 
     it('should increment version by 1 on upgradeSubscription()', () => {
       fc.assert(
-        fc.property(planArbitrary, planArbitrary, (currentPlan: any, newPlan: any) => {
+        fc.property(planArbitrary, planArbitrary, (currentPlan, newPlan) => {
           // Skip if not a valid upgrade
           if (!currentPlan.canUpgradeTo(newPlan)) {
             return true;
@@ -129,7 +129,7 @@ describe('BusinessOwner Aggregate - Property-Based Tests', () => {
 
     it('should increment version by 1 on suspendSubscription()', () => {
       fc.assert(
-        fc.property(planArbitrary, (plan: any) => {
+        fc.property(planArbitrary, (plan) => {
           const businessOwner = BusinessOwner.create(UUID.generate(), UUID.generate(), plan);
 
           const versionBefore = businessOwner.getVersion().getValue();
@@ -144,7 +144,7 @@ describe('BusinessOwner Aggregate - Property-Based Tests', () => {
 
     it('should increment version by 1 on restoreSubscription()', () => {
       fc.assert(
-        fc.property(planArbitrary, (plan: any) => {
+        fc.property(planArbitrary, (plan) => {
           const businessOwner = BusinessOwner.create(UUID.generate(), UUID.generate(), plan);
           businessOwner.suspendSubscription();
 
@@ -160,7 +160,7 @@ describe('BusinessOwner Aggregate - Property-Based Tests', () => {
 
     it('should have version = 1 after create()', () => {
       fc.assert(
-        fc.property(planArbitrary, (plan: any) => {
+        fc.property(planArbitrary, (plan) => {
           const businessOwner = BusinessOwner.create(UUID.generate(), UUID.generate(), plan);
 
           expect(businessOwner.getVersion().getValue()).toBe(1);
@@ -177,7 +177,7 @@ describe('BusinessOwner Aggregate - Property-Based Tests', () => {
    * should always return the same result.
    */
   describe('Property 3: Idempotency of status checks', () => {
-    const planArbitrary = fc.constantFrom(
+    const planArbitrary: fc.Arbitrary<SubscriptionPlan> = fc.constantFrom(
       SubscriptionPlan.free(),
       SubscriptionPlan.basic(),
       SubscriptionPlan.pro(),
@@ -186,7 +186,7 @@ describe('BusinessOwner Aggregate - Property-Based Tests', () => {
 
     it('isOnboardingCompleted() should be idempotent', () => {
       fc.assert(
-        fc.property(planArbitrary, fc.boolean(), (plan: any, shouldComplete: any) => {
+        fc.property(planArbitrary, fc.boolean(), (plan, shouldComplete) => {
           const businessOwner = BusinessOwner.create(UUID.generate(), UUID.generate(), plan);
 
           if (shouldComplete) {
@@ -206,7 +206,7 @@ describe('BusinessOwner Aggregate - Property-Based Tests', () => {
 
     it('getSubscriptionStatus() checks should be idempotent', () => {
       fc.assert(
-        fc.property(planArbitrary, fc.boolean(), (plan: any, shouldSuspend: any) => {
+        fc.property(planArbitrary, fc.boolean(), (plan, shouldSuspend) => {
           const businessOwner = BusinessOwner.create(UUID.generate(), UUID.generate(), plan);
 
           if (shouldSuspend) {

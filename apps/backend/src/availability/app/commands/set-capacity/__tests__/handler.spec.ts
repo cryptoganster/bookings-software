@@ -18,16 +18,16 @@ describe('SetCapacityHandler', () => {
     mockCapacityFactory = {
       loadByOfferingAndDate: jest.fn(),
       loadById: jest.fn(),
-    };
+    } as jest.Mocked<ICapacityFactory>;
 
     mockCapacityWriteRepository = {
       save: jest.fn(),
-    };
+    } as jest.Mocked<ICapacityWriteRepository>;
 
     mockUow = {
-      transaction: jest.fn(<T>(work: () => Promise<T>) => work()) as any,
+      transaction: jest.fn(<T>(work: () => Promise<T>) => work()),
       getQueryRunner: jest.fn(),
-    };
+    } as jest.Mocked<IUnitOfWork>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

@@ -74,13 +74,13 @@ describe('BusinessOwner Aggregate', () => {
 
     it('should throw error if userId is null', () => {
       expect(() => {
-        BusinessOwner.create(UUID.generate(), null as any, SubscriptionPlan.free());
+        BusinessOwner.create(UUID.generate(), null as unknown as UUID, SubscriptionPlan.free());
       }).toThrow();
     });
 
     it('should throw error if subscriptionPlan is invalid', () => {
       expect(() => {
-        BusinessOwner.create(UUID.generate(), UUID.generate(), null as any);
+        BusinessOwner.create(UUID.generate(), UUID.generate(), null as unknown as SubscriptionPlan);
       }).toThrow();
     });
   });

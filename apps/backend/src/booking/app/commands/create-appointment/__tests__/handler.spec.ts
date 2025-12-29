@@ -6,10 +6,18 @@ import { ICapacityFactory } from '@availability/domain/interfaces/factories/capa
 import { ICapacityWriteRepository } from '@availability/domain/interfaces/repositories/capacity-write';
 import { ICustomerExistenceChecker } from '@customer/domain/interfaces/services/customer-existence-checker.interface';
 import { IUnitOfWork } from '@shared/kernel/uow';
-import { Capacity } from '@availability/domain/aggregates/capacity';
 import { NoAvailableSlotsException } from '@booking/domain/exceptions/no-available-slots';
 import { CustomerNotFoundException } from '@customer/domain/exceptions/customer-not-found';
 import { PinoLogger } from 'nestjs-pino';
+import { Capacity } from '@availability/domain/aggregates/capacity';
+
+// Helper to create a mock Capacity
+function createMockCapacity(hasSlots: boolean): Capacity {
+  return {
+    hasAvailableSlots: jest.fn().mockReturnValue(hasSlots),
+    bookSlot: jest.fn(),
+  } as unknown as Capacity;
+}
 
 describe('CreateAppointmentHandler', () => {
   let handler: CreateAppointmentHandler;
@@ -24,30 +32,38 @@ describe('CreateAppointmentHandler', () => {
     // Create mocks
     mockAppointmentRepository = {
       save: jest.fn(),
-    } as any;
+    } as jest.Mocked<IAppointmentWriteRepository>;
 
     mockCapacityFactory = {
       loadByOfferingAndDate: jest.fn(),
-    } as any;
+      loadById: jest.fn(),
+    } as jest.Mocked<ICapacityFactory>;
 
     mockCapacityWriteRepository = {
       save: jest.fn(),
-    } as any;
+    } as jest.Mocked<ICapacityWriteRepository>;
 
     mockCustomerExistenceChecker = {
       exists: jest.fn(),
       getCustomer: jest.fn(),
-    } as any;
+    } as jest.Mocked<ICustomerExistenceChecker>;
 
     mockUow = {
       transaction: jest.fn((work) => work()),
-    } as any;
+      getQueryRunner: jest.fn(),
+    } as jest.Mocked<IUnitOfWork>;
 
     mockLogger = {
       setContext: jest.fn(),
       info: jest.fn(),
       error: jest.fn(),
-    } as any;
+      warn: jest.fn(),
+      debug: jest.fn(),
+      trace: jest.fn(),
+      fatal: jest.fn(),
+      assign: jest.fn(),
+      logger: {},
+    } as unknown as jest.Mocked<PinoLogger>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -99,10 +115,7 @@ describe('CreateAppointmentHandler', () => {
 
     it('should create appointment successfully when customer exists and capacity available', async () => {
       // Arrange
-      const mockCapacity = {
-        hasAvailableSlots: jest.fn().mockReturnValue(true),
-        bookSlot: jest.fn(),
-      } as any;
+      const mockCapacity = createMockCapacity(true);
 
       mockCustomerExistenceChecker.exists.mockResolvedValue(true);
       mockCapacityFactory.loadByOfferingAndDate.mockResolvedValue(mockCapacity);
@@ -155,10 +168,7 @@ describe('CreateAppointmentHandler', () => {
 
     it('should throw NoAvailableSlotsException when capacity has no available slots', async () => {
       // Arrange
-      const mockCapacity = {
-        hasAvailableSlots: jest.fn().mockReturnValue(false),
-        bookSlot: jest.fn(),
-      } as any;
+      const mockCapacity = createMockCapacity(false);
 
       mockCustomerExistenceChecker.exists.mockResolvedValue(true);
       mockCapacityFactory.loadByOfferingAndDate.mockResolvedValue(mockCapacity);
@@ -176,10 +186,7 @@ describe('CreateAppointmentHandler', () => {
 
     it('should call bookSlot on capacity when creating appointment', async () => {
       // Arrange
-      const mockCapacity = {
-        hasAvailableSlots: jest.fn().mockReturnValue(true),
-        bookSlot: jest.fn(),
-      } as any;
+      const mockCapacity = createMockCapacity(true);
 
       mockCustomerExistenceChecker.exists.mockResolvedValue(true);
       mockCapacityFactory.loadByOfferingAndDate.mockResolvedValue(mockCapacity);
@@ -194,10 +201,7 @@ describe('CreateAppointmentHandler', () => {
 
     it('should execute within a transaction', async () => {
       // Arrange
-      const mockCapacity = {
-        hasAvailableSlots: jest.fn().mockReturnValue(true),
-        bookSlot: jest.fn(),
-      } as any;
+      const mockCapacity = createMockCapacity(true);
 
       mockCustomerExistenceChecker.exists.mockResolvedValue(true);
       mockCapacityFactory.loadByOfferingAndDate.mockResolvedValue(mockCapacity);
@@ -212,10 +216,7 @@ describe('CreateAppointmentHandler', () => {
 
     it('should log info when command starts', async () => {
       // Arrange
-      const mockCapacity = {
-        hasAvailableSlots: jest.fn().mockReturnValue(true),
-        bookSlot: jest.fn(),
-      } as any;
+      const mockCapacity = createMockCapacity(true);
 
       mockCustomerExistenceChecker.exists.mockResolvedValue(true);
       mockCapacityFactory.loadByOfferingAndDate.mockResolvedValue(mockCapacity);
@@ -237,10 +238,7 @@ describe('CreateAppointmentHandler', () => {
 
     it('should log info when command succeeds', async () => {
       // Arrange
-      const mockCapacity = {
-        hasAvailableSlots: jest.fn().mockReturnValue(true),
-        bookSlot: jest.fn(),
-      } as any;
+      const mockCapacity = createMockCapacity(true);
 
       mockCustomerExistenceChecker.exists.mockResolvedValue(true);
       mockCapacityFactory.loadByOfferingAndDate.mockResolvedValue(mockCapacity);
@@ -287,10 +285,7 @@ describe('CreateAppointmentHandler', () => {
 
       mockCapacityFactory.loadByOfferingAndDate.mockImplementation(async () => {
         callOrder.push('loadCapacity');
-        return {
-          hasAvailableSlots: jest.fn().mockReturnValue(true),
-          bookSlot: jest.fn(),
-        } as any;
+        return createMockCapacity(true);
       });
 
       // Act

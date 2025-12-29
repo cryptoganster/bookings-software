@@ -8,7 +8,9 @@ const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 describe('WhatsAppBusinessApiClient - Unit Tests', () => {
   let client: WhatsAppBusinessApiClient;
-  let mockAxiosInstance: any;
+  let mockAxiosInstance: {
+    post: jest.Mock;
+  };
 
   beforeEach(async () => {
     mockAxiosInstance = {

@@ -10,11 +10,9 @@ import { CustomerWriteRepository } from '@customer/infra/persistence/repositorie
 import { CustomerReadRepository } from '@customer/infra/persistence/repositories/customer-read.repository';
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { UUID } from '@shared/vo/uuid';
-import {
-  createIntegrationTestDataSource,
-  cleanDatabase,
-  createTestBusiness,
-} from '@test-utils/integration-test-helper';
+import { setupTestDatabase, cleanDatabase } from '@test-utils/helpers/database';
+import { createTestBusiness } from '@test-utils/helpers/business';
+import { ensureMigrationsRun } from '../../../../../../test/test-setup';
 
 /**
  * Integration tests for IdentifyCustomerHandler
@@ -35,12 +33,14 @@ describe('IdentifyCustomerHandler Integration Tests', () => {
   let businessId: string;
 
   beforeAll(async () => {
-    dataSource = await createIntegrationTestDataSource();
+    await ensureMigrationsRun();
+
+    dataSource = await setupTestDatabase();
 
     module = await Test.createTestingModule({
       imports: [
         CqrsModule,
-        TypeOrmModule.forRoot(dataSource.options as any),
+        TypeOrmModule.forRoot(dataSource.options),
         TypeOrmModule.forFeature([CustomerModel]),
       ],
       providers: [

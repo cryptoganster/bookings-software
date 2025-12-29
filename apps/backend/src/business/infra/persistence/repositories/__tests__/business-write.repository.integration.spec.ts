@@ -19,7 +19,8 @@ import { BusinessAddress } from '@business/domain/vo/business-address';
 import { Timezone } from '@business/domain/vo/timezone';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
-import { E2EDatabaseHelper } from '@test-utils/e2e-helpers';
+import { E2EDatabaseHelper } from '@test-utils/helpers';
+import { ensureMigrationsRun } from '../../../../../../test/test-setup';
 
 describe('BusinessWriteRepository Integration Tests', () => {
   let module: TestingModule;
@@ -28,6 +29,8 @@ describe('BusinessWriteRepository Integration Tests', () => {
   let dbHelper: E2EDatabaseHelper;
 
   beforeAll(async () => {
+    await ensureMigrationsRun();
+
     module = await Test.createTestingModule({
       imports: [
         TypeOrmModule.forRoot({

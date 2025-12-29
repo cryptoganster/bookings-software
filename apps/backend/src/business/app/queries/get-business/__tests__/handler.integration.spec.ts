@@ -8,7 +8,8 @@ import { BusinessModel } from '@business/infra/persistence/models/business.model
 import { BusinessReadRepository } from '@business/infra/persistence/repositories/business-read.repository';
 import { BusinessNotFoundException } from '@business/domain/exceptions/business-not-found';
 import { UUID } from '@shared/vo/uuid';
-import { createTestUser, cleanDatabase } from '@test-utils/e2e-helpers';
+import { createTestUser, cleanDatabase } from '@test-utils/helpers';
+import { ensureMigrationsRun } from '../../../../../../test/test-setup';
 
 /**
  * Integration tests for GetBusinessHandler
@@ -26,6 +27,8 @@ describe('GetBusinessHandler Integration Tests', () => {
   let dataSource: DataSource;
 
   beforeAll(async () => {
+    await ensureMigrationsRun();
+
     module = await Test.createTestingModule({
       imports: [
         CqrsModule,

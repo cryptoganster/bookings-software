@@ -9,11 +9,13 @@ import {
   CustomerStatsResponseDto,
 } from '@customer/presentation/dtos';
 import { UserPayload } from '@auth/presentation/decorators/current-user';
-import {
-  SearchCustomersQuery,
-  SearchCustomersFilters,
-} from '@customer/app/queries/search-customers/query';
+import { SearchCustomersQuery } from '@customer/app/queries/search-customers/query';
 import { GetCustomerStatsQuery } from '@customer/app/queries/get-customer-stats/query';
+
+// Suppress unused variable warnings - these are imported for documentation
+void SearchCustomersResponseDto;
+void CustomerStatsResponseDto;
+void SearchCustomersQuery;
 
 describe('CustomerSearchController', () => {
   let controller: CustomerSearchController;
@@ -146,7 +148,7 @@ describe('CustomerSearchController', () => {
     it('should throw ForbiddenException when user has no businessId', async () => {
       const userWithoutBusiness: UserPayload = {
         userId: 'user-123',
-        businessId: undefined as any,
+        businessId: undefined as unknown as string,
         email: 'test@example.com',
       };
 
@@ -314,7 +316,7 @@ describe('CustomerSearchController', () => {
     it('should throw ForbiddenException when user has no businessId', async () => {
       const userWithoutBusiness: UserPayload = {
         userId: 'user-123',
-        businessId: undefined as any,
+        businessId: undefined as unknown as string,
         email: 'test@example.com',
       };
 

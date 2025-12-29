@@ -1,11 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { EventsGateway } from '../events.gateway';
-import { Socket } from 'socket.io';
+import { Socket, Server } from 'socket.io';
 import { Logger } from '@nestjs/common';
 
 describe('EventsGateway', () => {
   let gateway: EventsGateway;
-  let mockServer: any;
+  let mockServer: {
+    to: jest.Mock;
+    emit: jest.Mock;
+  };
   let mockSocket: Partial<Socket>;
 
   beforeEach(async () => {
@@ -21,14 +24,14 @@ describe('EventsGateway', () => {
       emit: jest.fn(),
     };
 
-    gateway.server = mockServer;
+    gateway.server = mockServer as unknown as Server;
 
     // Mock del socket del cliente
     mockSocket = {
       id: 'test-socket-id',
       handshake: {
         auth: {},
-      } as any,
+      } as unknown as Socket['handshake'],
       join: jest.fn(),
       disconnect: jest.fn(),
     };
@@ -267,7 +270,7 @@ describe('EventsGateway', () => {
         id: 'socket-1',
         handshake: {
           auth: { businessId: 'business-123' },
-        } as any,
+        } as unknown,
         join: jest.fn(),
         disconnect: jest.fn(),
       } as unknown as Socket;
@@ -276,7 +279,7 @@ describe('EventsGateway', () => {
         id: 'socket-2',
         handshake: {
           auth: { businessId: 'business-123' },
-        } as any,
+        } as unknown,
         join: jest.fn(),
         disconnect: jest.fn(),
       } as unknown as Socket;
@@ -296,7 +299,7 @@ describe('EventsGateway', () => {
         id: 'socket-1',
         handshake: {
           auth: { businessId: 'business-123' },
-        } as any,
+        } as unknown,
         join: jest.fn(),
         disconnect: jest.fn(),
       } as unknown as Socket;
@@ -305,7 +308,7 @@ describe('EventsGateway', () => {
         id: 'socket-2',
         handshake: {
           auth: { businessId: 'business-456' },
-        } as any,
+        } as unknown,
         join: jest.fn(),
         disconnect: jest.fn(),
       } as unknown as Socket;

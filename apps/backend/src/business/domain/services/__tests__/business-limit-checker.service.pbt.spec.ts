@@ -34,16 +34,16 @@ describe('BusinessLimitChecker PBT', () => {
               updatedAt: new Date(),
             };
 
-            const mockBusinessReadRepo: jest.Mocked<IBusinessReadRepository> = {
+            const mockBusinessReadRepo = {
               findByOwnerId: jest.fn().mockResolvedValue(businesses),
               findById: jest.fn(),
               findByWhatsAppPhone: jest.fn(),
-            } as any;
+            } as jest.Mocked<IBusinessReadRepository>;
 
-            const mockOwnerReadRepo: jest.Mocked<IBusinessOwnerReadRepository> = {
+            const mockOwnerReadRepo = {
               findById: jest.fn(),
               findByUserId: jest.fn().mockResolvedValue(owner),
-            } as any;
+            } as jest.Mocked<IBusinessOwnerReadRepository>;
 
             const checker = new BusinessLimitChecker(mockBusinessReadRepo, mockOwnerReadRepo);
 
@@ -68,16 +68,16 @@ describe('BusinessLimitChecker PBT', () => {
             (_, i) => ({ id: `business-${i}`, ownerId }) as BusinessReadModel,
           );
 
-          const mockBusinessReadRepo: jest.Mocked<IBusinessReadRepository> = {
+          const mockBusinessReadRepo = {
             findByOwnerId: jest.fn().mockResolvedValue(businesses),
             findById: jest.fn(),
             findByWhatsAppPhone: jest.fn(),
-          } as any;
+          } as jest.Mocked<IBusinessReadRepository>;
 
-          const mockOwnerReadRepo: jest.Mocked<IBusinessOwnerReadRepository> = {
+          const mockOwnerReadRepo = {
             findById: jest.fn(),
             findByUserId: jest.fn(),
-          } as any;
+          } as jest.Mocked<IBusinessOwnerReadRepository>;
 
           const checker = new BusinessLimitChecker(mockBusinessReadRepo, mockOwnerReadRepo);
 
@@ -114,16 +114,16 @@ describe('BusinessLimitChecker PBT', () => {
               updatedAt: new Date(),
             };
 
-            const mockBusinessReadRepo: jest.Mocked<IBusinessReadRepository> = {
+            const mockBusinessReadRepo = {
               findByOwnerId: jest.fn(),
               findById: jest.fn(),
               findByWhatsAppPhone: jest.fn(),
-            } as any;
+            } as jest.Mocked<IBusinessReadRepository>;
 
-            const mockOwnerReadRepo: jest.Mocked<IBusinessOwnerReadRepository> = {
+            const mockOwnerReadRepo = {
               findById: jest.fn(),
               findByUserId: jest.fn().mockResolvedValue(owner),
-            } as any;
+            } as jest.Mocked<IBusinessOwnerReadRepository>;
 
             const checker = new BusinessLimitChecker(mockBusinessReadRepo, mockOwnerReadRepo);
 
@@ -169,16 +169,16 @@ describe('BusinessLimitChecker PBT', () => {
               updatedAt: new Date(),
             };
 
-            const mockBusinessReadRepo: jest.Mocked<IBusinessReadRepository> = {
+            const mockBusinessReadRepo = {
               findByOwnerId: jest.fn().mockResolvedValue(businesses),
               findById: jest.fn(),
               findByWhatsAppPhone: jest.fn(),
-            } as any;
+            } as jest.Mocked<IBusinessReadRepository>;
 
-            const mockOwnerReadRepo: jest.Mocked<IBusinessOwnerReadRepository> = {
+            const mockOwnerReadRepo = {
               findById: jest.fn(),
               findByUserId: jest.fn().mockResolvedValue(owner),
-            } as any;
+            } as jest.Mocked<IBusinessOwnerReadRepository>;
 
             const checker = new BusinessLimitChecker(mockBusinessReadRepo, mockOwnerReadRepo);
 
@@ -219,16 +219,16 @@ describe('BusinessLimitChecker PBT', () => {
               updatedAt: new Date(),
             };
 
-            const mockBusinessReadRepo: jest.Mocked<IBusinessReadRepository> = {
+            const mockBusinessReadRepo = {
               findByOwnerId: jest.fn().mockResolvedValue(businesses),
               findById: jest.fn(),
               findByWhatsAppPhone: jest.fn(),
-            } as any;
+            } as jest.Mocked<IBusinessReadRepository>;
 
-            const mockOwnerReadRepo: jest.Mocked<IBusinessOwnerReadRepository> = {
+            const mockOwnerReadRepo = {
               findById: jest.fn(),
               findByUserId: jest.fn().mockResolvedValue(owner),
-            } as any;
+            } as jest.Mocked<IBusinessOwnerReadRepository>;
 
             const checker = new BusinessLimitChecker(mockBusinessReadRepo, mockOwnerReadRepo);
 
@@ -249,20 +249,20 @@ describe('BusinessLimitChecker PBT', () => {
       fc.assert(
         fc.asyncProperty(fc.uuid(), async (ownerId) => {
           // Arrange
-          const mockBusinessReadRepo: jest.Mocked<IBusinessReadRepository> = {
+          const mockBusinessReadRepo = {
             findByOwnerId: jest.fn().mockResolvedValue([]),
             findById: jest.fn(),
             findByWhatsAppPhone: jest.fn(),
-          } as any;
+          } as jest.Mocked<IBusinessReadRepository>;
 
-          const mockOwnerReadRepo: jest.Mocked<IBusinessOwnerReadRepository> = {
+          const mockOwnerReadRepo = {
             findById: jest.fn(),
             findByUserId: jest.fn().mockResolvedValue({
               id: 'owner-1',
               userId: ownerId,
               maxBusinesses: 3,
             } as BusinessOwnerReadModel),
-          } as any;
+          } as jest.Mocked<IBusinessOwnerReadRepository>;
 
           const checker = new BusinessLimitChecker(mockBusinessReadRepo, mockOwnerReadRepo);
 

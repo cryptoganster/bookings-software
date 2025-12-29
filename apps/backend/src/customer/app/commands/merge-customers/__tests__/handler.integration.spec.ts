@@ -9,7 +9,6 @@ import { CustomerModel } from '@customer/infra/persistence/models';
 import { Customer } from '@customer/domain/aggregates/customer';
 import { UUID } from '@shared/vo/uuid';
 import { WhatsAppPhone } from '@shared/vo/whatsapp-phone';
-import { CustomerNotFoundException } from '@customer/domain/exceptions';
 
 /**
  * Integration Tests for MergeCustomersHandler
@@ -58,12 +57,12 @@ describe('MergeCustomersHandler (Integration)', () => {
         query: jest.fn().mockResolvedValue([]), // Appointments update
         createQueryBuilder: jest.fn(),
       },
-    } as any;
+    } as unknown as jest.Mocked<QueryRunner>;
 
     // Mock DataSource
     mockDataSource = {
       createQueryRunner: jest.fn().mockReturnValue(mockQueryRunner),
-    } as any;
+    } as unknown as jest.Mocked<DataSource>;
 
     // Mock Factory
     mockFactory = {
@@ -82,7 +81,7 @@ describe('MergeCustomersHandler (Integration)', () => {
       save: jest.fn(),
       update: jest.fn(),
       createQueryBuilder: jest.fn(),
-    } as any;
+    } as unknown as jest.Mocked<Repository<CustomerModel>>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -201,7 +200,7 @@ describe('MergeCustomersHandler (Integration)', () => {
         .mockResolvedValueOnce(targetCustomer);
 
       // Simulate database error during appointments update
-      (mockQueryRunner.manager.query as jest.MockedFunction<any>).mockRejectedValueOnce(
+      (mockQueryRunner.manager.query as jest.Mock).mockRejectedValueOnce(
         new Error('Database connection lost'),
       );
 
@@ -248,7 +247,7 @@ describe('MergeCustomersHandler (Integration)', () => {
         .mockResolvedValueOnce(targetCustomer);
 
       // Simulate error during transaction
-      (mockQueryRunner.manager.query as jest.MockedFunction<any>).mockRejectedValueOnce(
+      (mockQueryRunner.manager.query as jest.Mock).mockRejectedValueOnce(
         new Error('Database error'),
       );
 

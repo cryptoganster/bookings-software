@@ -3,7 +3,8 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { DataSource } from 'typeorm';
 import { AppModule } from '../../../../app.module';
-import { E2EAuthHelper, E2EDatabaseHelper, UserRole } from '@test-utils/e2e-helpers';
+import { E2EAuthHelper, E2EDatabaseHelper } from '@test-utils/helpers';
+import { ensureMigrationsRun } from '../../../../../test/test-setup';
 
 describe('Business Controller E2E', () => {
   let app: INestApplication;
@@ -13,6 +14,9 @@ describe('Business Controller E2E', () => {
   let userId: string;
 
   beforeAll(async () => {
+    // IMPORTANT: Run migrations first (once per test session)
+    await ensureMigrationsRun();
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -44,9 +48,18 @@ describe('Business Controller E2E', () => {
 
     authHelper = new E2EAuthHelper(app);
 
-    // Create test user with BUSINESS_OWNER role
-    const testUser = await authHelper.createTestUser(UserRole.BUSINESS_OWNER, {
-      name: 'Business Owner',
+    // Create business owner with business (includes User + BusinessOwner + Business)
+    const testUser = await authHelper.createBusinessOwner({
+      name: 'Initial Test Business',
+      whatsappNumber: '+18095550000',
+      address: {
+        street: '123 Initial St',
+        city: 'Santo Domingo',
+        state: null,
+        country: 'Dominican Republic',
+        postalCode: null,
+      },
+      timezone: 'America/Santo_Domingo',
     });
 
     authToken = testUser.token;
@@ -263,7 +276,7 @@ describe('Business Controller E2E', () => {
 
       expect(Array.isArray(response.body)).toBe(true);
       expect(response.body.length).toBeGreaterThanOrEqual(2);
-      response.body.forEach((business: any) => {
+      response.body.forEach((business: unknown) => {
         expect(business).toHaveProperty('ownerId', userId);
       });
     });

@@ -19,11 +19,11 @@ describe('CancelAppointmentHandler Integration', () => {
   beforeEach(async () => {
     appointmentFactory = {
       loadById: jest.fn(),
-    } as any;
+    } as jest.Mocked<IAppointmentFactory>;
 
     appointmentRepository = {
       save: jest.fn(),
-    } as any;
+    } as jest.Mocked<IAppointmentWriteRepository>;
 
     const mockLogger = {
       info: jest.fn(),

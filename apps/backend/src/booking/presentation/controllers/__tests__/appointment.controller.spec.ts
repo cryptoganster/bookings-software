@@ -5,7 +5,6 @@ import { CreateAppointmentDto } from '../../dtos/create-appointment.dto';
 import { AppointmentFiltersDto } from '../../dtos/appointment-filters.dto';
 import { UserPayload } from '@auth/presentation/decorators/current-user';
 import { CreateAppointmentCommand } from '@booking/app/commands/create-appointment';
-import { GetBusinessAppointmentsQuery } from '@booking/app/queries/get-business-appointments';
 import { GetAppointmentQuery } from '@booking/app/queries/get-appointment';
 
 describe('AppointmentController', () => {

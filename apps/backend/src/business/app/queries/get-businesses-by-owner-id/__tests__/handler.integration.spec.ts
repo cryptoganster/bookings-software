@@ -7,7 +7,8 @@ import { GetBusinessesByOwnerIdQuery } from '../query';
 import { BusinessModel } from '@business/infra/persistence/models/business.model';
 import { BusinessReadRepository } from '@business/infra/persistence/repositories/business-read.repository';
 import { UUID } from '@shared/vo/uuid';
-import { createTestUser, cleanDatabase } from '@test-utils/e2e-helpers';
+import { createTestUser, cleanDatabase } from '@test-utils/helpers';
+import { ensureMigrationsRun } from '../../../../../../test/test-setup';
 
 /**
  * Integration tests for GetBusinessesByOwnerIdHandler
@@ -25,6 +26,8 @@ describe('GetBusinessesByOwnerIdHandler Integration Tests', () => {
   let dataSource: DataSource;
 
   beforeAll(async () => {
+    await ensureMigrationsRun();
+
     module = await Test.createTestingModule({
       imports: [
         CqrsModule,
@@ -131,10 +134,10 @@ describe('GetBusinessesByOwnerIdHandler Integration Tests', () => {
 
       // Assert
       expect(result).toHaveLength(3);
-      expect(result.every((b: any) => b.ownerId === ownerId)).toBe(true);
-      expect(result.map((b: any) => b.name)).toContain('Business 1');
-      expect(result.map((b: any) => b.name)).toContain('Business 2');
-      expect(result.map((b: any) => b.name)).toContain('Business 3');
+      expect(result.every((b: { ownerId: string }) => b.ownerId === ownerId)).toBe(true);
+      expect(result.map((b: { name: string }) => b.name)).toContain('Business 1');
+      expect(result.map((b: { name: string }) => b.name)).toContain('Business 2');
+      expect(result.map((b: { name: string }) => b.name)).toContain('Business 3');
     });
 
     it('should return empty list when owner has no businesses', async () => {
@@ -252,8 +255,14 @@ describe('GetBusinessesByOwnerIdHandler Integration Tests', () => {
 
       // Assert
       expect(result).toHaveLength(2);
-      expect(result.find((b: any) => b.name === 'Active Business')?.isActive).toBe(true);
-      expect(result.find((b: any) => b.name === 'Inactive Business')?.isActive).toBe(false);
+      expect(
+        result.find((b: { name: string; isActive: boolean }) => b.name === 'Active Business')
+          ?.isActive,
+      ).toBe(true);
+      expect(
+        result.find((b: { name: string; isActive: boolean }) => b.name === 'Inactive Business')
+          ?.isActive,
+      ).toBe(false);
     });
   });
 });

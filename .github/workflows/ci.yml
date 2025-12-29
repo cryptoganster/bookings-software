@@ -333,8 +333,8 @@ jobs:
       postgres:
         image: postgres:14-alpine
         env:
-          POSTGRES_USER: test
-          POSTGRES_PASSWORD: test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
           POSTGRES_DB: postgres_test
         options: >-
           --health-cmd pg_isready
@@ -373,8 +373,8 @@ jobs:
         env:
           DB_HOST: localhost
           DB_PORT: 5432
-          DB_USERNAME: test
-          DB_PASSWORD: test
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
           DB_DATABASE: postgres_test
           NODE_ENV: test
 

@@ -57,7 +57,7 @@ DB_HOST=localhost
 DB_PORT=5432
 DB_USERNAME=postgres
 DB_PASSWORD=tu_password
-DB_DATABASE=bookings_dev
+DB_DATABASE=postgres_dev
 
 # JWT
 JWT_SECRET=tu_secret_key_muy_seguro
@@ -89,8 +89,8 @@ Crear la base de datos manualmente:
 
 ```bash
 psql -U postgres
-CREATE DATABASE bookings_dev;
-CREATE DATABASE bookings_test;
+CREATE DATABASE postgres_dev;
+CREATE DATABASE postgres_test;
 \q
 ```
 

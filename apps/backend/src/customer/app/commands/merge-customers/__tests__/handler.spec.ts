@@ -12,7 +12,6 @@ import { WhatsAppPhone } from '@shared/vo/whatsapp-phone';
 import { CustomerNotFoundException } from '@customer/domain/exceptions';
 import { CannotMergeCustomerWithItselfException } from '@customer/domain/exceptions';
 import { CustomersFromDifferentBusinessesException } from '@customer/domain/exceptions';
-import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 
 describe('MergeCustomersHandler', () => {
   let handler: MergeCustomersHandler;
@@ -39,15 +38,15 @@ describe('MergeCustomersHandler', () => {
       rollbackTransaction: jest.fn(),
       release: jest.fn(),
       manager: {
-        query: jest.fn() as jest.MockedFunction<any>,
-        createQueryBuilder: jest.fn() as jest.MockedFunction<any>,
+        query: jest.fn() as jest.MockedFunction<typeof jest.fn>,
+        createQueryBuilder: jest.fn() as jest.MockedFunction<typeof jest.fn>,
       },
-    } as any;
+    } as unknown as jest.Mocked<QueryRunner>;
 
     // Mock DataSource
     mockDataSource = {
       createQueryRunner: jest.fn().mockReturnValue(mockQueryRunner),
-    } as any;
+    } as unknown as jest.Mocked<DataSource>;
 
     // Mock Factory
     mockFactory = {
@@ -66,7 +65,7 @@ describe('MergeCustomersHandler', () => {
       save: jest.fn(),
       update: jest.fn(),
       createQueryBuilder: jest.fn(),
-    } as any;
+    } as unknown as jest.Mocked<Repository<CustomerModel>>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -309,7 +308,7 @@ describe('MergeCustomersHandler', () => {
         .mockResolvedValueOnce(sourceCustomer)
         .mockResolvedValueOnce(targetCustomer);
 
-      (mockQueryRunner.manager.query as jest.MockedFunction<any>).mockRejectedValueOnce(
+      (mockQueryRunner.manager.query as jest.Mock).mockRejectedValueOnce(
         new Error('Database error'),
       );
 

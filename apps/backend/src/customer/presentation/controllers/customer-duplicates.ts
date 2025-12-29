@@ -115,15 +115,39 @@ export class CustomerDuplicatesController {
       );
 
       // Transform to response DTO
+      interface DuplicatePair {
+        customer1: {
+          id: string;
+          businessId: string;
+          userId: string | null;
+          whatsappPhone: string;
+          name: string | null;
+          createdAt: Date | string;
+        };
+        customer2: {
+          id: string;
+          businessId: string;
+          userId: string | null;
+          whatsappPhone: string;
+          name: string | null;
+          createdAt: Date | string;
+        };
+        similarityScore: number;
+        reasons: string[];
+      }
+
       return {
-        pairs: pairs.map((pair: any) => ({
+        pairs: pairs.map((pair: DuplicatePair) => ({
           customer1: {
             id: pair.customer1.id,
             businessId: pair.customer1.businessId,
             userId: pair.customer1.userId,
             whatsappPhone: pair.customer1.whatsappPhone,
             name: pair.customer1.name,
-            createdAt: pair.customer1.createdAt.toISOString(),
+            createdAt:
+              typeof pair.customer1.createdAt === 'string'
+                ? pair.customer1.createdAt
+                : pair.customer1.createdAt.toISOString(),
           },
           customer2: {
             id: pair.customer2.id,
@@ -131,7 +155,10 @@ export class CustomerDuplicatesController {
             userId: pair.customer2.userId,
             whatsappPhone: pair.customer2.whatsappPhone,
             name: pair.customer2.name,
-            createdAt: pair.customer2.createdAt.toISOString(),
+            createdAt:
+              typeof pair.customer2.createdAt === 'string'
+                ? pair.customer2.createdAt
+                : pair.customer2.createdAt.toISOString(),
           },
           similarityScore: pair.similarityScore,
           reasons: pair.reasons,

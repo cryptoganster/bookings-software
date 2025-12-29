@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { createTestUser } from '@test-utils/e2e-helpers';
-import { CommandBus } from '@nestjs/cqrs';
+import { createTestUser } from '@test-utils/helpers';
 import { DataSource, Repository } from 'typeorm';
 import { RestoreSubscriptionHandler } from '../handler';
 import { RestoreSubscriptionCommand } from '../command';
@@ -10,22 +9,20 @@ import { BusinessOwnerModel } from '@account/infra/persistence/models/business-o
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { BusinessOwnerNotFoundException } from '@account/domain/exceptions/business-owner-not-found.exception';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import {
-  createIntegrationTestDataSource,
-  cleanDatabase,
-  generateTestId,
-} from '@test-utils/integration-test-helper';
+import { setupTestDatabase, cleanDatabase, generateTestId } from '@test-utils/helpers/database';
+import { ensureMigrationsRun } from '../../../../../../test/test-setup';
 
 describe('RestoreSubscriptionHandler (Integration)', () => {
   let module: TestingModule;
   let handler: RestoreSubscriptionHandler;
   let repository: Repository<BusinessOwnerModel>;
   let dataSource: DataSource;
-  let commandBus: CommandBus;
 
   beforeAll(async () => {
+    await ensureMigrationsRun();
+
     // Create shared DataSource with all entities
-    dataSource = await createIntegrationTestDataSource();
+    dataSource = await setupTestDatabase();
 
     module = await Test.createTestingModule({
       providers: [
@@ -51,18 +48,11 @@ describe('RestoreSubscriptionHandler (Integration)', () => {
           provide: DataSource,
           useValue: dataSource,
         },
-        {
-          provide: CommandBus,
-          useValue: {
-            execute: jest.fn(),
-          },
-        },
       ],
     }).compile();
 
     handler = module.get<RestoreSubscriptionHandler>(RestoreSubscriptionHandler);
     repository = module.get<Repository<BusinessOwnerModel>>(getRepositoryToken(BusinessOwnerModel));
-    commandBus = module.get<CommandBus>(CommandBus);
   });
 
   afterAll(async () => {

@@ -9,11 +9,9 @@ import { UUID } from '@shared/vo/uuid';
 import { DayOfWeek } from '@availability/domain/vo/day-of-week.vo';
 import { TimeSlot } from '@availability/domain/vo/time-slot.vo';
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
-import {
-  createIntegrationTestDataSource,
-  cleanDatabase,
-  createTestBusiness,
-} from '@test-utils/integration-test-helper';
+import { setupTestDatabase, cleanDatabase } from '@test-utils/helpers/database';
+import { createTestBusiness } from '@test-utils/helpers/business';
+import { ensureMigrationsRun } from '../../../../../../test/test-setup';
 
 describe('Schedule Repositories (Integration)', () => {
   let module: TestingModule;
@@ -24,8 +22,10 @@ describe('Schedule Repositories (Integration)', () => {
   let uow: TypeOrmUnitOfWork;
 
   beforeAll(async () => {
+    await ensureMigrationsRun();
+
     // Use integration test helper to create DataSource with ALL entities
-    dataSource = await createIntegrationTestDataSource();
+    dataSource = await setupTestDatabase();
 
     module = await Test.createTestingModule({
       providers: [

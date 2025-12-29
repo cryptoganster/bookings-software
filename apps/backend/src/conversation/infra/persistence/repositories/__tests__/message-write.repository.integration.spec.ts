@@ -11,12 +11,7 @@ import { UUID } from '@shared/vo/uuid';
 import { MessageDirection } from '@conversation/domain/vo/message-direction';
 import { MessageType } from '@conversation/domain/vo/message-type';
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
-import { MessageWriteMapper } from '@conversation/infra/persistence/mappers/message-write.mapper';
-import {
-  createIntegrationTestDataSource,
-  cleanDatabase,
-  generateTestId,
-} from '@test-utils/integration-test-helper';
+import { setupTestDatabase, cleanDatabase, generateTestId } from '@test-utils/helpers/database';
 
 describe('MessageWriteRepository (Integration)', () => {
   let repository: MessageWriteRepository;
@@ -82,7 +77,7 @@ describe('MessageWriteRepository (Integration)', () => {
 
   beforeAll(async () => {
     // Create shared DataSource with ALL entities
-    dataSource = await createIntegrationTestDataSource();
+    dataSource = await setupTestDatabase();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

@@ -5,6 +5,7 @@ import { IMessageWriteRepository } from '@conversation/domain/interfaces/reposit
 import { IWhatsAppClient } from '@conversation/domain/interfaces/external/whatsapp-client';
 import { IUnitOfWork } from '@shared/kernel/uow';
 import { WhatsAppMessageFailedException } from '@conversation/domain/exceptions/whatsapp-message-failed.exception';
+import { Message } from '@conversation/domain/aggregates/message';
 
 describe('SendWhatsAppMessageHandler', () => {
   let handler: SendWhatsAppMessageHandler;
@@ -16,17 +17,18 @@ describe('SendWhatsAppMessageHandler', () => {
     // Create mocks
     messageRepository = {
       save: jest.fn(),
-    } as any;
+    } as jest.Mocked<IMessageWriteRepository>;
 
     whatsappClient = {
       sendMessage: jest.fn(),
       sendInteractiveButtons: jest.fn(),
       sendLocation: jest.fn(),
-    } as any;
+    } as jest.Mocked<IWhatsAppClient>;
 
     uow = {
       transaction: jest.fn((work) => work()),
-    } as any;
+      getQueryRunner: jest.fn(),
+    } as jest.Mocked<IUnitOfWork>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -325,8 +327,8 @@ describe('SendWhatsAppMessageHandler', () => {
 
       whatsappClient.sendMessage.mockResolvedValue(undefined);
 
-      let savedMessage: any;
-      messageRepository.save.mockImplementation(async (message) => {
+      let savedMessage: Message | undefined;
+      messageRepository.save.mockImplementation(async (message: Message) => {
         savedMessage = message;
       });
 
@@ -335,10 +337,10 @@ describe('SendWhatsAppMessageHandler', () => {
 
       // Assert
       expect(savedMessage).toBeDefined();
-      expect(savedMessage.getContent()).toBe('Test message');
-      expect(savedMessage.getDirection().getValue()).toBe('OUTBOUND');
-      expect(savedMessage.getMessageType().getValue()).toBe('TEXT');
-      expect(savedMessage.getIsFromAdmin()).toBe(true);
+      expect(savedMessage!.getContent()).toBe('Test message');
+      expect(savedMessage!.getDirection().getValue()).toBe('OUTBOUND');
+      expect(savedMessage!.getMessageType().getValue()).toBe('TEXT');
+      expect(savedMessage!.getIsFromAdmin()).toBe(true);
     });
 
     it('should create message with isFromAdmin false', async () => {
@@ -353,8 +355,8 @@ describe('SendWhatsAppMessageHandler', () => {
 
       whatsappClient.sendMessage.mockResolvedValue(undefined);
 
-      let savedMessage: any;
-      messageRepository.save.mockImplementation(async (message) => {
+      let savedMessage: Message | undefined;
+      messageRepository.save.mockImplementation(async (message: Message) => {
         savedMessage = message;
       });
 
@@ -362,7 +364,7 @@ describe('SendWhatsAppMessageHandler', () => {
       await handler.execute(command);
 
       // Assert
-      expect(savedMessage.getIsFromAdmin()).toBe(false);
+      expect(savedMessage!.getIsFromAdmin()).toBe(false);
     });
   });
 });

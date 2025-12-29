@@ -17,7 +17,6 @@ import { RegisterCommand } from '@auth/app/commands/register/command';
 import { UserRole } from '@auth/domain/vo/user-role';
 import { GetBusinessOwnerByUserIdQuery } from '../queries/get-business-owner-by-user-id/query';
 import { AppModule } from '@/app.module';
-import { SubscriptionPlan } from '@account/domain/vo/subscription-plan';
 
 describe('E2E: Complete Registration Flow (Auth → Account)', () => {
   let app: INestApplication;
@@ -130,7 +129,6 @@ describe('E2E: Complete Registration Flow (Auth → Account)', () => {
     expect(businessOwner).toBeDefined();
 
     // Verify FREE plan limits
-    const freePlan = 'FREE';
     expect(businessOwner.subscriptionPlan).toBe('FREE');
     // Note: maxBusinesses and maxAppointmentsPerMonth are not in read model
     // They are derived from the plan name in the domain

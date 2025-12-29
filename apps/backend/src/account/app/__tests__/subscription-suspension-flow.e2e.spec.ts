@@ -22,7 +22,6 @@ import { SuspendSubscriptionCommand } from '../commands/suspend-subscription/com
 import { RestoreSubscriptionCommand } from '../commands/restore-subscription/command';
 import { GetBusinessOwnerByUserIdQuery } from '../queries/get-business-owner-by-user-id/query';
 import { CreateBusinessCommand } from '@business/app/commands/create-business/command';
-import { CreateAppointmentCommand } from '@booking/app/commands/create-appointment/command';
 import { AppModule } from '@/app.module';
 
 describe('E2E: Subscription Suspension Flow', () => {
@@ -145,7 +144,7 @@ describe('E2E: Subscription Suspension Flow', () => {
     );
 
     // Create business
-    const businessResult = await commandBus.execute(
+    const _businessResult = await commandBus.execute(
       new CreateBusinessCommand(
         registerResult.userId,
         'My Business',
@@ -162,8 +161,8 @@ describe('E2E: Subscription Suspension Flow', () => {
     );
 
     // Create customer and offering (simplified - would need actual setup)
-    const customerId = 'test-customer-id';
-    const offeringId = 'test-offering-id';
+    const _customerId = 'test-customer-id';
+    const _offeringId = 'test-offering-id';
 
     // Suspend subscription
     await commandBus.execute(new SuspendSubscriptionCommand(businessOwner.id));
@@ -199,7 +198,7 @@ describe('E2E: Subscription Suspension Flow', () => {
     );
 
     // Create business
-    const businessResult = await commandBus.execute(
+    const _businessResult = await commandBus.execute(
       new CreateBusinessCommand(
         registerResult.userId,
         'My Business',

@@ -1,12 +1,26 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { EventsGateway } from '../events.gateway';
-import { Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
 import * as fc from 'fast-check';
+import { Server, Socket } from 'socket.io';
+
+interface MockServer {
+  to: jest.Mock;
+  emit: jest.Mock;
+}
+
+interface MockSocket {
+  id: string;
+  handshake: {
+    auth: { businessId?: string | null };
+  };
+  join: jest.Mock;
+  disconnect: jest.Mock;
+}
 
 describe('EventsGateway (Property-Based Tests)', () => {
   let gateway: EventsGateway;
-  let mockServer: any;
+  let mockServer: MockServer;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -20,7 +34,7 @@ describe('EventsGateway (Property-Based Tests)', () => {
       emit: jest.fn(),
     };
 
-    gateway.server = mockServer;
+    gateway.server = mockServer as unknown as Server;
 
     // Silenciar logs
     jest.spyOn(Logger.prototype, 'log').mockImplementation();
@@ -166,17 +180,17 @@ describe('EventsGateway (Property-Based Tests)', () => {
           fc.uuid(), // socketId
           (businessId, socketId) => {
             // Arrange
-            const mockSocket = {
+            const mockSocket: MockSocket = {
               id: socketId,
               handshake: {
                 auth: { businessId },
               },
               join: jest.fn(),
               disconnect: jest.fn(),
-            } as any;
+            };
 
             // Act
-            gateway.handleConnection(mockSocket);
+            gateway.handleConnection(mockSocket as unknown as Socket);
 
             // Assert
             expect(mockSocket.join).toHaveBeenCalledWith(`business:${businessId}`);
@@ -194,17 +208,17 @@ describe('EventsGateway (Property-Based Tests)', () => {
           fc.oneof(fc.constant(undefined), fc.constant(null), fc.constant('')),
           (socketId, invalidBusinessId) => {
             // Arrange
-            const mockSocket = {
+            const mockSocket: MockSocket = {
               id: socketId,
               handshake: {
                 auth: { businessId: invalidBusinessId },
               },
               join: jest.fn(),
               disconnect: jest.fn(),
-            } as any;
+            };
 
             // Act
-            gateway.handleConnection(mockSocket);
+            gateway.handleConnection(mockSocket as unknown as Socket);
 
             // Assert
             expect(mockSocket.disconnect).toHaveBeenCalled();

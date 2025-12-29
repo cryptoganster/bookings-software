@@ -31,12 +31,20 @@ export class CapacityReadRepository implements ICapacityReadRepository {
   }
 
   async findByOfferingAndDate(offeringId: string, date: Date): Promise<CapacityReadModel | null> {
-    const capacity = await this.repository.findOne({
-      where: {
-        offeringId,
-        date,
-      },
-    });
+    // Normalize date to midnight UTC for comparison (only date part, no time)
+    const normalizedDate = new Date(date);
+    normalizedDate.setUTCHours(0, 0, 0, 0);
+
+    // Format date as YYYY-MM-DD string for PostgreSQL DATE comparison
+    // This ensures consistent comparison regardless of timezone
+    const dateStr = normalizedDate.toISOString().split('T')[0];
+
+    // Use QueryBuilder with date string for consistent comparison
+    const capacity = await this.repository
+      .createQueryBuilder('capacity')
+      .where('capacity.offeringId = :offeringId', { offeringId })
+      .andWhere('capacity.date = :date', { date: dateStr })
+      .getOne();
 
     if (!capacity) {
       return null;

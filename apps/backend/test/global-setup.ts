@@ -1,16 +1,16 @@
 import { DataSource } from 'typeorm';
 import { config } from 'dotenv';
 import { join } from 'path';
+import * as fs from 'fs';
 
 /**
  * Jest Global Setup
  * Runs once before all test suites
- * Executes migrations to create database schema
  *
- * This approach:
- * 1. Validates that migrations work correctly
- * 2. Ensures test schema matches production schema
- * 3. Allows migration tests to validate the migration table
+ * This setup:
+ * 1. Drops and recreates the database schema
+ * 2. Cleans migration flag file (so migrations run fresh)
+ * 3. Migrations are executed in test-setup.ts (same process as tests)
  */
 export default async function globalSetup() {
   console.log('🔧 Running global setup...');
@@ -18,44 +18,65 @@ export default async function globalSetup() {
   // Load test environment variables
   config({ path: join(__dirname, '..', '.env.test') });
 
-  // Create DataSource for test database with migrations
-  const dataSource = new DataSource({
-    type: 'postgres',
+  // Clean migration flag file from previous test runs
+  const migrationFlagFile = join(__dirname, '.migrations-complete');
+  const migrationLockFile = join(__dirname, '.migrations-lock');
+
+  if (fs.existsSync(migrationFlagFile)) {
+    fs.unlinkSync(migrationFlagFile);
+    console.log('🧹 Cleaned migration flag file');
+  }
+
+  if (fs.existsSync(migrationLockFile)) {
+    fs.unlinkSync(migrationLockFile);
+    console.log('🧹 Cleaned migration lock file');
+  }
+
+  const dbConfig = {
+    type: 'postgres' as const,
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT || '5432', 10),
     username: process.env.DB_USERNAME || 'postgres',
     password: process.env.DB_PASSWORD || 'postgres',
     database: process.env.DB_DATABASE || 'postgres_test',
-    migrations: [join(__dirname, '..', 'src', 'database', 'migrations', '*.ts')],
-    migrationsRun: false, // We'll run them manually
-    synchronize: false, // Use migrations instead
+    synchronize: false,
     logging: false,
-  });
+  };
 
   try {
-    // Initialize connection
+    console.log('📡 Connecting to database...');
+    const dataSource = new DataSource(dbConfig);
     await dataSource.initialize();
     console.log('✅ Database connection established');
 
-    // Drop all tables (clean slate)
-    await dataSource.dropDatabase();
-    console.log('✅ Database dropped');
+    const queryRunner = dataSource.createQueryRunner();
+    try {
+      console.log('🗑️  Dropping schema public...');
+      await queryRunner.query('DROP SCHEMA IF EXISTS public CASCADE');
 
-    // Run all migrations
-    await dataSource.runMigrations();
-    console.log('✅ Migrations executed');
+      console.log('🏗️  Creating schema public...');
+      await queryRunner.query('CREATE SCHEMA public');
 
-    // Log migrations
-    const executedMigrations = await dataSource.query(
-      'SELECT name, timestamp FROM migrations ORDER BY timestamp',
-    );
-    console.log(`📦 Executed ${executedMigrations.length} migrations`);
+      console.log('🔐 Granting permissions...');
+      await queryRunner.query('GRANT ALL ON SCHEMA public TO postgres');
+      await queryRunner.query('GRANT ALL ON SCHEMA public TO public');
 
-    // Close connection
+      console.log('✅ Schema dropped and recreated');
+    } finally {
+      await queryRunner.release();
+    }
+
+    console.log('🔌 Closing connection...');
     await dataSource.destroy();
-    console.log('✅ Global setup complete');
+    console.log('✅ Global setup complete - migrations will run in test files');
   } catch (error) {
     console.error('❌ Global setup failed:', error);
+    if (error instanceof Error) {
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+      });
+    }
     throw error;
   }
 }

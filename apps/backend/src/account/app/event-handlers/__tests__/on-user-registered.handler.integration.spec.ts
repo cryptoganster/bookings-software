@@ -18,10 +18,11 @@ describe('OnUserRegisteredHandler - Integration Test', () => {
 
   beforeEach(async () => {
     const mockEventPublisher = {
-      mergeObjectContext: jest.fn((obj: any) => {
+      mergeObjectContext: jest.fn(<T extends object>(obj: T): T & { commit: jest.Mock } => {
         // Return the original object with a mock commit method added
-        obj.commit = jest.fn();
-        return obj;
+        const objWithCommit = obj as T & { commit: jest.Mock };
+        objWithCommit.commit = jest.fn();
+        return objWithCommit;
       }),
     };
 

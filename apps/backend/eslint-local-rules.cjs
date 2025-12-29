@@ -1,11 +1,82 @@
 /**
- * Custom ESLint rules for architecture boundaries
+ * Custom ESLint rules for architecture boundaries and testing best practices
  * 
  * Este archivo define reglas personalizadas para validar que las capas
- * de Clean Architecture respeten las dependencias permitidas.
+ * de Clean Architecture respeten las dependencias permitidas, y que los
+ * tests sigan las mejores prácticas.
  */
 
 module.exports = {
+  'require-migrations-call': {
+    meta: {
+      type: 'problem',
+      docs: {
+        description: 'Require ensureMigrationsRun() call in integration tests that access database',
+        category: 'Testing Best Practices',
+        recommended: true,
+      },
+      messages: {
+        missingCall: 'Test files that create DataSource or use TypeOrmModule.forRoot must call ensureMigrationsRun() in beforeAll(). This ensures migrations run before tests execute, preventing "relation does not exist" errors.',
+      },
+      schema: [],
+    },
+    create(context) {
+      const filename = context.getFilename();
+      
+      // Only check test files
+      if (!filename.includes('.spec.ts') && !filename.includes('.e2e-spec.ts') && !filename.includes('.test.ts')) {
+        return {};
+      }
+      
+      let hasDataSource = false;
+      let hasTypeOrmModule = false;
+      let hasMigrationsCall = false;
+      let hasBeforeAll = false;
+      
+      return {
+        // Detect DataSource creation
+        NewExpression(node) {
+          if (node.callee.name === 'DataSource') {
+            hasDataSource = true;
+          }
+        },
+        
+        // Detect TypeOrmModule.forRoot and ensureMigrationsRun() call
+        CallExpression(node) {
+          // Detect TypeOrmModule.forRoot
+          if (
+            node.callee.type === 'MemberExpression' &&
+            node.callee.object.name === 'TypeOrmModule' &&
+            node.callee.property.name === 'forRoot'
+          ) {
+            hasTypeOrmModule = true;
+          }
+          
+          // Detect ensureMigrationsRun() call
+          if (node.callee.name === 'ensureMigrationsRun') {
+            hasMigrationsCall = true;
+          }
+          
+          // Detect beforeAll() hook
+          if (node.callee.name === 'beforeAll') {
+            hasBeforeAll = true;
+          }
+        },
+        
+        // Report at end of file
+        'Program:exit'() {
+          // If file creates DataSource or uses TypeOrmModule.forRoot, it must call ensureMigrationsRun()
+          if ((hasDataSource || hasTypeOrmModule) && !hasMigrationsCall) {
+            context.report({
+              messageId: 'missingCall',
+              loc: { line: 1, column: 0 },
+            });
+          }
+        },
+      };
+    },
+  },
+  
   'enforce-path-aliases': {
     meta: {
       type: 'problem',

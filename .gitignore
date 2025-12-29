@@ -45,6 +45,7 @@ ormconfig.json
 
 # Tests
 test-results/
+.migrations-complete
 
 # Kiro IDE settings (contains secrets)
 .kiro/settings/

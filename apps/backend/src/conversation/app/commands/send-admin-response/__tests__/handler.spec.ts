@@ -36,7 +36,7 @@ describe('SendAdminResponseHandler', () => {
 
     mockCommandBus = {
       execute: jest.fn(),
-    } as any;
+    } as unknown as jest.Mocked<CommandBus>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

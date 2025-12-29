@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { createTestUser } from '@test-utils/e2e-helpers';
+import { createTestUser } from '@test-utils/helpers';
 import { CommandBus } from '@nestjs/cqrs';
 import { DataSource, Repository } from 'typeorm';
 import { SuspendSubscriptionHandler } from '../handler';
@@ -10,22 +10,20 @@ import { BusinessOwnerModel } from '@account/infra/persistence/models/business-o
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { BusinessOwnerNotFoundException } from '@account/domain/exceptions/business-owner-not-found.exception';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import {
-  createIntegrationTestDataSource,
-  cleanDatabase,
-  generateTestId,
-} from '@test-utils/integration-test-helper';
+import { setupTestDatabase, cleanDatabase, generateTestId } from '@test-utils/helpers/database';
+import { ensureMigrationsRun } from '../../../../../../test/test-setup';
 
 describe('SuspendSubscriptionHandler (Integration)', () => {
   let module: TestingModule;
   let handler: SuspendSubscriptionHandler;
   let repository: Repository<BusinessOwnerModel>;
   let dataSource: DataSource;
-  let commandBus: CommandBus;
 
   beforeAll(async () => {
+    await ensureMigrationsRun();
+
     // Create shared DataSource with all entities
-    dataSource = await createIntegrationTestDataSource();
+    dataSource = await setupTestDatabase();
 
     module = await Test.createTestingModule({
       providers: [
@@ -62,7 +60,6 @@ describe('SuspendSubscriptionHandler (Integration)', () => {
 
     handler = module.get<SuspendSubscriptionHandler>(SuspendSubscriptionHandler);
     repository = module.get<Repository<BusinessOwnerModel>>(getRepositoryToken(BusinessOwnerModel));
-    commandBus = module.get<CommandBus>(CommandBus);
   });
 
   afterAll(async () => {

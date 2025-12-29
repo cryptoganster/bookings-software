@@ -6,6 +6,20 @@ import { AppointmentCreated } from '@booking/domain/events/appointment-created';
 import { AppointmentCancelled } from '@booking/domain/events/appointment-cancelled';
 import * as fc from 'fast-check';
 
+// Type definitions for emitted commands
+interface ScheduleReminderCommand {
+  appointmentId: string;
+  dateTime: Date;
+}
+
+interface CancelReminderCommand {
+  appointmentId: string;
+}
+
+interface SendWhatsAppMessageCommand {
+  message: string;
+}
+
 /**
  * Feature: proyecto-base-mvp, Property 11: Sagas emit commands for matching events
  * Validates: Requirements 5.4
@@ -52,7 +66,7 @@ describe('AppointmentNotificationSaga - Property Tests', () => {
 
             // Assert - Debe emitir exactamente un comando
             return new Promise<boolean>((resolve) => {
-              const emittedCommands: any[] = [];
+              const emittedCommands: unknown[] = [];
               commands$.subscribe({
                 next: (command) => emittedCommands.push(command),
                 complete: () => {
@@ -60,9 +74,10 @@ describe('AppointmentNotificationSaga - Property Tests', () => {
                   const hasOneCommand = emittedCommands.length === 1;
 
                   // Verificar que el comando tiene los datos correctos
+                  const firstCommand = emittedCommands[0] as ScheduleReminderCommand;
                   const hasCorrectData =
-                    emittedCommands[0]?.appointmentId === appointmentId &&
-                    emittedCommands[0]?.dateTime?.getTime() === dateTime.getTime();
+                    firstCommand?.appointmentId === appointmentId &&
+                    firstCommand?.dateTime?.getTime() === dateTime.getTime();
 
                   resolve(hasOneCommand && hasCorrectData);
                 },
@@ -86,7 +101,7 @@ describe('AppointmentNotificationSaga - Property Tests', () => {
 
           // Assert - Debe emitir exactamente 2 comandos
           return new Promise<boolean>((resolve) => {
-            const emittedCommands: any[] = [];
+            const emittedCommands: unknown[] = [];
             commands$.subscribe({
               next: (command) => emittedCommands.push(command),
               complete: () => {
@@ -94,10 +109,12 @@ describe('AppointmentNotificationSaga - Property Tests', () => {
                 const hasTwoCommands = emittedCommands.length === 2;
 
                 // Verificar que el primer comando es CancelReminderCommand
-                const firstCommandCorrect = emittedCommands[0]?.appointmentId === appointmentId;
+                const firstCommand = emittedCommands[0] as CancelReminderCommand;
+                const firstCommandCorrect = firstCommand?.appointmentId === appointmentId;
 
                 // Verificar que el segundo comando es SendWhatsAppMessageCommand
-                const secondCommandCorrect = emittedCommands[1]?.message !== undefined;
+                const secondCommand = emittedCommands[1] as SendWhatsAppMessageCommand;
+                const secondCommandCorrect = secondCommand?.message !== undefined;
 
                 resolve(hasTwoCommands && firstCommandCorrect && secondCommandCorrect);
               },
@@ -136,7 +153,7 @@ describe('AppointmentNotificationSaga - Property Tests', () => {
 
             // Assert - Solo debe emitir comando para AppointmentCreated
             return new Promise<boolean>((resolve) => {
-              const emittedCommands: any[] = [];
+              const emittedCommands: unknown[] = [];
               commands$.subscribe({
                 next: (command) => emittedCommands.push(command),
                 complete: () => {
@@ -144,7 +161,8 @@ describe('AppointmentNotificationSaga - Property Tests', () => {
                   const hasOneCommand = emittedCommands.length === 1;
 
                   // El comando debe corresponder al evento AppointmentCreated
-                  const isCorrectEvent = emittedCommands[0]?.appointmentId === appointmentId1;
+                  const firstCommand = emittedCommands[0] as ScheduleReminderCommand;
+                  const isCorrectEvent = firstCommand?.appointmentId === appointmentId1;
 
                   resolve(hasOneCommand && isCorrectEvent);
                 },
@@ -197,7 +215,7 @@ describe('AppointmentNotificationSaga - Property Tests', () => {
 
             // Assert - Debe emitir un comando por cada evento
             return new Promise<boolean>((resolve) => {
-              const emittedCommands: any[] = [];
+              const emittedCommands: unknown[] = [];
               commands$.subscribe({
                 next: (command) => emittedCommands.push(command),
                 complete: () => {
@@ -205,11 +223,13 @@ describe('AppointmentNotificationSaga - Property Tests', () => {
                   const hasCorrectCount = emittedCommands.length === events.length;
 
                   // Cada comando debe corresponder a un evento
-                  const allCommandsCorrect = emittedCommands.every(
-                    (command, index) =>
+                  const allCommandsCorrect = emittedCommands.every((cmd, index) => {
+                    const command = cmd as ScheduleReminderCommand;
+                    return (
                       command.appointmentId === validEventData[index].appointmentId &&
-                      command.dateTime.getTime() === validEventData[index].dateTime.getTime(),
-                  );
+                      command.dateTime.getTime() === validEventData[index].dateTime.getTime()
+                    );
+                  });
 
                   resolve(hasCorrectCount && allCommandsCorrect);
                 },
@@ -234,7 +254,7 @@ describe('AppointmentNotificationSaga - Property Tests', () => {
 
             // Assert - No debe emitir ningún comando
             return new Promise<boolean>((resolve) => {
-              const emittedCommands: any[] = [];
+              const emittedCommands: unknown[] = [];
               commands$.subscribe({
                 next: (command) => emittedCommands.push(command),
                 complete: () => {
@@ -272,7 +292,7 @@ describe('AppointmentNotificationSaga - Property Tests', () => {
 
             // Act & Assert
             return new Promise<boolean>((resolve) => {
-              const emittedCommands: any[] = [];
+              const emittedCommands: unknown[] = [];
               let subscriptionComplete = false;
 
               commands$.subscribe({

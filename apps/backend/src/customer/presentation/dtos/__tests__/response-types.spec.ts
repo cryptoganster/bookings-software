@@ -164,8 +164,8 @@ describe('Response DTOs', () => {
       const dto = new DuplicatePairsResponseDto();
       dto.pairs = [
         {
-          customer1: mockCustomer1 as any,
-          customer2: mockCustomer2 as any,
+          customer1: mockCustomer1,
+          customer2: mockCustomer2,
           similarityScore: 0.85,
           reasons: ['Similar names', 'Same business'],
         },
@@ -183,17 +183,26 @@ describe('Response DTOs', () => {
     });
 
     it('should handle multiple duplicate pairs', () => {
+      const mockCustomer = {
+        id: '1',
+        businessId: 'b1',
+        whatsappPhone: '+1234567890',
+        name: 'Test',
+        userId: null,
+        createdAt: new Date().toISOString(),
+      };
+
       const dto = new DuplicatePairsResponseDto();
       dto.pairs = [
         {
-          customer1: {} as any,
-          customer2: {} as any,
+          customer1: mockCustomer,
+          customer2: mockCustomer,
           similarityScore: 0.9,
           reasons: ['Exact name match'],
         },
         {
-          customer1: {} as any,
-          customer2: {} as any,
+          customer1: mockCustomer,
+          customer2: mockCustomer,
           similarityScore: 0.75,
           reasons: ['Similar phone'],
         },
@@ -204,11 +213,20 @@ describe('Response DTOs', () => {
     });
 
     it('should validate similarity score range', () => {
+      const mockCustomer = {
+        id: '1',
+        businessId: 'b1',
+        whatsappPhone: '+1234567890',
+        name: 'Test',
+        userId: null,
+        createdAt: new Date().toISOString(),
+      };
+
       const dto = new DuplicatePairsResponseDto();
       dto.pairs = [
         {
-          customer1: {} as any,
-          customer2: {} as any,
+          customer1: mockCustomer,
+          customer2: mockCustomer,
           similarityScore: 0.85,
           reasons: [],
         },

@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { createTestUser } from '@test-utils/e2e-helpers';
-import { DataSource, Repository } from 'typeorm';
+import { createTestUser } from '@test-utils/helpers';
+import { DataSource } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { UpgradeSubscriptionHandler } from '../handler';
 import { UpgradeSubscriptionCommand } from '../command';
@@ -10,22 +10,20 @@ import { BusinessOwnerModel } from '@account/infra/persistence/models/business-o
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 import { UUID } from '@shared/vo/uuid';
-import {
-  createIntegrationTestDataSource,
-  cleanDatabase,
-  generateTestId,
-} from '@test-utils/integration-test-helper';
+import { setupTestDatabase, cleanDatabase } from '@test-utils/helpers/database';
+import { ensureMigrationsRun } from '../../../../../../test/test-setup';
 
 describe('UpgradeSubscriptionHandler - Concurrency Tests', () => {
   let module: TestingModule;
   let handler: UpgradeSubscriptionHandler;
   let dataSource: DataSource;
   let factory: BusinessOwnerFactory;
-  let repository: Repository<BusinessOwnerModel>;
 
   beforeAll(async () => {
+    await ensureMigrationsRun();
+
     // Create shared DataSource with ALL entities
-    dataSource = await createIntegrationTestDataSource();
+    dataSource = await setupTestDatabase();
 
     module = await Test.createTestingModule({
       providers: [
@@ -56,7 +54,6 @@ describe('UpgradeSubscriptionHandler - Concurrency Tests', () => {
 
     handler = module.get<UpgradeSubscriptionHandler>(UpgradeSubscriptionHandler);
     factory = module.get<BusinessOwnerFactory>('IBusinessOwnerFactory');
-    repository = module.get<Repository<BusinessOwnerModel>>(getRepositoryToken(BusinessOwnerModel));
   });
 
   afterAll(async () => {

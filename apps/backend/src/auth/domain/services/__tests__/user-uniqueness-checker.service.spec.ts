@@ -12,7 +12,7 @@ describe('UserUniquenessChecker', () => {
       findByEmail: jest.fn(),
       findById: jest.fn(),
       findAll: jest.fn(),
-    } as any;
+    } as jest.Mocked<IUserReadRepository>;
 
     checker = new UserUniquenessChecker(mockReadRepo);
   });

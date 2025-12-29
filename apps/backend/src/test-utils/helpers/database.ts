@@ -1,5 +1,5 @@
 /**
- * E2E Database Helper
+ * Database Test Helpers
  *
  * Consolidated database utilities for E2E and integration tests.
  * Provides functions for:
@@ -17,6 +17,8 @@ import { DataSource } from 'typeorm';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { AppointmentModel } from '@booking/infra/persistence/models/appointment';
 import { CapacityModel } from '@availability/infra/persistence/models/capacity';
+import { BlockoutModel } from '@availability/infra/persistence/models/blockout';
+import { ScheduleModel } from '@availability/infra/persistence/models/schedule';
 import { OfferingModel } from '@offering/infra/persistence/models/offering';
 import { CustomerModel } from '@customer/infra/persistence/models/customer.model';
 import { BusinessModel } from '@business/infra/persistence/models/business.model';
@@ -32,6 +34,8 @@ import { MessageModel } from '@conversation/infra/persistence/models/message.mod
 const ALL_ENTITIES = [
   AppointmentModel,
   CapacityModel,
+  BlockoutModel,
+  ScheduleModel,
   OfferingModel,
   CustomerModel,
   BusinessModel,
@@ -42,45 +46,13 @@ const ALL_ENTITIES = [
 ];
 
 /**
- * E2E Database Helper Class
+ * Test Database Helper Class
  *
  * Provides database utilities for E2E and integration tests.
  * Can be used as instance (with DataSource) or static methods.
  */
-export class E2EDatabaseHelper {
+export class TestDatabaseHelper {
   constructor(private readonly dataSource?: DataSource) {}
-
-  /**
-   * Create a test user in the database
-   * Required before creating businesses or business_owners due to foreign key constraints
-   */
-  async createTestUser(userId: string): Promise<void> {
-    if (!this.dataSource) {
-      throw new Error('DataSource is required for instance methods');
-    }
-    await E2EDatabaseHelper.createTestUser(this.dataSource, userId);
-  }
-
-  /**
-   * Create a test user in the database (static method)
-   * Required before creating businesses or business_owners due to foreign key constraints
-   */
-  static async createTestUser(dataSource: DataSource, userId: string): Promise<void> {
-    await dataSource.query(
-      `INSERT INTO users (id, email, password, name, roles, is_active, email_verified, created_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
-       ON CONFLICT (id) DO NOTHING`,
-      [
-        userId,
-        `user-${userId}@test.com`,
-        'hashed_password',
-        'Test User',
-        ['BUSINESS_OWNER'],
-        true,
-        true,
-      ],
-    );
-  }
 
   /**
    * Setup database (instance method)
@@ -90,7 +62,7 @@ export class E2EDatabaseHelper {
     if (!this.dataSource) {
       throw new Error('DataSource is required for instance methods');
     }
-    await E2EDatabaseHelper.cleanDatabase(this.dataSource);
+    await TestDatabaseHelper.cleanDatabase(this.dataSource);
   }
 
   /**
@@ -109,7 +81,7 @@ export class E2EDatabaseHelper {
     if (!this.dataSource) {
       throw new Error('DataSource is required for instance methods');
     }
-    await E2EDatabaseHelper.cleanDatabase(this.dataSource);
+    await TestDatabaseHelper.cleanDatabase(this.dataSource);
   }
 
   /**
@@ -122,8 +94,8 @@ export class E2EDatabaseHelper {
    *
    * @example
    * ```typescript
-   * const dataSource = await E2EDatabaseHelper.setupTestDatabase();
-   * await E2EDatabaseHelper.cleanDatabase(dataSource);
+   * const dataSource = await TestDatabaseHelper.setupTestDatabase();
+   * await TestDatabaseHelper.cleanDatabase(dataSource);
    * ```
    */
   static async cleanDatabase(dataSource: DataSource): Promise<void> {
@@ -156,22 +128,19 @@ export class E2EDatabaseHelper {
   /**
    * Create a test DataSource (static method)
    *
-   * Uses worker-specific database when running tests in parallel.
-   * When running with --runInBand, uses bookings_test directly.
-   * In parallel mode, uses bookings_test_${workerId}.
+   * Always uses postgres_test database (configured with maxWorkers: 1 in jest.config).
    *
    * @returns TypeORM DataSource configured for tests
    *
    * @example
    * ```typescript
-   * const dataSource = E2EDatabaseHelper.createTestDataSource();
+   * const dataSource = TestDatabaseHelper.createTestDataSource();
    * await dataSource.initialize();
    * ```
    */
   static createTestDataSource(): DataSource {
-    const isRunInBand = process.argv.includes('--runInBand');
-    const workerId = process.env.JEST_WORKER_ID;
-    const database = isRunInBand ? 'bookings_test' : `bookings_test_${workerId || '1'}`;
+    // Always use postgres_test since we run tests with maxWorkers: 1
+    const database = process.env.DB_DATABASE || 'postgres_test';
 
     return new DataSource({
       type: 'postgres',
@@ -199,23 +168,23 @@ export class E2EDatabaseHelper {
    * let dataSource: DataSource;
    *
    * beforeAll(async () => {
-   *   dataSource = await E2EDatabaseHelper.setupTestDatabase();
+   *   dataSource = await TestDatabaseHelper.setupTestDatabase();
    * });
    *
    * afterAll(async () => {
-   *   await E2EDatabaseHelper.teardownTestDatabase(dataSource);
+   *   await TestDatabaseHelper.teardownTestDatabase(dataSource);
    * });
    * ```
    */
   static async setupTestDatabase(): Promise<DataSource> {
-    const dataSource = E2EDatabaseHelper.createTestDataSource();
+    const dataSource = TestDatabaseHelper.createTestDataSource();
 
     if (!dataSource.isInitialized) {
       await dataSource.initialize();
     }
 
     // Clean database before tests
-    await E2EDatabaseHelper.cleanDatabase(dataSource);
+    await TestDatabaseHelper.cleanDatabase(dataSource);
 
     return dataSource;
   }
@@ -231,7 +200,7 @@ export class E2EDatabaseHelper {
    * @example
    * ```typescript
    * afterAll(async () => {
-   *   await E2EDatabaseHelper.teardownTestDatabase(dataSource);
+   *   await TestDatabaseHelper.teardownTestDatabase(dataSource);
    * });
    * ```
    */
@@ -254,7 +223,7 @@ export class E2EDatabaseHelper {
    * ```typescript
    * const moduleFixture = await Test.createTestingModule({
    *   imports: [
-   *     TypeOrmModule.forRoot(E2EDatabaseHelper.getTestTypeOrmConfig()),
+   *     TypeOrmModule.forRoot(TestDatabaseHelper.getTestTypeOrmConfig()),
    *     // ... other modules
    *   ],
    * }).compile();
@@ -267,7 +236,7 @@ export class E2EDatabaseHelper {
       port: parseInt(process.env.DB_PORT || '5432', 10),
       username: process.env.DB_USERNAME || 'postgres',
       password: process.env.DB_PASSWORD || 'postgres',
-      database: database || process.env.DB_DATABASE || 'bookings_test',
+      database: database || process.env.DB_DATABASE || 'postgres_test',
       entities: ALL_ENTITIES,
       synchronize: true,
       dropSchema: false,
@@ -276,10 +245,36 @@ export class E2EDatabaseHelper {
   }
 }
 
+// ============================================================================
+// Standalone Functions for Integration Tests
+// ============================================================================
+
+/**
+ * Generate a test ID (UUID v4)
+ *
+ * @returns UUID v4 string
+ *
+ * @example
+ * ```typescript
+ * const id = generateTestId();
+ * // Returns: "550e8400-e29b-41d4-a716-446655440000"
+ * ```
+ */
+export function generateTestId(): string {
+  // Simple UUID v4 generator for tests
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
 // Export standalone functions for backward compatibility
-export const cleanDatabase = E2EDatabaseHelper.cleanDatabase.bind(E2EDatabaseHelper);
-export const createTestDataSource = E2EDatabaseHelper.createTestDataSource.bind(E2EDatabaseHelper);
-export const setupTestDatabase = E2EDatabaseHelper.setupTestDatabase.bind(E2EDatabaseHelper);
-export const teardownTestDatabase = E2EDatabaseHelper.teardownTestDatabase.bind(E2EDatabaseHelper);
-export const getTestTypeOrmConfig = E2EDatabaseHelper.getTestTypeOrmConfig.bind(E2EDatabaseHelper);
-export const createTestUser = E2EDatabaseHelper.createTestUser.bind(E2EDatabaseHelper);
+export const cleanDatabase = TestDatabaseHelper.cleanDatabase.bind(TestDatabaseHelper);
+export const createTestDataSource =
+  TestDatabaseHelper.createTestDataSource.bind(TestDatabaseHelper);
+export const setupTestDatabase = TestDatabaseHelper.setupTestDatabase.bind(TestDatabaseHelper);
+export const teardownTestDatabase =
+  TestDatabaseHelper.teardownTestDatabase.bind(TestDatabaseHelper);
+export const getTestTypeOrmConfig =
+  TestDatabaseHelper.getTestTypeOrmConfig.bind(TestDatabaseHelper);

@@ -4,41 +4,44 @@ import { PinoLogger } from 'nestjs-pino';
 import { CreateAppointmentHandler } from '../handler';
 import { CreateAppointmentCommand } from '../command';
 import { IAppointmentWriteRepository } from '@booking/domain/interfaces/repositories/appointment-write';
+import { ICapacityFactory } from '@availability/domain/interfaces/factories/capacity-factory';
+import { ICapacityWriteRepository } from '@availability/domain/interfaces/repositories/capacity-write';
+import { ICustomerExistenceChecker } from '@customer/domain/interfaces/services/customer-existence-checker.interface';
 import { IUnitOfWork } from '@shared/kernel/uow';
 import { uuidV4 } from '@test-utils/generators';
+import { Capacity } from '@availability/domain/aggregates/capacity';
 
 describe('CreateAppointmentHandler - Property Tests', () => {
   let handler: CreateAppointmentHandler;
   let appointmentRepository: jest.Mocked<IAppointmentWriteRepository>;
-  let capacityFactory: any;
-  let capacityWriteRepository: any;
-  let customerExistenceChecker: any;
+  let capacityFactory: jest.Mocked<ICapacityFactory>;
+  let capacityWriteRepository: jest.Mocked<ICapacityWriteRepository>;
+  let customerExistenceChecker: jest.Mocked<ICustomerExistenceChecker>;
   let uow: jest.Mocked<IUnitOfWork>;
 
   beforeEach(async () => {
     appointmentRepository = {
       save: jest.fn(),
-      findById: jest.fn(),
-    } as any;
+    } as jest.Mocked<IAppointmentWriteRepository>;
 
     capacityFactory = {
       loadByOfferingAndDate: jest.fn(),
       loadById: jest.fn(),
-    };
+    } as jest.Mocked<ICapacityFactory>;
 
     capacityWriteRepository = {
       save: jest.fn(),
-    };
+    } as jest.Mocked<ICapacityWriteRepository>;
 
     customerExistenceChecker = {
       exists: jest.fn().mockResolvedValue(true), // Mock customer exists for all tests
       getCustomer: jest.fn(),
-    };
+    } as jest.Mocked<ICustomerExistenceChecker>;
 
     uow = {
       transaction: jest.fn((work) => work()),
       getQueryRunner: jest.fn(),
-    } as any;
+    } as jest.Mocked<IUnitOfWork>;
 
     const mockLogger = {
       info: jest.fn(),
@@ -98,7 +101,7 @@ describe('CreateAppointmentHandler - Property Tests', () => {
             bookSlot: jest.fn(() => {
               capacitySlots--;
             }),
-          };
+          } as unknown as Capacity;
 
           capacityFactory.loadByOfferingAndDate.mockResolvedValue(mockCapacity);
           customerExistenceChecker.exists.mockResolvedValue(true); // Mock customer exists

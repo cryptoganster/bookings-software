@@ -3,14 +3,13 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { DataSource } from 'typeorm';
 import { AppModule } from '../../../../app.module';
-import { E2EAuthHelper, E2EDatabaseHelper, UserRole } from '@test-utils/e2e-helpers';
+import { E2EAuthHelper, E2EDatabaseHelper } from '@test-utils/helpers';
 
 describe('Offering CRUD Controller E2E', () => {
   let app: INestApplication;
   let authHelper: E2EAuthHelper;
   let dbHelper: E2EDatabaseHelper;
   let authToken: string;
-  let userId: string;
   let businessId: string;
 
   beforeAll(async () => {
@@ -47,13 +46,12 @@ describe('Offering CRUD Controller E2E', () => {
     authHelper = new E2EAuthHelper(app);
 
     // Create test user with BUSINESS_OWNER role and business via API
-    const testUser = await authHelper.createTestUser(UserRole.BUSINESS_OWNER, {
-      name: 'Business Owner',
+    const testUser = await authHelper.createBusinessOwner({
+      name: 'Test Business',
     });
 
     authToken = testUser.token;
-    userId = testUser.id;
-    businessId = testUser.businessId!;
+    businessId = testUser.businessId;
 
     if (!businessId) {
       throw new Error('Failed to create business for test user');
@@ -204,8 +202,8 @@ describe('Offering CRUD Controller E2E', () => {
 
       expect(Array.isArray(response.body)).toBe(true);
       expect(response.body.length).toBeGreaterThanOrEqual(2);
-      expect(response.body.some((o: any) => o.id === offeringId1)).toBe(true);
-      expect(response.body.some((o: any) => o.id === offeringId2)).toBe(true);
+      expect(response.body.some((o: { id: string }) => o.id === offeringId1)).toBe(true);
+      expect(response.body.some((o: { id: string }) => o.id === offeringId2)).toBe(true);
     });
 
     it('should include offering details', async () => {
@@ -214,7 +212,7 @@ describe('Offering CRUD Controller E2E', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
-      const offering = response.body.find((o: any) => o.id === offeringId1);
+      const offering = response.body.find((o: { id: string }) => o.id === offeringId1);
       expect(offering).toHaveProperty('name', 'Haircut');
       expect(offering).toHaveProperty('duration', 30);
       expect(offering).toHaveProperty('maxCapacityPerSlot', 1);
@@ -264,9 +262,9 @@ describe('Offering CRUD Controller E2E', () => {
         .expect(200);
 
       expect(Array.isArray(response.body)).toBe(true);
-      expect(response.body.some((o: any) => o.id === activeOfferingId)).toBe(true);
-      expect(response.body.some((o: any) => o.id === inactiveOfferingId)).toBe(false);
-      response.body.forEach((offering: any) => {
+      expect(response.body.some((o: { id: string }) => o.id === activeOfferingId)).toBe(true);
+      expect(response.body.some((o: { id: string }) => o.id === inactiveOfferingId)).toBe(false);
+      response.body.forEach((offering: { isActive: boolean }) => {
         expect(offering.isActive).toBe(true);
       });
     });
@@ -306,7 +304,7 @@ describe('Offering CRUD Controller E2E', () => {
       await request(app.getHttpServer())
         .get('/api/offerings/00000000-0000-0000-0000-000000000000')
         .set('Authorization', `Bearer ${authToken}`)
-        .expect(500); // Controller throws generic Error, not NotFoundException
+        .expect(404);
     });
   });
 
@@ -327,7 +325,7 @@ describe('Offering CRUD Controller E2E', () => {
     });
 
     it('should update offering', async () => {
-      const response = await request(app.getHttpServer())
+      const _response = await request(app.getHttpServer())
         .put(`/api/offerings/${offeringId}`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({
@@ -403,7 +401,7 @@ describe('Offering CRUD Controller E2E', () => {
     });
 
     it('should deactivate offering', async () => {
-      const response = await request(app.getHttpServer())
+      const _response = await request(app.getHttpServer())
         .delete(`/api/offerings/${offeringId}`)
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
@@ -455,7 +453,7 @@ describe('Offering CRUD Controller E2E', () => {
     });
 
     it('should deactivate offering via toggle', async () => {
-      const response = await request(app.getHttpServer())
+      const _response = await request(app.getHttpServer())
         .patch(`/api/offerings/${offeringId}/active`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({
@@ -481,7 +479,7 @@ describe('Offering CRUD Controller E2E', () => {
         });
 
       // Then activate
-      const response = await request(app.getHttpServer())
+      const _response = await request(app.getHttpServer())
         .patch(`/api/offerings/${offeringId}/active`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({

@@ -14,7 +14,11 @@ import {
   createCapacityForTomorrow,
   createActiveOffering,
   E2EAuthHelper,
-} from '@test-utils/e2e-helpers';
+} from '@test-utils/helpers';
+
+// Suppress unused variable warning - imported for documentation
+void createCapacityForTomorrow;
+import { ensureMigrationsRun } from '../../../../../test/test-setup';
 
 describe('Customer Flow E2E', () => {
   let app: INestApplication;
@@ -31,6 +35,9 @@ describe('Customer Flow E2E', () => {
   const testCustomerPhone = '+1234567891'; // Unique phone number for this test suite
 
   beforeAll(async () => {
+    // IMPORTANT: Run migrations first (once per test session)
+    await ensureMigrationsRun();
+
     // Create mock WhatsApp client
     mockWhatsAppClient = {
       sendMessage: jest.fn().mockImplementation((to: string, message: string) => {
@@ -82,8 +89,8 @@ describe('Customer Flow E2E', () => {
     testBusinessId = testUser.businessId!;
 
     // Create active offering for foreign key constraint
-    const offering = await createActiveOffering(dataSource, testBusinessId);
-    testOfferingId = offering.id;
+    testOfferingId = UUID.generate().getValue();
+    await createActiveOffering(dataSource, testBusinessId, { id: testOfferingId });
   });
 
   afterAll(async () => {
@@ -102,6 +109,7 @@ describe('Customer Flow E2E', () => {
     await dataSource.query('DELETE FROM appointments');
     await dataSource.query('DELETE FROM customers');
     await dataSource.query('DELETE FROM capacities');
+    await dataSource.query('DELETE FROM schedules');
     await dataSource.query('DELETE FROM offerings');
 
     // Clear conversations from database
@@ -109,14 +117,13 @@ describe('Customer Flow E2E', () => {
     await dataSource.query('DELETE FROM messages');
 
     // Recreate the test offering after cleanup
-    const offering = await createActiveOffering(dataSource, testBusinessId);
-    testOfferingId = offering.id;
+    await createActiveOffering(dataSource, testBusinessId, { id: testOfferingId });
   });
 
   describe('Requirement 7.1: Customer Identification', () => {
     it('should automatically identify/create customer from WhatsApp message', async () => {
       // Arrange: Create offering so conversation flow can proceed
-      await createActiveOffering(dataSource, testBusinessId, testOfferingId);
+      await createActiveOffering(dataSource, testBusinessId, { id: testOfferingId });
 
       // Act: Customer sends first message
       await commandBus.execute(
@@ -144,7 +151,7 @@ describe('Customer Flow E2E', () => {
 
     it('should reuse existing customer on subsequent messages', async () => {
       // Arrange: Create offering so conversation flow can proceed
-      await createActiveOffering(dataSource, testBusinessId, testOfferingId);
+      await createActiveOffering(dataSource, testBusinessId, { id: testOfferingId });
 
       // Arrange: Send first message to create customer
       await commandBus.execute(
@@ -180,9 +187,36 @@ describe('Customer Flow E2E', () => {
 
   describe('Requirement 7.2: Customer Info in Appointment Queries', () => {
     it('should include customer name and phone in appointment read model', async () => {
-      // Arrange: Create offering and capacity
-      await createActiveOffering(dataSource, testBusinessId, testOfferingId);
-      await createCapacityForTomorrow(dataSource, testOfferingId, 5, 10);
+      // Arrange: Create offering
+      await createActiveOffering(dataSource, testBusinessId, { id: testOfferingId });
+
+      // Create schedules for ALL days (0-6) so conversation flow can find available slots
+      // The handler generates date buttons for tomorrow, day+2, day+3 regardless of day of week
+      const { createScheduleInDb } = await import('@test-utils/helpers');
+      for (let day = 0; day <= 6; day++) {
+        await createScheduleInDb(dataSource, {
+          businessId: testBusinessId,
+          dayOfWeek: day,
+          startTime: '09:00:00',
+          endTime: '17:00:00',
+        });
+      }
+
+      // Create capacity for the next 3 days (matching what sendDateSelectionButtons generates)
+      const { v4: uuidv4 } = require('uuid');
+      const today = new Date();
+      today.setUTCHours(0, 0, 0, 0);
+
+      for (let i = 1; i <= 3; i++) {
+        const date = new Date(today);
+        date.setUTCDate(today.getUTCDate() + i);
+        const dateStr = date.toISOString().split('T')[0];
+
+        await dataSource.query(
+          'INSERT INTO capacities (id, offering_id, date, total_slots, available_slots, version, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())',
+          [uuidv4(), testOfferingId, dateStr, 10, 10, 0],
+        );
+      }
 
       // Act: Complete booking flow
       await commandBus.execute(
@@ -277,8 +311,8 @@ describe('Customer Flow E2E', () => {
       const phone = '+1234567890';
 
       // Arrange: Create offerings for both businesses
-      await createActiveOffering(dataSource, business1Id, offering1Id);
-      await createActiveOffering(dataSource, business2Id, offering2Id);
+      await createActiveOffering(dataSource, business1Id, { id: offering1Id });
+      await createActiveOffering(dataSource, business2Id, { id: offering2Id });
 
       // Act: Create customer in business 1
       await commandBus.execute(
@@ -316,7 +350,7 @@ describe('Customer Flow E2E', () => {
       const phone = '+1234567890';
 
       // Arrange: Create offering for business 1 and create customer
-      await createActiveOffering(dataSource, business1Id, offering1Id);
+      await createActiveOffering(dataSource, business1Id, { id: offering1Id });
       await commandBus.execute(
         new ProcessIncomingMessageCommand(business1Id, '', phone, 'Hola', undefined),
       );
@@ -334,9 +368,36 @@ describe('Customer Flow E2E', () => {
 
   describe('Requirement 7.4: Anonymous Customer Flow', () => {
     it('should allow anonymous customer to complete booking', async () => {
-      // Arrange: Create offering and capacity
-      await createActiveOffering(dataSource, testBusinessId, testOfferingId);
-      await createCapacityForTomorrow(dataSource, testOfferingId, 5, 10);
+      // Arrange: Create offering
+      await createActiveOffering(dataSource, testBusinessId, { id: testOfferingId });
+
+      // Create schedules for ALL days (0-6) so conversation flow can find available slots
+      // The handler generates date buttons for tomorrow, day+2, day+3 regardless of day of week
+      const { createScheduleInDb } = await import('@test-utils/helpers');
+      for (let day = 0; day <= 6; day++) {
+        await createScheduleInDb(dataSource, {
+          businessId: testBusinessId,
+          dayOfWeek: day,
+          startTime: '09:00:00',
+          endTime: '17:00:00',
+        });
+      }
+
+      // Create capacity for the next 3 days (matching what sendDateSelectionButtons generates)
+      const { v4: uuidv4 } = require('uuid');
+      const today = new Date();
+      today.setUTCHours(0, 0, 0, 0);
+
+      for (let i = 1; i <= 3; i++) {
+        const date = new Date(today);
+        date.setUTCDate(today.getUTCDate() + i);
+        const dateStr = date.toISOString().split('T')[0];
+
+        await dataSource.query(
+          'INSERT INTO capacities (id, offering_id, date, total_slots, available_slots, version, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())',
+          [uuidv4(), testOfferingId, dateStr, 10, 10, 0],
+        );
+      }
 
       // Act: Complete booking flow as anonymous customer
       await commandBus.execute(
@@ -393,7 +454,7 @@ describe('Customer Flow E2E', () => {
   describe('Requirement 7.5: Idempotency', () => {
     it('should handle concurrent customer identification gracefully', async () => {
       // Arrange: Create offering so conversation flow can proceed
-      await createActiveOffering(dataSource, testBusinessId, testOfferingId);
+      await createActiveOffering(dataSource, testBusinessId, { id: testOfferingId });
 
       // Act: Send multiple messages concurrently
       // Some may fail due to unique constraint, but that's expected

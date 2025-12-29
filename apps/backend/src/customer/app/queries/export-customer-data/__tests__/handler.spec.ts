@@ -9,7 +9,7 @@ describe('ExportCustomerDataHandler', () => {
   let customerReadRepository: jest.Mocked<ICustomerReadRepository>;
 
   const mockCustomerId = '550e8400-e29b-41d4-a716-446655440001';
-  const mockBusinessId = '550e8400-e29b-41d4-a716-446655440002';
+  const _mockBusinessId = '550e8400-e29b-41d4-a716-446655440002';
 
   beforeEach(async () => {
     // Create mocks
@@ -19,7 +19,9 @@ describe('ExportCustomerDataHandler', () => {
       findByWhatsAppPhone: jest.fn(),
       findByUserId: jest.fn(),
       getFullData: jest.fn(),
-    } as any;
+      search: jest.fn(),
+      getStats: jest.fn(),
+    } as unknown as jest.Mocked<ICustomerReadRepository>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

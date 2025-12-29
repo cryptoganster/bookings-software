@@ -29,20 +29,22 @@ describe('DeleteCustomerHandler', () => {
     // Create mocks
     customerFactory = {
       loadById: jest.fn(),
-    } as any;
+      loadByWhatsAppPhone: jest.fn(),
+    } as unknown as jest.Mocked<ICustomerFactory>;
 
     customerWriteRepository = {
       save: jest.fn(),
-    } as any;
+    } as jest.Mocked<ICustomerWriteRepository>;
 
     appointmentChecker = {
       hasFutureAppointments: jest.fn(),
       getFutureAppointmentsCount: jest.fn(),
-    } as any;
+    } as jest.Mocked<ICustomerAppointmentChecker>;
 
     uow = {
       transaction: jest.fn((work) => work()),
-    } as any;
+      getQueryRunner: jest.fn(),
+    } as jest.Mocked<IUnitOfWork>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

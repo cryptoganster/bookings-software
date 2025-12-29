@@ -53,10 +53,10 @@ describe('Property 14: Protected endpoints reject invalid tokens', () => {
         getResponse: () => ({}),
         getNext: () => ({}),
       }),
-      getClass: () => ({}) as any,
-      getHandler: () => ({}) as any,
+      getClass: () => ({}) as unknown,
+      getHandler: () => ({}) as unknown,
       getArgs: () => [],
-      getArgByIndex: () => ({}) as any,
+      getArgByIndex: () => ({}) as unknown,
       switchToRpc: () => ({
         getData: () => ({}),
         getContext: () => ({}),
@@ -66,7 +66,7 @@ describe('Property 14: Protected endpoints reject invalid tokens', () => {
         getClient: () => ({}),
         getPattern: () => '',
       }),
-      getType: () => 'http' as any,
+      getType: () => 'http' as unknown,
     } as unknown as ExecutionContext;
   };
 

@@ -14,7 +14,8 @@ import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { UUID } from '@shared/vo/uuid';
 import { WhatsAppPhoneAlreadyExistsException } from '@shared/kernel/exceptions/whatsapp-phone-already-exists';
 import { MaxBusinessesExceededException } from '@business/domain/exceptions/max-businesses-exceeded';
-import { createTestUser, cleanDatabase } from '@test-utils/e2e-helpers';
+import { createTestUser, cleanDatabase } from '@test-utils/helpers';
+import { ensureMigrationsRun } from '../../../../../../test/test-setup';
 
 /**
  * Integration tests for CreateBusinessHandler
@@ -33,11 +34,12 @@ describe('CreateBusinessHandler Integration Tests', () => {
   let module: TestingModule;
   let commandBus: CommandBus;
   let dataSource: DataSource;
-  let ownerId: string;
 
   beforeAll(async () => {
+    await ensureMigrationsRun();
+
     const mockEventPublisher = {
-      mergeObjectContext: jest.fn((obj: any) => {
+      mergeObjectContext: jest.fn(<T extends { commit?: jest.Mock }>(obj: T): T => {
         // Return the original object with a mock commit method added
         obj.commit = jest.fn();
         return obj;
@@ -136,8 +138,6 @@ describe('CreateBusinessHandler Integration Tests', () => {
 
     commandBus = module.get<CommandBus>(CommandBus);
     dataSource = module.get<DataSource>(DataSource);
-
-    ownerId = UUID.generate().getValue();
   }, 30000);
 
   afterAll(async () => {
@@ -146,12 +146,16 @@ describe('CreateBusinessHandler Integration Tests', () => {
   });
 
   afterEach(async () => {
+    // Clean businesses table explicitly before general cleanup
+    // This ensures WhatsApp phone uniqueness constraint doesn't fail
+    await dataSource.query('DELETE FROM businesses');
     await cleanDatabase(dataSource);
   });
 
   describe('Create new business', () => {
     it('should create new business with valid data', async () => {
       // Arrange
+      const ownerId = UUID.generate().getValue();
       await createTestUser(dataSource, ownerId);
 
       const command = new CreateBusinessCommand(
@@ -196,6 +200,7 @@ describe('CreateBusinessHandler Integration Tests', () => {
 
     it('should create business with minimal address (only street and city)', async () => {
       // Arrange
+      const ownerId = UUID.generate().getValue();
       await createTestUser(dataSource, ownerId);
 
       const command = new CreateBusinessCommand(
@@ -229,6 +234,7 @@ describe('CreateBusinessHandler Integration Tests', () => {
 
     it('should create business with different timezone', async () => {
       // Arrange
+      const ownerId = UUID.generate().getValue();
       await createTestUser(dataSource, ownerId);
 
       const command = new CreateBusinessCommand(
@@ -260,6 +266,7 @@ describe('CreateBusinessHandler Integration Tests', () => {
   describe('WhatsAppPhone uniqueness (Property 1)', () => {
     it('should reject duplicate WhatsAppPhone', async () => {
       // Arrange - Create first business
+      const ownerId = UUID.generate().getValue();
       const existingId = UUID.generate().getValue();
       await createTestUser(dataSource, ownerId);
 
@@ -309,6 +316,7 @@ describe('CreateBusinessHandler Integration Tests', () => {
 
     it('should allow same owner to create multiple businesses with different phones', async () => {
       // Arrange
+      const ownerId = UUID.generate().getValue();
       await createTestUser(dataSource, ownerId);
 
       const command1 = new CreateBusinessCommand(
@@ -390,6 +398,7 @@ describe('CreateBusinessHandler Integration Tests', () => {
   describe('Multi-business support', () => {
     it('should allow creating multiple businesses for same owner', async () => {
       // Arrange
+      const ownerId = UUID.generate().getValue();
       await createTestUser(dataSource, ownerId);
 
       const commands = [
@@ -450,6 +459,7 @@ describe('CreateBusinessHandler Integration Tests', () => {
 
     it('should reject business creation when limit exceeded', async () => {
       // Arrange - Get the mock and update it to return a plan with maxBusinesses = 1
+      const ownerId = UUID.generate().getValue();
       await createTestUser(dataSource, ownerId);
 
       const mockBusinessOwnerReadRepo = module.get('IBusinessOwnerReadRepository');
@@ -509,6 +519,7 @@ describe('CreateBusinessHandler Integration Tests', () => {
   describe('Default values', () => {
     it('should set isActive=true by default', async () => {
       // Arrange
+      const ownerId = UUID.generate().getValue();
       await createTestUser(dataSource, ownerId);
 
       const command = new CreateBusinessCommand(
@@ -538,6 +549,7 @@ describe('CreateBusinessHandler Integration Tests', () => {
 
     it('should set version=1 for new business', async () => {
       // Arrange
+      const ownerId = UUID.generate().getValue();
       await createTestUser(dataSource, ownerId);
 
       const command = new CreateBusinessCommand(

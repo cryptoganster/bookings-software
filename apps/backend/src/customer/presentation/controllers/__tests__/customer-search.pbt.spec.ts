@@ -233,7 +233,7 @@ describe('CustomerSearchController - Property-Based Tests', () => {
 
             // Arrange
             const dto: SearchCustomersDto = {
-              sortBy: sortBy as any,
+              sortBy: sortBy as 'name' | 'createdAt' | 'appointmentCount',
               sortOrder: 'asc',
             };
 
@@ -269,7 +269,7 @@ describe('CustomerSearchController - Property-Based Tests', () => {
 
             // Arrange
             const dto: SearchCustomersDto = {
-              sortBy: sortBy as any,
+              sortBy: sortBy as 'name' | 'createdAt' | 'appointmentCount',
               sortOrder: 'desc',
             };
 

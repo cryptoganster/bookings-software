@@ -176,11 +176,12 @@ describe('CustomerMergeController', () => {
       await controller.merge(dto, mockUser);
 
       // Assert
-      const completeLog = logger.info.mock.calls.find(
-        (call: any) => call[0].action === 'merge_customers_complete',
-      );
+      const calls = logger.info.mock.calls as Array<
+        [{ action: string; duration?: number }, string]
+      >;
+      const completeLog = calls.find((call) => call[0].action === 'merge_customers_complete');
       expect(completeLog).toBeDefined();
-      expect((completeLog as any)[0].duration).toBeGreaterThanOrEqual(0);
+      expect(completeLog![0].duration).toBeGreaterThanOrEqual(0);
     });
 
     it('should re-throw error after logging', async () => {
@@ -282,7 +283,7 @@ describe('CustomerMergeController', () => {
         }),
         'Customer merge failed',
       );
-      const errorLog = logger.error.mock.calls[0][0] as any;
+      const errorLog = logger.error.mock.calls[0][0] as { duration: number };
       expect(errorLog.duration).toBeGreaterThanOrEqual(0);
     });
   });

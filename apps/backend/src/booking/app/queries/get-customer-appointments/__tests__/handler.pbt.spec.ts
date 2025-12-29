@@ -6,6 +6,7 @@ import { GetCustomerAppointmentsQuery } from '../query';
 import { AppointmentReadRepository } from '@booking/infra/persistence/repositories/appointment-read';
 import { AppointmentModel } from '@booking/infra/persistence/models/appointment';
 import * as fc from 'fast-check';
+import { ensureMigrationsRun } from '../../../../../../test/test-setup';
 
 describe('GetCustomerAppointmentsHandler - Property Tests', () => {
   let module: TestingModule;
@@ -13,6 +14,8 @@ describe('GetCustomerAppointmentsHandler - Property Tests', () => {
   let dataSource: DataSource;
 
   beforeAll(async () => {
+    await ensureMigrationsRun();
+
     module = await Test.createTestingModule({
       imports: [
         TypeOrmModule.forRoot({

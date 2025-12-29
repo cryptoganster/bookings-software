@@ -6,7 +6,6 @@ import { HealthController } from '../health.controller';
 describe('HealthController', () => {
   let controller: HealthController;
   let healthCheckService: HealthCheckService;
-  let typeOrmHealthIndicator: TypeOrmHealthIndicator;
   let logger: PinoLogger;
 
   beforeEach(async () => {
@@ -37,7 +36,7 @@ describe('HealthController', () => {
 
     controller = module.get<HealthController>(HealthController);
     healthCheckService = module.get<HealthCheckService>(HealthCheckService);
-    typeOrmHealthIndicator = module.get<TypeOrmHealthIndicator>(TypeOrmHealthIndicator);
+    // TypeOrmHealthIndicator is provided but not used directly in tests
     logger = module.get<PinoLogger>(PinoLogger);
   });
 

@@ -103,12 +103,12 @@ describe('WhatsAppPhone Value Object', () => {
 
     it('should not be equal to null', () => {
       const phone = WhatsAppPhone.fromString('+18095551234');
-      expect(phone.equals(null as any)).toBe(false);
+      expect(phone.equals(null as unknown as WhatsAppPhone)).toBe(false);
     });
 
     it('should not be equal to undefined', () => {
       const phone = WhatsAppPhone.fromString('+18095551234');
-      expect(phone.equals(undefined as any)).toBe(false);
+      expect(phone.equals(undefined as unknown as WhatsAppPhone)).toBe(false);
     });
   });
 

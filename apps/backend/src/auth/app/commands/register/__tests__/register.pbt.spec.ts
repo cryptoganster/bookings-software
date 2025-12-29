@@ -29,7 +29,7 @@ describe('Property 7: initialRole propagates correctly through registration', ()
       },
     };
 
-    const mockUserReadRepository: IUserReadRepository = {
+    const _mockUserReadRepository: IUserReadRepository = {
       findById: (id: string) => {
         for (const user of userRepository.values()) {
           if (user.getId().getValue() === id) {
@@ -203,7 +203,7 @@ describe('Property 7: initialRole propagates correctly through registration', ()
           userRepository.clear();
 
           // Register user with specific role
-          const result = await registerHandler.execute(
+          const _result = await registerHandler.execute(
             new RegisterCommand(userData.email, userData.password, userData.name, userData.role),
           );
 

@@ -3,7 +3,8 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { DataSource } from 'typeorm';
 import { AppModule } from '../../../../app.module';
-import { E2EAuthHelper, E2EDatabaseHelper, UserRole } from '@test-utils/e2e-helpers';
+import { E2EAuthHelper, E2EDatabaseHelper, UserRole } from '@test-utils/helpers';
+import { ensureMigrationsRun } from '../../../../../test/test-setup';
 
 describe('BusinessOwnerProfile Controller E2E', () => {
   let app: INestApplication;
@@ -11,9 +12,10 @@ describe('BusinessOwnerProfile Controller E2E', () => {
   let dbHelper: E2EDatabaseHelper;
   let authToken: string;
   let userId: string;
-  let businessOwnerId: string;
 
   beforeAll(async () => {
+    await ensureMigrationsRun();
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -51,12 +53,12 @@ describe('BusinessOwnerProfile Controller E2E', () => {
     // Wait a bit for event handler to create BusinessOwner
     await new Promise((resolve) => setTimeout(resolve, 200));
 
-    // Get the BusinessOwner ID
+    // Get the BusinessOwner ID (verify it was created)
     const profileResponse = await request(app.getHttpServer())
       .get('/api/account/profile')
       .set('Authorization', `Bearer ${authToken}`);
 
-    businessOwnerId = profileResponse.body.id;
+    expect(profileResponse.body.id).toBeDefined();
   });
 
   afterAll(async () => {

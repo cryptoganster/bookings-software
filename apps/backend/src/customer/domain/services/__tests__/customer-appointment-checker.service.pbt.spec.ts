@@ -49,7 +49,7 @@ describe('CustomerAppointmentChecker PBT', () => {
             findUpcoming: jest.fn(),
             findToday: jest.fn(),
             findByBusinessAndDateRange: jest.fn(),
-          } as any;
+          } as jest.Mocked<IAppointmentReadRepository>;
 
           const checker = new CustomerAppointmentChecker(mockRepo);
 
@@ -102,7 +102,7 @@ describe('CustomerAppointmentChecker PBT', () => {
             findUpcoming: jest.fn(),
             findToday: jest.fn(),
             findByBusinessAndDateRange: jest.fn(),
-          } as any;
+          } as jest.Mocked<IAppointmentReadRepository>;
 
           const checker = new CustomerAppointmentChecker(mockRepo);
 
@@ -154,7 +154,7 @@ describe('CustomerAppointmentChecker PBT', () => {
             findUpcoming: jest.fn(),
             findToday: jest.fn(),
             findByBusinessAndDateRange: jest.fn(),
-          } as any;
+          } as jest.Mocked<IAppointmentReadRepository>;
 
           const checker = new CustomerAppointmentChecker(mockRepo);
 
@@ -185,7 +185,7 @@ describe('CustomerAppointmentChecker PBT', () => {
             findUpcoming: jest.fn(),
             findToday: jest.fn(),
             findByBusinessAndDateRange: jest.fn(),
-          } as any;
+          } as jest.Mocked<IAppointmentReadRepository>;
 
           const checker = new CustomerAppointmentChecker(mockRepo);
 
@@ -236,7 +236,7 @@ describe('CustomerAppointmentChecker PBT', () => {
             findUpcoming: jest.fn(),
             findToday: jest.fn(),
             findByBusinessAndDateRange: jest.fn(),
-          } as any;
+          } as jest.Mocked<IAppointmentReadRepository>;
 
           const checker = new CustomerAppointmentChecker(mockRepo);
 
@@ -274,7 +274,7 @@ describe('CustomerAppointmentChecker PBT', () => {
             findUpcoming: jest.fn(),
             findToday: jest.fn(),
             findByBusinessAndDateRange: jest.fn(),
-          } as any;
+          } as jest.Mocked<IAppointmentReadRepository>;
 
           const checker = new CustomerAppointmentChecker(mockRepo);
 

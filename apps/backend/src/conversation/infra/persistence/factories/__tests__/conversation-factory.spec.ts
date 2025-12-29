@@ -6,18 +6,14 @@ import { ConversationModel } from '@conversation/infra/persistence/models/conver
 import { BusinessModel } from '@business/infra/persistence/models/business.model';
 import { CustomerModel } from '@customer/infra/persistence/models/customer.model';
 import { UUID } from '@shared/vo/uuid';
-import {
-  createIntegrationTestDataSource,
-  cleanDatabase,
-  generateTestId,
-} from '@test-utils/integration-test-helper';
+import { setupTestDatabase, cleanDatabase, generateTestId } from '@test-utils/helpers/database';
 
 describe('ConversationFactory', () => {
   let factory: ConversationFactory;
   let dataSource: DataSource;
 
   beforeAll(async () => {
-    dataSource = await createIntegrationTestDataSource();
+    dataSource = await setupTestDatabase();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

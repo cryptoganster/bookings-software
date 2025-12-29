@@ -10,11 +10,7 @@ import { Message } from '@conversation/domain/aggregates/message';
 import { UUID } from '@shared/vo/uuid';
 import { MessageDirection } from '@conversation/domain/vo/message-direction';
 import { MessageType } from '@conversation/domain/vo/message-type';
-import {
-  createIntegrationTestDataSource,
-  cleanDatabase,
-  generateTestId,
-} from '@test-utils/integration-test-helper';
+import { setupTestDatabase, cleanDatabase, generateTestId } from '@test-utils/helpers/database';
 
 describe('MessageReadRepository (Integration)', () => {
   let repository: MessageReadRepository;
@@ -79,7 +75,7 @@ describe('MessageReadRepository (Integration)', () => {
 
   beforeAll(async () => {
     // Create shared DataSource with ALL entities
-    dataSource = await createIntegrationTestDataSource();
+    dataSource = await setupTestDatabase();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
