@@ -27,7 +27,7 @@
     "@packages/shared-types": "workspace:*",
     "@tabler/icons-react": "^3.36.0",
     "@tanstack/react-query": "^5.0.0",
-    "@tanstack/react-query-devtools": "^5.91.1",
+    "@tanstack/react-query-devtools": "^5.91.2",
     "axios": "^1.6.0",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
