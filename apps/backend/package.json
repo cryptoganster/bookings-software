@@ -10,6 +10,7 @@
     "postbuild": "cp -r src/database/migrations dist/database/ && cp -r src/database/seeds dist/database/",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
+    "dev": "nodemon",
     "start:dev": "nodemon",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",

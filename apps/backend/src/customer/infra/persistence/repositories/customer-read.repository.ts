@@ -135,9 +135,12 @@ export class CustomerReadRepository implements ICustomerReadRepository {
    * - Date range filtering
    * - Pagination (OFFSET, LIMIT)
    * - Sorting (name, createdAt, appointmentCount)
+   * - Input normalization (page >= 1, limit 1-100)
+   * - Query cloning to prevent state pollution
+   * - Secondary sort for consistent ordering
    *
-   * Requirements: 2.1, 2.2, 2.3, 2.4, 2.5
-   * Edge Cases: 2 (SQL injection), 7 (Pagination beyond total), 9 (Empty query)
+   * Requirements: 1.1-1.5, 2.1-2.5, 3.1-3.4, 4.1-4.5, 5.1-5.5
+   * Properties: 1-9 (Offset accuracy, Metadata, No duplicates, Coverage, Stable sort, Edge cases)
    */
   async search(filters: SearchCustomersFilters): Promise<SearchCustomersResult> {
     const {
@@ -151,8 +154,12 @@ export class CustomerReadRepository implements ICustomerReadRepository {
       sortOrder = 'DESC',
     } = filters;
 
-    // Build query
-    const queryBuilder = this.repository
+    // Normalize inputs (Requirements 4.2, 4.3, 4.4)
+    const normalizedPage = Math.max(1, page);
+    const normalizedLimit = Math.max(1, Math.min(100, limit));
+
+    // Build base query for filtering
+    const baseQuery = this.repository
       .createQueryBuilder('customer')
       .where('customer.business_id = :businessId', { businessId });
 
@@ -164,7 +171,7 @@ export class CustomerReadRepository implements ICustomerReadRepository {
         .replace(/%/g, '\\%')
         .replace(/_/g, '\\_');
 
-      queryBuilder.andWhere(
+      baseQuery.andWhere(
         new Brackets((qb) => {
           qb.where('LOWER(customer.name) LIKE LOWER(:searchText)', {
             searchText: `%${escapedText}%`,
@@ -177,32 +184,43 @@ export class CustomerReadRepository implements ICustomerReadRepository {
 
     // Type filter
     if (type === 'anonymous') {
-      queryBuilder.andWhere('customer.user_id IS NULL');
+      baseQuery.andWhere('customer.user_id IS NULL');
     } else if (type === 'registered') {
-      queryBuilder.andWhere('customer.user_id IS NOT NULL');
+      baseQuery.andWhere('customer.user_id IS NOT NULL');
     }
 
     // Date range filter
     if (dateRange) {
-      queryBuilder.andWhere('customer.created_at BETWEEN :startDate AND :endDate', {
+      baseQuery.andWhere('customer.created_at BETWEEN :startDate AND :endDate', {
         startDate: dateRange.startDate,
         endDate: dateRange.endDate,
       });
     }
 
-    // Get total count before pagination
-    const total = await queryBuilder.getCount();
+    // Get total count BEFORE adding sorting and pagination (Requirement 5.1)
+    const total = await baseQuery.getCount();
 
-    // Sorting
-    const sortColumn = sortBy === 'name' ? 'customer.name' : 'customer.created_at';
-    queryBuilder.orderBy(sortColumn, sortOrder);
+    // Calculate pagination metadata (Requirements 2.1-2.5)
+    const totalPages = Math.ceil(total / normalizedLimit);
+    const offset = (normalizedPage - 1) * normalizedLimit;
 
-    // Pagination
-    const offset = (page - 1) * limit;
-    queryBuilder.skip(offset).take(limit);
+    // Clone the query for the data fetch to avoid state pollution (Requirement 1.5)
+    const dataQuery = baseQuery.clone();
+
+    // Apply sorting with secondary sort for consistency (Requirements 3.1-3.4)
+    const primarySort = sortBy === 'name' ? 'customer.name' : 'customer.created_at';
+    dataQuery.orderBy(primarySort, sortOrder);
+
+    // Always add secondary sort by created_at for consistency (Requirements 3.2, 3.3)
+    if (sortBy !== 'createdAt') {
+      dataQuery.addOrderBy('customer.created_at', 'DESC');
+    }
+
+    // Apply pagination AFTER sorting (Requirements 1.1-1.4, 5.2)
+    dataQuery.skip(offset).take(normalizedLimit);
 
     // Execute query
-    const models = await queryBuilder.getMany();
+    const models = await dataQuery.getMany();
 
     // Map to read models with appointment count (placeholder for now)
     const customers = models.map((model) => ({
@@ -215,13 +233,11 @@ export class CustomerReadRepository implements ICustomerReadRepository {
       appointmentCount: 0, // TODO: Join with appointments table
     }));
 
-    const totalPages = Math.ceil(total / limit);
-
     return {
       customers,
       total,
-      page,
-      limit,
+      page: normalizedPage,
+      limit: normalizedLimit,
       totalPages,
     };
   }
