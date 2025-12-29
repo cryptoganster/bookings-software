@@ -12,7 +12,6 @@ describe('BusinessOwnerProfile Controller E2E', () => {
   let dbHelper: E2EDatabaseHelper;
   let authToken: string;
   let userId: string;
-  let businessOwnerId: string;
 
   beforeAll(async () => {
     await ensureMigrationsRun();
@@ -54,12 +53,12 @@ describe('BusinessOwnerProfile Controller E2E', () => {
     // Wait a bit for event handler to create BusinessOwner
     await new Promise((resolve) => setTimeout(resolve, 200));
 
-    // Get the BusinessOwner ID
+    // Get the BusinessOwner ID (verify it was created)
     const profileResponse = await request(app.getHttpServer())
       .get('/api/account/profile')
       .set('Authorization', `Bearer ${authToken}`);
 
-    businessOwnerId = profileResponse.body.id;
+    expect(profileResponse.body.id).toBeDefined();
   });
 
   afterAll(async () => {

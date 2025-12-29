@@ -47,7 +47,7 @@ describe('Property 5: JWT tokens contain valid user data with roles', () => {
       },
     };
 
-    const mockUserReadRepository: IUserReadRepository = {
+    const _mockUserReadRepository: IUserReadRepository = {
       findById: (id: string) => {
         for (const user of userRepository.values()) {
           if (user.getId().getValue() === id) {

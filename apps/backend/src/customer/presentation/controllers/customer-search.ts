@@ -175,15 +175,26 @@ export class CustomerSearchController {
       );
 
       // Transform to response DTO
+      interface CustomerWithAppointmentCount {
+        id: string;
+        businessId: string;
+        userId: string | null;
+        whatsappPhone: string;
+        name: string | null;
+        appointmentCount: number;
+        createdAt: Date | string;
+      }
+
       return {
-        customers: result.customers.map((c: any) => ({
+        customers: result.customers.map((c: CustomerWithAppointmentCount) => ({
           id: c.id,
           businessId: c.businessId,
           userId: c.userId,
           whatsappPhone: c.whatsappPhone,
           name: c.name,
           appointmentCount: c.appointmentCount,
-          createdAt: c.createdAt.toISOString(),
+          createdAt:
+            typeof c.createdAt === 'string' ? c.createdAt : (c.createdAt as Date).toISOString(),
         })),
         total: result.total,
         page: result.page,
@@ -285,13 +296,19 @@ export class CustomerSearchController {
       );
 
       // Return stats (already in correct format)
+      interface TopCustomer {
+        id: string;
+        name: string | null;
+        appointmentCount: number;
+      }
+
       return {
         totalCustomers: stats.totalCustomers,
         anonymousCount: stats.anonymousCount,
         registeredCount: stats.registeredCount,
         newThisWeek: stats.newThisWeek,
         newThisMonth: stats.newThisMonth,
-        topCustomers: stats.topCustomers.map((c: any) => ({
+        topCustomers: stats.topCustomers.map((c: TopCustomer) => ({
           id: c.id,
           name: c.name || 'Unknown',
           appointmentCount: c.appointmentCount,

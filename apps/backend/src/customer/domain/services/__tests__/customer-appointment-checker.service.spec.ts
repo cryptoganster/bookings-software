@@ -14,7 +14,7 @@ describe('CustomerAppointmentChecker', () => {
       findUpcoming: jest.fn(),
       findToday: jest.fn(),
       findByBusinessAndDateRange: jest.fn(),
-    } as any;
+    } as jest.Mocked<IAppointmentReadRepository>;
 
     checker = new CustomerAppointmentChecker(mockAppointmentReadRepo);
   });

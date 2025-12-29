@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { createTestUser } from '@test-utils/helpers';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { UpgradeSubscriptionHandler } from '../handler';
 import { UpgradeSubscriptionCommand } from '../command';
@@ -10,7 +10,7 @@ import { BusinessOwnerModel } from '@account/infra/persistence/models/business-o
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 import { UUID } from '@shared/vo/uuid';
-import { setupTestDatabase, cleanDatabase, generateTestId } from '@test-utils/helpers/database';
+import { setupTestDatabase, cleanDatabase } from '@test-utils/helpers/database';
 import { ensureMigrationsRun } from '../../../../../../test/test-setup';
 
 describe('UpgradeSubscriptionHandler - Concurrency Tests', () => {
@@ -18,7 +18,6 @@ describe('UpgradeSubscriptionHandler - Concurrency Tests', () => {
   let handler: UpgradeSubscriptionHandler;
   let dataSource: DataSource;
   let factory: BusinessOwnerFactory;
-  let repository: Repository<BusinessOwnerModel>;
 
   beforeAll(async () => {
     await ensureMigrationsRun();
@@ -55,7 +54,6 @@ describe('UpgradeSubscriptionHandler - Concurrency Tests', () => {
 
     handler = module.get<UpgradeSubscriptionHandler>(UpgradeSubscriptionHandler);
     factory = module.get<BusinessOwnerFactory>('IBusinessOwnerFactory');
-    repository = module.get<Repository<BusinessOwnerModel>>(getRepositoryToken(BusinessOwnerModel));
   });
 
   afterAll(async () => {

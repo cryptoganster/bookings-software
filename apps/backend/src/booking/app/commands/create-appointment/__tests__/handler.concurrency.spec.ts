@@ -3,42 +3,45 @@ import { PinoLogger } from 'nestjs-pino';
 import { CreateAppointmentHandler } from '../handler';
 import { CreateAppointmentCommand } from '../command';
 import { IAppointmentWriteRepository } from '@booking/domain/interfaces/repositories/appointment-write';
+import { ICapacityFactory } from '@availability/domain/interfaces/factories/capacity-factory';
+import { ICapacityWriteRepository } from '@availability/domain/interfaces/repositories/capacity-write';
+import { ICustomerExistenceChecker } from '@customer/domain/interfaces/services/customer-existence-checker.interface';
 import { IUnitOfWork } from '@shared/kernel/uow';
 import { NoAvailableSlotsException } from '@booking/domain/exceptions/no-available-slots';
+import { Capacity } from '@availability/domain/aggregates/capacity';
 
 describe('CreateAppointmentHandler Concurrency', () => {
   let handler: CreateAppointmentHandler;
   let appointmentRepository: jest.Mocked<IAppointmentWriteRepository>;
-  let capacityFactory: any;
-  let capacityWriteRepository: any;
-  let customerExistenceChecker: any;
+  let capacityFactory: jest.Mocked<ICapacityFactory>;
+  let capacityWriteRepository: jest.Mocked<ICapacityWriteRepository>;
+  let customerExistenceChecker: jest.Mocked<ICustomerExistenceChecker>;
   let uow: jest.Mocked<IUnitOfWork>;
 
   beforeEach(async () => {
     // Mock repositories
     appointmentRepository = {
       save: jest.fn(),
-      findById: jest.fn(),
-    } as any;
+    } as jest.Mocked<IAppointmentWriteRepository>;
 
     capacityFactory = {
       loadByOfferingAndDate: jest.fn(),
       loadById: jest.fn(),
-    };
+    } as jest.Mocked<ICapacityFactory>;
 
     capacityWriteRepository = {
       save: jest.fn(),
-    };
+    } as jest.Mocked<ICapacityWriteRepository>;
 
     customerExistenceChecker = {
       exists: jest.fn().mockResolvedValue(true), // Mock customer exists for all tests
       getCustomer: jest.fn(),
-    };
+    } as jest.Mocked<ICustomerExistenceChecker>;
 
     uow = {
       transaction: jest.fn((work) => work()),
       getQueryRunner: jest.fn(),
-    } as any;
+    } as jest.Mocked<IUnitOfWork>;
 
     const mockLogger = {
       info: jest.fn(),
@@ -97,7 +100,7 @@ describe('CreateAppointmentHandler Concurrency', () => {
         availableSlots--;
         callCount++;
       }),
-    };
+    } as unknown as Capacity;
 
     // First call sees capacity available
     // Second call also sees capacity available (race condition)
@@ -156,7 +159,7 @@ describe('CreateAppointmentHandler Concurrency', () => {
     const mockCapacity = {
       hasAvailableSlots: jest.fn().mockReturnValue(false),
       bookSlot: jest.fn(),
-    };
+    } as unknown as Capacity;
 
     capacityFactory.loadByOfferingAndDate.mockResolvedValue(mockCapacity);
 
@@ -209,7 +212,7 @@ describe('CreateAppointmentHandler Concurrency', () => {
           successfulBookings++;
         }
       }),
-    };
+    } as unknown as Capacity;
 
     capacityFactory.loadByOfferingAndDate.mockResolvedValue(mockCapacity);
 

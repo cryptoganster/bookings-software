@@ -132,7 +132,7 @@ describe('Customer Controllers E2E', () => {
         // "John" matches both "John Doe" and "Bob Johnson", so expect at least 1
         expect(response.body.customers.length).toBeGreaterThanOrEqual(1);
         // Verify all results contain "John" in the name
-        response.body.customers.forEach((customer: any) => {
+        response.body.customers.forEach((customer: { name: string }) => {
           expect(customer.name).toContain('John');
         });
       });
@@ -156,7 +156,7 @@ describe('Customer Controllers E2E', () => {
           .expect(200);
 
         expect(response.body.customers.length).toBeGreaterThan(0);
-        response.body.customers.forEach((customer: any) => {
+        response.body.customers.forEach((customer: { userId: string | null }) => {
           expect(customer.userId).toBeNull();
         });
       });
@@ -169,7 +169,7 @@ describe('Customer Controllers E2E', () => {
           .expect(200);
 
         expect(response.body.customers.length).toBeGreaterThan(0);
-        response.body.customers.forEach((customer: any) => {
+        response.body.customers.forEach((customer: { userId: string | null }) => {
           expect(customer.userId).not.toBeNull();
         });
       });
@@ -202,7 +202,7 @@ describe('Customer Controllers E2E', () => {
           .set('Authorization', `Bearer ${authToken}`)
           .expect(200);
 
-        const names = response.body.customers.map((c: any) => c.name);
+        const names = response.body.customers.map((c: { name: string }) => c.name);
         const sortedNames = [...names].sort();
         expect(names).toEqual(sortedNames);
       });
@@ -214,7 +214,7 @@ describe('Customer Controllers E2E', () => {
           .set('Authorization', `Bearer ${authToken}`)
           .expect(200);
 
-        const names = response.body.customers.map((c: any) => c.name);
+        const names = response.body.customers.map((c: { name: string }) => c.name);
         const sortedNames = [...names].sort().reverse();
         expect(names).toEqual(sortedNames);
       });
@@ -380,7 +380,7 @@ describe('Customer Controllers E2E', () => {
 
         expect(Array.isArray(response.body)).toBe(true);
         expect(response.body.length).toBe(2);
-        response.body.forEach((customer: any) => {
+        response.body.forEach((customer: { userId: string }) => {
           expect(customer.userId).toBe(testUserId);
         });
       });

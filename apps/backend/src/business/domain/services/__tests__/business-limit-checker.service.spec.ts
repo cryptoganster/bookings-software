@@ -15,12 +15,12 @@ describe('BusinessLimitChecker', () => {
       findByOwnerId: jest.fn(),
       findById: jest.fn(),
       findByWhatsAppPhone: jest.fn(),
-    } as any;
+    } as jest.Mocked<IBusinessReadRepository>;
 
     mockOwnerReadRepo = {
       findById: jest.fn(),
       findByUserId: jest.fn(),
-    } as any;
+    } as jest.Mocked<IBusinessOwnerReadRepository>;
 
     checker = new BusinessLimitChecker(mockBusinessReadRepo, mockOwnerReadRepo);
   });

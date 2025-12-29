@@ -7,14 +7,13 @@
  */
 
 import { Test, TestingModule } from '@nestjs/testing';
-import { CqrsModule, EventBus } from '@nestjs/cqrs';
+import { CqrsModule } from '@nestjs/cqrs';
 import { Logger } from '@nestjs/common';
 import { OnAppointmentCreatedHandler } from '../on-appointment-created.handler';
 import { AppointmentCreated } from '@booking/domain/events/appointment-created';
 
 describe('OnAppointmentCreatedHandler (Integration)', () => {
   let handler: OnAppointmentCreatedHandler;
-  let eventBus: EventBus;
   let loggerSpy: jest.SpyInstance;
 
   beforeAll(async () => {
@@ -24,7 +23,7 @@ describe('OnAppointmentCreatedHandler (Integration)', () => {
     }).compile();
 
     handler = module.get<OnAppointmentCreatedHandler>(OnAppointmentCreatedHandler);
-    eventBus = module.get<EventBus>(EventBus);
+    // EventBus is available but not used directly in these tests
   });
 
   beforeEach(() => {

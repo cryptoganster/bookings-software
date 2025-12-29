@@ -5,11 +5,6 @@ import { WhatsAppPhone } from '@shared/vo/whatsapp-phone';
 import { Timezone } from '../../vo/timezone';
 import { BusinessAddress } from '../../vo/business-address';
 import { InvalidBusinessNameException } from '../../exceptions/invalid-business-name';
-import { BusinessCreated } from '../../events/business-created';
-import { BusinessInfoUpdated } from '../../events/business-info-updated';
-import { BusinessWhatsAppConfigured } from '../../events/business-whatsapp-configured';
-import { BusinessDeactivated } from '../../events/business-deactivated';
-import { BusinessActivated } from '../../events/business-activated';
 
 describe('Business Aggregate', () => {
   let id: UUID;

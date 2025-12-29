@@ -3,7 +3,6 @@ import { GetAvailableSlotsHandler } from '../handler';
 import { GetAvailableSlotsQuery } from '../query';
 import { IAvailabilityChecker } from '@availability/domain/interfaces/services/availability-checker.service';
 import { ICapacityReadRepository } from '@availability/domain/interfaces/repositories/capacity-read';
-import { TimeSlot } from '@availability/domain/read-models/capacity';
 
 describe('GetAvailableSlotsHandler', () => {
   let handler: GetAvailableSlotsHandler;
@@ -15,13 +14,14 @@ describe('GetAvailableSlotsHandler', () => {
     availabilityChecker = {
       isDateAvailable: jest.fn(),
       getAvailableTimeSlots: jest.fn(),
-    } as any;
+    } as jest.Mocked<IAvailabilityChecker>;
 
     // Mock CapacityReadRepository
     capacityReadRepository = {
       findByOfferingAndDate: jest.fn(),
+      findByOfferingAndDateRange: jest.fn(),
       findByBusinessId: jest.fn(),
-    } as any;
+    } as unknown as jest.Mocked<ICapacityReadRepository>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

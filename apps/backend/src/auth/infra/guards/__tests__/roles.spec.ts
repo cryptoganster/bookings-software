@@ -13,14 +13,14 @@ describe('RolesGuard', () => {
     guard = new RolesGuard(reflector);
   });
 
-  const createMockExecutionContext = (user: any): ExecutionContext => {
+  const createMockExecutionContext = (user: unknown): ExecutionContext => {
     return {
       switchToHttp: () => ({
         getRequest: () => ({ user }),
       }),
       getHandler: jest.fn(),
       getClass: jest.fn(),
-    } as any;
+    } as unknown as ExecutionContext;
   };
 
   describe('canActivate', () => {

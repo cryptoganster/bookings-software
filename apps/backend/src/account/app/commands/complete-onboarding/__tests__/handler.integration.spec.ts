@@ -1,13 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { createTestUser } from '@test-utils/helpers';
-import { CommandBus } from '@nestjs/cqrs';
 import { DataSource, Repository } from 'typeorm';
 import { CompleteOnboardingHandler } from '../handler';
 import { CompleteOnboardingCommand } from '../command';
 import { BusinessOwnerFactory } from '@account/infra/persistence/factories/business-owner.factory';
 import { BusinessOwnerWriteRepository } from '@account/infra/persistence/repositories/business-owner-write.repository';
 import { BusinessOwnerModel } from '@account/infra/persistence/models/business-owner.model';
-import { IUnitOfWork } from '@shared/kernel/uow';
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { OnboardingAlreadyCompletedException } from '@account/domain/exceptions/onboarding-already-completed.exception';
 import { BusinessOwnerNotFoundException } from '@account/domain/exceptions/business-owner-not-found.exception';
@@ -20,7 +18,6 @@ describe('CompleteOnboardingHandler (Integration)', () => {
   let handler: CompleteOnboardingHandler;
   let repository: Repository<BusinessOwnerModel>;
   let dataSource: DataSource;
-  let commandBus: CommandBus;
 
   beforeAll(async () => {
     await ensureMigrationsRun();
@@ -52,18 +49,11 @@ describe('CompleteOnboardingHandler (Integration)', () => {
           provide: DataSource,
           useValue: dataSource,
         },
-        {
-          provide: CommandBus,
-          useValue: {
-            execute: jest.fn(),
-          },
-        },
       ],
     }).compile();
 
     handler = module.get<CompleteOnboardingHandler>(CompleteOnboardingHandler);
     repository = module.get<Repository<BusinessOwnerModel>>(getRepositoryToken(BusinessOwnerModel));
-    commandBus = module.get<CommandBus>(CommandBus);
   });
 
   afterAll(async () => {

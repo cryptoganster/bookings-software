@@ -15,6 +15,9 @@ import {
   createActiveOffering,
   E2EAuthHelper,
 } from '@test-utils/helpers';
+
+// Suppress unused variable warning - imported for documentation
+void createCapacityForTomorrow;
 import { ensureMigrationsRun } from '../../../../../test/test-setup';
 
 describe('Customer Flow E2E', () => {

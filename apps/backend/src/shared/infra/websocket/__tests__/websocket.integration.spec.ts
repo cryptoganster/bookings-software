@@ -16,9 +16,35 @@ import { AppointmentModified } from '@booking/domain/events/appointment-modified
  * Nota: Estas pruebas requieren un servidor corriendo y pueden ser lentas.
  * Para ejecutarlas: npm test -- websocket.integration.spec.ts
  */
+
+// Type definitions for test data
+interface AppointmentCreatedData {
+  appointmentId: string;
+  customerId: string;
+  offeringId: string;
+  dateTime: string;
+  timestamp: string;
+}
+
+interface AppointmentCancelledData {
+  appointmentId: string;
+  timestamp: string;
+}
+
+interface AppointmentModifiedData {
+  appointmentId: string;
+  newDateTime: string;
+  timestamp: string;
+}
+
+interface AppWithBroadcaster extends INestApplication {
+  broadcaster: {
+    handleDomainEvent: (event: unknown) => void;
+  };
+}
+
 describe('WebSocket Integration Tests', () => {
-  let app: INestApplication;
-  let eventBus: EventBus;
+  let app: AppWithBroadcaster;
   let client1: ClientSocket | undefined;
   let client2: ClientSocket | undefined;
   let client3: ClientSocket | undefined;
@@ -55,17 +81,15 @@ describe('WebSocket Integration Tests', () => {
       })
       .compile();
 
-    app = moduleFixture.createNestApplication();
+    app = moduleFixture.createNestApplication() as AppWithBroadcaster;
     await app.listen(PORT);
-
-    eventBus = moduleFixture.get<EventBus>(EventBus);
 
     // Obtener el broadcaster y simular su inicialización
     const broadcaster = moduleFixture.get<WebSocketEventBroadcaster>(WebSocketEventBroadcaster);
     const gateway = moduleFixture.get<EventsGateway>(EventsGateway);
 
     // Reemplazar el método handleDomainEvent para poder disparar eventos manualmente
-    (broadcaster as any).handleDomainEvent = (event: any) => {
+    const handleDomainEvent = (event: unknown) => {
       if (event instanceof AppointmentCreated) {
         gateway.broadcastToBusinessRoom(event.businessId, 'appointment:created', {
           appointmentId: event.appointmentId,
@@ -88,8 +112,12 @@ describe('WebSocket Integration Tests', () => {
       }
     };
 
+    // Assign to broadcaster
+    (broadcaster as unknown as { handleDomainEvent: typeof handleDomainEvent }).handleDomainEvent =
+      handleDomainEvent;
+
     // Exponer el broadcaster para poder disparar eventos
-    (app as any).broadcaster = broadcaster;
+    app.broadcaster = broadcaster as unknown as AppWithBroadcaster['broadcaster'];
   });
 
   afterAll(async () => {
@@ -176,14 +204,14 @@ describe('WebSocket Integration Tests', () => {
       });
 
       client1!.on('connect', () => {
-        client1!.on('appointment:created', (data: any) => {
+        client1!.on('appointment:created', (data: AppointmentCreatedData) => {
           business1Received = true;
           expect(data.appointmentId).toBe('appt-123');
         });
       });
 
       client2!.on('connect', () => {
-        client2!.on('appointment:created', (data: any) => {
+        client2!.on('appointment:created', () => {
           business2Received = true;
           done(new Error('Business 2 should not receive events for Business 1'));
         });
@@ -198,8 +226,7 @@ describe('WebSocket Integration Tests', () => {
             new Date(),
           );
 
-          const broadcaster = (app as any).broadcaster;
-          broadcaster.handleDomainEvent(event);
+          app.broadcaster.handleDomainEvent(event);
 
           // Verificar después de un tiempo
           setTimeout(() => {
@@ -230,7 +257,7 @@ describe('WebSocket Integration Tests', () => {
       };
 
       client1!.on('connect', () => {
-        client1!.on('appointment:created', (data: any) => {
+        client1!.on('appointment:created', (data: AppointmentCreatedData) => {
           client1Received = true;
           expect(data.appointmentId).toBe('appt-456');
           checkBothReceived();
@@ -238,7 +265,7 @@ describe('WebSocket Integration Tests', () => {
       });
 
       client2!.on('connect', () => {
-        client2!.on('appointment:created', (data: any) => {
+        client2!.on('appointment:created', (data: AppointmentCreatedData) => {
           client2Received = true;
           expect(data.appointmentId).toBe('appt-456');
           checkBothReceived();
@@ -254,8 +281,7 @@ describe('WebSocket Integration Tests', () => {
             new Date(),
           );
 
-          const broadcaster = (app as any).broadcaster;
-          broadcaster.handleDomainEvent(event);
+          app.broadcaster.handleDomainEvent(event);
         }, 100);
       });
     });
@@ -268,7 +294,7 @@ describe('WebSocket Integration Tests', () => {
       });
 
       client1!.on('connect', () => {
-        client1!.on('appointment:created', (data: any) => {
+        client1!.on('appointment:created', (data: AppointmentCreatedData) => {
           expect(data).toMatchObject({
             appointmentId: 'appt-123',
             customerId: 'customer-456',
@@ -289,8 +315,7 @@ describe('WebSocket Integration Tests', () => {
             new Date('2024-12-20T10:00:00Z'),
           );
 
-          const broadcaster = (app as any).broadcaster;
-          broadcaster.handleDomainEvent(event);
+          app.broadcaster.handleDomainEvent(event);
         }, 50);
       });
     });
@@ -314,14 +339,14 @@ describe('WebSocket Integration Tests', () => {
       });
 
       client1!.on('connect', () => {
-        client1!.on('appointment:cancelled', (data: any) => {
+        client1!.on('appointment:cancelled', (data: AppointmentCancelledData) => {
           expect(data.appointmentId).toBe('appt-999');
           checkAllReceived();
         });
       });
 
       client2!.on('connect', () => {
-        client2!.on('appointment:cancelled', (data: any) => {
+        client2!.on('appointment:cancelled', (data: AppointmentCancelledData) => {
           expect(data.appointmentId).toBe('appt-999');
           checkAllReceived();
         });
@@ -330,8 +355,7 @@ describe('WebSocket Integration Tests', () => {
         setTimeout(() => {
           const event = new AppointmentCancelled('appt-999');
 
-          const broadcaster = (app as any).broadcaster;
-          broadcaster.handleDomainEvent(event);
+          app.broadcaster.handleDomainEvent(event);
         }, 100);
       });
     });
@@ -342,7 +366,7 @@ describe('WebSocket Integration Tests', () => {
       });
 
       client1!.on('connect', () => {
-        client1!.on('appointment:modified', (data: any) => {
+        client1!.on('appointment:modified', (data: AppointmentModifiedData) => {
           expect(data.appointmentId).toBe('appt-555');
           expect(data.newDateTime).toBeDefined();
           expect(data.timestamp).toBeDefined();
@@ -354,8 +378,7 @@ describe('WebSocket Integration Tests', () => {
           const newDateTime = new Date('2024-12-21T14:00:00Z');
           const event = new AppointmentModified('appt-555', newDateTime);
 
-          const broadcaster = (app as any).broadcaster;
-          broadcaster.handleDomainEvent(event);
+          app.broadcaster.handleDomainEvent(event);
         }, 50);
       });
     });
@@ -427,8 +450,7 @@ describe('WebSocket Integration Tests', () => {
             new Date(),
           );
 
-          const broadcaster = (app as any).broadcaster;
-          broadcaster.handleDomainEvent(event);
+          app.broadcaster.handleDomainEvent(event);
 
           // Verificar que no recibió el evento
           setTimeout(() => {
@@ -449,7 +471,7 @@ describe('WebSocket Integration Tests', () => {
       const originalDate = new Date('2024-12-20T10:30:00Z');
 
       client1!.on('connect', () => {
-        client1!.on('appointment:created', (data: any) => {
+        client1!.on('appointment:created', (data: AppointmentCreatedData) => {
           expect(data.dateTime).toBeDefined();
           // Socket.IO serializa Dates como strings
           const receivedDate = new Date(data.dateTime);
@@ -466,8 +488,7 @@ describe('WebSocket Integration Tests', () => {
             originalDate,
           );
 
-          const broadcaster = (app as any).broadcaster;
-          broadcaster.handleDomainEvent(event);
+          app.broadcaster.handleDomainEvent(event);
         }, 50);
       });
     });
@@ -478,7 +499,7 @@ describe('WebSocket Integration Tests', () => {
       });
 
       client1!.on('connect', () => {
-        client1!.on('appointment:created', (data: any) => {
+        client1!.on('appointment:created', (data: AppointmentCreatedData) => {
           expect(data.appointmentId).toBe('appt-complex');
           expect(data.customerId).toBe('customer-456');
           expect(data.offeringId).toBe('offering-789');
@@ -495,8 +516,7 @@ describe('WebSocket Integration Tests', () => {
             new Date(),
           );
 
-          const broadcaster = (app as any).broadcaster;
-          broadcaster.handleDomainEvent(event);
+          app.broadcaster.handleDomainEvent(event);
         }, 50);
       });
     });

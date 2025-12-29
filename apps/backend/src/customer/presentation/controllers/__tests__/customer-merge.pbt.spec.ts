@@ -54,7 +54,7 @@ describe('MergeCustomersDto PBT', () => {
           targetCustomerId: uuid,
         });
 
-        const errors = await validate(dto);
+        const _errors = await validate(dto);
 
         // Currently, class-validator doesn't prevent same UUIDs
         // This is a business rule that should be enforced at the service layer

@@ -9,23 +9,59 @@ import { AppointmentCancelled } from '@booking/domain/events/appointment-cancell
 import { AppointmentModified } from '@booking/domain/events/appointment-modified';
 import * as fc from 'fast-check';
 
+// Type definitions for broadcast data
+interface AppointmentCreatedBroadcastData {
+  appointmentId: string;
+  customerId: string;
+  offeringId: string;
+  dateTime: Date;
+  timestamp: string;
+}
+
+interface AppointmentCancelledBroadcastData {
+  appointmentId: string;
+  timestamp: string;
+}
+
+interface AppointmentModifiedBroadcastData {
+  appointmentId: string;
+  newDateTime: Date;
+  timestamp: string;
+}
+
+// Type definitions for event data from fast-check
+interface CreatedEventData {
+  type: 'created';
+  appointmentId: string;
+  businessId: string;
+  customerId: string;
+  offeringId: string;
+  dateTime: Date;
+}
+
+interface ModifiedEventData {
+  type: 'modified';
+  appointmentId: string;
+  newDateTime: Date;
+}
+
 describe('WebSocketEventBroadcaster (Property-Based Tests)', () => {
   let broadcaster: WebSocketEventBroadcaster;
   let mockEventBus: jest.Mocked<EventBus>;
   let mockEventsGateway: jest.Mocked<EventsGateway>;
-  let eventBusSubject: Subject<any>;
+  let eventBusSubject: Subject<unknown>;
 
   beforeEach(async () => {
     eventBusSubject = new Subject();
 
     mockEventBus = {
       pipe: jest.fn().mockReturnValue(eventBusSubject),
-    } as any;
+    } as unknown as jest.Mocked<EventBus>;
 
     mockEventsGateway = {
       broadcastToBusinessRoom: jest.fn(),
       broadcastToAllClients: jest.fn(),
-    } as any;
+    } as unknown as jest.Mocked<EventsGateway>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -119,7 +155,7 @@ describe('WebSocketEventBroadcaster (Property-Based Tests)', () => {
 
             // Assert
             const callArgs = mockEventsGateway.broadcastToBusinessRoom.mock.calls[0];
-            const data = callArgs[2] as any;
+            const data = callArgs[2] as AppointmentCreatedBroadcastData;
             expect(data.timestamp).toBeDefined();
             expect(typeof data.timestamp).toBe('string');
             expect(new Date(data.timestamp)).toBeInstanceOf(Date);
@@ -153,7 +189,7 @@ describe('WebSocketEventBroadcaster (Property-Based Tests)', () => {
 
             // Assert
             const callArgs = mockEventsGateway.broadcastToBusinessRoom.mock.calls[0];
-            const data = callArgs[2] as any;
+            const data = callArgs[2] as AppointmentCreatedBroadcastData;
             expect(data.appointmentId).toBe(appointmentId);
             expect(data.customerId).toBe(customerId);
             expect(data.offeringId).toBe(offeringId);
@@ -203,7 +239,7 @@ describe('WebSocketEventBroadcaster (Property-Based Tests)', () => {
 
           // Assert
           const callArgs = mockEventsGateway.broadcastToAllClients.mock.calls[0];
-          const data = callArgs[1] as any;
+          const data = callArgs[1] as AppointmentCancelledBroadcastData;
           expect(data.timestamp).toBeDefined();
           expect(typeof data.timestamp).toBe('string');
         }),
@@ -252,7 +288,7 @@ describe('WebSocketEventBroadcaster (Property-Based Tests)', () => {
 
           // Assert
           const callArgs = mockEventsGateway.broadcastToAllClients.mock.calls[0];
-          const data = callArgs[1] as any;
+          const data = callArgs[1] as AppointmentModifiedBroadcastData;
           expect(data.newDateTime).toBe(newDateTime);
           expect(data.newDateTime.getTime()).toBe(newDateTime.getTime());
         }),
@@ -295,21 +331,23 @@ describe('WebSocketEventBroadcaster (Property-Based Tests)', () => {
             // Act
             events.forEach((eventData) => {
               if (eventData.type === 'created') {
+                const createdData = eventData as CreatedEventData;
                 const event = new AppointmentCreated(
-                  eventData.appointmentId,
-                  (eventData as any).businessId,
-                  (eventData as any).customerId,
-                  (eventData as any).offeringId,
-                  (eventData as any).dateTime,
+                  createdData.appointmentId,
+                  createdData.businessId,
+                  createdData.customerId,
+                  createdData.offeringId,
+                  createdData.dateTime,
                 );
                 eventBusSubject.next(event);
               } else if (eventData.type === 'cancelled') {
                 const event = new AppointmentCancelled(eventData.appointmentId);
                 eventBusSubject.next(event);
               } else if (eventData.type === 'modified') {
+                const modifiedData = eventData as ModifiedEventData;
                 const event = new AppointmentModified(
-                  eventData.appointmentId,
-                  (eventData as any).newDateTime,
+                  modifiedData.appointmentId,
+                  modifiedData.newDateTime,
                 );
                 eventBusSubject.next(event);
               }

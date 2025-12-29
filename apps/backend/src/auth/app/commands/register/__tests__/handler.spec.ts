@@ -7,7 +7,6 @@ import { RegisterHandler } from '../handler';
 import { RegisterCommand } from '../command';
 import { IUserWriteRepository } from '@auth/domain/interfaces/repositories/user-write';
 import { IUserUniquenessChecker } from '@auth/domain/interfaces/services/user-uniqueness-checker.interface';
-import { UUID } from '@shared/vo/uuid';
 import { UserRole } from '@auth/domain/vo/user-role';
 
 describe('RegisterHandler', () => {

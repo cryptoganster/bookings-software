@@ -7,6 +7,7 @@ import { IBusinessUniquenessChecker } from '@business/domain/interfaces/services
 import { BusinessNotFoundException } from '@business/domain/exceptions/business-not-found';
 import { WhatsAppPhoneAlreadyExistsException } from '@shared/kernel/exceptions/whatsapp-phone-already-exists';
 import { WhatsAppPhone } from '@shared/vo/whatsapp-phone';
+import { Business } from '@business/domain/aggregates/business';
 
 /**
  * Unit tests for ConfigureWhatsAppHandler
@@ -34,15 +35,15 @@ describe('ConfigureWhatsAppHandler', () => {
     // Create mocks
     mockFactory = {
       loadById: jest.fn(),
-    } as any;
+    } as jest.Mocked<IBusinessFactory>;
 
     mockWriteRepository = {
       save: jest.fn(),
-    } as any;
+    } as jest.Mocked<IBusinessWriteRepository>;
 
     mockUniquenessChecker = {
       isWhatsAppPhoneUnique: jest.fn(),
-    } as any;
+    } as jest.Mocked<IBusinessUniquenessChecker>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -75,7 +76,7 @@ describe('ConfigureWhatsAppHandler', () => {
       const mockBusiness = {
         configureWhatsApp: jest.fn(),
       };
-      mockFactory.loadById.mockResolvedValue(mockBusiness as any);
+      mockFactory.loadById.mockResolvedValue(mockBusiness as unknown as Business);
       mockUniquenessChecker.isWhatsAppPhoneUnique.mockResolvedValue(true);
 
       const command = new ConfigureWhatsAppCommand(businessId, whatsappPhone);
@@ -111,7 +112,7 @@ describe('ConfigureWhatsAppHandler', () => {
       const mockBusiness = {
         configureWhatsApp: jest.fn(),
       };
-      mockFactory.loadById.mockResolvedValue(mockBusiness as any);
+      mockFactory.loadById.mockResolvedValue(mockBusiness as unknown as Business);
       mockUniquenessChecker.isWhatsAppPhoneUnique.mockResolvedValue(false);
 
       const command = new ConfigureWhatsAppCommand(businessId, whatsappPhone);
@@ -132,7 +133,7 @@ describe('ConfigureWhatsAppHandler', () => {
       const mockBusiness = {
         configureWhatsApp: jest.fn(),
       };
-      mockFactory.loadById.mockResolvedValue(mockBusiness as any);
+      mockFactory.loadById.mockResolvedValue(mockBusiness as unknown as Business);
       mockUniquenessChecker.isWhatsAppPhoneUnique.mockResolvedValue(true);
 
       const command = new ConfigureWhatsAppCommand(businessId, whatsappPhone);
@@ -152,7 +153,7 @@ describe('ConfigureWhatsAppHandler', () => {
       const mockBusiness = {
         configureWhatsApp: jest.fn(),
       };
-      mockFactory.loadById.mockResolvedValue(mockBusiness as any);
+      mockFactory.loadById.mockResolvedValue(mockBusiness as unknown as Business);
       mockUniquenessChecker.isWhatsAppPhoneUnique.mockResolvedValue(true);
 
       const command = new ConfigureWhatsAppCommand(businessId, whatsappPhone);
@@ -170,7 +171,7 @@ describe('ConfigureWhatsAppHandler', () => {
       const mockBusiness = {
         configureWhatsApp: jest.fn(),
       };
-      mockFactory.loadById.mockResolvedValue(mockBusiness as any);
+      mockFactory.loadById.mockResolvedValue(mockBusiness as unknown as Business);
       mockUniquenessChecker.isWhatsAppPhoneUnique.mockResolvedValue(true);
 
       const command = new ConfigureWhatsAppCommand(businessId, whatsappPhone);
@@ -190,7 +191,7 @@ describe('ConfigureWhatsAppHandler', () => {
       const mockBusiness = {
         configureWhatsApp: jest.fn(),
       };
-      mockFactory.loadById.mockResolvedValue(mockBusiness as any);
+      mockFactory.loadById.mockResolvedValue(mockBusiness as unknown as Business);
       mockUniquenessChecker.isWhatsAppPhoneUnique.mockResolvedValue(true);
 
       const command = new ConfigureWhatsAppCommand(businessId, whatsappPhone);
@@ -208,7 +209,7 @@ describe('ConfigureWhatsAppHandler', () => {
       const mockBusiness = {
         configureWhatsApp: jest.fn(),
       };
-      mockFactory.loadById.mockResolvedValue(mockBusiness as any);
+      mockFactory.loadById.mockResolvedValue(mockBusiness as unknown as Business);
       mockUniquenessChecker.isWhatsAppPhoneUnique.mockResolvedValue(true);
 
       const command = new ConfigureWhatsAppCommand(businessId, whatsappPhone);
@@ -233,7 +234,7 @@ describe('ConfigureWhatsAppHandler', () => {
       const mockBusiness = {
         configureWhatsApp: jest.fn(),
       };
-      mockFactory.loadById.mockResolvedValue(mockBusiness as any);
+      mockFactory.loadById.mockResolvedValue(mockBusiness as unknown as Business);
       mockUniquenessChecker.isWhatsAppPhoneUnique.mockResolvedValue(true);
 
       const command = new ConfigureWhatsAppCommand(businessId, whatsappPhone);
@@ -244,7 +245,7 @@ describe('ConfigureWhatsAppHandler', () => {
       // Assert - Verify architecture compliance
       expect(mockUniquenessChecker.isWhatsAppPhoneUnique).toHaveBeenCalled();
       // Handler should NOT have any read repository injected
-      expect((handler as any).readRepository).toBeUndefined();
+      expect((handler as { readRepository?: unknown }).readRepository).toBeUndefined();
     });
   });
 });

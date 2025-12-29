@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { createTestUser } from '@test-utils/helpers';
-import { CommandBus } from '@nestjs/cqrs';
 import { DataSource, Repository } from 'typeorm';
 import { UpgradeSubscriptionHandler } from '../handler';
 import { UpgradeSubscriptionCommand } from '../command';
@@ -20,7 +19,6 @@ describe('UpgradeSubscriptionHandler (Integration)', () => {
   let handler: UpgradeSubscriptionHandler;
   let repository: Repository<BusinessOwnerModel>;
   let dataSource: DataSource;
-  let commandBus: CommandBus;
 
   beforeAll(async () => {
     await ensureMigrationsRun();
@@ -52,18 +50,11 @@ describe('UpgradeSubscriptionHandler (Integration)', () => {
           provide: DataSource,
           useValue: dataSource,
         },
-        {
-          provide: CommandBus,
-          useValue: {
-            execute: jest.fn(),
-          },
-        },
       ],
     }).compile();
 
     handler = module.get<UpgradeSubscriptionHandler>(UpgradeSubscriptionHandler);
     repository = module.get<Repository<BusinessOwnerModel>>(getRepositoryToken(BusinessOwnerModel));
-    commandBus = module.get<CommandBus>(CommandBus);
   });
 
   afterAll(async () => {

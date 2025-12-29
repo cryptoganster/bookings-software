@@ -7,12 +7,20 @@ import {
   CustomerAlreadyLinkedToUserException,
   CustomerNotLinkedToUserException,
 } from '../../exceptions';
+// Events are imported for documentation but not used directly in tests
+// since autoCommit=true publishes events automatically
 import {
   CustomerCreated,
   CustomerNameUpdated,
   CustomerLinkedToUser,
   CustomerUnlinkedFromUser,
 } from '../../events';
+
+// Suppress unused variable warnings - these are imported for documentation
+void CustomerCreated;
+void CustomerNameUpdated;
+void CustomerLinkedToUser;
+void CustomerUnlinkedFromUser;
 
 describe('Customer Aggregate', () => {
   let customerId: UUID;
@@ -83,19 +91,24 @@ describe('Customer Aggregate', () => {
 
     it('should throw InvalidCustomerDataException if id is missing', () => {
       expect(() =>
-        Customer.createAnonymous(null as any, businessId, whatsappPhone, 'Juan Pérez'),
+        Customer.createAnonymous(null as unknown as UUID, businessId, whatsappPhone, 'Juan Pérez'),
       ).toThrow(InvalidCustomerDataException);
     });
 
     it('should throw InvalidCustomerDataException if businessId is missing', () => {
       expect(() =>
-        Customer.createAnonymous(customerId, null as any, whatsappPhone, 'Juan Pérez'),
+        Customer.createAnonymous(customerId, null as unknown as UUID, whatsappPhone, 'Juan Pérez'),
       ).toThrow(InvalidCustomerDataException);
     });
 
     it('should throw InvalidCustomerDataException if whatsappPhone is missing', () => {
       expect(() =>
-        Customer.createAnonymous(customerId, businessId, null as any, 'Juan Pérez'),
+        Customer.createAnonymous(
+          customerId,
+          businessId,
+          null as unknown as WhatsAppPhone,
+          'Juan Pérez',
+        ),
       ).toThrow(InvalidCustomerDataException);
     });
 

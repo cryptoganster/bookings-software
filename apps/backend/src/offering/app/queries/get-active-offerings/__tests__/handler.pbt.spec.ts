@@ -103,7 +103,7 @@ describe('GetActiveOfferingsHandler - Property-Based Tests', () => {
           }),
           { minLength: 1, maxLength: 10 },
         ),
-        async (offerings: OfferingReadModel[]) => {
+        async (_offerings: OfferingReadModel[]) => {
           // Arrange
           const businessId = UUID.generate().getValue();
 

@@ -16,7 +16,7 @@ describe('WebSocketEventBroadcaster', () => {
   let broadcaster: WebSocketEventBroadcaster;
   let mockEventBus: jest.Mocked<EventBus>;
   let mockEventsGateway: jest.Mocked<EventsGateway>;
-  let eventBusSubject: Subject<any>;
+  let eventBusSubject: Subject<unknown>;
 
   beforeEach(async () => {
     // Subject para simular el EventBus
@@ -25,13 +25,13 @@ describe('WebSocketEventBroadcaster', () => {
     // Mock del EventBus
     mockEventBus = {
       pipe: jest.fn().mockReturnValue(eventBusSubject),
-    } as any;
+    } as unknown as jest.Mocked<EventBus>;
 
     // Mock del EventsGateway
     mockEventsGateway = {
       broadcastToBusinessRoom: jest.fn(),
       broadcastToAllClients: jest.fn(),
-    } as any;
+    } as unknown as jest.Mocked<EventsGateway>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -153,7 +153,7 @@ describe('WebSocketEventBroadcaster', () => {
 
       // Assert
       const callArgs = mockEventsGateway.broadcastToBusinessRoom.mock.calls[0];
-      const data = callArgs[2] as any;
+      const data = callArgs[2] as { timestamp: string };
       expect(data.timestamp).toBeDefined();
       expect(new Date(data.timestamp)).toBeInstanceOf(Date);
     });
@@ -391,7 +391,7 @@ describe('WebSocketEventBroadcaster', () => {
 
       // Assert
       const callArgs = mockEventsGateway.broadcastToBusinessRoom.mock.calls[0];
-      const data = callArgs[2] as any;
+      const data = callArgs[2] as { timestamp: string };
       expect(data.timestamp).toBeDefined();
       expect(new Date(data.timestamp)).toBeInstanceOf(Date);
     });

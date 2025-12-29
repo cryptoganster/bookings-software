@@ -4,7 +4,13 @@ import { DataSource } from 'typeorm';
 describe('TypeOrmUnitOfWork', () => {
   let dataSource: DataSource;
   let uow: TypeOrmUnitOfWork;
-  let mockQueryRunner: any;
+  let mockQueryRunner: {
+    connect: jest.Mock;
+    startTransaction: jest.Mock;
+    commitTransaction: jest.Mock;
+    rollbackTransaction: jest.Mock;
+    release: jest.Mock;
+  };
 
   beforeEach(() => {
     mockQueryRunner = {
@@ -17,7 +23,7 @@ describe('TypeOrmUnitOfWork', () => {
 
     dataSource = {
       createQueryRunner: jest.fn().mockReturnValue(mockQueryRunner),
-    } as any;
+    } as unknown as DataSource;
 
     uow = new TypeOrmUnitOfWork(dataSource);
   });

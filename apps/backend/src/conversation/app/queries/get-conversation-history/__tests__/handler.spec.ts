@@ -16,13 +16,13 @@ describe('GetConversationHistoryHandler', () => {
     // Create mocks
     messageReadRepository = {
       findByConversationId: jest.fn(),
-    } as any;
+    } as jest.Mocked<IMessageReadRepository>;
 
     conversationReadRepository = {
       findById: jest.fn(),
       findByBusinessId: jest.fn(),
       findPendingByBusinessId: jest.fn(),
-    } as any;
+    } as jest.Mocked<IConversationReadRepository>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

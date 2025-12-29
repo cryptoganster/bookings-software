@@ -307,7 +307,7 @@ describe('BlockoutFactory (Integration)', () => {
       }
 
       // Act & Assert
-      for (const { id, businessId } of testData) {
+      for (const { id } of testData) {
         const aggregate = await factory.loadById(id);
         expect(aggregate).toBeDefined();
         expect(aggregate!.getBusinessId().getValue()).toBe(testBusinessId);

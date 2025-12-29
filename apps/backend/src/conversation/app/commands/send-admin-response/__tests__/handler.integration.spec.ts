@@ -34,7 +34,7 @@ describe('SendAdminResponseHandler (Integration)', () => {
 
     mockCommandBus = {
       execute: jest.fn().mockResolvedValue({ messageId: 'msg-123' }),
-    } as any;
+    } as unknown as jest.Mocked<CommandBus>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

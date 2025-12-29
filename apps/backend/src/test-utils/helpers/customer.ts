@@ -262,7 +262,7 @@ export class TestCustomerHelper {
    * @param customerId - Customer ID
    * @returns Customer data export
    */
-  async exportCustomerData(token: string, customerId: string): Promise<any> {
+  async exportCustomerData(token: string, customerId: string): Promise<unknown> {
     try {
       const response = await request(this.app.getHttpServer())
         .get(`/api/customers/${customerId}/export`)

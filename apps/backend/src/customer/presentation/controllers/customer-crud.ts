@@ -231,13 +231,14 @@ export class CustomerCrudController {
       );
 
       // Transform to response
-      return customers.map((c: any) => ({
+      return customers.map((c: CustomerReadModel) => ({
         id: c.id,
         businessId: c.businessId,
         userId: c.userId,
         whatsappPhone: c.whatsappPhone,
         name: c.name,
-        createdAt: c.createdAt.toISOString(),
+        createdAt:
+          typeof c.createdAt === 'string' ? c.createdAt : (c.createdAt as Date).toISOString(),
       }));
     } catch (error: unknown) {
       const duration = Date.now() - startTime;

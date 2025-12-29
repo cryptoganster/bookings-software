@@ -20,18 +20,18 @@ describe('AvailabilityChecker Service - Unit Tests', () => {
       findById: jest.fn(),
       findByBusinessId: jest.fn(),
       findByBusinessAndDay: jest.fn(),
-    } as any;
+    } as jest.Mocked<IScheduleReadRepository>;
 
     mockBlockoutRepo = {
       findById: jest.fn(),
       findByBusinessId: jest.fn(),
       findByBusinessAndDateRange: jest.fn(),
-    } as any;
+    } as jest.Mocked<IBlockoutReadRepository>;
 
     mockCapacityFactory = {
       loadByOfferingAndDate: jest.fn(),
       loadById: jest.fn(),
-    } as any;
+    } as jest.Mocked<ICapacityFactory>;
 
     // Create service instance
     service = new AvailabilityChecker(mockScheduleRepo, mockBlockoutRepo, mockCapacityFactory);

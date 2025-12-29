@@ -16,7 +16,7 @@ describe('Appointment Event Publishing - Property Tests', () => {
   let module: TestingModule;
   let eventBus: EventBus;
   let eventPublisher: EventPublisher;
-  let publishedEvents: any[];
+  let publishedEvents: unknown[];
 
   beforeAll(async () => {
     module = await Test.createTestingModule({

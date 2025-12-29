@@ -20,16 +20,17 @@ describe('UpdateScheduleHandler', () => {
     mockScheduleFactory = {
       loadById: jest.fn(),
       loadByBusinessAndDay: jest.fn(),
-    };
+    } as jest.Mocked<IScheduleFactory>;
 
     mockScheduleWriteRepository = {
       save: jest.fn(),
       delete: jest.fn(),
-    };
+    } as jest.Mocked<IScheduleWriteRepository>;
 
     mockUow = {
       transaction: jest.fn((work) => work()),
-    } as any;
+      getQueryRunner: jest.fn(),
+    } as jest.Mocked<IUnitOfWork>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

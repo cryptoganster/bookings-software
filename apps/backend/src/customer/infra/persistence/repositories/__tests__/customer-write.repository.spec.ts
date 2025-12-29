@@ -92,7 +92,7 @@ describe('CustomerWriteRepository', () => {
 
       mockTypeOrmRepo.createQueryBuilder.mockReturnValue({
         update: mockUpdate,
-      } as any);
+      } as unknown as ReturnType<Repository<CustomerModel>['createQueryBuilder']>);
 
       // Act
       await repository.save(customer);
@@ -147,7 +147,7 @@ describe('CustomerWriteRepository', () => {
 
       mockTypeOrmRepo.createQueryBuilder.mockReturnValue({
         update: mockUpdate,
-      } as any);
+      } as unknown as ReturnType<Repository<CustomerModel>['createQueryBuilder']>);
 
       // Act & Assert
       await expect(repository.save(customer)).rejects.toThrow(ConcurrencyException);

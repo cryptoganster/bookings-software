@@ -39,7 +39,7 @@ describe('CreateBusinessHandler Integration Tests', () => {
     await ensureMigrationsRun();
 
     const mockEventPublisher = {
-      mergeObjectContext: jest.fn((obj: any) => {
+      mergeObjectContext: jest.fn(<T extends { commit?: jest.Mock }>(obj: T): T => {
         // Return the original object with a mock commit method added
         obj.commit = jest.fn();
         return obj;

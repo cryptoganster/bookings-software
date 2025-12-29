@@ -253,11 +253,12 @@ describe('CustomerDuplicatesController', () => {
       await controller.getDuplicates(dto, mockUser);
 
       // Assert
-      const completeLog = logger.info.mock.calls.find(
-        (call: any) => call[0].action === 'detect_duplicates_complete',
-      );
+      const calls = logger.info.mock.calls as Array<
+        [{ action: string; duration?: number }, string]
+      >;
+      const completeLog = calls.find((call) => call[0].action === 'detect_duplicates_complete');
       expect(completeLog).toBeDefined();
-      expect((completeLog as any)[0].duration).toBeGreaterThanOrEqual(0);
+      expect(completeLog![0].duration).toBeGreaterThanOrEqual(0);
     });
 
     it('should handle multiple duplicate pairs', async () => {

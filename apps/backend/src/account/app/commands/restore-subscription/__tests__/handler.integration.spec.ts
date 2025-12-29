@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { createTestUser } from '@test-utils/helpers';
-import { CommandBus } from '@nestjs/cqrs';
 import { DataSource, Repository } from 'typeorm';
 import { RestoreSubscriptionHandler } from '../handler';
 import { RestoreSubscriptionCommand } from '../command';
@@ -18,7 +17,6 @@ describe('RestoreSubscriptionHandler (Integration)', () => {
   let handler: RestoreSubscriptionHandler;
   let repository: Repository<BusinessOwnerModel>;
   let dataSource: DataSource;
-  let commandBus: CommandBus;
 
   beforeAll(async () => {
     await ensureMigrationsRun();
@@ -50,18 +48,11 @@ describe('RestoreSubscriptionHandler (Integration)', () => {
           provide: DataSource,
           useValue: dataSource,
         },
-        {
-          provide: CommandBus,
-          useValue: {
-            execute: jest.fn(),
-          },
-        },
       ],
     }).compile();
 
     handler = module.get<RestoreSubscriptionHandler>(RestoreSubscriptionHandler);
     repository = module.get<Repository<BusinessOwnerModel>>(getRepositoryToken(BusinessOwnerModel));
-    commandBus = module.get<CommandBus>(CommandBus);
   });
 
   afterAll(async () => {

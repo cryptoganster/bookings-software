@@ -12,7 +12,7 @@ describe('BusinessUniquenessChecker', () => {
       findById: jest.fn(),
       findByOwnerId: jest.fn(),
       findAll: jest.fn(),
-    } as any;
+    } as jest.Mocked<IBusinessReadRepository>;
 
     checker = new BusinessUniquenessChecker(mockReadRepo);
   });

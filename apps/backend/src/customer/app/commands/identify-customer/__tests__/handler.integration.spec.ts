@@ -40,7 +40,7 @@ describe('IdentifyCustomerHandler Integration Tests', () => {
     module = await Test.createTestingModule({
       imports: [
         CqrsModule,
-        TypeOrmModule.forRoot(dataSource.options as any),
+        TypeOrmModule.forRoot(dataSource.options),
         TypeOrmModule.forFeature([CustomerModel]),
       ],
       providers: [

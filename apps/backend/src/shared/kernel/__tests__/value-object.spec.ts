@@ -6,7 +6,7 @@ class TestValueObject extends ValueObject {
     super();
   }
 
-  protected getEqualityComponents(): any[] {
+  protected getEqualityComponents(): unknown[] {
     return [this.value];
   }
 
@@ -20,7 +20,7 @@ class AnotherValueObject extends ValueObject {
     super();
   }
 
-  protected getEqualityComponents(): any[] {
+  protected getEqualityComponents(): unknown[] {
     return [this.value];
   }
 }
@@ -44,7 +44,7 @@ describe('ValueObject', () => {
     it('should return false when comparing with null', () => {
       const vo = new TestValueObject('test');
 
-      expect(vo.equals(null as any)).toBe(false);
+      expect(vo.equals(null as unknown as ValueObject)).toBe(false);
     });
 
     it('should return false when comparing different types', () => {
@@ -63,7 +63,7 @@ describe('ValueObject', () => {
           super();
         }
 
-        protected getEqualityComponents(): any[] {
+        protected getEqualityComponents(): unknown[] {
           return [this.value1, this.value2];
         }
       }
@@ -71,7 +71,7 @@ describe('ValueObject', () => {
       const vo1 = new TestValueObject('test');
       const vo2 = new MultiComponentVO('test', 'test2');
 
-      expect(vo1.equals(vo2 as any)).toBe(false);
+      expect(vo1.equals(vo2 as unknown as ValueObject)).toBe(false);
     });
   });
 });

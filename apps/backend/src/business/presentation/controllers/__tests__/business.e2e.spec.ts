@@ -3,7 +3,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { DataSource } from 'typeorm';
 import { AppModule } from '../../../../app.module';
-import { E2EAuthHelper, E2EDatabaseHelper, UserRole } from '@test-utils/helpers';
+import { E2EAuthHelper, E2EDatabaseHelper } from '@test-utils/helpers';
 import { ensureMigrationsRun } from '../../../../../test/test-setup';
 
 describe('Business Controller E2E', () => {
@@ -276,7 +276,7 @@ describe('Business Controller E2E', () => {
 
       expect(Array.isArray(response.body)).toBe(true);
       expect(response.body.length).toBeGreaterThanOrEqual(2);
-      response.body.forEach((business: any) => {
+      response.body.forEach((business: unknown) => {
         expect(business).toHaveProperty('ownerId', userId);
       });
     });

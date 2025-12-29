@@ -11,7 +11,6 @@ import { UUID } from '@shared/vo/uuid';
 import { MessageDirection } from '@conversation/domain/vo/message-direction';
 import { MessageType } from '@conversation/domain/vo/message-type';
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
-import { MessageWriteMapper } from '@conversation/infra/persistence/mappers/message-write.mapper';
 import { setupTestDatabase, cleanDatabase, generateTestId } from '@test-utils/helpers/database';
 
 describe('MessageWriteRepository (Integration)', () => {

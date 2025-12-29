@@ -188,7 +188,7 @@ describe('Migration Validation', () => {
           `);
           console.log(
             'Tables in database:',
-            tables.map((t: any) => t.table_name),
+            tables.map((t: { table_name: string }) => t.table_name),
           );
         } else {
           console.log(`Found ${result.length} foreign keys`);
@@ -264,7 +264,7 @@ describe('Migration Validation', () => {
 
       try {
         const result = await queryRunner.query('SELECT name FROM migrations ORDER BY timestamp');
-        const dbMigrationNames = result.map((row: any) => row.name);
+        const dbMigrationNames = result.map((row: { name: string }) => row.name);
 
         // Verify we have the same number of migrations
         expect(dbMigrationNames.length).toBe(migrationFiles.length);

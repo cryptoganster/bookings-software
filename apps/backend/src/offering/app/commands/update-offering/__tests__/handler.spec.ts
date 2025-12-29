@@ -6,7 +6,6 @@ import { IOfferingFactory } from '@offering/domain/interfaces/factories/offering
 import { Offering } from '@offering/domain/aggregates/offering';
 import { UUID } from '@shared/vo/uuid';
 import { OfferingDuration } from '@offering/domain/vo/offering-duration';
-import { OfferingNotFoundException } from '@offering/domain/exceptions/offering-not-found';
 import { OfferingNotFoundForBusinessException } from '@offering/domain/exceptions/offering-not-found-for-business';
 import { DuplicateOfferingNameException } from '@offering/domain/exceptions/duplicate-offering-name';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';

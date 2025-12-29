@@ -63,7 +63,7 @@ describe('AppointmentNotificationSaga', () => {
       const commands$ = saga.appointmentCreated(events$);
 
       // Assert - Solo debe emitir comando para AppointmentCreated
-      const emittedCommands: any[] = [];
+      const emittedCommands: unknown[] = [];
       commands$.subscribe({
         next: (command) => emittedCommands.push(command),
         complete: () => {
@@ -86,7 +86,7 @@ describe('AppointmentNotificationSaga', () => {
       const commands$ = saga.appointmentCancelled(events$);
 
       // Assert
-      const emittedCommands: any[] = [];
+      const emittedCommands: unknown[] = [];
       commands$.subscribe({
         next: (command) => emittedCommands.push(command),
         complete: () => {
@@ -97,8 +97,9 @@ describe('AppointmentNotificationSaga', () => {
           expect(emittedCommands[0]).toHaveProperty('appointmentId', 'appointment-id');
 
           // Segundo comando: SendWhatsAppMessageCommand
-          expect(emittedCommands[1]).toHaveProperty('message');
-          expect(emittedCommands[1].message).toContain('cancelada');
+          const secondCommand = emittedCommands[1] as { message: string };
+          expect(secondCommand).toHaveProperty('message');
+          expect(secondCommand.message).toContain('cancelada');
 
           done();
         },
@@ -124,7 +125,7 @@ describe('AppointmentNotificationSaga', () => {
       const commands$ = saga.appointmentCancelled(events$);
 
       // Assert - Solo debe emitir comandos para AppointmentCancelled
-      const emittedCommands: any[] = [];
+      const emittedCommands: unknown[] = [];
       commands$.subscribe({
         next: (command) => emittedCommands.push(command),
         complete: () => {

@@ -236,8 +236,9 @@ describe('CustomerFactory', () => {
       };
 
       // Mock returns customer only for business1
-      mockRepository.findOne.mockImplementation(async (options: any) => {
-        if (options.where.business_id === business1 && options.where.whatsapp_phone === phone) {
+      mockRepository.findOne.mockImplementation(async (options) => {
+        const where = options?.where as { business_id?: string; whatsapp_phone?: string };
+        if (where?.business_id === business1 && where?.whatsapp_phone === phone) {
           return model;
         }
         return null;

@@ -22,12 +22,12 @@ describe('AppointmentWriteRepository - Property Tests', () => {
       findOne: jest.fn(),
       insert: jest.fn(),
       createQueryBuilder: jest.fn(),
-    } as any;
+    } as unknown as jest.Mocked<Repository<AppointmentModel>>;
 
     uow = {
       transaction: jest.fn((work) => work()),
       getQueryRunner: jest.fn(),
-    } as any;
+    } as unknown as jest.Mocked<IUnitOfWork>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -120,8 +120,16 @@ describe('AppointmentWriteRepository - Property Tests', () => {
           };
 
           typeormRepository.createQueryBuilder
-            .mockReturnValueOnce(mockQueryBuilder1 as any)
-            .mockReturnValueOnce(mockQueryBuilder2 as any);
+            .mockReturnValueOnce(
+              mockQueryBuilder1 as unknown as ReturnType<
+                Repository<AppointmentModel>['createQueryBuilder']
+              >,
+            )
+            .mockReturnValueOnce(
+              mockQueryBuilder2 as unknown as ReturnType<
+                Repository<AppointmentModel>['createQueryBuilder']
+              >,
+            );
 
           // Act - First save should succeed
           await repository.save(appointment1);

@@ -38,7 +38,7 @@ describe('CustomerExistenceChecker PBT', () => {
             search: jest.fn(),
             getStats: jest.fn(),
             getFullData: jest.fn(),
-          } as any;
+          } as jest.Mocked<ICustomerReadRepository>;
 
           const checker = new CustomerExistenceChecker(mockReadRepo);
 
@@ -74,7 +74,7 @@ describe('CustomerExistenceChecker PBT', () => {
             search: jest.fn(),
             getStats: jest.fn(),
             getFullData: jest.fn(),
-          } as any;
+          } as jest.Mocked<ICustomerReadRepository>;
 
           const checker = new CustomerExistenceChecker(mockReadRepo);
 
@@ -127,7 +127,7 @@ describe('CustomerExistenceChecker PBT', () => {
               search: jest.fn(),
               getStats: jest.fn(),
               getFullData: jest.fn(),
-            } as any;
+            } as jest.Mocked<ICustomerReadRepository>;
 
             const checker = new CustomerExistenceChecker(mockReadRepo);
 
@@ -165,7 +165,7 @@ describe('CustomerExistenceChecker PBT', () => {
             search: jest.fn(),
             getStats: jest.fn(),
             getFullData: jest.fn(),
-          } as any;
+          } as jest.Mocked<ICustomerReadRepository>;
 
           const checker = new CustomerExistenceChecker(mockReadRepo);
 
@@ -211,7 +211,7 @@ describe('CustomerExistenceChecker PBT', () => {
             search: jest.fn(),
             getStats: jest.fn(),
             getFullData: jest.fn(),
-          } as any;
+          } as jest.Mocked<ICustomerReadRepository>;
 
           const checker = new CustomerExistenceChecker(mockReadRepo);
 
@@ -244,7 +244,7 @@ describe('CustomerExistenceChecker PBT', () => {
             search: jest.fn(),
             getStats: jest.fn(),
             getFullData: jest.fn(),
-          } as any;
+          } as jest.Mocked<ICustomerReadRepository>;
 
           const checker = new CustomerExistenceChecker(mockReadRepo);
 
@@ -279,7 +279,7 @@ describe('CustomerExistenceChecker PBT', () => {
             search: jest.fn(),
             getStats: jest.fn(),
             getFullData: jest.fn(),
-          } as any;
+          } as jest.Mocked<ICustomerReadRepository>;
 
           const checker = new CustomerExistenceChecker(mockReadRepo);
 
@@ -331,7 +331,7 @@ describe('CustomerExistenceChecker PBT', () => {
             search: jest.fn(),
             getStats: jest.fn(),
             getFullData: jest.fn(),
-          } as any;
+          } as jest.Mocked<ICustomerReadRepository>;
 
           const checker = new CustomerExistenceChecker(mockReadRepo);
 

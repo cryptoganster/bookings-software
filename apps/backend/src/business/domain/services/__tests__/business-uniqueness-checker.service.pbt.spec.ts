@@ -8,11 +8,11 @@ describe('BusinessUniquenessChecker PBT', () => {
       fc.assert(
         fc.asyncProperty(fc.string({ minLength: 10, maxLength: 15 }), async (phone) => {
           // Arrange
-          const mockReadRepo: jest.Mocked<IBusinessReadRepository> = {
+          const mockReadRepo = {
             findByWhatsAppPhone: jest.fn().mockResolvedValue(null),
             findById: jest.fn(),
             findByOwnerId: jest.fn(),
-          } as any;
+          } as jest.Mocked<IBusinessReadRepository>;
 
           const checker = new BusinessUniquenessChecker(mockReadRepo);
 
@@ -36,14 +36,14 @@ describe('BusinessUniquenessChecker PBT', () => {
           fc.option(fc.uuid(), { nil: undefined }),
           async (phone, excludeBusinessId) => {
             // Arrange
-            const mockReadRepo: jest.Mocked<IBusinessReadRepository> = {
+            const mockReadRepo = {
               findByWhatsAppPhone: jest.fn().mockResolvedValue({
                 id: 'business-1',
                 whatsappPhone: phone,
               }),
               findById: jest.fn(),
               findByOwnerId: jest.fn(),
-            } as any;
+            } as jest.Mocked<IBusinessReadRepository>;
 
             const checker = new BusinessUniquenessChecker(mockReadRepo);
 
@@ -65,11 +65,11 @@ describe('BusinessUniquenessChecker PBT', () => {
       fc.assert(
         fc.asyncProperty(fc.string({ minLength: 10, maxLength: 15 }), async (phone) => {
           // Arrange
-          const mockReadRepo: jest.Mocked<IBusinessReadRepository> = {
+          const mockReadRepo = {
             findByWhatsAppPhone: jest.fn().mockResolvedValue(null),
             findById: jest.fn(),
             findByOwnerId: jest.fn(),
-          } as any;
+          } as jest.Mocked<IBusinessReadRepository>;
 
           const checker = new BusinessUniquenessChecker(mockReadRepo);
 
@@ -90,14 +90,14 @@ describe('BusinessUniquenessChecker PBT', () => {
           fc.uuid(),
           async (phone, businessId) => {
             // Arrange
-            const mockReadRepo: jest.Mocked<IBusinessReadRepository> = {
+            const mockReadRepo = {
               findByWhatsAppPhone: jest.fn().mockResolvedValue({
                 id: businessId,
                 whatsappPhone: phone,
               }),
               findById: jest.fn(),
               findByOwnerId: jest.fn(),
-            } as any;
+            } as jest.Mocked<IBusinessReadRepository>;
 
             const checker = new BusinessUniquenessChecker(mockReadRepo);
 
@@ -119,14 +119,14 @@ describe('BusinessUniquenessChecker PBT', () => {
           fc.uuid(),
           async (phone, businessId) => {
             // Arrange
-            const mockReadRepo: jest.Mocked<IBusinessReadRepository> = {
+            const mockReadRepo = {
               findByWhatsAppPhone: jest.fn().mockResolvedValue({
                 id: businessId,
                 whatsappPhone: phone,
               }),
               findById: jest.fn(),
               findByOwnerId: jest.fn(),
-            } as any;
+            } as jest.Mocked<IBusinessReadRepository>;
 
             const checker = new BusinessUniquenessChecker(mockReadRepo);
 
@@ -147,11 +147,11 @@ describe('BusinessUniquenessChecker PBT', () => {
       fc.assert(
         fc.asyncProperty(fc.string({ minLength: 10, maxLength: 15 }), async (phone) => {
           // Arrange
-          const mockReadRepo: jest.Mocked<IBusinessReadRepository> = {
+          const mockReadRepo = {
             findByWhatsAppPhone: jest.fn().mockResolvedValue(null),
             findById: jest.fn(),
             findByOwnerId: jest.fn(),
-          } as any;
+          } as jest.Mocked<IBusinessReadRepository>;
 
           const checker = new BusinessUniquenessChecker(mockReadRepo);
 

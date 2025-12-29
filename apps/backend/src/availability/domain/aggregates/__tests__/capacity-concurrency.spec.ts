@@ -28,7 +28,7 @@ describe('Capacity - Concurrency Tests', () => {
 
     module = await Test.createTestingModule({
       imports: [
-        TypeOrmModule.forRoot(dataSource.options as any),
+        TypeOrmModule.forRoot(dataSource.options),
         TypeOrmModule.forFeature([CapacityModel]),
       ],
       providers: [

@@ -25,6 +25,10 @@ describe('BusinessOwnerWriteRepository - Integration Test (Optimistic Locking)',
   let factory: BusinessOwnerFactory;
   let dataSource: DataSource;
 
+  beforeAll(async () => {
+    await ensureMigrationsRun();
+  });
+
   beforeEach(async () => {
     // Use shared DataSource with all entities
     dataSource = await setupTestDatabase();

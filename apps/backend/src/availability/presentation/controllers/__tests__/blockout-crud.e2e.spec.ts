@@ -246,7 +246,7 @@ describe('Blockout CRUD (e2e)', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
-      const deletedBlockout = response.body.find((b: any) => b.id === blockoutId);
+      const deletedBlockout = response.body.find((b: { id: string }) => b.id === blockoutId);
       expect(deletedBlockout).toBeUndefined();
     });
 

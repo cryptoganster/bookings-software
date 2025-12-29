@@ -2,13 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '@/app.module';
-import { DataSource } from 'typeorm';
 import { E2EAuthHelper } from '@test-utils/helpers';
 import { generateTestId } from '@test-utils/helpers/database';
 
 describe('Schedule CRUD (e2e)', () => {
   let app: INestApplication;
-  let dataSource: DataSource;
   let authHelper: E2EAuthHelper;
   let authToken: string;
   let businessId: string;
@@ -34,7 +32,6 @@ describe('Schedule CRUD (e2e)', () => {
 
     await app.init();
 
-    dataSource = moduleFixture.get<DataSource>(DataSource);
     authHelper = new E2EAuthHelper(app);
 
     // Create business owner with business using helper
@@ -190,7 +187,9 @@ describe('Schedule CRUD (e2e)', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
-      const updatedSchedule = response.body.find((s: any) => s.id === scheduleId);
+      const updatedSchedule = response.body.find(
+        (s: { id: string; startTime: string; endTime: string }) => s.id === scheduleId,
+      );
       expect(updatedSchedule.startTime).toBe('08:00:00'); // Database returns HH:MM:SS format
       expect(updatedSchedule.endTime).toBe('16:00:00');
     });
@@ -242,7 +241,9 @@ describe('Schedule CRUD (e2e)', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
-      const deletedSchedule = response.body.find((s: any) => s.id === scheduleId);
+      const deletedSchedule = response.body.find(
+        (s: { id: string; isActive: boolean }) => s.id === scheduleId,
+      );
       expect(deletedSchedule.isActive).toBe(false);
     });
 

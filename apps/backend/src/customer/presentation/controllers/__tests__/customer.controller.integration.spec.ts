@@ -5,7 +5,6 @@ import * as request from 'supertest';
 import { CustomerModule } from '../../../customer.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { JwtModule } from '@nestjs/jwt';
 import { SharedModule } from '@shared/shared.module';
 import { AuthModule } from '@auth/auth.module';
 import { LoggerModule } from 'nestjs-pino';

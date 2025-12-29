@@ -38,7 +38,6 @@ describe('Availability Query (e2e)', () => {
   let dataSource: DataSource;
   let authHelper: TestAuthHelper;
   let authToken: string;
-  let userId: string;
   let businessId: string;
   let offeringId: string;
 
@@ -83,7 +82,6 @@ describe('Availability Query (e2e)', () => {
     });
 
     authToken = testUser.token;
-    userId = testUser.id;
     businessId = testUser.businessId;
 
     // 2. Create an offering using helper (direct database insert)
@@ -356,7 +354,7 @@ describe('Availability Query (e2e)', () => {
       expect(response.body.length).toBeGreaterThan(0);
 
       // Verify slot structure
-      response.body.forEach((slot: any) => {
+      response.body.forEach((slot: { time: string; availableSlots: number }) => {
         expect(slot).toHaveProperty('time');
         expect(slot).toHaveProperty('availableSlots');
         expect(typeof slot.time).toBe('string');
@@ -395,7 +393,7 @@ describe('Availability Query (e2e)', () => {
         .expect(200);
 
       // All slots should be between 9:00 and 17:00
-      response.body.forEach((slot: any) => {
+      response.body.forEach((slot: { time: string; availableSlots: number }) => {
         const time = new Date(slot.time);
         const hours = time.getUTCHours();
         expect(hours).toBeGreaterThanOrEqual(9);

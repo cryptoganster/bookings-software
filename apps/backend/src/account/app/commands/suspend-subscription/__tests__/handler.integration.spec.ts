@@ -18,7 +18,6 @@ describe('SuspendSubscriptionHandler (Integration)', () => {
   let handler: SuspendSubscriptionHandler;
   let repository: Repository<BusinessOwnerModel>;
   let dataSource: DataSource;
-  let commandBus: CommandBus;
 
   beforeAll(async () => {
     await ensureMigrationsRun();
@@ -61,7 +60,6 @@ describe('SuspendSubscriptionHandler (Integration)', () => {
 
     handler = module.get<SuspendSubscriptionHandler>(SuspendSubscriptionHandler);
     repository = module.get<Repository<BusinessOwnerModel>>(getRepositoryToken(BusinessOwnerModel));
-    commandBus = module.get<CommandBus>(CommandBus);
   });
 
   afterAll(async () => {

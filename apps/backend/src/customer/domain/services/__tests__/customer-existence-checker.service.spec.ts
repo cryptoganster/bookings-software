@@ -17,7 +17,7 @@ describe('CustomerExistenceChecker', () => {
       search: jest.fn(),
       getStats: jest.fn(),
       getFullData: jest.fn(),
-    } as any;
+    } as jest.Mocked<ICustomerReadRepository>;
 
     checker = new CustomerExistenceChecker(mockReadRepo);
   });

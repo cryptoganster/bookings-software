@@ -12,7 +12,7 @@ describe('GetAvailableDatesHandler', () => {
     availabilityChecker = {
       isDateAvailable: jest.fn(),
       getAvailableTimeSlots: jest.fn(),
-    } as any;
+    } as jest.Mocked<IAvailabilityChecker>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

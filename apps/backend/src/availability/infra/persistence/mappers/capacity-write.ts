@@ -25,7 +25,7 @@ export class CapacityWriteMapper {
     return {
       id: capacity.getId().getValue(),
       offeringId: capacity.getOfferingId().getValue(),
-      date: dateStr as any, // TypeORM will accept string for DATE column
+      date: dateStr as unknown as Date, // TypeORM will accept string for DATE column
       totalSlots: capacity.getTotalSlots(),
       availableSlots: capacity.getAvailableSlots(),
       version: capacity.getVersion().getValue(),

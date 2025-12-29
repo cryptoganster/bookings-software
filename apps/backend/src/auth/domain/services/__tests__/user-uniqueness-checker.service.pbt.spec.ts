@@ -16,10 +16,10 @@ describe('UserUniquenessChecker PBT', () => {
       fc.assert(
         fc.asyncProperty(fc.emailAddress(), async (email) => {
           // Arrange
-          const mockReadRepo: jest.Mocked<IUserReadRepository> = {
+          const mockReadRepo = {
             findByEmail: jest.fn().mockResolvedValue(null),
             findById: jest.fn(),
-          } as any;
+          } as jest.Mocked<IUserReadRepository>;
 
           const checker = new UserUniquenessChecker(mockReadRepo);
 
@@ -42,10 +42,10 @@ describe('UserUniquenessChecker PBT', () => {
       fc.assert(
         fc.asyncProperty(fc.emailAddress(), async (email) => {
           // Arrange
-          const mockReadRepo: jest.Mocked<IUserReadRepository> = {
+          const mockReadRepo = {
             findByEmail: jest.fn().mockResolvedValue(null),
             findById: jest.fn(),
-          } as any;
+          } as jest.Mocked<IUserReadRepository>;
 
           const checker = new UserUniquenessChecker(mockReadRepo);
 
@@ -63,7 +63,7 @@ describe('UserUniquenessChecker PBT', () => {
       fc.assert(
         fc.asyncProperty(fc.emailAddress(), fc.uuid(), async (email, userId) => {
           // Arrange
-          const mockReadRepo: jest.Mocked<IUserReadRepository> = {
+          const mockReadRepo = {
             findByEmail: jest.fn().mockResolvedValue({
               id: userId,
               email: email,
@@ -74,7 +74,7 @@ describe('UserUniquenessChecker PBT', () => {
               createdAt: new Date(),
             }),
             findById: jest.fn(),
-          } as any;
+          } as jest.Mocked<IUserReadRepository>;
 
           const checker = new UserUniquenessChecker(mockReadRepo);
 
@@ -94,10 +94,10 @@ describe('UserUniquenessChecker PBT', () => {
       fc.assert(
         fc.asyncProperty(fc.emailAddress(), async (email) => {
           // Arrange
-          const mockReadRepo: jest.Mocked<IUserReadRepository> = {
+          const mockReadRepo = {
             findByEmail: jest.fn().mockResolvedValue(null),
             findById: jest.fn(),
-          } as any;
+          } as jest.Mocked<IUserReadRepository>;
 
           const checker = new UserUniquenessChecker(mockReadRepo);
 
@@ -124,10 +124,10 @@ describe('UserUniquenessChecker PBT', () => {
           ),
           async (email) => {
             // Arrange
-            const mockReadRepo: jest.Mocked<IUserReadRepository> = {
+            const mockReadRepo = {
               findByEmail: jest.fn().mockResolvedValue(null),
               findById: jest.fn(),
-            } as any;
+            } as jest.Mocked<IUserReadRepository>;
 
             const checker = new UserUniquenessChecker(mockReadRepo);
 
