@@ -202,7 +202,7 @@ describe('CustomerDuplicatesController', () => {
       // Act
       try {
         await controller.getDuplicates(dto, userWithoutBusiness);
-      } catch (error) {
+      } catch (_error) {
         // Expected to throw
       }
 
@@ -226,7 +226,7 @@ describe('CustomerDuplicatesController', () => {
       // Act
       try {
         await controller.getDuplicates(dto, mockUser);
-      } catch (err) {
+      } catch (_err) {
         // Expected to throw
       }
 

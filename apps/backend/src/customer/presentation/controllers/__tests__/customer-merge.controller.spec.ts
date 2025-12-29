@@ -145,7 +145,7 @@ describe('CustomerMergeController', () => {
       // Act
       try {
         await controller.merge(dto, mockUser);
-      } catch (err) {
+      } catch (_err) {
         // Expected to throw
       }
 
@@ -246,7 +246,7 @@ describe('CustomerMergeController', () => {
       // Act
       try {
         await controller.merge(dto, mockUser);
-      } catch (err) {
+      } catch (_err) {
         // Expected to throw
       }
 
@@ -272,7 +272,7 @@ describe('CustomerMergeController', () => {
       // Act
       try {
         await controller.merge(dto, mockUser);
-      } catch (err) {
+      } catch (_err) {
         // Expected to throw
       }
 
