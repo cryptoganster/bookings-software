@@ -13,6 +13,7 @@ import { OnboardingAlreadyCompletedException } from '@account/domain/exceptions/
 import { BusinessOwnerNotFoundException } from '@account/domain/exceptions/business-owner-not-found.exception';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { setupTestDatabase, cleanDatabase, generateTestId } from '@test-utils/helpers/database';
+import { ensureMigrationsRun } from '../../../../../../test/test-setup';
 
 describe('CompleteOnboardingHandler (Integration)', () => {
   let module: TestingModule;
@@ -22,6 +23,8 @@ describe('CompleteOnboardingHandler (Integration)', () => {
   let commandBus: CommandBus;
 
   beforeAll(async () => {
+    await ensureMigrationsRun();
+
     // Create shared DataSource with all entities
     dataSource = await setupTestDatabase();
 

@@ -9,6 +9,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { SharedModule } from '@shared/shared.module';
 import { AuthModule } from '@auth/auth.module';
 import { LoggerModule } from 'nestjs-pino';
+import { ensureMigrationsRun } from '../../../../../test/test-setup';
 
 // Mock BookingModule to avoid loading its dependencies in tests
 @Module({
@@ -36,6 +37,8 @@ describe('CustomerController (Integration)', () => {
   let queryBusSpy: jest.SpyInstance;
 
   beforeAll(async () => {
+    await ensureMigrationsRun();
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({

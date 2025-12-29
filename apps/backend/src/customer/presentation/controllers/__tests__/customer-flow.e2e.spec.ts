@@ -187,9 +187,10 @@ describe('Customer Flow E2E', () => {
       // Arrange: Create offering
       await createActiveOffering(dataSource, testBusinessId, { id: testOfferingId });
 
-      // Create schedules for Monday-Friday (9-17) so conversation flow can find available slots
+      // Create schedules for ALL days (0-6) so conversation flow can find available slots
+      // The handler generates date buttons for tomorrow, day+2, day+3 regardless of day of week
       const { createScheduleInDb } = await import('@test-utils/helpers');
-      for (let day = 1; day <= 5; day++) {
+      for (let day = 0; day <= 6; day++) {
         await createScheduleInDb(dataSource, {
           businessId: testBusinessId,
           dayOfWeek: day,
@@ -198,20 +199,21 @@ describe('Customer Flow E2E', () => {
         });
       }
 
-      // Find next Monday (day 1) to ensure we have a schedule
+      // Create capacity for the next 3 days (matching what sendDateSelectionButtons generates)
+      const { v4: uuidv4 } = require('uuid');
       const today = new Date();
       today.setUTCHours(0, 0, 0, 0);
-      const daysUntilMonday = (1 - today.getUTCDay() + 7) % 7 || 7;
-      const nextMonday = new Date(today);
-      nextMonday.setUTCDate(today.getUTCDate() + daysUntilMonday);
 
-      // Create capacity for next Monday (use date string to avoid timezone issues)
-      const mondayStr = nextMonday.toISOString().split('T')[0];
-      const { v4: uuidv4 } = require('uuid');
-      await dataSource.query(
-        'INSERT INTO capacities (id, offering_id, date, total_slots, available_slots, version, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())',
-        [uuidv4(), testOfferingId, mondayStr, 10, 10, 0],
-      );
+      for (let i = 1; i <= 3; i++) {
+        const date = new Date(today);
+        date.setUTCDate(today.getUTCDate() + i);
+        const dateStr = date.toISOString().split('T')[0];
+
+        await dataSource.query(
+          'INSERT INTO capacities (id, offering_id, date, total_slots, available_slots, version, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())',
+          [uuidv4(), testOfferingId, dateStr, 10, 10, 0],
+        );
+      }
 
       // Act: Complete booking flow
       await commandBus.execute(
@@ -366,9 +368,10 @@ describe('Customer Flow E2E', () => {
       // Arrange: Create offering
       await createActiveOffering(dataSource, testBusinessId, { id: testOfferingId });
 
-      // Create schedules for Monday-Friday (9-17) so conversation flow can find available slots
+      // Create schedules for ALL days (0-6) so conversation flow can find available slots
+      // The handler generates date buttons for tomorrow, day+2, day+3 regardless of day of week
       const { createScheduleInDb } = await import('@test-utils/helpers');
-      for (let day = 1; day <= 5; day++) {
+      for (let day = 0; day <= 6; day++) {
         await createScheduleInDb(dataSource, {
           businessId: testBusinessId,
           dayOfWeek: day,
@@ -377,20 +380,21 @@ describe('Customer Flow E2E', () => {
         });
       }
 
-      // Find next Monday (day 1) to ensure we have a schedule
+      // Create capacity for the next 3 days (matching what sendDateSelectionButtons generates)
+      const { v4: uuidv4 } = require('uuid');
       const today = new Date();
       today.setUTCHours(0, 0, 0, 0);
-      const daysUntilMonday = (1 - today.getUTCDay() + 7) % 7 || 7;
-      const nextMonday = new Date(today);
-      nextMonday.setUTCDate(today.getUTCDate() + daysUntilMonday);
 
-      // Create capacity for next Monday (use date string to avoid timezone issues)
-      const mondayStr = nextMonday.toISOString().split('T')[0];
-      const { v4: uuidv4 } = require('uuid');
-      await dataSource.query(
-        'INSERT INTO capacities (id, offering_id, date, total_slots, available_slots, version, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())',
-        [uuidv4(), testOfferingId, mondayStr, 10, 10, 0],
-      );
+      for (let i = 1; i <= 3; i++) {
+        const date = new Date(today);
+        date.setUTCDate(today.getUTCDate() + i);
+        const dateStr = date.toISOString().split('T')[0];
+
+        await dataSource.query(
+          'INSERT INTO capacities (id, offering_id, date, total_slots, available_slots, version, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())',
+          [uuidv4(), testOfferingId, dateStr, 10, 10, 0],
+        );
+      }
 
       // Act: Complete booking flow as anonymous customer
       await commandBus.execute(

@@ -24,25 +24,69 @@ import * as fs from 'fs';
  */
 
 const MIGRATIONS_FLAG_FILE = join(__dirname, '.migrations-complete');
+const MIGRATIONS_LOCK_FILE = join(__dirname, '.migrations-lock');
 
 /**
  * Run migrations once per test session
  *
  * This function:
  * 1. Checks if migrations have already been run (via flag file)
- * 2. If not, runs all migrations
+ * 2. If not, acquires a lock and runs all migrations
  * 3. Verifies database state (tables and foreign keys)
  * 4. Creates flag file to prevent re-running
  *
  * Safe to call multiple times - will only run migrations once.
+ * Uses lock file to prevent race conditions in parallel test execution.
  */
 export async function ensureMigrationsRun(): Promise<void> {
+  const timestamp = new Date().toISOString();
+  console.log(`[${timestamp}] [PID ${process.pid}] ensureMigrationsRun() called`);
+
   // Check if already run in this test session
   if (fs.existsSync(MIGRATIONS_FLAG_FILE)) {
+    console.log(
+      `[${timestamp}] [PID ${process.pid}] Migrations already completed (flag file exists)`,
+    );
     return; // Already run, skip
   }
 
-  console.log('🚀 Running migrations in test process...');
+  // Try to acquire lock (atomic operation)
+  let lockAcquired = false;
+  try {
+    // writeFileSync with 'wx' flag fails if file exists (atomic)
+    fs.writeFileSync(MIGRATIONS_LOCK_FILE, process.pid.toString(), { flag: 'wx' });
+    lockAcquired = true;
+    console.log(`[PID ${process.pid}] Lock acquired, will run migrations`);
+  } catch (error) {
+    // Lock file exists, another worker is running migrations
+    // Wait for migrations to complete
+    console.log(
+      `[PID ${process.pid}] ⏳ Waiting for migrations to complete (another worker is running them)...`,
+    );
+
+    // Poll for flag file (max 30 seconds)
+    const maxWaitTime = 30000; // 30 seconds
+    const pollInterval = 100; // 100ms
+    const startTime = Date.now();
+
+    while (!fs.existsSync(MIGRATIONS_FLAG_FILE)) {
+      if (Date.now() - startTime > maxWaitTime) {
+        throw new Error('Timeout waiting for migrations to complete');
+      }
+      await new Promise((resolve) => setTimeout(resolve, pollInterval));
+    }
+
+    console.log(`[PID ${process.pid}] ✅ Migrations completed by another worker`);
+    return;
+  }
+
+  // If we acquired the lock, we're responsible for running migrations
+  if (!lockAcquired) {
+    return;
+  }
+
+  const startTime = Date.now();
+  console.log(`[${new Date().toISOString()}] 🚀 Running migrations in test process...`);
 
   const dbConfig = {
     type: 'postgres' as const,
@@ -110,9 +154,22 @@ export async function ensureMigrationsRun(): Promise<void> {
 
     // Create flag file
     fs.writeFileSync(MIGRATIONS_FLAG_FILE, new Date().toISOString());
-    console.log('✅ Migrations complete');
+    const endTime = Date.now();
+    const duration = endTime - startTime;
+    console.log(`[${new Date().toISOString()}] ✅ Migrations complete (took ${duration}ms)`);
+
+    // Release lock
+    if (fs.existsSync(MIGRATIONS_LOCK_FILE)) {
+      fs.unlinkSync(MIGRATIONS_LOCK_FILE);
+    }
   } catch (error) {
     console.error('❌ Migration setup failed:', error);
+
+    // Release lock on error
+    if (fs.existsSync(MIGRATIONS_LOCK_FILE)) {
+      fs.unlinkSync(MIGRATIONS_LOCK_FILE);
+    }
+
     if (migrationDataSource?.isInitialized) {
       await migrationDataSource.destroy();
     }
@@ -121,11 +178,14 @@ export async function ensureMigrationsRun(): Promise<void> {
 }
 
 /**
- * Clean up migration flag file
+ * Clean up migration flag and lock files
  * Called by Jest's globalTeardown (if configured)
  */
 export function cleanupMigrationFlag(): void {
   if (fs.existsSync(MIGRATIONS_FLAG_FILE)) {
     fs.unlinkSync(MIGRATIONS_FLAG_FILE);
+  }
+  if (fs.existsSync(MIGRATIONS_LOCK_FILE)) {
+    fs.unlinkSync(MIGRATIONS_LOCK_FILE);
   }
 }

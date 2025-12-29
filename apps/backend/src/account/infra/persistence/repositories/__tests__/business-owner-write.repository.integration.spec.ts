@@ -12,6 +12,7 @@ import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 import { DataSource } from 'typeorm';
 import { setupTestDatabase, cleanDatabase } from '@test-utils/helpers/database';
+import { ensureMigrationsRun } from '../../../../../../test/test-setup';
 
 /**
  * Integration Test for BusinessOwnerWriteRepository

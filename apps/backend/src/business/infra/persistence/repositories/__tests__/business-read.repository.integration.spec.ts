@@ -14,6 +14,7 @@ import { BusinessReadRepository } from '../business-read.repository';
 import { BusinessModel } from '../../models/business.model';
 import { UUID } from '@shared/vo/uuid';
 import { E2EDatabaseHelper, createTestUser } from '@test-utils/helpers';
+import { ensureMigrationsRun } from '../../../../../../test/test-setup';
 
 describe('BusinessReadRepository Integration Tests', () => {
   let module: TestingModule;
@@ -22,6 +23,8 @@ describe('BusinessReadRepository Integration Tests', () => {
   let dbHelper: E2EDatabaseHelper;
 
   beforeAll(async () => {
+    await ensureMigrationsRun();
+
     module = await Test.createTestingModule({
       imports: [
         TypeOrmModule.forRoot({

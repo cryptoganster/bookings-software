@@ -12,6 +12,7 @@ import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 import { setupTestDatabase, cleanDatabase } from '@test-utils/helpers/database';
 import { createTestBusiness } from '@test-utils/helpers/business';
 import { createActiveOffering } from '@test-utils/helpers/offering';
+import { ensureMigrationsRun } from '../../../../../test/test-setup';
 
 describe('Capacity - Concurrency Tests', () => {
   let module: TestingModule;
@@ -21,6 +22,8 @@ describe('Capacity - Concurrency Tests', () => {
   let testBusinessId: string;
 
   beforeAll(async () => {
+    await ensureMigrationsRun();
+
     dataSource = await setupTestDatabase();
 
     module = await Test.createTestingModule({

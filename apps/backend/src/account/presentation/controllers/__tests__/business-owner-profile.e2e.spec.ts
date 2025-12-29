@@ -4,6 +4,7 @@ import * as request from 'supertest';
 import { DataSource } from 'typeorm';
 import { AppModule } from '../../../../app.module';
 import { E2EAuthHelper, E2EDatabaseHelper, UserRole } from '@test-utils/helpers';
+import { ensureMigrationsRun } from '../../../../../test/test-setup';
 
 describe('BusinessOwnerProfile Controller E2E', () => {
   let app: INestApplication;
@@ -14,6 +15,8 @@ describe('BusinessOwnerProfile Controller E2E', () => {
   let businessOwnerId: string;
 
   beforeAll(async () => {
+    await ensureMigrationsRun();
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();

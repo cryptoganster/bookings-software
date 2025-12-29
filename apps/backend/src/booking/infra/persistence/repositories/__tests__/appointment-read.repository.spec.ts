@@ -6,6 +6,7 @@ import { AppointmentModel } from '../../models/appointment';
 import { CustomerModel } from '@customer/infra/persistence/models/customer.model';
 import { UUID } from '@shared/vo/uuid';
 import { E2EDatabaseHelper } from '@test-utils/helpers';
+import { ensureMigrationsRun } from '../../../../../../test/test-setup';
 
 describe('AppointmentReadRepository Integration Tests', () => {
   let module: TestingModule;
@@ -13,6 +14,8 @@ describe('AppointmentReadRepository Integration Tests', () => {
   let dataSource: DataSource;
 
   beforeAll(async () => {
+    await ensureMigrationsRun();
+
     module = await Test.createTestingModule({
       imports: [
         TypeOrmModule.forRoot(E2EDatabaseHelper.getTestTypeOrmConfig()),

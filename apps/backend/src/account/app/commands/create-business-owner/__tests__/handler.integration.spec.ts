@@ -12,6 +12,7 @@ import { DataSource } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { setupTestDatabase, cleanDatabase } from '@test-utils/helpers/database';
 import { createTestUser } from '@test-utils/helpers';
+import { ensureMigrationsRun } from '../../../../../../test/test-setup';
 
 /**
  * Integration Test for CreateBusinessOwnerHandler
@@ -25,6 +26,8 @@ describe('CreateBusinessOwnerHandler - Integration Test', () => {
   let factory: BusinessOwnerFactory;
 
   beforeAll(async () => {
+    await ensureMigrationsRun();
+
     // Create shared DataSource with all entities
     dataSource = await setupTestDatabase();
 

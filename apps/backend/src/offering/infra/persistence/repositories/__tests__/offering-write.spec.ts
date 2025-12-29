@@ -9,6 +9,7 @@ import { OfferingDuration } from '@offering/domain/vo/offering-duration';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { E2EDatabaseHelper, createTestBusiness } from '@test-utils/helpers';
+import { ensureMigrationsRun } from '../../../../../../test/test-setup';
 
 describe('OfferingWriteRepository Integration Tests', () => {
   let module: TestingModule;
@@ -16,6 +17,8 @@ describe('OfferingWriteRepository Integration Tests', () => {
   let dataSource: DataSource;
 
   beforeAll(async () => {
+    await ensureMigrationsRun();
+
     module = await Test.createTestingModule({
       imports: [
         TypeOrmModule.forRoot({

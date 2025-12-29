@@ -8,6 +8,7 @@
   "testTimeout": 30000,
   "globalSetup": "<rootDir>/../test/global-setup.ts",
   "setupFiles": ["<rootDir>/../test/setup.ts"],
+  "setupFilesAfterEnv": ["<rootDir>/../test/setup-after-env.ts"],
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
   },

@@ -12,6 +12,7 @@ import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { UUID } from '@shared/vo/uuid';
 import { setupTestDatabase, cleanDatabase } from '@test-utils/helpers/database';
 import { createTestBusiness } from '@test-utils/helpers/business';
+import { ensureMigrationsRun } from '../../../../../../test/test-setup';
 
 /**
  * Integration tests for IdentifyCustomerHandler
@@ -32,6 +33,8 @@ describe('IdentifyCustomerHandler Integration Tests', () => {
   let businessId: string;
 
   beforeAll(async () => {
+    await ensureMigrationsRun();
+
     dataSource = await setupTestDatabase();
 
     module = await Test.createTestingModule({

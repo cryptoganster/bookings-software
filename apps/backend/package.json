@@ -112,6 +112,9 @@
     "setupFiles": [
       "<rootDir>/../test/setup.ts"
     ],
+    "setupFilesAfterEnv": [
+      "<rootDir>/../test/setup-after-env.ts"
+    ],
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/$1",
       "^@shared/(.*)$": "<rootDir>/shared/$1",

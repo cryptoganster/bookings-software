@@ -90,8 +90,8 @@ describe('Availability Query (e2e)', () => {
     const offering = await createTestOffering(dataSource, businessId, 'Test Service', 60, 5);
     offeringId = offering.id;
 
-    // 3. Create schedules for testing (Monday to Friday, 9-17)
-    for (let day = 1; day <= 5; day++) {
+    // 3. Create schedules for testing (ALL days 0-6, 9-17)
+    for (let day = 0; day <= 6; day++) {
       await request(app.getHttpServer())
         .post('/api/schedules')
         .set('Authorization', `Bearer ${authToken}`)
@@ -207,57 +207,43 @@ describe('Availability Query (e2e)', () => {
       expect(hasTomorrow).toBe(false);
     });
 
-    it('should exclude dates outside schedule', async () => {
-      // Schedules are Monday-Friday (days 1-5), so weekend (Sunday=0, Saturday=6) should be excluded
-      // Find the next Sunday (day 0)
+    it('should exclude dates without capacity', async () => {
+      // This test verifies that dates without capacity records are excluded
+      // We create schedules for all days (0-6), so the filter is based on capacity
       const today = new Date();
       today.setUTCHours(0, 0, 0, 0);
 
-      // Calculate days until next Sunday (0 = Sunday)
-      const currentDay = today.getUTCDay();
-      const daysUntilSunday = currentDay === 0 ? 7 : 7 - currentDay; // If today is Sunday, get next Sunday
+      // Find a date 14 days in the future (to avoid conflicts with other test data)
+      const futureDate = new Date(today);
+      futureDate.setUTCDate(today.getUTCDate() + 14);
 
-      const nextSunday = new Date(today);
-      nextSunday.setUTCDate(today.getUTCDate() + daysUntilSunday);
+      const nextDay = new Date(futureDate);
+      nextDay.setUTCDate(futureDate.getUTCDate() + 1);
 
-      // Verify it's actually Sunday
-      expect(nextSunday.getUTCDay()).toBe(0);
-
-      // Calculate Monday (next day after Sunday)
-      const monday = new Date(nextSunday);
-      monday.setUTCDate(monday.getUTCDate() + 1);
-
-      // Ensure we have capacity for both Sunday and Monday
       const { v4: uuidv4 } = require('uuid');
 
       // Convert dates to YYYY-MM-DD strings to avoid timezone issues
-      const sundayStr = nextSunday.toISOString().split('T')[0];
-      const mondayStr = monday.toISOString().split('T')[0];
+      const futureDateStr = futureDate.toISOString().split('T')[0];
+      const nextDayStr = nextDay.toISOString().split('T')[0];
 
       // Delete existing capacity for these dates to avoid conflicts
       await dataSource.query('DELETE FROM capacities WHERE offering_id = $1 AND date IN ($2, $3)', [
         offeringId,
-        sundayStr,
-        mondayStr,
+        futureDateStr,
+        nextDayStr,
       ]);
 
-      // Create capacity for Sunday (should be excluded due to no schedule)
+      // Create capacity ONLY for nextDay (futureDate should be excluded due to no capacity)
       await dataSource.query(
         'INSERT INTO capacities (id, offering_id, date, total_slots, available_slots, version, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())',
-        [uuidv4(), offeringId, sundayStr, 10, 10, 0],
+        [uuidv4(), offeringId, nextDayStr, 10, 10, 0],
       );
 
-      // Create capacity for Monday (should be included - has schedule)
-      await dataSource.query(
-        'INSERT INTO capacities (id, offering_id, date, total_slots, available_slots, version, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())',
-        [uuidv4(), offeringId, mondayStr, 10, 10, 0],
-      );
-
-      // Query for dates around Sunday (Saturday, Sunday, Monday)
-      const startDate = new Date(nextSunday);
-      startDate.setUTCDate(startDate.getUTCDate() - 1); // Saturday
-      const endDate = new Date(nextSunday);
-      endDate.setUTCDate(endDate.getUTCDate() + 1); // Monday
+      // Query for dates around futureDate
+      const startDate = new Date(futureDate);
+      startDate.setUTCDate(startDate.getUTCDate() - 1);
+      const endDate = new Date(futureDate);
+      endDate.setUTCDate(endDate.getUTCDate() + 2);
 
       const response = await request(app.getHttpServer())
         .get('/api/availability/dates')
@@ -270,13 +256,13 @@ describe('Availability Query (e2e)', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
-      // Sunday should NOT be in the list (no schedule for day 0)
-      const hasSunday = response.body.some((date: string) => date.startsWith(sundayStr));
-      expect(hasSunday).toBe(false);
+      // futureDate should NOT be in the list (no capacity)
+      const hasFutureDate = response.body.some((date: string) => date.startsWith(futureDateStr));
+      expect(hasFutureDate).toBe(false);
 
-      // Monday SHOULD be in the list (has schedule for day 1)
-      const hasMonday = response.body.some((date: string) => date.startsWith(mondayStr));
-      expect(hasMonday).toBe(true);
+      // nextDay SHOULD be in the list (has capacity)
+      const hasNextDay = response.body.some((date: string) => date.startsWith(nextDayStr));
+      expect(hasNextDay).toBe(true);
     });
 
     it('should fail with missing required parameters', async () => {

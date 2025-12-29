@@ -11,6 +11,7 @@ import { TimeSlot } from '@availability/domain/vo/time-slot.vo';
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { setupTestDatabase, cleanDatabase } from '@test-utils/helpers/database';
 import { createTestBusiness } from '@test-utils/helpers/business';
+import { ensureMigrationsRun } from '../../../../../../test/test-setup';
 
 describe('Schedule Repositories (Integration)', () => {
   let module: TestingModule;
@@ -21,6 +22,8 @@ describe('Schedule Repositories (Integration)', () => {
   let uow: TypeOrmUnitOfWork;
 
   beforeAll(async () => {
+    await ensureMigrationsRun();
+
     // Use integration test helper to create DataSource with ALL entities
     dataSource = await setupTestDatabase();
 

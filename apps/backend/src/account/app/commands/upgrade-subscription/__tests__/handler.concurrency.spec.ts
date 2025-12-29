@@ -11,6 +11,7 @@ import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 import { UUID } from '@shared/vo/uuid';
 import { setupTestDatabase, cleanDatabase, generateTestId } from '@test-utils/helpers/database';
+import { ensureMigrationsRun } from '../../../../../../test/test-setup';
 
 describe('UpgradeSubscriptionHandler - Concurrency Tests', () => {
   let module: TestingModule;
@@ -20,6 +21,8 @@ describe('UpgradeSubscriptionHandler - Concurrency Tests', () => {
   let repository: Repository<BusinessOwnerModel>;
 
   beforeAll(async () => {
+    await ensureMigrationsRun();
+
     // Create shared DataSource with ALL entities
     dataSource = await setupTestDatabase();
 

@@ -15,6 +15,7 @@ import { UUID } from '@shared/vo/uuid';
 import { WhatsAppPhoneAlreadyExistsException } from '@shared/kernel/exceptions/whatsapp-phone-already-exists';
 import { MaxBusinessesExceededException } from '@business/domain/exceptions/max-businesses-exceeded';
 import { createTestUser, cleanDatabase } from '@test-utils/helpers';
+import { ensureMigrationsRun } from '../../../../../../test/test-setup';
 
 /**
  * Integration tests for CreateBusinessHandler
@@ -35,6 +36,8 @@ describe('CreateBusinessHandler Integration Tests', () => {
   let dataSource: DataSource;
 
   beforeAll(async () => {
+    await ensureMigrationsRun();
+
     const mockEventPublisher = {
       mergeObjectContext: jest.fn((obj: any) => {
         // Return the original object with a mock commit method added
@@ -143,6 +146,9 @@ describe('CreateBusinessHandler Integration Tests', () => {
   });
 
   afterEach(async () => {
+    // Clean businesses table explicitly before general cleanup
+    // This ensures WhatsApp phone uniqueness constraint doesn't fail
+    await dataSource.query('DELETE FROM businesses');
     await cleanDatabase(dataSource);
   });
 

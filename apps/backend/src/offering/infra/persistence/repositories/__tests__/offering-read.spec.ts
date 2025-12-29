@@ -5,6 +5,7 @@ import { OfferingReadRepository } from '../offering-read';
 import { OfferingModel } from '../../models/offering';
 import { UUID } from '@shared/vo/uuid';
 import { createTestBusiness } from '@test-utils/helpers/business';
+import { ensureMigrationsRun } from '../../../../../../test/test-setup';
 
 describe('OfferingReadRepository Integration Tests', () => {
   let module: TestingModule;
@@ -12,6 +13,8 @@ describe('OfferingReadRepository Integration Tests', () => {
   let dataSource: DataSource;
 
   beforeAll(async () => {
+    await ensureMigrationsRun();
+
     module = await Test.createTestingModule({
       imports: [
         TypeOrmModule.forRoot({

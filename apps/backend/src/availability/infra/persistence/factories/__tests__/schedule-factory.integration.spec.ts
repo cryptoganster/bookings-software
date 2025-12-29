@@ -5,6 +5,7 @@ import { ScheduleModel } from '../../models/schedule';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { setupTestDatabase, cleanDatabase, generateTestId } from '@test-utils/helpers/database';
 import { createTestBusiness } from '@test-utils/helpers/business';
+import { ensureMigrationsRun } from '../../../../../../test/test-setup';
 
 describe('ScheduleFactory (Integration)', () => {
   let module: TestingModule;
@@ -13,6 +14,8 @@ describe('ScheduleFactory (Integration)', () => {
   let dataSource: DataSource;
 
   beforeAll(async () => {
+    await ensureMigrationsRun();
+
     // Create shared DataSource with ALL entities
     dataSource = await setupTestDatabase();
 

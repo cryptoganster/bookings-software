@@ -11,6 +11,7 @@ import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { DataSource } from 'typeorm';
 import { cleanDatabase, setupTestDatabase } from '@test-utils/helpers/database';
 import { createTestBusiness } from '@test-utils/helpers/business';
+import { ensureMigrationsRun } from '../../../../../../test/test-setup';
 
 /**
  * Concurrency tests for IdentifyCustomerHandler
@@ -30,6 +31,8 @@ describe('IdentifyCustomerHandler - Concurrency Tests', () => {
   let businessId: string;
 
   beforeAll(async () => {
+    await ensureMigrationsRun();
+
     dataSource = await setupTestDatabase();
 
     module = await Test.createTestingModule({

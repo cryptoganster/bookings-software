@@ -20,9 +20,16 @@ export default async function globalSetup() {
 
   // Clean migration flag file from previous test runs
   const migrationFlagFile = join(__dirname, '.migrations-complete');
+  const migrationLockFile = join(__dirname, '.migrations-lock');
+
   if (fs.existsSync(migrationFlagFile)) {
     fs.unlinkSync(migrationFlagFile);
     console.log('🧹 Cleaned migration flag file');
+  }
+
+  if (fs.existsSync(migrationLockFile)) {
+    fs.unlinkSync(migrationLockFile);
+    console.log('🧹 Cleaned migration lock file');
   }
 
   const dbConfig = {

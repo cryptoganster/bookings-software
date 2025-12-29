@@ -23,6 +23,7 @@ import { GetBusinessOwnerByUserIdQuery } from '../queries/get-business-owner-by-
 import { AppModule } from '@/app.module';
 import { AlreadyOnThisPlanException } from '@account/domain/exceptions/already-on-this-plan.exception';
 import { CannotDowngradeSubscriptionException } from '@account/domain/exceptions/cannot-downgrade-subscription.exception';
+import { ensureMigrationsRun } from '../../../../test/test-setup';
 
 describe('E2E: Edge Cases', () => {
   let app: INestApplication;
@@ -31,6 +32,9 @@ describe('E2E: Edge Cases', () => {
   let queryBus: QueryBus;
 
   beforeAll(async () => {
+    // IMPORTANT: Run migrations first (once per test session)
+    await ensureMigrationsRun();
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();

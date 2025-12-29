@@ -10,6 +10,7 @@ import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
 import { TypeOrmUnitOfWork } from '@shared/infra/uow';
 import { AppointmentFactory } from '../../factories/appointment-factory';
 import { E2EDatabaseHelper } from '@test-utils/helpers';
+import { ensureMigrationsRun } from '../../../../../../test/test-setup';
 
 describe('AppointmentWriteRepository Integration Tests', () => {
   let module: TestingModule;
@@ -18,6 +19,8 @@ describe('AppointmentWriteRepository Integration Tests', () => {
   let dataSource: DataSource;
 
   beforeAll(async () => {
+    await ensureMigrationsRun();
+
     module = await Test.createTestingModule({
       imports: [
         TypeOrmModule.forRoot({

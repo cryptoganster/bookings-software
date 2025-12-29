@@ -5,6 +5,7 @@ import { BlockoutModel } from '../../models/blockout';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { setupTestDatabase, cleanDatabase, generateTestId } from '@test-utils/helpers/database';
 import { createTestBusiness } from '@test-utils/helpers/business';
+import { ensureMigrationsRun } from '../../../../../../test/test-setup';
 
 describe('BlockoutFactory (Integration)', () => {
   let module: TestingModule;
@@ -14,6 +15,8 @@ describe('BlockoutFactory (Integration)', () => {
   let testBusinessId: string; // Shared business ID for all tests
 
   beforeAll(async () => {
+    await ensureMigrationsRun();
+
     // Create shared DataSource with ALL entities
     dataSource = await setupTestDatabase();
 

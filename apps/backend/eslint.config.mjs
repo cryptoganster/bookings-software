@@ -43,4 +43,31 @@ export default [
       '@typescript-eslint/no-explicit-any': 'warn',
     },
   },
+  {
+    // Configuración específica para archivos de test
+    files: ['src/**/*.spec.ts', 'src/**/*.e2e-spec.ts', 'src/**/*.test.ts'],
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        project: './tsconfig.json',
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    plugins: {
+      '@typescript-eslint': tsPlugin,
+      'local-rules': {
+        rules: localRules,
+      },
+    },
+    rules: {
+      // Regla para requerir ensureMigrationsRun() en tests de integración
+      'local-rules/require-migrations-call': 'error',
+      
+      // Reglas de TypeScript (más relajadas para tests)
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/explicit-function-return-type': 'off',
+      '@typescript-eslint/explicit-module-boundary-types': 'off',
+      '@typescript-eslint/no-explicit-any': 'warn',
+    },
+  },
 ];

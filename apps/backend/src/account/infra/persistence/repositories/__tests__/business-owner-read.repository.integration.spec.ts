@@ -5,6 +5,7 @@ import { BusinessOwnerReadRepository } from '../business-owner-read.repository';
 import { BusinessOwnerModel } from '../../models/business-owner.model';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { setupTestDatabase, cleanDatabase } from '@test-utils/helpers/database';
+import { ensureMigrationsRun } from '../../../../../../test/test-setup';
 
 describe('BusinessOwnerReadRepository (Integration)', () => {
   let module: TestingModule;
@@ -13,6 +14,8 @@ describe('BusinessOwnerReadRepository (Integration)', () => {
   let dataSource: DataSource;
 
   beforeAll(async () => {
+    await ensureMigrationsRun();
+
     // Use shared DataSource with all entities
     dataSource = await setupTestDatabase();
 
