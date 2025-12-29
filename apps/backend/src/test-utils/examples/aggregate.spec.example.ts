@@ -15,7 +15,7 @@
  * @see .kiro/steering/PRD.md (Section 4: Aggregates)
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from '@jest/globals';
 import { UUID } from '@shared/vo/uuid';
 
 /**

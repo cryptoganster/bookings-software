@@ -15,7 +15,7 @@
  * @see .kiro/steering/PRD.md (Section 10: Event Handlers y Process Managers)
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 
@@ -32,7 +32,7 @@ describe('OnAppointmentCreatedHandler', () => {
   beforeEach(async () => {
     // Create mock for CommandBus
     mockCommandBus = {
-      execute: vi.fn(),
+      execute: jest.fn(),
     };
 
     // Create testing module with mocked dependencies
@@ -110,7 +110,7 @@ describe('OnAppointmentCreatedHandler', () => {
     mockCommandBus.execute.mockRejectedValue(new Error('Command failed'));
 
     // Spy on console.error
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
     // Act
     // await handler.handle(event);
@@ -138,7 +138,7 @@ describe('OnAppointmentCancelledHandler', () => {
 
   beforeEach(async () => {
     mockCommandBus = {
-      execute: vi.fn(),
+      execute: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -210,7 +210,7 @@ describe('OnAppointmentCancelledHandler', () => {
       .mockRejectedValueOnce(new Error('Cancel reminder failed'))
       .mockResolvedValueOnce(undefined);
 
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
     // Act
     // await handler.handle(event);
@@ -239,11 +239,11 @@ describe('OnCustomerLinkedToUserHandler', () => {
 
   beforeEach(async () => {
     mockCommandBus = {
-      execute: vi.fn(),
+      execute: jest.fn(),
     };
 
     mockQueryBus = {
-      execute: vi.fn(),
+      execute: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -342,7 +342,7 @@ describe('OnAdminQueryRequestedHandler', () => {
 
   beforeEach(async () => {
     mockWhatsAppClient = {
-      sendMessage: vi.fn(),
+      sendMessage: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -424,7 +424,7 @@ describe('OnUserRegisteredHandler', () => {
 
   beforeEach(async () => {
     mockCommandBus = {
-      execute: vi.fn(),
+      execute: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({

@@ -15,7 +15,7 @@
  * @see .kiro/steering/PRD.md (Section 9: Casos de Uso)
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CqrsModule, EventBus } from '@nestjs/cqrs';
 
@@ -35,21 +35,21 @@ describe('CreateAppointmentHandler', () => {
   beforeEach(async () => {
     // Create mocks for all dependencies
     mockAppointmentRepo = {
-      save: vi.fn(),
-      findById: vi.fn(),
+      save: jest.fn(),
+      findById: jest.fn(),
     };
 
     mockCapacityRepo = {
-      findByOfferingAndDate: vi.fn(),
-      save: vi.fn(),
+      findByOfferingAndDate: jest.fn(),
+      save: jest.fn(),
     };
 
     mockUnitOfWork = {
-      transaction: vi.fn((callback: () => Promise<any>) => callback()),
+      transaction: jest.fn((callback: () => Promise<any>) => callback()),
     };
 
     mockEventBus = {
-      publish: vi.fn(),
+      publish: jest.fn(),
     };
 
     // Create testing module with mocked dependencies
@@ -107,7 +107,7 @@ describe('CreateAppointmentHandler', () => {
       offeringId: 'offering-123',
       availableSlots: 5,
       hasAvailableSlots: () => true,
-      decrementSlot: vi.fn(),
+      decrementSlot: jest.fn(),
     };
 
     mockCapacityRepo.findByOfferingAndDate.mockResolvedValue(mockCapacity);
@@ -208,7 +208,7 @@ describe('CreateAppointmentHandler', () => {
     const mockCapacity = {
       id: 'capacity-123',
       hasAvailableSlots: () => true,
-      decrementSlot: vi.fn(),
+      decrementSlot: jest.fn(),
     };
 
     mockCapacityRepo.findByOfferingAndDate.mockResolvedValue(mockCapacity);
@@ -247,17 +247,17 @@ describe('CreateBusinessHandler with Domain Service', () => {
 
   beforeEach(async () => {
     mockBusinessRepo = {
-      save: vi.fn(),
+      save: jest.fn(),
     };
 
     mockUniquenessChecker = {
-      isWhatsAppPhoneUnique: vi.fn(),
+      isWhatsAppPhoneUnique: jest.fn(),
     };
 
     mockLimitChecker = {
-      canCreateBusiness: vi.fn(),
-      getBusinessCount: vi.fn(),
-      getMaxBusinessesAllowed: vi.fn(),
+      canCreateBusiness: jest.fn(),
+      getBusinessCount: jest.fn(),
+      getMaxBusinessesAllowed: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -377,11 +377,11 @@ describe('CancelAppointmentHandler with Retry Logic', () => {
 
   beforeEach(async () => {
     mockFactory = {
-      loadById: vi.fn(),
+      loadById: jest.fn(),
     };
 
     mockAppointmentRepo = {
-      save: vi.fn(),
+      save: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -413,7 +413,7 @@ describe('CancelAppointmentHandler with Retry Logic', () => {
 
     const mockAppointment = {
       id: 'appointment-123',
-      cancel: vi.fn(),
+      cancel: jest.fn(),
       getVersion: () => ({ getValue: () => 1 }),
     };
 
@@ -444,7 +444,7 @@ describe('CancelAppointmentHandler with Retry Logic', () => {
 
     const mockAppointment = {
       id: 'appointment-123',
-      cancel: vi.fn(),
+      cancel: jest.fn(),
       getVersion: () => ({ getValue: () => 1 }),
     };
 
@@ -476,7 +476,7 @@ describe('CancelAppointmentHandler with Retry Logic', () => {
 
     const mockAppointment = {
       id: 'appointment-123',
-      cancel: vi.fn(),
+      cancel: jest.fn(),
     };
 
     mockFactory.loadById.mockResolvedValue(mockAppointment);

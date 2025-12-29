@@ -15,7 +15,7 @@
  * @see .kiro/steering/PRD.md (Section 9: Casos de Uso)
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
 
 /**
@@ -31,7 +31,7 @@ describe('GetAppointmentQueryHandler', () => {
   beforeEach(async () => {
     // Create mock for read repository
     mockReadRepo = {
-      findById: vi.fn(),
+      findById: jest.fn(),
     };
 
     // Create testing module with mocked dependencies
@@ -128,7 +128,7 @@ describe('GetCustomerAppointmentsQueryHandler', () => {
 
   beforeEach(async () => {
     mockReadRepo = {
-      findByCustomerId: vi.fn(),
+      findByCustomerId: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -214,7 +214,7 @@ describe('GetBusinessAppointmentsQueryHandler with Pagination', () => {
 
   beforeEach(async () => {
     mockReadRepo = {
-      findByBusinessId: vi.fn(),
+      findByBusinessId: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -309,7 +309,7 @@ describe('GetAppointmentsWithFiltersQueryHandler', () => {
 
   beforeEach(async () => {
     mockReadRepo = {
-      findWithFilters: vi.fn(),
+      findWithFilters: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -388,11 +388,11 @@ describe('GetAvailableSlotsQueryHandler', () => {
 
   beforeEach(async () => {
     mockCapacityRepo = {
-      findByOfferingAndDate: vi.fn(),
+      findByOfferingAndDate: jest.fn(),
     };
 
     mockScheduleRepo = {
-      findByBusinessAndDay: vi.fn(),
+      findByBusinessAndDay: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
