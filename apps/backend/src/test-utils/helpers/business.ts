@@ -174,11 +174,16 @@ export class TestBusinessHelper {
  * // Returns: "+18091234567"
  * ```
  */
+let phoneCounter = 0;
+
 export function generateUniqueWhatsAppNumber(): string {
   const timestamp = Date.now().toString();
   // Take last 7 digits of timestamp to ensure uniqueness
   const uniquePart = timestamp.slice(-7);
-  return `+1809${uniquePart}`;
+  // Add counter to ensure uniqueness even when called in rapid succession
+  phoneCounter = (phoneCounter + 1) % 1000;
+  const counterPart = phoneCounter.toString().padStart(3, '0');
+  return `+1809${uniquePart}${counterPart}`;
 }
 
 /**
