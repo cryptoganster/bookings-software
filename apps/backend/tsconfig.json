@@ -15,6 +15,8 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
+    "typeRoots": ["./node_modules/@types", "../../node_modules/@types"],
+    "types": ["node", "jest"],
     "paths": {
       "@packages/shared-types": ["../../packages/shared-types/src/index.ts"],
       "@/*": ["src/*"],

@@ -16,6 +16,9 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
+    /* Prevent auto-discovery of @types packages from other workspaces */
+    "types": ["vite/client", "node"],
+
     /* Path Aliases */
     "baseUrl": ".",
     "paths": {

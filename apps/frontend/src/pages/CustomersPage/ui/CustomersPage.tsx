@@ -24,7 +24,6 @@ import {
   Alert,
 } from "@mantine/core";
 import { IconAlertCircle } from "@tabler/icons-react";
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { CustomerReadModel } from "@packages/shared-types";
 import { PageHeader } from "@shared/ui/PageHeader/PageHeader";
@@ -37,18 +36,17 @@ import { CustomerCard } from "@entities/customer";
 
 export function CustomersPage() {
   const navigate = useNavigate();
-  const [page, setPage] = useState(1);
   const limit = 12; // 12 customers per page (3x4 grid)
 
   const { data, isLoading, isError, error, filters, updateFilters } =
-    useSearchCustomers({ page, limit });
+    useSearchCustomers({ page: 1, limit });
 
   const handleCustomerClick = (customerId: string) => {
     navigate(`/customers/${customerId}`);
   };
 
   const handlePageChange = (newPage: number) => {
-    setPage(newPage);
+    updateFilters({ page: newPage });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -63,7 +61,7 @@ export function CustomersPage() {
             value={filters.searchText || ""}
             onChange={(value) => {
               updateFilters({ searchText: value });
-              setPage(1); // Reset to first page on search
+              // Page reset is handled automatically by updateFilters
             }}
           />
 
@@ -71,7 +69,7 @@ export function CustomersPage() {
             filters={filters}
             onChange={(newFilters) => {
               updateFilters(newFilters);
-              setPage(1); // Reset to first page on filter change
+              // Page reset is handled automatically by updateFilters
             }}
           />
         </Stack>
@@ -136,7 +134,7 @@ export function CustomersPage() {
               <Center mt="xl">
                 <Pagination
                   total={data.totalPages}
-                  value={page}
+                  value={filters.page ?? 1}
                   onChange={handlePageChange}
                   size="md"
                   radius="xl"
@@ -147,8 +145,9 @@ export function CustomersPage() {
             {/* Results Summary */}
             <Center>
               <Text size="sm" c="dimmed">
-                Mostrando {(page - 1) * limit + 1} -{" "}
-                {Math.min(page * limit, data.total)} de {data.total} clientes
+                Mostrando {((filters.page ?? 1) - 1) * limit + 1} -{" "}
+                {Math.min((filters.page ?? 1) * limit, data.total)} de{" "}
+                {data.total} clientes
               </Text>
             </Center>
           </>
