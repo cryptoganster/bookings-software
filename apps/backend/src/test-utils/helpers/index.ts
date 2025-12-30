@@ -92,7 +92,6 @@ export {
   teardownTestDatabase,
   getTestTypeOrmConfig,
   generateTestId,
-  ensureMigrationsRun,
 } from './database';
 
 // Backward compatibility exports (deprecated)

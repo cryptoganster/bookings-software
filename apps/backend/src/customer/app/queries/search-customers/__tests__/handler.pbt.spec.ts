@@ -31,8 +31,8 @@ import {
   generateUniqueWhatsAppNumber,
   createTestBusinessInDb,
   createTestUserInDb,
-  ensureMigrationsRun,
 } from '@test-utils/helpers';
+import { ensureMigrationsRun } from '../../../../../../test/test-setup';
 import { v4 as uuidv4 } from 'uuid';
 import * as fc from 'fast-check';
 
@@ -45,6 +45,8 @@ describe('SearchCustomersHandler - Property-Based Tests', () => {
   let userId: string;
 
   beforeAll(async () => {
+    await ensureMigrationsRun();
+
     module = await Test.createTestingModule({
       imports: [
         TypeOrmModule.forRoot({

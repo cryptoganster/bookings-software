@@ -422,19 +422,30 @@ describe('Availability Query (e2e)', () => {
 
     it('should adjust slots based on duration', async () => {
       // Find next Wednesday (day 3) to ensure we have a schedule
+      // Use a Wednesday that's at least 14 days in the future to avoid conflicts with blockouts
       const today = new Date();
-      const daysUntilWednesday = (3 - today.getDay() + 7) % 7 || 7;
+      today.setUTCHours(0, 0, 0, 0);
+
+      const daysUntilWednesday = (3 - today.getUTCDay() + 7) % 7 || 7;
       const nextWednesday = new Date(today);
-      nextWednesday.setDate(today.getDate() + daysUntilWednesday);
-      nextWednesday.setUTCHours(0, 0, 0, 0);
+      nextWednesday.setUTCDate(today.getUTCDate() + daysUntilWednesday + 14); // Add 14 days to avoid blockouts
+
+      // Verify it's actually Wednesday
+      expect(nextWednesday.getUTCDay()).toBe(3);
 
       // Convert to YYYY-MM-DD string to avoid timezone issues
       const wednesdayStr = nextWednesday.toISOString().split('T')[0];
 
-      // Ensure we have capacity for this Wednesday
+      // Delete any existing capacity and blockouts for this date to ensure clean state
       const { v4: uuidv4 } = require('uuid');
+      await dataSource.query('DELETE FROM capacities WHERE offering_id = $1 AND date = $2', [
+        offeringId,
+        wednesdayStr,
+      ]);
+
+      // Ensure we have capacity for this Wednesday
       await dataSource.query(
-        'INSERT INTO capacities (id, offering_id, date, total_slots, available_slots, version, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW()) ON CONFLICT DO NOTHING',
+        'INSERT INTO capacities (id, offering_id, date, total_slots, available_slots, version, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())',
         [uuidv4(), offeringId, wednesdayStr, 10, 10, 0],
       );
 
@@ -461,6 +472,9 @@ describe('Availability Query (e2e)', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
+      // Both should have slots (schedule is 9-17, so 8 hours = 16 30-min slots or 8 60-min slots)
+      expect(response30.body.length).toBeGreaterThan(0);
+      expect(response60.body.length).toBeGreaterThan(0);
       expect(response30.body.length).toBeGreaterThan(response60.body.length);
     });
 
