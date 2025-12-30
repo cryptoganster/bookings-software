@@ -32,12 +32,16 @@ import { AuthController } from '@auth/presentation/controllers/auth';
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET') || 'default-secret-change-in-production',
-        signOptions: {
-          expiresIn: configService.get('JWT_EXPIRATION') || '1d',
-        },
-      }),
+      useFactory: (configService: ConfigService) => {
+        const expiresIn = configService.get<string>('JWT_EXPIRATION') || '1d';
+        return {
+          secret: configService.get<string>('JWT_SECRET') || 'default-secret-change-in-production',
+          signOptions: {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            expiresIn: expiresIn as any, // Type compatibility with @nestjs/jwt v11
+          },
+        };
+      },
       inject: [ConfigService],
     }),
   ],
