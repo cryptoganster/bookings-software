@@ -10,6 +10,8 @@ import {
   generateUniqueWhatsAppNumber,
   createTestBusinessInDb,
   createTestUserInDb,
+  setupTestDatabase,
+  ensureMigrationsRun,
 } from '@test-utils/helpers';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -22,6 +24,8 @@ describe('SearchCustomersHandler - Integration Tests', () => {
   let userId: string;
 
   beforeAll(async () => {
+    await setupTestDatabase();
+
     module = await Test.createTestingModule({
       imports: [
         TypeOrmModule.forRoot({

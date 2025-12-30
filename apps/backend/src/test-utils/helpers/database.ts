@@ -278,3 +278,12 @@ export const teardownTestDatabase =
   TestDatabaseHelper.teardownTestDatabase.bind(TestDatabaseHelper);
 export const getTestTypeOrmConfig =
   TestDatabaseHelper.getTestTypeOrmConfig.bind(TestDatabaseHelper);
+
+// Re-export ensureMigrationsRun from test-setup
+// Re-export ensureMigrationsRun from this file
+export async function ensureMigrationsRun(dataSource: DataSource): Promise<void> {
+  const migrations = await dataSource.runMigrations();
+  if (migrations.length > 0) {
+    console.log(`✅ Ran ${migrations.length} migrations`);
+  }
+}

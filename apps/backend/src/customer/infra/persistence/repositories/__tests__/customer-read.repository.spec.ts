@@ -22,7 +22,7 @@ describe('CustomerReadRepository - Unit Tests', () => {
       getCount: jest.fn(),
       getMany: jest.fn(),
       clone: jest.fn().mockReturnThis(),
-    } as any;
+    } as unknown as jest.Mocked<SelectQueryBuilder<CustomerModel>>;
 
     // Create mock repository
     mockRepository = {
@@ -30,7 +30,7 @@ describe('CustomerReadRepository - Unit Tests', () => {
       findOne: jest.fn(),
       find: jest.fn(),
       count: jest.fn(),
-    } as any;
+    } as unknown as jest.Mocked<Repository<CustomerModel>>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

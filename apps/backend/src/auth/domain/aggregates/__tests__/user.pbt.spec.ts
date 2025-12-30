@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect } from '@jest/globals';
 import fc from 'fast-check';
 import { User } from '../user';
@@ -471,14 +470,14 @@ describe('User Aggregate - Property-Based Tests', () => {
             // Act & Assert - Try operations that should fail
             try {
               user.addRole(role); // Duplicate role
-            } catch (e) {
+            } catch (_e) {
               // Expected exception
             }
             expect(user.getVersion().getValue()).toBe(versionBeforeFailedOp);
 
             try {
               user.removeRole(role); // Last role
-            } catch (e) {
+            } catch (_e) {
               // Expected exception
             }
             expect(user.getVersion().getValue()).toBe(versionBeforeFailedOp);

@@ -119,7 +119,7 @@ describe('CustomerCrudController', () => {
 
       try {
         await controller.getById('customer-123', mockUser);
-      } catch (err) {
+      } catch (_err) {
         // Expected
       }
 
@@ -267,7 +267,7 @@ describe('CustomerCrudController', () => {
 
       try {
         await controller.delete('customer-123', mockUser);
-      } catch (err) {
+      } catch (_err) {
         // Expected
       }
 

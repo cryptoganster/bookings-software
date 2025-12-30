@@ -32,11 +32,11 @@ import { AuthController } from '@auth/presentation/controllers/auth';
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService): JwtModuleOptions => ({
+      useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET') || 'default-secret-change-in-production',
         signOptions: {
           expiresIn: configService.get<string>('JWT_EXPIRATION') || '1d',
-        },
+        } as any, // Type assertion needed due to @nestjs/jwt type definition issue
       }),
       inject: [ConfigService],
     }),
