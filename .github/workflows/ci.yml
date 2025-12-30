@@ -48,9 +48,9 @@ jobs:
             node_modules
             apps/*/node_modules
             packages/*/node_modules
-          key: ${{ runner.os }}-pnpm-v2-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-pnpm-v3-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-pnpm-v2-
+            ${{ runner.os }}-pnpm-v3-
 
   # Job 2: Linting
   lint:
@@ -79,7 +79,7 @@ jobs:
             node_modules
             apps/*/node_modules
             packages/*/node_modules
-          key: ${{ runner.os }}-pnpm-v2-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-pnpm-v3-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Lint Backend
         run: pnpm --filter backend lint
@@ -114,7 +114,7 @@ jobs:
             node_modules
             apps/*/node_modules
             packages/*/node_modules
-          key: ${{ runner.os }}-pnpm-v2-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-pnpm-v3-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Check Backend Formatting
         run: pnpm --filter backend format
@@ -166,7 +166,7 @@ jobs:
             node_modules
             apps/*/node_modules
             packages/*/node_modules
-          key: ${{ runner.os }}-pnpm-v2-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-pnpm-v3-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Build Shared Types
         run: pnpm --filter @packages/shared-types build
@@ -204,7 +204,7 @@ jobs:
             node_modules
             apps/*/node_modules
             packages/*/node_modules
-          key: ${{ runner.os }}-pnpm-v2-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-pnpm-v3-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Run npm audit
         run: pnpm audit --audit-level=high --json > audit-report.json || true
@@ -257,7 +257,7 @@ jobs:
             node_modules
             apps/*/node_modules
             packages/*/node_modules
-          key: ${{ runner.os }}-pnpm-v2-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-pnpm-v3-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Install license-checker
         run: npm install -g license-checker
@@ -366,7 +366,7 @@ jobs:
             node_modules
             apps/*/node_modules
             packages/*/node_modules
-          key: ${{ runner.os }}-pnpm-v2-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-pnpm-v3-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Run Backend Tests
         run: pnpm --filter backend test:cov
@@ -490,7 +490,7 @@ jobs:
             node_modules
             apps/*/node_modules
             packages/*/node_modules
-          key: ${{ runner.os }}-pnpm-v2-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-pnpm-v3-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Build Shared Types
         run: pnpm --filter @packages/shared-types build
@@ -539,7 +539,7 @@ jobs:
             node_modules
             apps/*/node_modules
             packages/*/node_modules
-          key: ${{ runner.os }}-pnpm-v2-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-pnpm-v3-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Build Shared Types
         run: pnpm --filter @packages/shared-types build
