@@ -212,4 +212,14 @@ describe("LoginForm", () => {
     // API should not be called
     expect(loginApi.login).not.toHaveBeenCalled();
   });
+
+  it("should render link to registration page", () => {
+    const Wrapper = createWrapper();
+    render(<LoginForm />, { wrapper: Wrapper });
+
+    expect(screen.getByText(/¿no tienes cuenta\?/i)).toBeInTheDocument();
+    const registerLink = screen.getByRole("link", { name: /regístrate/i });
+    expect(registerLink).toBeInTheDocument();
+    expect(registerLink).toHaveAttribute("href", "/register");
+  });
 });

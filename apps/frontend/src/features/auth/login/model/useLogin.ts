@@ -13,8 +13,40 @@ import type { AxiosError } from "axios";
 import { loginApi } from "../api/loginApi";
 import { useAuthStore } from "@app/store/auth.store";
 import type { LoginDto } from "@entities/user";
-import type { ApiErrorDto } from "@packages/shared-types";
+import type { ApiErrorDto, UserRole } from "@packages/shared-types";
 import { logger } from "@shared/lib/logger";
+
+/**
+ * Get redirect path based on user roles
+ *
+ * Priority:
+ * 1. BUSINESS_OWNER -> / (dashboard)
+ * 2. ADMIN -> /admin (future route)
+ * 3. CUSTOMER -> /my-appointments (future route)
+ * 4. Default -> / (dashboard)
+ *
+ * @param roles - Array of user roles
+ * @returns Redirect path
+ */
+export function getRedirectPathForRoles(roles: UserRole[]): string {
+  // BUSINESS_OWNER has highest priority
+  if (roles.includes("BUSINESS_OWNER")) {
+    return "/";
+  }
+
+  // ADMIN has second priority
+  if (roles.includes("ADMIN")) {
+    return "/admin";
+  }
+
+  // CUSTOMER has third priority
+  if (roles.includes("CUSTOMER")) {
+    return "/my-appointments";
+  }
+
+  // Default fallback to dashboard
+  return "/";
+}
 
 /**
  * Decode JWT token to extract payload
@@ -86,8 +118,13 @@ export function useLogin() {
         color: "green",
       });
 
-      // Redirigir al dashboard
-      navigate("/");
+      // Redirigir basado en roles del usuario
+      const redirectPath = getRedirectPathForRoles(data.user.roles);
+      logger.info("Redirecting after login", {
+        redirectPath,
+        roles: data.user.roles,
+      });
+      navigate(redirectPath);
     },
 
     onError: (error: AxiosError<ApiErrorDto>) => {

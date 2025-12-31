@@ -5,12 +5,21 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { apiClient } from "@shared/api/client";
+import axios from "axios";
+
+// Use the same API_URL as the handlers
+const API_URL = "http://localhost:3000/api";
+
+// Create a test client that matches the MSW handlers URL
+const testClient = axios.create({
+  baseURL: API_URL,
+  timeout: 10000,
+});
 
 describe("MSW Handlers", () => {
   describe("Auth endpoints", () => {
     it("should mock login endpoint", async () => {
-      const response = await apiClient.post("/auth/login", {
+      const response = await testClient.post("/auth/login", {
         email: "test@example.com",
         password: "password",
       });
@@ -25,7 +34,7 @@ describe("MSW Handlers", () => {
 
   describe("Appointments endpoints", () => {
     it("should mock get appointments endpoint", async () => {
-      const response = await apiClient.get("/appointments");
+      const response = await testClient.get("/appointments");
 
       expect(response.status).toBe(200);
       expect(Array.isArray(response.data)).toBe(true);
@@ -33,7 +42,7 @@ describe("MSW Handlers", () => {
     });
 
     it("should filter appointments by status", async () => {
-      const response = await apiClient.get("/appointments", {
+      const response = await testClient.get("/appointments", {
         params: { status: "CONFIRMED" },
       });
 
@@ -45,7 +54,7 @@ describe("MSW Handlers", () => {
     });
 
     it("should mock get appointment by id endpoint", async () => {
-      const response = await apiClient.get("/appointments/test-id");
+      const response = await testClient.get("/appointments/test-id");
 
       expect(response.status).toBe(200);
       expect(response.data).toHaveProperty("id");
@@ -54,7 +63,7 @@ describe("MSW Handlers", () => {
     });
 
     it("should mock cancel appointment endpoint", async () => {
-      const response = await apiClient.put("/appointments/test-id/cancel");
+      const response = await testClient.put("/appointments/test-id/cancel");
 
       expect(response.status).toBe(200);
       expect(response.data.status).toBe("CANCELLED");
@@ -64,7 +73,7 @@ describe("MSW Handlers", () => {
 
   describe("Stats endpoint", () => {
     it("should mock stats endpoint", async () => {
-      const response = await apiClient.get("/appointments/stats");
+      const response = await testClient.get("/appointments/stats");
 
       expect(response.status).toBe(200);
       expect(response.data).toHaveProperty("today");

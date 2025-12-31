@@ -3,6 +3,13 @@
  *
  * Formulario de login con validación y manejo de errores
  * Diseño profesional con Paper, inputs redondeados y paleta brandGreen
+ *
+ * Features:
+ * - Validación con Zod
+ * - Manejo de errores por campo
+ * - Loading state durante el login
+ * - Integración con TanStack Query
+ * - Clears password field after successful submission (SR-1.4)
  */
 
 import { useForm } from "react-hook-form";
@@ -15,7 +22,9 @@ import {
   Paper,
   Title,
   Text,
+  Anchor,
 } from "@mantine/core";
+import { Link } from "react-router-dom";
 
 import { loginSchema, type LoginFormData } from "../model/schema";
 import { useLogin } from "../model/useLogin";
@@ -31,12 +40,14 @@ import { useLogin } from "../model/useLogin";
  * - Diseño profesional con Paper (shadow="xl", padding={30}, radius="xl")
  * - Inputs con size="md" y radius="xl"
  * - Botón con color="brandGreen" (paleta verde personalizada)
+ * - Clears password field after successful submission (SR-1.4)
  *
  * Requirements:
  * - 2.6: Formulario con Paper profesional
  * - 2.8: Inputs con size="md" y radius="xl"
  * - 2.9: PasswordInput con size="md" y radius="xl"
  * - 2.12: Botón con color="brandGreen"
+ * - SR-1.4: Password field memory clearing
  *
  * @example
  * ```tsx
@@ -49,6 +60,7 @@ export function LoginForm() {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -59,7 +71,12 @@ export function LoginForm() {
   });
 
   const onSubmit = (data: LoginFormData) => {
-    login(data);
+    login(data, {
+      onSuccess: () => {
+        // Clear password field after successful submission (SR-1.4)
+        reset({ email: "", password: "" });
+      },
+    });
   };
 
   return (
@@ -112,6 +129,13 @@ export function LoginForm() {
           >
             Iniciar Sesión
           </Button>
+
+          <Text ta="center" size="sm" c="dimmed">
+            ¿No tienes cuenta?{" "}
+            <Anchor component={Link} to="/register" size="sm">
+              Regístrate
+            </Anchor>
+          </Text>
         </Stack>
       </form>
     </Paper>

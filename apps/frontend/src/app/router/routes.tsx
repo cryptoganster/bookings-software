@@ -7,6 +7,7 @@
 
 import { createBrowserRouter } from "react-router-dom";
 import { LoginPage } from "@pages/LoginPage";
+import { RegisterPage } from "@pages/RegisterPage";
 import { DashboardPage } from "@pages/DashboardPage";
 import { AppointmentsPage } from "@pages/AppointmentsPage";
 import { CustomersPage } from "@pages/CustomersPage";
@@ -18,12 +19,14 @@ import { BlockoutsPage } from "@pages/BlockoutsPage";
 import { ConversationsPage } from "@pages/ConversationsPage";
 import { DashboardLayout } from "@app/layouts/DashboardLayout";
 import { ProtectedRoute } from "./ProtectedRoute";
+import { AuthPageGuard } from "./AuthPageGuard";
 
 /**
  * Router Configuration
  *
  * Estructura de rutas:
- * - /login (pública) - Página de inicio de sesión
+ * - /login (pública con guard) - Página de inicio de sesión
+ * - /register (pública con guard) - Página de registro
  * - / (protegida) - Dashboard principal con DashboardLayout
  * - /appointments (protegida) - Gestión de citas
  * - /customers (protegida) - Gestión de clientes
@@ -38,9 +41,13 @@ import { ProtectedRoute } from "./ProtectedRoute";
  * si el usuario no está autenticado. Todas las rutas protegidas
  * usan el DashboardLayout con Header y Navbar.
  *
+ * Las rutas de autenticación (/login, /register) redirigen a usuarios
+ * autenticados a su dashboard correspondiente según su rol.
+ *
  * Requirements:
  * - 2.1: Rutas protegidas con redirección a login
  * - 2.4: Guard de autenticación
+ * - FR-4.2: Guard para páginas de auth (usuarios autenticados)
  * - 6.1: Layout principal con AppShell
  * - 6.4: Navegación entre páginas
  *
@@ -55,10 +62,20 @@ import { ProtectedRoute } from "./ProtectedRoute";
  * ```
  */
 export const router = createBrowserRouter([
-  // Ruta pública: Login
+  // Rutas de autenticación con AuthPageGuard
+  // Redirige usuarios autenticados a su dashboard según rol
   {
-    path: "/login",
-    element: <LoginPage />,
+    element: <AuthPageGuard />,
+    children: [
+      {
+        path: "/login",
+        element: <LoginPage />,
+      },
+      {
+        path: "/register",
+        element: <RegisterPage />,
+      },
+    ],
   },
 
   // Rutas protegidas con DashboardLayout
