@@ -1,6 +1,7 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
 import { env } from "@shared/config/env";
 import { logger } from "@shared/lib/logger";
+import { useAuthStore } from "@app/store/auth.store";
 
 /**
  * Axios instance configured for the backend API
@@ -19,20 +20,11 @@ export const apiClient = axios.create({
  */
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // Get token from localStorage (will be managed by auth store)
-    const authStorage = localStorage.getItem("auth-storage");
+    // Get token from Zustand store (works outside React components)
+    const token = useAuthStore.getState().token;
 
-    if (authStorage) {
-      try {
-        const { state } = JSON.parse(authStorage);
-        const token = state?.token;
-
-        if (token && config.headers) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-      } catch (error) {
-        logger.error("Error parsing auth storage", { error });
-      }
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
 
     return config;
@@ -43,6 +35,20 @@ apiClient.interceptors.request.use(
 );
 
 /**
+ * Handle 401 Unauthorized - token expired or invalid
+ *
+ * Clears auth state and redirects to login page.
+ * This function is exported for testing purposes.
+ */
+export function handleUnauthorized(): void {
+  // Clear auth store state (this also clears localStorage via persist middleware)
+  useAuthStore.getState().logout();
+
+  // Redirect to login page
+  window.location.href = "/login";
+}
+
+/**
  * Response interceptor - handles common error scenarios
  */
 apiClient.interceptors.response.use(
@@ -50,11 +56,14 @@ apiClient.interceptors.response.use(
   (error: AxiosError) => {
     // Handle 401 Unauthorized - token expired or invalid
     if (error.response?.status === 401) {
-      // Clear auth storage
-      localStorage.removeItem("auth-storage");
+      // Don't redirect if already on login page or if it's a login request
+      const isLoginRequest = error.config?.url?.includes("/auth/login");
+      const isOnLoginPage = window.location.pathname === "/login";
 
-      // Redirect to login page
-      window.location.href = "/login";
+      if (!isLoginRequest && !isOnLoginPage) {
+        logger.warn("Token expired or invalid, redirecting to login");
+        handleUnauthorized();
+      }
     }
 
     // Handle 404 Not Found
