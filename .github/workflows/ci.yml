@@ -81,6 +81,9 @@ jobs:
             packages/*/node_modules
           key: ${{ runner.os }}-pnpm-v3-${{ hashFiles('**/pnpm-lock.yaml') }}
 
+      - name: Install dependencies (fallback if cache miss)
+        run: pnpm install --frozen-lockfile
+
       - name: Lint Backend
         run: pnpm --filter backend lint
 
@@ -115,6 +118,9 @@ jobs:
             apps/*/node_modules
             packages/*/node_modules
           key: ${{ runner.os }}-pnpm-v3-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Install dependencies (fallback if cache miss)
+        run: pnpm install --frozen-lockfile
 
       - name: Check Backend Formatting
         run: pnpm --filter backend format
@@ -168,6 +174,9 @@ jobs:
             packages/*/node_modules
           key: ${{ runner.os }}-pnpm-v3-${{ hashFiles('**/pnpm-lock.yaml') }}
 
+      - name: Install dependencies (fallback if cache miss)
+        run: pnpm install --frozen-lockfile
+
       - name: Build Shared Types
         run: pnpm --filter @packages/shared-types build
 
@@ -205,6 +214,9 @@ jobs:
             apps/*/node_modules
             packages/*/node_modules
           key: ${{ runner.os }}-pnpm-v3-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Install dependencies (fallback if cache miss)
+        run: pnpm install --frozen-lockfile
 
       - name: Run npm audit
         run: pnpm audit --audit-level=high --json > audit-report.json || true
@@ -258,6 +270,9 @@ jobs:
             apps/*/node_modules
             packages/*/node_modules
           key: ${{ runner.os }}-pnpm-v3-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Install dependencies (fallback if cache miss)
+        run: pnpm install --frozen-lockfile
 
       - name: Install license-checker
         run: npm install -g license-checker
@@ -367,6 +382,9 @@ jobs:
             apps/*/node_modules
             packages/*/node_modules
           key: ${{ runner.os }}-pnpm-v3-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Install dependencies (fallback if cache miss)
+        run: pnpm install --frozen-lockfile
 
       - name: Run Backend Tests
         run: pnpm --filter backend test:cov
@@ -492,6 +510,9 @@ jobs:
             packages/*/node_modules
           key: ${{ runner.os }}-pnpm-v3-${{ hashFiles('**/pnpm-lock.yaml') }}
 
+      - name: Install dependencies (fallback if cache miss)
+        run: pnpm install --frozen-lockfile
+
       - name: Build Shared Types
         run: pnpm --filter @packages/shared-types build
 
@@ -541,6 +562,9 @@ jobs:
             packages/*/node_modules
           key: ${{ runner.os }}-pnpm-v3-${{ hashFiles('**/pnpm-lock.yaml') }}
 
+      - name: Install dependencies (fallback if cache miss)
+        run: pnpm install --frozen-lockfile
+
       - name: Build Shared Types
         run: pnpm --filter @packages/shared-types build
 
@@ -580,6 +604,18 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
+
+      - name: Restore dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-pnpm-v3-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Install dependencies (fallback if cache miss)
+        run: pnpm install --frozen-lockfile
 
       - name: Validate Workspace Structure
         run: |
