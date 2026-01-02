@@ -314,7 +314,7 @@ describe('Admin Query Controller E2E', () => {
         .post(`/api/admin-queries/${testConversationId}/respond`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          message: 'Thank you for contacting us. How can I help you?',
+          content: 'Thank you for contacting us. How can I help you?',
         })
         .expect(200);
 
@@ -333,17 +333,17 @@ describe('Admin Query Controller E2E', () => {
       expect(adminMessage?.direction).toBe('OUTBOUND');
     });
 
-    it('should return 400 for empty message', async () => {
+    it('should return 400 for empty content', async () => {
       await request(app.getHttpServer())
         .post(`/api/admin-queries/${testConversationId}/respond`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          message: '',
+          content: '',
         })
         .expect(400);
     });
 
-    it('should return 400 for missing message field', async () => {
+    it('should return 400 for missing content field', async () => {
       await request(app.getHttpServer())
         .post(`/api/admin-queries/${testConversationId}/respond`)
         .set('Authorization', `Bearer ${authToken}`)
@@ -351,12 +351,12 @@ describe('Admin Query Controller E2E', () => {
         .expect(400);
     });
 
-    it('should return 400 for whitespace-only message', async () => {
+    it('should return 400 for whitespace-only content', async () => {
       await request(app.getHttpServer())
         .post(`/api/admin-queries/${testConversationId}/respond`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          message: '   ',
+          content: '   ',
         })
         .expect(400);
     });
@@ -368,7 +368,7 @@ describe('Admin Query Controller E2E', () => {
         .post(`/api/admin-queries/${nonExistentId}/respond`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          message: 'Test message',
+          content: 'Test message',
         })
         .expect(404);
     });
@@ -378,7 +378,7 @@ describe('Admin Query Controller E2E', () => {
         .post('/api/admin-queries/invalid-uuid/respond')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          message: 'Test message',
+          content: 'Test message',
         })
         .expect(400);
     });
@@ -387,19 +387,19 @@ describe('Admin Query Controller E2E', () => {
       await request(app.getHttpServer())
         .post(`/api/admin-queries/${testConversationId}/respond`)
         .send({
-          message: 'Test message',
+          content: 'Test message',
         })
         .expect(401);
     });
 
-    it('should handle long messages', async () => {
+    it('should handle long messages up to 1000 characters', async () => {
       const longMessage = 'A'.repeat(1000);
 
       const response = await request(app.getHttpServer())
         .post(`/api/admin-queries/${testConversationId}/respond`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          message: longMessage,
+          content: longMessage,
         })
         .expect(200);
 
@@ -415,6 +415,18 @@ describe('Admin Query Controller E2E', () => {
       expect(adminMessage?.content).toBe(longMessage);
     });
 
+    it('should return 400 for messages exceeding 1000 characters', async () => {
+      const tooLongMessage = 'A'.repeat(1001);
+
+      await request(app.getHttpServer())
+        .post(`/api/admin-queries/${testConversationId}/respond`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          content: tooLongMessage,
+        })
+        .expect(400);
+    });
+
     it('should handle special characters in message', async () => {
       const specialMessage = 'Hello! 👋 How are you? 😊 Price: $50.00 (50% off!)';
 
@@ -422,7 +434,7 @@ describe('Admin Query Controller E2E', () => {
         .post(`/api/admin-queries/${testConversationId}/respond`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          message: specialMessage,
+          content: specialMessage,
         })
         .expect(200);
 

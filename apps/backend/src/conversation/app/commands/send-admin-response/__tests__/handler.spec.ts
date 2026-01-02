@@ -10,6 +10,7 @@ import { Conversation } from '@conversation/domain/aggregates/conversation';
 import { UUID } from '@shared/vo/uuid';
 import { ConversationState } from '@conversation/domain/vo/conversation-state';
 import { ConcurrencyException } from '@shared/kernel/exceptions/concurrency';
+import { ConversationAlreadyResolvedException } from '@conversation/domain/exceptions/conversation-already-resolved.exception';
 
 describe('SendAdminResponseHandler', () => {
   let handler: SendAdminResponseHandler;
@@ -322,7 +323,7 @@ describe('SendAdminResponseHandler', () => {
       const command = new SendAdminResponseCommand(conversationId, adminMessage);
 
       // Act & Assert
-      await expect(handler.execute(command)).rejects.toThrow('Conversation is already resolved');
+      await expect(handler.execute(command)).rejects.toThrow(ConversationAlreadyResolvedException);
 
       expect(mockWriteRepo.save).not.toHaveBeenCalled();
       expect(mockCommandBus.execute).not.toHaveBeenCalled();

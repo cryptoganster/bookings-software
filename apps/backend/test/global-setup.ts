@@ -55,7 +55,7 @@ export default async function globalSetup() {
       await queryRunner.query('DROP SCHEMA IF EXISTS public CASCADE');
 
       console.log('🏗️  Creating schema public...');
-      await queryRunner.query('CREATE SCHEMA public');
+      await queryRunner.query('CREATE SCHEMA IF NOT EXISTS public');
 
       console.log('🔐 Granting permissions...');
       await queryRunner.query('GRANT ALL ON SCHEMA public TO postgres');

@@ -5,6 +5,8 @@ import { ConversationStarted } from '@conversation/domain/events/conversation-st
 import { ConversationStateChanged } from '@conversation/domain/events/conversation-state-changed';
 import { ConversationCompleted } from '@conversation/domain/events/conversation-completed';
 import { AdminQueryResolved } from '@conversation/domain/events/admin-query-resolved.event';
+import { ConversationAlreadyResolvedException } from '@conversation/domain/exceptions/conversation-already-resolved.exception';
+import { InvalidConversationStatusException } from '@conversation/domain/exceptions/invalid-conversation-status.exception';
 
 export class Conversation extends VersionedAggregateRoot {
   private id!: UUID;
@@ -123,16 +125,28 @@ export class Conversation extends VersionedAggregateRoot {
   /**
    * Resolves an admin query by marking the conversation as resolved.
    *
-   * @throws Error if conversation is already resolved
+   * @throws InvalidConversationStatusException if conversation status is not 'AWAITING_ADMIN'
+   * @throws ConversationAlreadyResolvedException if conversation is already resolved
    *
    * @remarks
+   * - Validates status is 'AWAITING_ADMIN' before resolving
    * - Updates status from 'AWAITING_ADMIN' to 'RESOLVED'
    * - Increments version for optimistic locking
    * - Publishes AdminQueryResolved event
    */
   resolveAdminQuery(): void {
-    if (this.status === 'RESOLVED') {
-      throw new Error('Conversation is already resolved');
+    // Validate status is 'AWAITING_ADMIN' (FR-1.3)
+    if (this.status !== 'AWAITING_ADMIN') {
+      // Check if already resolved (FR-1.4)
+      if (this.status === 'RESOLVED') {
+        throw new ConversationAlreadyResolvedException(this.id.getValue());
+      }
+      // Status is neither AWAITING_ADMIN nor RESOLVED (e.g., ACTIVE)
+      throw new InvalidConversationStatusException(
+        this.id.getValue(),
+        this.status,
+        'AWAITING_ADMIN',
+      );
     }
 
     this.status = 'RESOLVED';

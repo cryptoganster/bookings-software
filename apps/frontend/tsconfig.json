@@ -17,7 +17,7 @@
     "jsx": "react-jsx",
 
     /* Prevent auto-discovery of @types packages from other workspaces */
-    "types": ["vite/client", "node"],
+    "types": ["vite/client", "node", "vitest/globals"],
 
     /* Path Aliases */
     "baseUrl": ".",
