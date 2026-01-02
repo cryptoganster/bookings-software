@@ -629,11 +629,18 @@ describe('Conversation Aggregate', () => {
   describe('resolveAdminQuery', () => {
     it('should resolve admin query and update status to RESOLVED', () => {
       // Arrange
-      const conversation = Conversation.start(
+      const conversation = Conversation.fromPersistence(
         validId,
         validBusinessId,
         validCustomerId,
         validCustomerPhone,
+        ConversationState.initial(),
+        'AWAITING_ADMIN', // ← Must be AWAITING_ADMIN to resolve
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        1,
       );
       const initialVersion = conversation.getVersion().getValue();
 
@@ -645,29 +652,64 @@ describe('Conversation Aggregate', () => {
       expect(conversation.getVersion().getValue()).toBe(initialVersion + 1);
     });
 
-    it('should throw error when conversation is already resolved', () => {
+    it('should throw ConversationAlreadyResolvedException when conversation is already resolved', () => {
       // Arrange
-      const conversation = Conversation.start(
+      const conversation = Conversation.fromPersistence(
         validId,
         validBusinessId,
         validCustomerId,
         validCustomerPhone,
+        ConversationState.initial(),
+        'RESOLVED', // ← Already resolved
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        1,
       );
-      conversation.resolveAdminQuery(); // First resolution
 
       // Act & Assert
       expect(() => {
-        conversation.resolveAdminQuery(); // Second resolution attempt
-      }).toThrow('Conversation is already resolved');
+        conversation.resolveAdminQuery();
+      }).toThrow('already resolved');
+    });
+
+    it('should throw InvalidConversationStatusException when status is not AWAITING_ADMIN', () => {
+      // Arrange
+      const conversation = Conversation.fromPersistence(
+        validId,
+        validBusinessId,
+        validCustomerId,
+        validCustomerPhone,
+        ConversationState.initial(),
+        'ACTIVE', // ← Wrong status
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        1,
+      );
+
+      // Act & Assert
+      expect(() => {
+        conversation.resolveAdminQuery();
+      }).toThrow("Current status is 'ACTIVE', expected 'AWAITING_ADMIN'");
     });
 
     it('should increment version when resolving admin query', () => {
       // Arrange
-      const conversation = Conversation.start(
+      const conversation = Conversation.fromPersistence(
         validId,
         validBusinessId,
         validCustomerId,
         validCustomerPhone,
+        ConversationState.initial(),
+        'AWAITING_ADMIN',
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        5, // ← Start with version 5
       );
       const versionBefore = conversation.getVersion().getValue();
 
@@ -676,15 +718,23 @@ describe('Conversation Aggregate', () => {
 
       // Assert
       expect(conversation.getVersion().getValue()).toBe(versionBefore + 1);
+      expect(conversation.getVersion().getValue()).toBe(6);
     });
 
     it('should apply AdminQueryResolved event', () => {
       // Arrange
-      const conversation = Conversation.start(
+      const conversation = Conversation.fromPersistence(
         validId,
         validBusinessId,
         validCustomerId,
         validCustomerPhone,
+        ConversationState.initial(),
+        'AWAITING_ADMIN',
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        1,
       );
 
       // Act
@@ -699,16 +749,19 @@ describe('Conversation Aggregate', () => {
 
     it('should work with conversation in any state', () => {
       // Arrange
-      const conversation = Conversation.start(
+      const conversation = Conversation.fromPersistence(
         validId,
         validBusinessId,
         validCustomerId,
         validCustomerPhone,
+        ConversationState.selectingDate(), // ← Different state
+        'AWAITING_ADMIN',
+        'offering-123',
+        undefined,
+        undefined,
+        undefined,
+        1,
       );
-
-      // Transition to different state
-      conversation.transitionToSelectingService();
-      conversation.selectService('offering-123');
 
       // Act
       conversation.resolveAdminQuery();
