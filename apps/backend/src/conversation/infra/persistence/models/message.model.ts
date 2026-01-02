@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryColumn, CreateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryColumn, CreateDateColumn, Index } from 'typeorm';
 
 /**
  * MessageModel - TypeORM Entity
@@ -10,8 +10,11 @@ import { Entity, Column, PrimaryColumn, CreateDateColumn } from 'typeorm';
  * - Relación con ConversationModel via conversationId (foreign key only, no bidirectional relation)
  * - direction: 'INBOUND' | 'OUTBOUND'
  * - messageType: 'TEXT' | 'BUTTON' | 'LOCATION'
+ * - Indexes:
+ *   - (conversation_id, sent_at): Para queries de historial de mensajes ordenados por fecha
  */
 @Entity('messages')
+@Index(['conversationId', 'sentAt'])
 export class MessageModel {
   @PrimaryColumn('uuid')
   id!: string;

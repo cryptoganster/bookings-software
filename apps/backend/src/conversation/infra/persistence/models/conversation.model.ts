@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryColumn, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
 
 /**
  * ConversationModel - TypeORM Entity
@@ -10,8 +10,13 @@ import { Entity, Column, PrimaryColumn, CreateDateColumn, UpdateDateColumn } fro
  * - Relación con MessageModel via conversationId (foreign key only, no bidirectional relation)
  * - status: 'ACTIVE' | 'AWAITING_ADMIN' | 'RESOLVED'
  * - version: Para optimistic locking
+ * - Indexes:
+ *   - (business_id, status): Para queries de conversaciones pendientes por negocio
+ *   - last_message_at: Para ordenamiento por última actividad
  */
 @Entity('conversations')
+@Index(['businessId', 'status'])
+@Index(['lastMessageAt'])
 export class ConversationModel {
   @PrimaryColumn('uuid')
   id!: string;

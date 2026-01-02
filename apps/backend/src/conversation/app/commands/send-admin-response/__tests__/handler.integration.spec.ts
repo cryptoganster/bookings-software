@@ -8,6 +8,8 @@ import { IConversationWriteRepository } from '@conversation/domain/interfaces/re
 import { Conversation } from '@conversation/domain/aggregates/conversation';
 import { UUID } from '@shared/vo/uuid';
 import { ConversationState } from '@conversation/domain/vo/conversation-state';
+import { ConversationAlreadyResolvedException } from '@conversation/domain/exceptions/conversation-already-resolved.exception';
+import { InvalidConversationStatusException } from '@conversation/domain/exceptions/invalid-conversation-status.exception';
 
 describe('SendAdminResponseHandler (Integration)', () => {
   let handler: SendAdminResponseHandler;
@@ -101,7 +103,34 @@ describe('SendAdminResponseHandler (Integration)', () => {
     });
 
     it('should handle conversation with different initial statuses', async () => {
-      // Test with ACTIVE status
+      // Test with AWAITING_ADMIN status (valid for resolving)
+      const awaitingAdminConversation = Conversation.fromPersistence(
+        UUID.fromString(conversationId),
+        UUID.fromString(businessId),
+        UUID.fromString(customerId),
+        customerPhone,
+        ConversationState.initial(),
+        'AWAITING_ADMIN',
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        1,
+      );
+
+      mockFactory.loadById.mockResolvedValue(awaitingAdminConversation);
+      mockWriteRepo.save.mockResolvedValue();
+
+      const command = new SendAdminResponseCommand(conversationId, adminMessage);
+
+      await handler.execute(command);
+
+      expect(awaitingAdminConversation.getStatus()).toBe('RESOLVED');
+      expect(mockWriteRepo.save).toHaveBeenCalled();
+    });
+
+    it('should throw InvalidConversationStatusException when status is ACTIVE', async () => {
+      // Test with ACTIVE status (invalid for resolving)
       const activeConversation = Conversation.fromPersistence(
         UUID.fromString(conversationId),
         UUID.fromString(businessId),
@@ -117,14 +146,14 @@ describe('SendAdminResponseHandler (Integration)', () => {
       );
 
       mockFactory.loadById.mockResolvedValue(activeConversation);
-      mockWriteRepo.save.mockResolvedValue();
 
       const command = new SendAdminResponseCommand(conversationId, adminMessage);
 
-      await handler.execute(command);
+      // Act & Assert
+      await expect(handler.execute(command)).rejects.toThrow(InvalidConversationStatusException);
 
-      expect(activeConversation.getStatus()).toBe('RESOLVED');
-      expect(mockWriteRepo.save).toHaveBeenCalled();
+      expect(mockWriteRepo.save).not.toHaveBeenCalled();
+      expect(mockCommandBus.execute).not.toHaveBeenCalled();
     });
 
     it('should preserve conversation data during resolution', async () => {
@@ -193,7 +222,7 @@ describe('SendAdminResponseHandler (Integration)', () => {
       const command = new SendAdminResponseCommand(conversationId, adminMessage);
 
       // Act & Assert
-      await expect(handler.execute(command)).rejects.toThrow('Conversation is already resolved');
+      await expect(handler.execute(command)).rejects.toThrow(ConversationAlreadyResolvedException);
 
       // Verify no save or message sent
       expect(mockWriteRepo.save).not.toHaveBeenCalled();
