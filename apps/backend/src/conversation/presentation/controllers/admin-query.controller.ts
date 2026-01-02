@@ -72,7 +72,7 @@ export class AdminQueryController {
     @Param() params: ConversationIdParamDto,
     @Body() dto: RespondToQueryDto,
   ): Promise<{ message: string }> {
-    await this.commandBus.execute(new SendAdminResponseCommand(params.id, dto.message));
+    await this.commandBus.execute(new SendAdminResponseCommand(params.id, dto.content));
 
     return { message: 'Response sent successfully' };
   }
