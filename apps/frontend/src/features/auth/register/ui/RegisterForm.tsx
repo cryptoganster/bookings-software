@@ -14,7 +14,7 @@
  * Requirements: FR-1.1, FR-1.2, FR-1.3, FR-1.6, SR-1.4
  */
 
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   TextInput,
@@ -48,7 +48,7 @@ export function RegisterForm() {
   const {
     register: registerField,
     handleSubmit,
-    watch,
+    control,
     reset,
     formState: { errors },
   } = useForm<RegisterFormData>({
@@ -62,8 +62,9 @@ export function RegisterForm() {
     },
   });
 
-  // Watch password for strength indicator
-  const watchedPassword = watch("password");
+  // Watch password for strength indicator using useWatch hook
+  // (useWatch is React Compiler compatible, unlike watch())
+  const watchedPassword = useWatch({ control, name: "password" });
 
   const onSubmit = (data: RegisterFormData) => {
     // Extract only the fields needed for API
