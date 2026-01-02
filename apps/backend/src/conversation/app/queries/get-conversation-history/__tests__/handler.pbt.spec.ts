@@ -161,14 +161,13 @@ describe('GetConversationHistoryHandler - Property-Based Tests', () => {
             for (const msg of messages) {
               await messageRepository.save({
                 id: msg.id,
-                conversation_id: conversationId,
+                conversationId: conversationId,
                 direction: msg.direction,
                 content: msg.content,
-                message_type: msg.messageType,
-                sent_at: msg.sentAt,
-                is_from_admin: msg.isFromAdmin,
-                created_at: new Date(),
-                updated_at: new Date(),
+                messageType: msg.messageType,
+                sentAt: msg.sentAt,
+                isFromAdmin: msg.isFromAdmin,
+                createdAt: new Date(),
               });
             }
 
@@ -239,14 +238,13 @@ describe('GetConversationHistoryHandler - Property-Based Tests', () => {
             for (const msg of messages) {
               await messageRepository.save({
                 id: msg.id,
-                conversation_id: conversationId,
+                conversationId: conversationId,
                 direction: 'INBOUND',
                 content: msg.content,
-                message_type: 'TEXT',
-                sent_at: msg.sentAt,
-                is_from_admin: false,
-                created_at: new Date(),
-                updated_at: new Date(),
+                messageType: 'TEXT',
+                sentAt: msg.sentAt,
+                isFromAdmin: false,
+                createdAt: new Date(),
               });
             }
 
@@ -273,7 +271,7 @@ describe('GetConversationHistoryHandler - Property-Based Tests', () => {
     it('should maintain chronological order for messages within same day', async () => {
       await fc.assert(
         fc.asyncProperty(
-          fc.array(
+          fc.uniqueArray(
             fc.record({
               id: fc.uuid(),
               content: fc.string({ minLength: 1, maxLength: 100 }),
@@ -284,7 +282,7 @@ describe('GetConversationHistoryHandler - Property-Based Tests', () => {
                 })
                 .map((ts) => new Date(ts)), // All within same day
             }),
-            { minLength: 5, maxLength: 15 },
+            { minLength: 5, maxLength: 15, selector: (msg) => msg.id },
           ),
           async (messages) => {
             // Arrange: Create customer
@@ -318,14 +316,13 @@ describe('GetConversationHistoryHandler - Property-Based Tests', () => {
             for (const msg of messages) {
               await messageRepository.save({
                 id: msg.id,
-                conversation_id: conversationId,
+                conversationId: conversationId,
                 direction: 'INBOUND',
                 content: msg.content,
-                message_type: 'TEXT',
-                sent_at: msg.sentAt,
-                is_from_admin: false,
-                created_at: new Date(),
-                updated_at: new Date(),
+                messageType: 'TEXT',
+                sentAt: msg.sentAt,
+                isFromAdmin: false,
+                createdAt: new Date(),
               });
             }
 
@@ -339,9 +336,14 @@ describe('GetConversationHistoryHandler - Property-Based Tests', () => {
               expect(currentTime).toBeLessThanOrEqual(nextTime);
             }
 
-            // Assert: All messages from same day
-            const firstDate = new Date(result[0].sentAt).toDateString();
-            expect(result.every((m) => new Date(m.sentAt).toDateString() === firstDate)).toBe(true);
+            // Assert: All messages returned
+            expect(result).toHaveLength(messages.length);
+
+            // Assert: All message IDs present
+            const resultIds = result.map((m) => m.id);
+            messages.forEach((msg) => {
+              expect(resultIds).toContain(msg.id);
+            });
           },
         ),
         { numRuns: 50 },
@@ -405,14 +407,13 @@ describe('GetConversationHistoryHandler - Property-Based Tests', () => {
             for (const msg of messages) {
               await messageRepository.save({
                 id: msg.id,
-                conversation_id: conversationId,
+                conversationId: conversationId,
                 direction: msg.direction,
                 content: msg.content,
-                message_type: msg.messageType,
-                sent_at: msg.sentAt,
-                is_from_admin: msg.isFromAdmin,
-                created_at: new Date(),
-                updated_at: new Date(),
+                messageType: msg.messageType,
+                sentAt: msg.sentAt,
+                isFromAdmin: msg.isFromAdmin,
+                createdAt: new Date(),
               });
             }
 

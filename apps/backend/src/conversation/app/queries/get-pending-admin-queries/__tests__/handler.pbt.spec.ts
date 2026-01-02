@@ -82,16 +82,12 @@ describe('GetPendingAdminQueriesHandler - Property-Based Tests', () => {
 
   beforeEach(async () => {
     // Clean up before each test - delete all conversations and customers for this business
-    await conversationRepository
-      .createQueryBuilder()
-      .delete()
-      .where('businessId = :businessId', { businessId })
-      .execute();
-    await customerRepository
-      .createQueryBuilder()
-      .delete()
-      .where('business_id = :businessId', { businessId })
-      .execute();
+    // Use direct delete to ensure cleanup happens
+    await conversationRepository.delete({ businessId });
+    await customerRepository.delete({ business_id: businessId });
+
+    // Clear query result cache to ensure fresh data
+    await dataSource.queryResultCache?.clear();
   });
 
   describe('Task 3.6: Property 1 - Pending queries filter property', () => {
@@ -207,6 +203,10 @@ describe('GetPendingAdminQueriesHandler - Property-Based Tests', () => {
             nonAwaitingIds.forEach((id) => {
               expect(resultIds).not.toContain(id);
             });
+
+            // Cleanup after this iteration
+            await conversationRepository.delete({ businessId });
+            await customerRepository.delete({ business_id: businessId });
           },
         ),
         { numRuns: 100 },
@@ -276,6 +276,10 @@ describe('GetPendingAdminQueriesHandler - Property-Based Tests', () => {
             // Assert: All conversations returned
             expect(result).toHaveLength(conversations.length);
             expect(result.every((c) => c.status === 'AWAITING_ADMIN')).toBe(true);
+
+            // Cleanup after this iteration
+            await conversationRepository.delete({ businessId });
+            await customerRepository.delete({ business_id: businessId });
           },
         ),
         { numRuns: 50 },
@@ -345,6 +349,10 @@ describe('GetPendingAdminQueriesHandler - Property-Based Tests', () => {
 
             // Assert: Empty array
             expect(result).toHaveLength(0);
+
+            // Cleanup after this iteration
+            await conversationRepository.delete({ businessId });
+            await customerRepository.delete({ business_id: businessId });
           },
         ),
         { numRuns: 50 },
@@ -422,6 +430,10 @@ describe('GetPendingAdminQueriesHandler - Property-Based Tests', () => {
               const next = new Date(result[i + 1].lastMessageAt).getTime();
               expect(current).toBeGreaterThanOrEqual(next);
             }
+
+            // Cleanup after this iteration
+            await conversationRepository.delete({ businessId });
+            await customerRepository.delete({ business_id: businessId });
           },
         ),
         { numRuns: 50 },
