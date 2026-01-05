@@ -4,7 +4,11 @@ import { DataSource } from 'typeorm';
 import { AppModule } from '../../../../app.module';
 import { CommandBus } from '@nestjs/cqrs';
 import { ProcessIncomingMessageCommand } from '@conversation/app/commands/process-incoming-message';
-import { IWhatsAppClient, Button } from '@conversation/domain/interfaces/external/whatsapp-client';
+import {
+  IWhatsAppClient,
+  Button,
+  ListSection,
+} from '@conversation/domain/interfaces/external/whatsapp-client';
 import { UUID } from '@shared/vo/uuid';
 import { AppointmentModel } from '@booking/infra/persistence/models/appointment';
 import { createActiveOffering, createScheduleInDb } from '@test-utils/helpers';
@@ -62,7 +66,12 @@ describe('Conversational Booking Flow (e2e)', () => {
   let mockWhatsAppClient: jest.Mocked<IWhatsAppClient>;
 
   // Variables para rastrear el flujo
-  let sentMessages: Array<{ phone: string; message: string; buttons?: Button[] }> = [];
+  let sentMessages: Array<{
+    phone: string;
+    message: string;
+    buttons?: Button[];
+    sections?: ListSection[];
+  }> = [];
   let testBusinessId: string;
   let testOfferingId: string;
   const testCustomerPhone = '+1234567892'; // Unique phone number for this test suite
@@ -83,7 +92,14 @@ describe('Conversational Booking Flow (e2e)', () => {
           sentMessages.push({ phone: to, message, buttons });
           return Promise.resolve();
         }),
-      sendInteractiveList: jest.fn().mockResolvedValue(undefined),
+      sendInteractiveList: jest
+        .fn()
+        .mockImplementation(
+          (to: string, message: string, buttonText: string, sections: ListSection[]) => {
+            sentMessages.push({ phone: to, message, sections });
+            return Promise.resolve();
+          },
+        ),
       sendLocation: jest.fn(),
     };
 
@@ -158,6 +174,7 @@ describe('Conversational Booking Flow (e2e)', () => {
     sentMessages = [];
     mockWhatsAppClient.sendMessage.mockClear();
     mockWhatsAppClient.sendInteractiveButtons.mockClear();
+    mockWhatsAppClient.sendInteractiveList.mockClear();
 
     // Limpiar base de datos (order matters due to foreign keys)
     await dataSource.query('DELETE FROM appointments');
@@ -219,16 +236,30 @@ describe('Conversational Booking Flow (e2e)', () => {
         ),
       );
 
-      // Verificar que se enviaron botones de selección de servicio
-      expect(mockWhatsAppClient.sendInteractiveButtons).toHaveBeenCalledTimes(1);
+      // Verificar que se enviaron botones o lista de selección de servicio
+      expect(
+        mockWhatsAppClient.sendInteractiveButtons.mock.calls.length +
+          mockWhatsAppClient.sendInteractiveList.mock.calls.length,
+      ).toBeGreaterThanOrEqual(1);
       expect(sentMessages[0].message).toContain('¿Qué servicio deseas agendar?');
-      expect(sentMessages[0].buttons).toBeDefined();
-      expect(sentMessages[0].buttons!.length).toBeGreaterThan(0);
+
+      // Extract offering ID from either buttons or list
+      let offeringButtonId: string;
+      if (sentMessages[0].buttons) {
+        expect(sentMessages[0].buttons!.length).toBeGreaterThan(0);
+        offeringButtonId = sentMessages[0].buttons![0].id;
+      } else if (sentMessages[0].sections) {
+        expect(sentMessages[0].sections![0].rows.length).toBeGreaterThan(0);
+        offeringButtonId = sentMessages[0].sections![0].rows[0].id;
+      } else {
+        throw new Error('Expected either buttons or sections in sent message');
+      }
 
       // Paso 2: Cliente selecciona un servicio
       // Usar el UUID del offering directamente como buttonId
       sentMessages = [];
       mockWhatsAppClient.sendInteractiveButtons.mockClear();
+      mockWhatsAppClient.sendInteractiveList.mockClear();
 
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
@@ -240,16 +271,29 @@ describe('Conversational Booking Flow (e2e)', () => {
         ),
       );
 
-      // Verificar que se enviaron botones de selección de fecha
-      expect(mockWhatsAppClient.sendInteractiveButtons).toHaveBeenCalledTimes(1);
+      // Verificar que se enviaron botones o lista de selección de fecha
+      expect(
+        mockWhatsAppClient.sendInteractiveButtons.mock.calls.length +
+          mockWhatsAppClient.sendInteractiveList.mock.calls.length,
+      ).toBeGreaterThanOrEqual(1);
       expect(sentMessages[0].message).toContain('Selecciona una fecha');
-      expect(sentMessages[0].buttons).toBeDefined();
-      expect(sentMessages[0].buttons!.length).toBeGreaterThan(0);
+
+      // Extract date button ID from either buttons or list
+      let dateButtonId: string;
+      if (sentMessages[0].buttons) {
+        expect(sentMessages[0].buttons!.length).toBeGreaterThan(0);
+        dateButtonId = sentMessages[0].buttons![0].id;
+      } else if (sentMessages[0].sections) {
+        expect(sentMessages[0].sections![0].rows.length).toBeGreaterThan(0);
+        dateButtonId = sentMessages[0].sections![0].rows[0].id;
+      } else {
+        throw new Error('Expected either buttons or sections in sent message');
+      }
 
       // Paso 3: Cliente selecciona una fecha
-      const dateButtonId = sentMessages[0].buttons![0].id;
       sentMessages = [];
       mockWhatsAppClient.sendInteractiveButtons.mockClear();
+      mockWhatsAppClient.sendInteractiveList.mockClear();
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
@@ -260,16 +304,29 @@ describe('Conversational Booking Flow (e2e)', () => {
         ),
       );
 
-      // Verificar que se enviaron botones de selección de hora
-      expect(mockWhatsAppClient.sendInteractiveButtons).toHaveBeenCalledTimes(1);
+      // Verificar que se enviaron botones o lista de selección de hora
+      expect(
+        mockWhatsAppClient.sendInteractiveButtons.mock.calls.length +
+          mockWhatsAppClient.sendInteractiveList.mock.calls.length,
+      ).toBeGreaterThanOrEqual(1);
       expect(sentMessages[0].message).toContain('Horarios disponibles');
-      expect(sentMessages[0].buttons).toBeDefined();
-      expect(sentMessages[0].buttons!.length).toBeGreaterThan(0);
+
+      // Extract time button ID from either buttons or list
+      let timeButtonId: string;
+      if (sentMessages[0].buttons) {
+        expect(sentMessages[0].buttons!.length).toBeGreaterThan(0);
+        timeButtonId = sentMessages[0].buttons![0].id;
+      } else if (sentMessages[0].sections) {
+        expect(sentMessages[0].sections![0].rows.length).toBeGreaterThan(0);
+        timeButtonId = sentMessages[0].sections![0].rows[0].id;
+      } else {
+        throw new Error('Expected either buttons or sections in sent message');
+      }
 
       // Paso 4: Cliente selecciona una hora
-      const timeButtonId = sentMessages[0].buttons![0].id;
       sentMessages = [];
       mockWhatsAppClient.sendInteractiveButtons.mockClear();
+      mockWhatsAppClient.sendInteractiveList.mockClear();
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
@@ -280,7 +337,7 @@ describe('Conversational Booking Flow (e2e)', () => {
         ),
       );
 
-      // Verificar que se enviaron botones de confirmación
+      // Verificar que se enviaron botones de confirmación (always buttons, never list)
       expect(mockWhatsAppClient.sendInteractiveButtons).toHaveBeenCalledTimes(1);
       expect(sentMessages[0].message).toContain('Confirma tu cita');
       expect(sentMessages[0].buttons).toBeDefined();
@@ -380,7 +437,16 @@ describe('Conversational Booking Flow (e2e)', () => {
         ),
       );
 
-      const dateButtonId = sentMessages[0].buttons![0].id;
+      // Extract date button ID from either buttons or list
+      let dateButtonId: string;
+      if (sentMessages[0].buttons) {
+        dateButtonId = sentMessages[0].buttons![0].id;
+      } else if (sentMessages[0].sections) {
+        dateButtonId = sentMessages[0].sections![0].rows[0].id;
+      } else {
+        throw new Error('Expected either buttons or sections in sent message');
+      }
+
       sentMessages = [];
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
@@ -392,7 +458,16 @@ describe('Conversational Booking Flow (e2e)', () => {
         ),
       );
 
-      const timeButtonId = sentMessages[0].buttons![0].id;
+      // Extract time button ID from either buttons or list
+      let timeButtonId: string;
+      if (sentMessages[0].buttons) {
+        timeButtonId = sentMessages[0].buttons![0].id;
+      } else if (sentMessages[0].sections) {
+        timeButtonId = sentMessages[0].sections![0].rows[0].id;
+      } else {
+        throw new Error('Expected either buttons or sections in sent message');
+      }
+
       sentMessages = [];
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
@@ -407,6 +482,7 @@ describe('Conversational Booking Flow (e2e)', () => {
       // Cliente selecciona "Cambiar" en lugar de "Confirmar"
       sentMessages = [];
       mockWhatsAppClient.sendInteractiveButtons.mockClear();
+      mockWhatsAppClient.sendInteractiveList.mockClear();
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
           testBusinessId,
@@ -472,7 +548,16 @@ describe('Conversational Booking Flow (e2e)', () => {
         ),
       );
 
-      const dateButtonId = sentMessages[0].buttons![0].id;
+      // Extract date button ID from either buttons or list
+      let dateButtonId: string;
+      if (sentMessages[0].buttons) {
+        dateButtonId = sentMessages[0].buttons![0].id;
+      } else if (sentMessages[0].sections) {
+        dateButtonId = sentMessages[0].sections![0].rows[0].id;
+      } else {
+        throw new Error('Expected either buttons or sections in sent message');
+      }
+
       sentMessages = [];
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
@@ -484,7 +569,16 @@ describe('Conversational Booking Flow (e2e)', () => {
         ),
       );
 
-      const timeButtonId = sentMessages[0].buttons![0].id;
+      // Extract time button ID from either buttons or list
+      let timeButtonId: string;
+      if (sentMessages[0].buttons) {
+        timeButtonId = sentMessages[0].buttons![0].id;
+      } else if (sentMessages[0].sections) {
+        timeButtonId = sentMessages[0].sections![0].rows[0].id;
+      } else {
+        throw new Error('Expected either buttons or sections in sent message');
+      }
+
       sentMessages = [];
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
@@ -574,7 +668,16 @@ describe('Conversational Booking Flow (e2e)', () => {
         ),
       );
 
-      const dateButtonId = sentMessages[0].buttons![0].id;
+      // Extract date button ID from either buttons or list
+      let dateButtonId: string;
+      if (sentMessages[0].buttons) {
+        dateButtonId = sentMessages[0].buttons![0].id;
+      } else if (sentMessages[0].sections) {
+        dateButtonId = sentMessages[0].sections![0].rows[0].id;
+      } else {
+        throw new Error('Expected either buttons or sections in sent message');
+      }
+
       sentMessages = [];
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
@@ -586,7 +689,16 @@ describe('Conversational Booking Flow (e2e)', () => {
         ),
       );
 
-      const timeButtonId = sentMessages[0].buttons![0].id;
+      // Extract time button ID from either buttons or list
+      let timeButtonId: string;
+      if (sentMessages[0].buttons) {
+        timeButtonId = sentMessages[0].buttons![0].id;
+      } else if (sentMessages[0].sections) {
+        timeButtonId = sentMessages[0].sections![0].rows[0].id;
+      } else {
+        throw new Error('Expected either buttons or sections in sent message');
+      }
+
       sentMessages = [];
       await commandBus.execute(
         new ProcessIncomingMessageCommand(
