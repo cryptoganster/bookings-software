@@ -1,7 +1,7 @@
 import { Provider } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { WhatsAppBusinessApiClient } from './whatsapp-business-api-client';
-import { TwilioWhatsAppClient } from './twilio-whatsapp-client';
+import { WhatsAppBusinessApiClient } from '@conversation/infra/external/whatsapp-business-api-client';
+import { TwilioWhatsAppClient } from '@conversation/infra/external/twilio-whatsapp-client';
 import { IWhatsAppClient } from '@conversation/domain/interfaces/external/whatsapp-client';
 
 /**

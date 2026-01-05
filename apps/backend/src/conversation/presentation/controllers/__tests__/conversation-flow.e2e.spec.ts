@@ -244,13 +244,13 @@ describe('Conversational Booking Flow (e2e)', () => {
       expect(sentMessages[0].message).toContain('¿Qué servicio deseas agendar?');
 
       // Extract offering ID from either buttons or list
-      let offeringButtonId: string;
+      let _offeringButtonId: string;
       if (sentMessages[0].buttons) {
         expect(sentMessages[0].buttons!.length).toBeGreaterThan(0);
-        offeringButtonId = sentMessages[0].buttons![0].id;
+        _offeringButtonId = sentMessages[0].buttons![0].id;
       } else if (sentMessages[0].sections) {
         expect(sentMessages[0].sections![0].rows.length).toBeGreaterThan(0);
-        offeringButtonId = sentMessages[0].sections![0].rows[0].id;
+        _offeringButtonId = sentMessages[0].sections![0].rows[0].id;
       } else {
         throw new Error('Expected either buttons or sections in sent message');
       }
