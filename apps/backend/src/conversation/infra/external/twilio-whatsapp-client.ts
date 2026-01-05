@@ -81,7 +81,10 @@ export class TwilioWhatsAppClient implements IWhatsAppClient {
     to: string,
     message: string,
     buttonText: string,
-    sections: any[],
+    sections: Array<{
+      title?: string;
+      rows: Array<{ title: string; description?: string; id: string }>;
+    }>,
   ): Promise<void> {
     // Twilio Sandbox no soporta listas interactivas nativas de WhatsApp
     // Simulamos con texto formateado
@@ -91,7 +94,7 @@ export class TwilioWhatsAppClient implements IWhatsAppClient {
       if (section.title) {
         listText += `*${section.title}*\n`;
       }
-      section.rows.forEach((row: any, i: number) => {
+      section.rows.forEach((row, i: number) => {
         listText += `${i + 1}. ${row.title}`;
         if (row.description) {
           listText += ` - ${row.description}`;

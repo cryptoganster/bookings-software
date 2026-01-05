@@ -92,23 +92,28 @@ export class WhatsAppBusinessApiClient implements IWhatsAppClient {
         });
 
         return;
-      } catch (error: any) {
-        lastError = error;
+      } catch (error: unknown) {
+        lastError = error as Error;
         attempt++;
+
+        const axiosError = error as {
+          message?: string;
+          response?: { data?: unknown; status?: number };
+        };
 
         console.error('[WhatsAppBusinessApiClient] Error sending interactive buttons:', {
           attempt,
           maxRetries,
-          error: error.message,
-          response: error.response?.data,
-          status: error.response?.status,
+          error: axiosError.message,
+          response: axiosError.response?.data,
+          status: axiosError.response?.status,
           to,
           buttonsCount: buttons.length,
         });
 
         if (attempt >= maxRetries) {
           throw new Error(
-            `Failed to send WhatsApp interactive buttons after ${maxRetries} attempts. Last error: ${lastError?.message}. Response: ${JSON.stringify(error.response?.data)}`,
+            `Failed to send WhatsApp interactive buttons after ${maxRetries} attempts. Last error: ${lastError?.message}. Response: ${JSON.stringify(axiosError.response?.data)}`,
           );
         }
         // Exponential backoff: 1s, 2s, 4s
@@ -166,23 +171,28 @@ export class WhatsAppBusinessApiClient implements IWhatsAppClient {
         });
 
         return;
-      } catch (error: any) {
-        lastError = error;
+      } catch (error: unknown) {
+        lastError = error as Error;
         attempt++;
+
+        const axiosError = error as {
+          message?: string;
+          response?: { data?: unknown; status?: number };
+        };
 
         console.error('[WhatsAppBusinessApiClient] Error sending interactive list:', {
           attempt,
           maxRetries,
-          error: error.message,
-          response: error.response?.data,
-          status: error.response?.status,
+          error: axiosError.message,
+          response: axiosError.response?.data,
+          status: axiosError.response?.status,
           to,
           sectionsCount: sections.length,
         });
 
         if (attempt >= maxRetries) {
           throw new Error(
-            `Failed to send WhatsApp interactive list after ${maxRetries} attempts. Last error: ${lastError?.message}. Response: ${JSON.stringify(error.response?.data)}`,
+            `Failed to send WhatsApp interactive list after ${maxRetries} attempts. Last error: ${lastError?.message}. Response: ${JSON.stringify(axiosError.response?.data)}`,
           );
         }
         // Exponential backoff: 1s, 2s, 4s

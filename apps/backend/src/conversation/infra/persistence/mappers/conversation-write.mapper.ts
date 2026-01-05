@@ -65,7 +65,7 @@ export class ConversationWriteMapper {
     // Handle both string and Date types (TypeORM might return either)
     const selectedDate = model.selectedDate
       ? (() => {
-          const value = model.selectedDate as any; // Cast to any for runtime type checking
+          const value = model.selectedDate as Date | string; // Cast to union type for runtime type checking
 
           // Type guard: check if it's a Date object (runtime check)
           if (value instanceof Date) {
