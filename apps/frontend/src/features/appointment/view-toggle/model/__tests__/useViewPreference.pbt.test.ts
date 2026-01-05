@@ -14,13 +14,17 @@ import { renderHook, act } from "@testing-library/react";
 import { useViewPreference } from "../useViewPreference";
 
 describe("useViewPreference - Property-Based Tests", () => {
-  // Limpiar localStorage antes y después de cada test
+  // Limpiar localStorage y forzar rehydration de Zustand antes y después de cada test
   beforeEach(() => {
     localStorage.clear();
+    // Forzar a Zustand a rehydratar desde localStorage vacío
+    useViewPreference.persist.rehydrate();
   });
 
   afterEach(() => {
     localStorage.clear();
+    // Resetear el estado de Zustand al valor por defecto
+    useViewPreference.setState({ view: "list" });
   });
 
   describe("Property 1: View Preference Persistence", () => {
