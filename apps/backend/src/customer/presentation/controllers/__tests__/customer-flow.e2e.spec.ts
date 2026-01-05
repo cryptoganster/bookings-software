@@ -50,6 +50,7 @@ describe('Customer Flow E2E', () => {
           sentMessages.push({ phone: to, message, buttons });
           return Promise.resolve();
         }),
+      sendInteractiveList: jest.fn().mockResolvedValue(undefined),
       sendLocation: jest.fn(),
     };
 

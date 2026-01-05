@@ -83,6 +83,7 @@ describe('Conversational Booking Flow (e2e)', () => {
           sentMessages.push({ phone: to, message, buttons });
           return Promise.resolve();
         }),
+      sendInteractiveList: jest.fn().mockResolvedValue(undefined),
       sendLocation: jest.fn(),
     };
 
