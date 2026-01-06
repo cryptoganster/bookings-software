@@ -23,7 +23,7 @@
     "@mantine/dates": "^8.3.10",
     "@mantine/hooks": "^8.3.10",
     "@mantine/modals": "^8.3.10",
-    "@mantine/notifications": "^8.3.10",
+    "@mantine/notifications": "^8.3.11",
     "@packages/shared-types": "workspace:*",
     "@tabler/icons-react": "^3.36.0",
     "@tanstack/react-query": "^5.90.15",
