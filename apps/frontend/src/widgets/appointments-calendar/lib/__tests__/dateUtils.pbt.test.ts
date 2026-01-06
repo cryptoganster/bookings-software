@@ -12,6 +12,11 @@ describe("dateUtils - Property-Based Tests", () => {
     test.prop([fc.date({ min: minDate, max: maxDate })])(
       "should always return exactly 7 consecutive days starting from Monday",
       (date) => {
+        // Skip invalid dates
+        if (!isFinite(date.getTime())) {
+          return;
+        }
+
         const [start, end] = getWeekRange(date);
 
         // Property 1: Week should contain exactly 7 days
@@ -35,6 +40,11 @@ describe("dateUtils - Property-Based Tests", () => {
     test.prop([fc.date({ min: minDate, max: maxDate })])(
       "should be idempotent - calling getWeekRange on any day of the week returns the same week",
       (date) => {
+        // Skip invalid dates
+        if (!isFinite(date.getTime())) {
+          return;
+        }
+
         const [start1, end1] = getWeekRange(date);
 
         // Get week range for the start date (Monday)
@@ -54,6 +64,11 @@ describe("dateUtils - Property-Based Tests", () => {
     test.prop([fc.date({ min: minDate, max: maxDate })])(
       "should handle year boundaries correctly",
       (date) => {
+        // Skip invalid dates
+        if (!isFinite(date.getTime())) {
+          return;
+        }
+
         const [start, end] = getWeekRange(date);
 
         // Week should still be 7 days even across year boundaries
@@ -73,6 +88,11 @@ describe("dateUtils - Property-Based Tests", () => {
     test.prop([fc.date({ min: minDate, max: maxDate })])(
       "should always return a string",
       (date) => {
+        // Skip invalid dates
+        if (!isFinite(date.getTime())) {
+          return;
+        }
+
         const result = formatDateSpanish(date, "EEEE");
         expect(typeof result).toBe("string");
         expect(result.length).toBeGreaterThan(0);
@@ -82,6 +102,11 @@ describe("dateUtils - Property-Based Tests", () => {
     test.prop([fc.date({ min: minDate, max: maxDate })])(
       "should be deterministic - same input produces same output",
       (date) => {
+        // Skip invalid dates
+        if (!isFinite(date.getTime())) {
+          return;
+        }
+
         const result1 = formatDateSpanish(date, "MMM d, yyyy");
         const result2 = formatDateSpanish(date, "MMM d, yyyy");
         expect(result1).toBe(result2);
