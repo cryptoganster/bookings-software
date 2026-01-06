@@ -28,7 +28,7 @@ import { OnAppointmentCreatedHandler } from '@conversation/app/event-handlers/on
 import { OnAppointmentCancelledHandler } from '@conversation/app/event-handlers/on-appointment-cancelled.handler';
 
 // External clients
-import { WhatsAppBusinessApiClient } from '@conversation/infra/external/whatsapp-business-api-client';
+import { WhatsAppClientProvider } from '@conversation/infra/external/whatsapp-client.factory';
 
 // Factories
 import { ConversationFactory } from '@conversation/infra/persistence/factories/conversation-factory';
@@ -114,11 +114,8 @@ const EventHandlers = [OnAppointmentCreatedHandler, OnAppointmentCancelledHandle
     },
     // ICapacityReadRepository is provided by AvailabilityModule
 
-    // External clients
-    {
-      provide: 'IWhatsAppClient',
-      useClass: WhatsAppBusinessApiClient,
-    },
+    // External clients - Selecciona Meta API o Twilio según WHATSAPP_PROVIDER
+    WhatsAppClientProvider,
   ],
   exports: [
     'IConversationFactory',
