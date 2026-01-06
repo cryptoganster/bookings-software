@@ -19,15 +19,16 @@ describe('SendAdminResponseHandler - Integration Tests', () => {
     // Create mocks
     conversationFactory = {
       loadById: jest.fn(),
-    } as any;
+      loadByCustomerIdAndBusinessId: jest.fn(),
+    } as jest.Mocked<IConversationFactory>;
 
     conversationWriteRepo = {
       save: jest.fn(),
-    } as any;
+    } as jest.Mocked<IConversationWriteRepository>;
 
     commandBus = {
       execute: jest.fn(),
-    } as any;
+    } as unknown as jest.Mocked<CommandBus>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
