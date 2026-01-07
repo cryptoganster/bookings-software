@@ -62,10 +62,24 @@ export class ConversationWriteMapper {
    */
   static toDomain(model: ConversationModel): Conversation {
     // Convert "YYYY-MM-DD" string to Date at midnight UTC
+    // Handle both string and Date types (TypeORM might return either)
     const selectedDate = model.selectedDate
       ? (() => {
-          const [year, month, day] = model.selectedDate.split('-').map(Number);
-          return new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+          const value = model.selectedDate as Date | string; // Cast to union type for runtime type checking
+
+          // Type guard: check if it's a Date object (runtime check)
+          if (value instanceof Date) {
+            return value as Date;
+          }
+
+          // If string, parse it
+          if (typeof value === 'string') {
+            const [year, month, day] = value.split('-').map(Number);
+            return new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+          }
+
+          // Fallback: should never happen, but return undefined for safety
+          return undefined;
         })()
       : undefined;
 

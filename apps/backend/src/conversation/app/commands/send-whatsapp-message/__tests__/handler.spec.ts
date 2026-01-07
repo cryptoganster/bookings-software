@@ -22,6 +22,7 @@ describe('SendWhatsAppMessageHandler', () => {
     whatsappClient = {
       sendMessage: jest.fn(),
       sendInteractiveButtons: jest.fn(),
+      sendInteractiveList: jest.fn(),
       sendLocation: jest.fn(),
     } as jest.Mocked<IWhatsAppClient>;
 

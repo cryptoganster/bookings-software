@@ -6,7 +6,11 @@ import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ProcessIncomingMessageCommand } from '@conversation/app/commands/process-incoming-message';
 import { GetAppointmentQuery } from '@booking/app/queries/get-appointment';
 import { GetCustomerByPhoneQuery } from '@customer/app/queries/get-customer-by-phone';
-import { IWhatsAppClient, Button } from '@conversation/domain/interfaces/external/whatsapp-client';
+import {
+  IWhatsAppClient,
+  Button,
+  ListSection,
+} from '@conversation/domain/interfaces/external/whatsapp-client';
 import { UUID } from '@shared/vo/uuid';
 import { AppointmentModel } from '@booking/infra/persistence/models/appointment';
 import { CustomerModel } from '@customer/infra/persistence/models/customer.model';
@@ -29,7 +33,12 @@ describe('Customer Flow E2E', () => {
   let authHelper: E2EAuthHelper;
 
   // Test data
-  let sentMessages: Array<{ phone: string; message: string; buttons?: Button[] }> = [];
+  let sentMessages: Array<{
+    phone: string;
+    message: string;
+    buttons?: Button[];
+    sections?: ListSection[];
+  }> = [];
   let testBusinessId: string;
   let testOfferingId: string;
   const testCustomerPhone = '+1234567891'; // Unique phone number for this test suite
@@ -50,6 +59,14 @@ describe('Customer Flow E2E', () => {
           sentMessages.push({ phone: to, message, buttons });
           return Promise.resolve();
         }),
+      sendInteractiveList: jest
+        .fn()
+        .mockImplementation(
+          (to: string, message: string, buttonText: string, sections: ListSection[]) => {
+            sentMessages.push({ phone: to, message, sections });
+            return Promise.resolve();
+          },
+        ),
       sendLocation: jest.fn(),
     };
 
@@ -104,6 +121,7 @@ describe('Customer Flow E2E', () => {
     sentMessages = [];
     mockWhatsAppClient.sendMessage.mockClear();
     mockWhatsAppClient.sendInteractiveButtons.mockClear();
+    mockWhatsAppClient.sendInteractiveList.mockClear();
 
     // Clean database
     await dataSource.query('DELETE FROM appointments');
@@ -234,13 +252,31 @@ describe('Customer Flow E2E', () => {
         ),
       );
 
-      const dateButtonId = sentMessages[0].buttons![0].id;
+      // Extract date button ID from either buttons or list
+      let dateButtonId: string;
+      if (sentMessages[0].buttons) {
+        dateButtonId = sentMessages[0].buttons![0].id;
+      } else if (sentMessages[0].sections) {
+        dateButtonId = sentMessages[0].sections![0].rows[0].id;
+      } else {
+        throw new Error('Expected either buttons or sections in sent message');
+      }
+
       sentMessages = [];
       await commandBus.execute(
         new ProcessIncomingMessageCommand(testBusinessId, '', testCustomerPhone, '', dateButtonId),
       );
 
-      const timeButtonId = sentMessages[0].buttons![0].id;
+      // Extract time button ID from either buttons or list
+      let timeButtonId: string;
+      if (sentMessages[0].buttons) {
+        timeButtonId = sentMessages[0].buttons![0].id;
+      } else if (sentMessages[0].sections) {
+        timeButtonId = sentMessages[0].sections![0].rows[0].id;
+      } else {
+        throw new Error('Expected either buttons or sections in sent message');
+      }
+
       sentMessages = [];
       await commandBus.execute(
         new ProcessIncomingMessageCommand(testBusinessId, '', testCustomerPhone, '', timeButtonId),
@@ -415,13 +451,31 @@ describe('Customer Flow E2E', () => {
         ),
       );
 
-      const dateButtonId = sentMessages[0].buttons![0].id;
+      // Extract date button ID from either buttons or list
+      let dateButtonId: string;
+      if (sentMessages[0].buttons) {
+        dateButtonId = sentMessages[0].buttons![0].id;
+      } else if (sentMessages[0].sections) {
+        dateButtonId = sentMessages[0].sections![0].rows[0].id;
+      } else {
+        throw new Error('Expected either buttons or sections in sent message');
+      }
+
       sentMessages = [];
       await commandBus.execute(
         new ProcessIncomingMessageCommand(testBusinessId, '', testCustomerPhone, '', dateButtonId),
       );
 
-      const timeButtonId = sentMessages[0].buttons![0].id;
+      // Extract time button ID from either buttons or list
+      let timeButtonId: string;
+      if (sentMessages[0].buttons) {
+        timeButtonId = sentMessages[0].buttons![0].id;
+      } else if (sentMessages[0].sections) {
+        timeButtonId = sentMessages[0].sections![0].rows[0].id;
+      } else {
+        throw new Error('Expected either buttons or sections in sent message');
+      }
+
       sentMessages = [];
       await commandBus.execute(
         new ProcessIncomingMessageCommand(testBusinessId, '', testCustomerPhone, '', timeButtonId),
