@@ -37,7 +37,7 @@ export async function seedBusiness(
       businessId,
       userId,
       'Peluquería El Estilo',
-      '+18095551234',
+      '+18097982896', // ← Real WhatsApp number configured in system
       'Calle Principal 123',
       'Santo Domingo',
       'Distrito Nacional',
@@ -52,7 +52,7 @@ export async function seedBusiness(
   console.log('✅ Business BC seeded');
   console.log(`   Business ID: ${businessId}`);
   console.log('   Name: Peluquería El Estilo');
-  console.log('   WhatsApp: +18095551234');
+  console.log('   WhatsApp: +18097982896 (REAL NUMBER)');
   console.log('   Location: Santo Domingo, República Dominicana');
 
   return { businessId };

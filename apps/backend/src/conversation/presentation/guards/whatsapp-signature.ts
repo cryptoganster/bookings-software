@@ -34,10 +34,10 @@ export class WhatsAppSignatureGuard implements CanActivate {
       throw new UnauthorizedException('Missing signature header');
     }
 
-    const appSecret = this.configService.get<string>('WHATSAPP_APP_SECRET');
+    const appSecret = this.configService.get<string>('WHATSAPP_WEBHOOK_SECRET');
 
     if (!appSecret) {
-      throw new UnauthorizedException('App secret not configured');
+      throw new UnauthorizedException('Webhook secret not configured');
     }
 
     // Calcular la firma esperada

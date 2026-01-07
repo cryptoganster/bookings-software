@@ -2,11 +2,13 @@
   "apps/backend/src/**/*.ts": [
     "pnpm --filter backend lint:fix",
     "pnpm --filter backend format",
+    "bash -c 'pnpm --filter backend lint'",
     "bash -c 'pnpm --filter backend typecheck'"
   ],
   "apps/frontend/src/**/*.{ts,tsx}": [
     "pnpm --filter frontend lint:fix",
     "pnpm --filter frontend format",
+    "bash -c 'pnpm --filter frontend lint'",
     "bash -c 'pnpm --filter frontend typecheck'"
   ],
   "packages/shared-types/src/**/*.ts": ["prettier --write"],
