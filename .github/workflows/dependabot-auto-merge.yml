@@ -11,96 +11,88 @@ permissions:
 jobs:
   dependabot:
     runs-on: ubuntu-latest
-    if: github.actor == 'dependabot[bot]'
     steps:
+      - name: Check if PR is from Dependabot
+        id: check-actor
+        run: |
+          if [ "${{ github.actor }}" != "dependabot[bot]" ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "ℹ️ Not a Dependabot PR, skipping auto-merge"
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+            echo "✅ Dependabot PR detected"
+          fi
+
       - name: Dependabot metadata
         id: metadata
+        if: steps.check-actor.outputs.skip == 'false'
         uses: dependabot/fetch-metadata@v2
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Wait for CI checks to complete
+        if: steps.check-actor.outputs.skip == 'false'
         run: |
-          PR_NUMBER="${{ github.event.pull_request.number }}"
-          MAX_WAIT_MINUTES=20
-          CHECK_INTERVAL_SECONDS=30
-          MAX_ITERATIONS=$((MAX_WAIT_MINUTES * 60 / CHECK_INTERVAL_SECONDS))
+          echo "⏳ Waiting for CI checks to complete..."
+          echo "PR Number: ${{ github.event.pull_request.number }}"
           
-          echo "⏳ Waiting for CI checks to complete (max ${MAX_WAIT_MINUTES} minutes)..."
-          echo "📋 PR #${PR_NUMBER}"
-          echo ""
+          # Wait up to 20 minutes for checks to complete
+          MAX_WAIT=1200  # 20 minutes in seconds
+          INTERVAL=30    # Check every 30 seconds
+          ELAPSED=0
           
-          for i in $(seq 1 $MAX_ITERATIONS); do
-            echo "🔍 Check attempt $i/$MAX_ITERATIONS ($(date '+%H:%M:%S'))"
+          while [ $ELAPSED -lt $MAX_WAIT ]; do
+            # Get check status
+            CHECK_STATUS=$(gh pr checks ${{ github.event.pull_request.number }} --json state,conclusion --jq '.')
             
-            # Get all checks for this PR
-            # Available fields: bucket, completedAt, description, event, link, name, startedAt, state, workflow
-            CHECKS=$(gh pr checks "$PR_NUMBER" --json name,state,completedAt 2>/dev/null || echo "[]")
+            # Count checks
+            TOTAL=$(echo "$CHECK_STATUS" | jq 'length')
+            PENDING=$(echo "$CHECK_STATUS" | jq '[.[] | select(.state == "PENDING" or .state == "QUEUED" or .state == "IN_PROGRESS")] | length')
+            SUCCESS=$(echo "$CHECK_STATUS" | jq '[.[] | select(.conclusion == "SUCCESS")] | length')
+            FAILED=$(echo "$CHECK_STATUS" | jq '[.[] | select(.conclusion == "FAILURE" or .conclusion == "CANCELLED" or .conclusion == "TIMED_OUT")] | length')
             
-            if [ "$CHECKS" = "[]" ] || [ -z "$CHECKS" ]; then
-              echo "  ⚠️  No checks found yet, waiting..."
-              sleep $CHECK_INTERVAL_SECONDS
-              continue
-            fi
+            echo "📊 Check Status: Total=$TOTAL, Pending=$PENDING, Success=$SUCCESS, Failed=$FAILED"
             
-            # Count checks by state
-            TOTAL=$(echo "$CHECKS" | jq 'length')
-            SUCCESS=$(echo "$CHECKS" | jq '[.[] | select(.state == "SUCCESS")] | length')
-            FAILURE=$(echo "$CHECKS" | jq '[.[] | select(.state == "FAILURE")] | length')
-            PENDING=$(echo "$CHECKS" | jq '[.[] | select(.state == "PENDING" or .state == "QUEUED" or .state == "IN_PROGRESS" or .completedAt == "")] | length')
-            
-            echo "  📊 Status: $SUCCESS success, $FAILURE failed, $PENDING pending (total: $TOTAL)"
-            
-            # If any check failed, exit immediately
-            if [ "$FAILURE" -gt 0 ]; then
-              echo ""
-              echo "❌ CI checks failed. Not enabling auto-merge."
-              echo ""
-              echo "Failed checks:"
-              echo "$CHECKS" | jq -r '.[] | select(.state == "FAILURE") | "  - \(.name)"'
+            # If any checks failed, exit
+            if [ "$FAILED" -gt 0 ]; then
+              echo "❌ Some checks failed. Auto-merge will not be enabled."
               exit 1
             fi
             
             # If all checks completed successfully
-            if [ "$PENDING" -eq 0 ] && [ "$SUCCESS" -eq "$TOTAL" ]; then
-              echo ""
-              echo "✅ All CI checks passed!"
-              echo ""
-              echo "Successful checks:"
-              echo "$CHECKS" | jq -r '.[] | "  - \(.name)"'
+            if [ "$PENDING" -eq 0 ] && [ "$SUCCESS" -gt 0 ]; then
+              echo "✅ All checks passed!"
               exit 0
             fi
             
-            # Still waiting for some checks
-            echo "  ⏳ Waiting for $PENDING checks to complete..."
-            sleep $CHECK_INTERVAL_SECONDS
+            # Wait and check again
+            echo "⏳ Waiting for checks to complete... (${ELAPSED}s elapsed)"
+            sleep $INTERVAL
+            ELAPSED=$((ELAPSED + INTERVAL))
           done
           
-          # Timeout reached
-          echo ""
-          echo "⏰ Timeout reached after ${MAX_WAIT_MINUTES} minutes"
-          echo "❌ Not all checks completed in time. Not enabling auto-merge."
-          echo ""
-          echo "Current status:"
-          echo "$CHECKS" | jq -r '.[] | "  - \(.name): \(.state)"'
+          echo "⏱️ Timeout waiting for checks. Auto-merge will not be enabled."
           exit 1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Enable auto-merge for patch and minor updates
         if: |
-          steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
-          steps.metadata.outputs.update-type == 'version-update:semver-minor'
+          steps.check-actor.outputs.skip == 'false' &&
+          (steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
+          steps.metadata.outputs.update-type == 'version-update:semver-minor')
         run: |
-          echo "🚀 Enabling auto-merge for ${{ steps.metadata.outputs.update-type }}"
+          echo "🔄 Enabling auto-merge for ${{ steps.metadata.outputs.update-type }}"
           gh pr merge --auto --squash "$PR_URL"
-          echo "✅ Auto-merge enabled. PR will merge automatically when all requirements are met."
+          echo "✅ Auto-merge enabled. PR will merge automatically once all checks pass."
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Comment on major updates
-        if: steps.metadata.outputs.update-type == 'version-update:semver-major'
+        if: |
+          steps.check-actor.outputs.skip == 'false' &&
+          steps.metadata.outputs.update-type == 'version-update:semver-major'
         run: |
           gh pr comment "$PR_URL" --body "⚠️ This is a **major version update**. Please review manually before merging."
         env:

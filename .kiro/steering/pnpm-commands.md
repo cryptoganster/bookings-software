@@ -161,12 +161,12 @@ Los workspaces se definen en `pnpm-workspace.yaml` y `package.json` de cada app:
 ```json
 {
   "scripts": {
-    "dev": "nest start --watch",
+    "dev": "nodemon",
     "build": "nest build",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --max-warnings 0",
     "lint:fix": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "typecheck": "tsc --noEmit"
@@ -179,19 +179,24 @@ Los workspaces se definen en `pnpm-workspace.yaml` y `package.json` de cada app:
 ```json
 {
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
+    "dev": "vite --host",
+    "build": "tsc -b && vite build",
     "test": "vitest --run",
     "test:watch": "vitest",
-    "test:coverage": "vitest --coverage",
+    "test:coverage": "vitest --run --coverage",
     "test:ui": "vitest --ui",
-    "lint": "eslint . --ext ts,tsx",
-    "lint:fix": "eslint . --ext ts,tsx --fix",
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx}\"",
     "typecheck": "tsc --noEmit"
   }
 }
 ```
+
+**Nota sobre Testing:**
+- `test`: Single-run mode (para CI/CD) - ejecuta tests una vez y termina
+- `test:watch`: Watch mode (para desarrollo) - re-ejecuta tests al detectar cambios
+- Ambos workspaces usan el mismo patrón para consistencia
 
 ## Mejores Prácticas
 
