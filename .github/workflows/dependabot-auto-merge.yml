@@ -11,15 +11,27 @@ permissions:
 jobs:
   dependabot:
     runs-on: ubuntu-latest
-    if: github.actor == 'dependabot[bot]'
     steps:
+      - name: Check if PR is from Dependabot
+        id: check-actor
+        run: |
+          if [ "${{ github.actor }}" != "dependabot[bot]" ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "ℹ️ Not a Dependabot PR, skipping auto-merge"
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+            echo "✅ Dependabot PR detected"
+          fi
+
       - name: Dependabot metadata
         id: metadata
+        if: steps.check-actor.outputs.skip == 'false'
         uses: dependabot/fetch-metadata@v2
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Wait for CI checks to complete
+        if: steps.check-actor.outputs.skip == 'false'
         run: |
           echo "⏳ Waiting for CI checks to complete..."
           echo "PR Number: ${{ github.event.pull_request.number }}"
@@ -66,8 +78,9 @@ jobs:
 
       - name: Enable auto-merge for patch and minor updates
         if: |
-          steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
-          steps.metadata.outputs.update-type == 'version-update:semver-minor'
+          steps.check-actor.outputs.skip == 'false' &&
+          (steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
+          steps.metadata.outputs.update-type == 'version-update:semver-minor')
         run: |
           echo "🔄 Enabling auto-merge for ${{ steps.metadata.outputs.update-type }}"
           gh pr merge --auto --squash "$PR_URL"
@@ -77,7 +90,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Comment on major updates
-        if: steps.metadata.outputs.update-type == 'version-update:semver-major'
+        if: |
+          steps.check-actor.outputs.skip == 'false' &&
+          steps.metadata.outputs.update-type == 'version-update:semver-major'
         run: |
           gh pr comment "$PR_URL" --body "⚠️ This is a **major version update**. Please review manually before merging."
         env:
