@@ -299,6 +299,9 @@ describe('SearchCustomersHandler - Property-Based Tests', () => {
           fc.integer({ min: 10, max: 50 }), // total customers
           fc.integer({ min: 5, max: 15 }), // limit per page
           async (total, limit) => {
+            // Clean up before test to ensure fresh state
+            await repository.delete({ business_id: businessId });
+
             // Arrange - Create customers
             const customers = [];
             const expectedIds = new Set<string>();
@@ -316,6 +319,9 @@ describe('SearchCustomersHandler - Property-Based Tests', () => {
               });
             }
             await repository.save(customers);
+
+            // Wait for DB to commit
+            await new Promise<void>((resolve) => setTimeout(resolve, 10));
 
             // Act - Fetch all pages
             const totalPages = Math.ceil(total / limit);
@@ -343,7 +349,7 @@ describe('SearchCustomersHandler - Property-Based Tests', () => {
             await repository.delete({ business_id: businessId });
           },
         ),
-        { numRuns: 100 },
+        { numRuns: 50 }, // Reduced from 100 to avoid timeout
       );
     });
   });

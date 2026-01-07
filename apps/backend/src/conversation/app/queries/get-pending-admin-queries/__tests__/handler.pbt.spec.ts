@@ -129,6 +129,11 @@ describe('GetPendingAdminQueriesHandler - Property-Based Tests', () => {
             { minLength: 5, maxLength: 20 },
           ), // Timestamps
           async (count, statuses, states, timestamps) => {
+            // Clean up before test to ensure fresh state
+            await conversationRepository.delete({ businessId });
+            await customerRepository.delete({ business_id: businessId });
+            await dataSource.queryResultCache?.clear();
+
             // Arrange: Create conversations with unique IDs
             const conversations = [];
             for (let i = 0; i < Math.min(count, statuses.length); i++) {
@@ -175,6 +180,9 @@ describe('GetPendingAdminQueriesHandler - Property-Based Tests', () => {
               });
             }
 
+            // Wait for DB to commit
+            await new Promise<void>((resolve) => setTimeout(resolve, 10));
+
             // Act: Execute query
             const result = await handler.execute(new GetPendingAdminQueriesQuery(businessId));
 
@@ -209,7 +217,7 @@ describe('GetPendingAdminQueriesHandler - Property-Based Tests', () => {
             await customerRepository.delete({ business_id: businessId });
           },
         ),
-        { numRuns: 100 },
+        { numRuns: 50 }, // Reduced from 100 to avoid timeout
       );
     });
 

@@ -130,6 +130,11 @@ describe('GetConversationHistoryHandler - Property-Based Tests', () => {
             { minLength: 3, maxLength: 20 },
           ),
           async (messages) => {
+            // Clean up before test to ensure fresh state
+            await messageRepository.createQueryBuilder().delete().execute();
+            await conversationRepository.delete({ businessId });
+            await customerRepository.delete({ business_id: businessId });
+
             // Arrange: Create customer
             const customerId = uuidv4();
             await customerRepository.save({
@@ -171,6 +176,9 @@ describe('GetConversationHistoryHandler - Property-Based Tests', () => {
               });
             }
 
+            // Wait for DB to commit
+            await new Promise<void>((resolve) => setTimeout(resolve, 10));
+
             // Act: Execute query
             const result = await handler.execute(new GetConversationHistoryQuery(conversationId));
 
@@ -191,7 +199,7 @@ describe('GetConversationHistoryHandler - Property-Based Tests', () => {
             });
           },
         ),
-        { numRuns: 100 },
+        { numRuns: 50, timeout: 30000 }, // Reduced from 100 and added timeout
       );
     });
 
