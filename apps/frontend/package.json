@@ -7,14 +7,14 @@
     "dev": "vite --host",
     "build": "tsc -b && vite build",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint .",
+    "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx}\"",
     "preview": "vite preview",
-    "test": "vitest",
+    "test": "vitest --run",
     "test:watch": "vitest",
-    "test:coverage": "vitest --coverage",
+    "test:coverage": "vitest --run --coverage",
     "test:ui": "vitest --ui"
   },
   "dependencies": {
@@ -34,7 +34,7 @@
     "dayjs": "^1.11.19",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "react-hook-form": "^7.69.0",
+    "react-hook-form": "^7.70.0",
     "react-router-dom": "^7.11.0",
     "zod": "^4.2.1",
     "zustand": "^5.0.9"

@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+# Pre-push hook - Runs all tests before push
+# To bypass: git push --no-verify (NOT RECOMMENDED)
+
+set -e
+
+echo "🧪 Running pre-push checks..."
+echo ""
+
+# 1. Backend tests
+echo "🔬 Step 1/2: Running backend tests..."
+pnpm test:backend
+echo ""
+
+# 2. Frontend tests
+echo "🎨 Step 2/2: Running frontend tests..."
+pnpm test:frontend
+echo ""
+
+echo "✅ All tests passed! Pushing to remote..."
+echo ""

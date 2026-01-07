@@ -45,6 +45,11 @@ interface WhatsAppWebhookPayload {
               id: string;
               title: string;
             };
+            list_reply?: {
+              id: string;
+              title: string;
+              description?: string;
+            };
           };
         }>;
       };
@@ -81,8 +86,11 @@ export class WebhookController {
   @Post()
   async handleIncomingMessage(@Body() payload: WhatsAppWebhookPayload) {
     try {
+      this.logger.log('Received WhatsApp webhook payload');
+
       // Validar que sea un mensaje de WhatsApp
       if (payload.object !== 'whatsapp_business_account') {
+        this.logger.warn('Ignored: not a whatsapp message');
         return { status: 'ignored', reason: 'not a whatsapp message' };
       }
 
@@ -104,8 +112,20 @@ export class WebhookController {
           // Procesar cada mensaje
           for (const message of messages) {
             // Extraer información del mensaje
-            const customerPhone = message.from;
-            const businessPhoneId = metadata.phone_number_id;
+            // WhatsApp API sends phone without '+' prefix, we need to add it for E.164 format
+            const customerPhone = message.from.startsWith('+') ? message.from : `+${message.from}`;
+            const businessWhatsAppNumber = metadata.display_phone_number;
+
+            this.logger.log({
+              customerPhone,
+              businessWhatsAppNumber,
+              messageType: message.type,
+            });
+
+            // TODO: En multi-tenant, buscar businessId por businessWhatsAppNumber
+            // Por ahora, usar un businessId hardcoded para MVP single-tenant
+            // Este businessId debe existir en la tabla businesses
+            const businessId = process.env.DEFAULT_BUSINESS_ID || 'REPLACE_WITH_ACTUAL_BUSINESS_ID';
 
             let messageText = '';
             let buttonId: string | undefined;
@@ -113,18 +133,32 @@ export class WebhookController {
             // Determinar el tipo de mensaje
             if (message.type === 'text' && message.text) {
               messageText = message.text.body;
-            } else if (message.type === 'interactive' && message.interactive?.button_reply) {
-              buttonId = message.interactive.button_reply.id;
-              messageText = message.interactive.button_reply.title;
+            } else if (message.type === 'interactive' && message.interactive) {
+              // Handle button replies (max 3 buttons)
+              if (message.interactive.button_reply) {
+                buttonId = message.interactive.button_reply.id;
+                messageText = message.interactive.button_reply.title;
+              }
+              // Handle list replies (up to 10 items per section)
+              else if (message.interactive.list_reply) {
+                buttonId = message.interactive.list_reply.id;
+                messageText = message.interactive.list_reply.title;
+              } else {
+                this.logger.warn(`Unsupported interactive type: ${message.interactive.type}`);
+                continue;
+              }
             } else {
               // Tipo de mensaje no soportado
+              this.logger.warn(`Unsupported message type: ${message.type}`);
               continue;
             }
+
+            this.logger.log(`Processing message: "${messageText}" from ${customerPhone}`);
 
             // Despachar comando para procesar el mensaje
             await this.commandBus.execute(
               new ProcessIncomingMessageCommand(
-                businessPhoneId, // businessId (identificado por phone_number_id)
+                businessId, // businessId real de la tabla businesses
                 customerPhone, // customerId (identificado por número de teléfono)
                 customerPhone, // customerPhone
                 messageText,
@@ -139,14 +173,10 @@ export class WebhookController {
       return { status: 'success' };
     } catch (error) {
       // Log error but respond with 200 to avoid WhatsApp retries
-      this.logger.error(
-        'Error processing WhatsApp webhook',
-        error instanceof Error ? error.stack : String(error),
-        {
-          error: error instanceof Error ? error.message : String(error),
-          payload: JSON.stringify(payload),
-        },
-      );
+      this.logger.error('Error processing WhatsApp webhook', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       return { status: 'error', message: 'Internal error' };
     }
   }
