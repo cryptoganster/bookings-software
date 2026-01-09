@@ -58,3 +58,19 @@ global.ResizeObserver = class ResizeObserver {
   observe() {}
   unobserve() {}
 } as unknown as typeof ResizeObserver;
+
+// Mock ProgressEvent (requerido por MSW para XMLHttpRequest)
+if (typeof global.ProgressEvent === "undefined") {
+  global.ProgressEvent = class ProgressEvent extends Event {
+    lengthComputable: boolean;
+    loaded: number;
+    total: number;
+
+    constructor(type: string, init?: ProgressEventInit) {
+      super(type, init);
+      this.lengthComputable = init?.lengthComputable ?? false;
+      this.loaded = init?.loaded ?? 0;
+      this.total = init?.total ?? 0;
+    }
+  } as unknown as typeof ProgressEvent;
+}
