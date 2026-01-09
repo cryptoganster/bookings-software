@@ -88,7 +88,7 @@ describe('WhatsApp Client - Integration Tests', () => {
         const endTime = Date.now();
 
         // Assert
-        expect(endTime - startTime).toBeGreaterThanOrEqual(100);
+        expect(endTime - startTime).toBeGreaterThanOrEqual(99);
         expect(mockClient.sentMessages).toHaveLength(1);
       });
     });

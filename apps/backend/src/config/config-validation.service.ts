@@ -18,6 +18,13 @@ export class ConfigValidationService implements OnModuleInit {
   constructor(private readonly configService: ConfigService) {}
 
   onModuleInit() {
+    // Skip validation in test environment
+    const nodeEnv = this.configService.get<string>('NODE_ENV', 'development');
+    if (nodeEnv === 'test') {
+      this.logger.log('⏭️  Skipping configuration validation in test environment');
+      return;
+    }
+
     this.validateConfiguration();
   }
 

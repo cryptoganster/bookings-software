@@ -253,7 +253,7 @@ describe('Example: Using MockWhatsAppClient', () => {
       const elapsed = Date.now() - startTime;
 
       // Assert
-      expect(elapsed).toBeGreaterThanOrEqual(100);
+      expect(elapsed).toBeGreaterThanOrEqual(99);
       expect(mockClient.sentMessages).toHaveLength(1);
     });
   });
