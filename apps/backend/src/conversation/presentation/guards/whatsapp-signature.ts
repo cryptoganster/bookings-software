@@ -46,7 +46,18 @@ export class WhatsAppSignatureGuard implements CanActivate {
       .update(JSON.stringify(request.body))
       .digest('hex');
 
+    // Extraer el hash de la firma (después de "sha256=")
     const signatureHash = signature.split('sha256=')[1];
+
+    // Validar que el hash existe
+    if (!signatureHash) {
+      throw new UnauthorizedException('Invalid signature format');
+    }
+
+    // Validar que ambos hashes tienen la misma longitud
+    if (signatureHash.length !== expectedSignature.length) {
+      throw new UnauthorizedException('Invalid signature');
+    }
 
     // Comparación segura de firmas
     if (!crypto.timingSafeEqual(Buffer.from(signatureHash), Buffer.from(expectedSignature))) {
