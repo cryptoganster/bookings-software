@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Stack, Text, Paper } from "@mantine/core";
 import { format, isToday } from "date-fns";
 import { es } from "date-fns/locale";
@@ -11,6 +12,8 @@ interface DayColumnProps {
   date: Date;
   /** Appointments for this day, sorted chronologically */
   appointments: AppointmentReadModel[];
+  /** Loading state for appointments */
+  isLoading?: boolean;
 }
 
 /**
@@ -22,11 +25,18 @@ interface DayColumnProps {
  * - List of appointments sorted chronologically
  * - Current day highlighting (blue border and background)
  * - Empty state when no appointments
+ * - Loading state when fetching appointments
+ *
+ * Memoized to prevent unnecessary re-renders when props haven't changed.
  *
  * @example
- * <DayColumn date={new Date()} appointments={[...]} />
+ * <DayColumn date={new Date()} appointments={[...]} isLoading={false} />
  */
-export function DayColumn({ date, appointments }: DayColumnProps) {
+const DayColumnComponent = ({
+  date,
+  appointments,
+  isLoading = false,
+}: DayColumnProps) => {
   const isCurrentDay = isToday(date);
 
   // Sort appointments chronologically by dateTime
@@ -70,12 +80,17 @@ export function DayColumn({ date, appointments }: DayColumnProps) {
           </Text>
         </Stack>
 
-        {/* Appointments list or empty state */}
-        {sortedAppointments.length === 0 ? (
+        {/* Appointments list, loading state, or empty state */}
+        {isLoading ? (
+          <Text size="sm" c="dimmed" ta="center" mt="md">
+            Cargando...
+          </Text>
+        ) : sortedAppointments.length === 0 ? (
           <EmptyState
             title="Sin citas"
             message="No hay citas programadas para este día"
             icon={<IconCalendarOff size={48} stroke={1.5} color="gray" />}
+            size="sm"
           />
         ) : (
           <Stack gap="xs" mt="sm">
@@ -87,4 +102,7 @@ export function DayColumn({ date, appointments }: DayColumnProps) {
       </Stack>
     </Paper>
   );
-}
+};
+
+// Memoize component to prevent re-renders when props haven't changed
+export const DayColumn = memo(DayColumnComponent);

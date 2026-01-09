@@ -29,9 +29,19 @@ const appointmentArbitrary = fc.record({
   offeringName: fc
     .string({ minLength: 2, maxLength: 100 })
     .filter((s) => s.trim().length > 0),
-  dateTime: fc.date().map((d) => d.toISOString()),
+  dateTime: fc
+    .integer({
+      min: Date.parse("2020-01-01"),
+      max: Date.parse("2030-12-31"),
+    })
+    .map((timestamp) => new Date(timestamp).toISOString()),
   status: appointmentStatusArbitrary,
-  createdAt: fc.date().map((d) => d.toISOString()),
+  createdAt: fc
+    .integer({
+      min: Date.parse("2020-01-01"),
+      max: Date.now(),
+    })
+    .map((timestamp) => new Date(timestamp).toISOString()),
   cancelledAt: fc.constant(null),
 });
 

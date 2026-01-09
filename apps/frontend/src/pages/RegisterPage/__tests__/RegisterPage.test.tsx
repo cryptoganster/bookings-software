@@ -61,7 +61,9 @@ describe("RegisterPage", () => {
         user: null,
         token: null,
         businessId: null,
+        businessTimezone: null,
         login: vi.fn(),
+        updateBusinessTimezone: vi.fn(),
         updateBusinessId: vi.fn(),
         logout: vi.fn(),
       };
@@ -115,7 +117,9 @@ describe("RegisterPage", () => {
           },
           token: "jwt-token",
           businessId: "business-123",
+          businessTimezone: null,
           login: vi.fn(),
+          updateBusinessTimezone: vi.fn(),
           updateBusinessId: vi.fn(),
           logout: vi.fn(),
         };

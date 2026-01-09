@@ -49,10 +49,8 @@ export function AppointmentsCalendar() {
   }, [status, offeringId]);
 
   // Fetch appointments for the week with merged filters
-  const { data, isLoading, error, appointmentsByDay } = useWeekAppointments(
-    currentWeek,
-    additionalFilters,
-  );
+  const { data, isLoading, error, appointmentsByDay, refetch } =
+    useWeekAppointments(currentWeek, additionalFilters);
 
   // Calculate total appointment count for the week
   const appointmentCount = data?.length ?? 0;
@@ -72,6 +70,7 @@ export function AppointmentsCalendar() {
           isLoading={isLoading}
           error={error ?? null}
           appointmentsByDay={appointmentsByDay}
+          refetch={refetch}
         />
       </Stack>
     </Paper>

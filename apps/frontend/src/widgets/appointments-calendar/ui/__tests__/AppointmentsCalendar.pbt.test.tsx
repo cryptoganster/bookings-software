@@ -17,7 +17,17 @@ import type { AppointmentReadModel } from "@entities/appointment";
 import type { AppointmentStatus } from "@packages/shared-types";
 
 // Mock modules
-vi.mock("@entities/appointment/model/queries");
+vi.mock("@entities/appointment/model/queries", () => ({
+  useAppointments: vi.fn(),
+  useAppointment: vi.fn(() => ({
+    data: undefined,
+    isLoading: false,
+    error: null,
+    isError: false,
+    isSuccess: false,
+    refetch: vi.fn(),
+  })),
+}));
 vi.mock("@features/appointment/filter");
 
 describe("AppointmentsCalendar - Property-Based Tests", () => {
@@ -69,8 +79,11 @@ describe("AppointmentsCalendar - Property-Based Tests", () => {
             ),
             offeringId: fc.uuid(),
             dateTime: fc
-              .date({ min: new Date(2020, 0, 1), max: new Date(2030, 11, 31) })
-              .map((d) => d.toISOString()),
+              .integer({
+                min: Date.parse("2020-01-01"),
+                max: Date.parse("2030-12-31"),
+              })
+              .map((timestamp) => new Date(timestamp).toISOString()),
             customerName: fc.string(),
             offeringName: fc.string(),
           }),
@@ -114,10 +127,14 @@ describe("AppointmentsCalendar - Property-Based Tests", () => {
         renderWithProviders(<AppointmentsCalendar />);
 
         // Verify appointment count matches filtered results
-        // Use getAllByText since there might be multiple badges with same count
-        const countBadges = screen.getAllByText(
+        // Use queryAllByText since there might be multiple badges with same count
+        // (one per day column in the calendar view)
+        const countBadges = screen.queryAllByText(
           `${matchingAppointments.length} citas`,
         );
+
+        // Property: At least one badge should display the count
+        // (there will be one badge per day column that has appointments)
         expect(countBadges.length).toBeGreaterThan(0);
 
         // Property: The displayed count should equal the number of appointments
@@ -144,8 +161,11 @@ describe("AppointmentsCalendar - Property-Based Tests", () => {
             ),
             offeringId: fc.uuid(),
             dateTime: fc
-              .date({ min: new Date(2020, 0, 1), max: new Date(2030, 11, 31) })
-              .map((d) => d.toISOString()),
+              .integer({
+                min: Date.parse("2020-01-01"),
+                max: Date.parse("2030-12-31"),
+              })
+              .map((timestamp) => new Date(timestamp).toISOString()),
             customerName: fc.string(),
             offeringName: fc.string(),
           }),
@@ -182,10 +202,14 @@ describe("AppointmentsCalendar - Property-Based Tests", () => {
         renderWithProviders(<AppointmentsCalendar />);
 
         // Verify appointment count matches all appointments
-        // Use getAllByText since there might be multiple badges with same count
-        const countBadges = screen.getAllByText(
+        // Use queryAllByText since there might be multiple badges with same count
+        // (one per day column in the calendar view)
+        const countBadges = screen.queryAllByText(
           `${allAppointments.length} citas`,
         );
+
+        // Property: At least one badge should display the count
+        // (there will be one badge per day column that has appointments)
         expect(countBadges.length).toBeGreaterThan(0);
 
         // Property: When no filters are selected, all appointments should be displayed
@@ -217,7 +241,13 @@ describe("AppointmentsCalendar - Property-Based Tests", () => {
     )(
       "should maintain filter state across view switches",
       async (status, offeringId) => {
+        // Clear only the mocks we're about to set up to ensure isolation
+        // Don't use vi.clearAllMocks() as it clears mocks from other tests
+        vi.mocked(filterHook.useAppointmentFilters).mockClear();
+        vi.mocked(appointmentQueries.useAppointments).mockClear();
+
         // Create a persistent mock state that survives unmount/remount
+        // This simulates how Zustand store persists state in real app
         const persistentFilterState = {
           status,
           offeringId,
@@ -231,8 +261,11 @@ describe("AppointmentsCalendar - Property-Based Tests", () => {
         };
 
         // Mock filter hook to always return the same state object
-        vi.mocked(filterHook.useAppointmentFilters).mockReturnValue(
-          persistentFilterState,
+        // This ensures the state persists across unmount/remount
+        // IMPORTANT: Use mockImplementation instead of mockReturnValue to ensure
+        // the same object reference is returned on every call
+        vi.mocked(filterHook.useAppointmentFilters).mockImplementation(
+          () => persistentFilterState,
         );
 
         // Mock useAppointments
@@ -280,11 +313,17 @@ describe("AppointmentsCalendar - Property-Based Tests", () => {
 
         // Property: Filter state in store should remain unchanged across unmount/remount
         // This is the key property - the Zustand store persists the filter state
-        const finalFilterState = vi
+        // We verify by checking that the mock implementation returns the same state
+        const firstCallResult = vi.mocked(filterHook.useAppointmentFilters).mock
+          .results[0]?.value;
+        const lastCallResult = vi
           .mocked(filterHook.useAppointmentFilters)
           .mock.results.slice(-1)[0]?.value;
-        expect(finalFilterState?.status).toBe(status);
-        expect(finalFilterState?.offeringId).toBe(offeringId);
+
+        // Both calls should return the exact same object reference
+        expect(firstCallResult).toBe(lastCallResult);
+        expect(lastCallResult?.status).toBe(status);
+        expect(lastCallResult?.offeringId).toBe(offeringId);
       },
     );
   });

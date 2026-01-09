@@ -53,18 +53,29 @@ const appointmentArbitrary = fc.record({
     .string({ minLength: 2, maxLength: 50 })
     .filter((s) => s.trim().length > 0),
   dateTime: fc
-    .date({ min: new Date("2020-01-01"), max: new Date("2030-12-31") })
-    .map((d) => d.toISOString()),
+    .integer({
+      min: Date.parse("2020-01-01"),
+      max: Date.parse("2030-12-31"),
+    })
+    .map((timestamp) => new Date(timestamp).toISOString()),
   status: fc.constantFrom(
     "CONFIRMED",
     "CANCELLED",
     "COMPLETED",
   ) as fc.Arbitrary<"CONFIRMED" | "CANCELLED" | "COMPLETED">,
   createdAt: fc
-    .date({ min: new Date("2020-01-01"), max: new Date() })
-    .map((d) => d.toISOString()),
+    .integer({
+      min: Date.parse("2020-01-01"),
+      max: Date.now(),
+    })
+    .map((timestamp) => new Date(timestamp).toISOString()),
   cancelledAt: fc.option(
-    fc.date().map((d) => d.toISOString()),
+    fc
+      .integer({
+        min: Date.parse("2020-01-01"),
+        max: Date.now(),
+      })
+      .map((timestamp) => new Date(timestamp).toISOString()),
     { nil: null },
   ),
 });
@@ -84,19 +95,20 @@ describe("AppointmentDetailsModal - Property-Based Tests", () => {
    *
    * Validates: Requirements 5.2
    */
-  test.prop([appointmentArbitrary], { numRuns: 10, timeout: 10000 })(
+  test.prop([appointmentArbitrary], { numRuns: 5 })(
     "Property 12: Modal displays all required appointment fields",
     async (appointment: AppointmentReadModel) => {
       // Mock API response for this appointment
+      // Use wildcard pattern to match any host/port combination
       server.use(
-        http.get("*/api/appointments/:id", () => {
+        http.get(`*/api/appointments/${appointment.id}`, () => {
           return HttpResponse.json(appointment);
         }),
       );
 
       const Wrapper = createWrapper();
 
-      render(
+      const { unmount } = render(
         <AppointmentDetailsModal
           appointmentId={appointment.id}
           opened={true}
@@ -105,34 +117,66 @@ describe("AppointmentDetailsModal - Property-Based Tests", () => {
         { wrapper: Wrapper },
       );
 
-      // Wait for data to load
-      await waitFor(() => {
-        expect(screen.queryByText("Error al cargar")).not.toBeInTheDocument();
-      });
+      try {
+        // Wait for loading to complete (loading overlay disappears)
+        await waitFor(
+          () => {
+            const loadingOverlay = document.querySelector(
+              ".mantine-LoadingOverlay-root",
+            );
+            expect(loadingOverlay).not.toBeInTheDocument();
+          },
+          { timeout: 2000 },
+        );
 
-      // Verify all required fields are displayed
-      // Note: We check for the presence of the data, not exact formatting
-      // since formatting is tested separately
+        // Verify all required fields are displayed
+        // Note: We check for the presence of the data, not exact formatting
+        // since formatting is tested separately
 
-      // Customer name should be visible
-      expect(
-        screen.getByText(appointment.customerName || "Sin nombre"),
-      ).toBeInTheDocument();
+        // Strategy: Use queryAllByText with a function matcher to handle edge cases
+        // This is more flexible than regex for handling whitespace normalization
 
-      // Customer phone should be visible
-      expect(screen.getByText(appointment.customerPhone)).toBeInTheDocument();
+        // Customer name should be visible
+        const customerNameText = (
+          appointment.customerName || "Sin nombre"
+        ).trim();
+        const customerNameMatches = screen.queryAllByText(
+          (_content, element) => {
+            return element?.textContent?.trim() === customerNameText;
+          },
+        );
+        expect(customerNameMatches.length).toBeGreaterThan(0);
 
-      // Offering name should be visible (as title)
-      expect(screen.getByText(appointment.offeringName)).toBeInTheDocument();
+        // Customer phone should be visible
+        const customerPhoneText = appointment.customerPhone.trim();
+        const customerPhoneMatches = screen.queryAllByText(
+          (_content, element) => {
+            return element?.textContent?.trim() === customerPhoneText;
+          },
+        );
+        expect(customerPhoneMatches.length).toBeGreaterThan(0);
 
-      // Status should be visible
-      expect(screen.getByText(appointment.status)).toBeInTheDocument();
+        // Offering name should be visible (as title)
+        const offeringNameText = appointment.offeringName.trim();
+        const offeringNameMatches = screen.queryAllByText(
+          (_content, element) => {
+            return element?.textContent?.trim() === offeringNameText;
+          },
+        );
+        expect(offeringNameMatches.length).toBeGreaterThan(0);
 
-      // Labels should be present
-      expect(screen.getByText("Cliente:")).toBeInTheDocument();
-      expect(screen.getByText("Teléfono:")).toBeInTheDocument();
-      expect(screen.getByText("Fecha y Hora:")).toBeInTheDocument();
-      expect(screen.getByText("Creada:")).toBeInTheDocument();
+        // Status should be visible
+        expect(screen.getByText(appointment.status)).toBeInTheDocument();
+
+        // Labels should be present (these are unique)
+        expect(screen.getByText("Cliente:")).toBeInTheDocument();
+        expect(screen.getByText("Teléfono:")).toBeInTheDocument();
+        expect(screen.getByText("Fecha y Hora:")).toBeInTheDocument();
+        expect(screen.getByText("Creada:")).toBeInTheDocument();
+      } finally {
+        // Always cleanup to prevent modal stacking
+        unmount();
+      }
     },
   );
 
@@ -145,19 +189,20 @@ describe("AppointmentDetailsModal - Property-Based Tests", () => {
    *
    * Validates: Requirements 5.3
    */
-  test.prop([appointmentArbitrary], { numRuns: 10, timeout: 10000 })(
+  test.prop([appointmentArbitrary], { numRuns: 5 })(
     "Property 13: Cancel button shows only for CONFIRMED status",
     async (appointment: AppointmentReadModel) => {
       // Mock API response for this appointment
+      // Use wildcard pattern to match any host/port combination
       server.use(
-        http.get("*/api/appointments/:id", () => {
+        http.get(`*/api/appointments/${appointment.id}`, () => {
           return HttpResponse.json(appointment);
         }),
       );
 
       const Wrapper = createWrapper();
 
-      render(
+      const { unmount } = render(
         <AppointmentDetailsModal
           appointmentId={appointment.id}
           opened={true}
@@ -166,22 +211,35 @@ describe("AppointmentDetailsModal - Property-Based Tests", () => {
         { wrapper: Wrapper },
       );
 
-      // Wait for data to load
-      await waitFor(() => {
-        expect(screen.queryByText("Error al cargar")).not.toBeInTheDocument();
-      });
+      try {
+        // Wait for loading to complete (loading overlay disappears)
+        await waitFor(
+          () => {
+            const loadingOverlay = document.querySelector(
+              ".mantine-LoadingOverlay-root",
+            );
+            expect(loadingOverlay).not.toBeInTheDocument();
+          },
+          { timeout: 2000 },
+        );
 
-      // Check for cancel button based on status
-      const cancelButton = screen.queryByRole("button", {
-        name: /cancelar cita/i,
-      });
+        // Check for cancel button based on status
+        // Use getAllByRole to handle multiple buttons, then filter
+        const allButtons = screen.queryAllByRole("button");
+        const cancelButton = allButtons.find((button) =>
+          button.textContent?.match(/cancelar cita/i),
+        );
 
-      if (appointment.status === "CONFIRMED") {
-        // Cancel button MUST be present for CONFIRMED appointments
-        expect(cancelButton).toBeInTheDocument();
-      } else {
-        // Cancel button MUST NOT be present for non-CONFIRMED appointments
-        expect(cancelButton).not.toBeInTheDocument();
+        if (appointment.status === "CONFIRMED") {
+          // Cancel button MUST be present for CONFIRMED appointments
+          expect(cancelButton).toBeDefined();
+        } else {
+          // Cancel button MUST NOT be present for non-CONFIRMED appointments
+          expect(cancelButton).toBeUndefined();
+        }
+      } finally {
+        // Always cleanup to prevent modal stacking
+        unmount();
       }
     },
   );

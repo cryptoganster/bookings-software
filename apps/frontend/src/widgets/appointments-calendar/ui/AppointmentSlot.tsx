@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Paper, Stack, Text } from "@mantine/core";
-import { format } from "date-fns";
-import { getStatusColor } from "@entities/appointment";
+import { getStatusColor, formatAppointmentTime } from "@entities/appointment";
 import type { AppointmentReadModel } from "@entities/appointment";
 import { AppointmentDetailsModal } from "@features/appointment/details";
+import { useAuthStore } from "@app/store/auth.store";
 
 interface AppointmentSlotProps {
   /** Appointment to display */
@@ -18,6 +18,7 @@ interface AppointmentSlotProps {
  * Displays a single appointment in a compact card format within a day column.
  * Shows time, offering name, and customer name with status-based color coding.
  * Clicking the slot opens a modal with full appointment details.
+ * All times are displayed in the business timezone.
  *
  * @example
  * <AppointmentSlot appointment={appointment} />
@@ -27,8 +28,12 @@ export function AppointmentSlot({
   onClick,
 }: AppointmentSlotProps) {
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const businessTimezone = useAuthStore((state) => state.businessTimezone);
   const statusColor = getStatusColor(appointment.status);
-  const time = format(new Date(appointment.dateTime), "h:mm a");
+  const time = formatAppointmentTime(
+    appointment.dateTime,
+    businessTimezone || undefined,
+  );
 
   const handleClick = () => {
     setDetailsOpen(true);
@@ -45,6 +50,7 @@ export function AppointmentSlot({
         p="xs"
         radius="sm"
         onClick={handleClick}
+        data-testid="appointment-slot"
         style={{
           backgroundColor: `var(--mantine-color-${statusColor}-1)`,
           borderLeft: `3px solid var(--mantine-color-${statusColor}-6)`,

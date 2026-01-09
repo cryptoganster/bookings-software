@@ -220,3 +220,84 @@ describe("DayColumn", () => {
     });
   });
 });
+
+describe("Loading state", () => {
+  it("should display loading text when isLoading is true", () => {
+    const date = new Date("2024-01-15");
+    const appointments: AppointmentReadModel[] = [];
+
+    render(
+      <TestWrapper>
+        <DayColumn date={date} appointments={appointments} isLoading={true} />
+      </TestWrapper>,
+    );
+
+    expect(screen.getByText("Cargando...")).toBeInTheDocument();
+  });
+
+  it("should display loading text with dimmed color", () => {
+    const date = new Date("2024-01-15");
+    const appointments: AppointmentReadModel[] = [];
+
+    render(
+      <TestWrapper>
+        <DayColumn date={date} appointments={appointments} isLoading={true} />
+      </TestWrapper>,
+    );
+
+    const loadingText = screen.getByText("Cargando...");
+    const style = loadingText.getAttribute("style") || "";
+
+    // Should have dimmed color
+    expect(style).toContain("color");
+    expect(style).toContain("dimmed");
+  });
+
+  it("should not display empty state when loading", () => {
+    const date = new Date("2024-01-15");
+    const appointments: AppointmentReadModel[] = [];
+
+    render(
+      <TestWrapper>
+        <DayColumn date={date} appointments={appointments} isLoading={true} />
+      </TestWrapper>,
+    );
+
+    expect(screen.queryByText("Sin citas")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("No hay citas programadas para este día"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("should not display appointments when loading", () => {
+    const date = new Date("2024-01-15");
+    const appointments: AppointmentReadModel[] = [
+      createMockAppointment({ offeringName: "Corte de Pelo" }),
+    ];
+
+    render(
+      <TestWrapper>
+        <DayColumn date={date} appointments={appointments} isLoading={true} />
+      </TestWrapper>,
+    );
+
+    expect(screen.queryByText("Corte de Pelo")).not.toBeInTheDocument();
+    expect(screen.getByText("Cargando...")).toBeInTheDocument();
+  });
+
+  it("should display appointments when not loading", () => {
+    const date = new Date("2024-01-15");
+    const appointments: AppointmentReadModel[] = [
+      createMockAppointment({ offeringName: "Corte de Pelo" }),
+    ];
+
+    render(
+      <TestWrapper>
+        <DayColumn date={date} appointments={appointments} isLoading={false} />
+      </TestWrapper>,
+    );
+
+    expect(screen.queryByText("Cargando...")).not.toBeInTheDocument();
+    expect(screen.getByText("Corte de Pelo")).toBeInTheDocument();
+  });
+});

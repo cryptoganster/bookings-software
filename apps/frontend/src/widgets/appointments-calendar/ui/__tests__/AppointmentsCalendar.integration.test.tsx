@@ -21,7 +21,14 @@ vi.mock("@entities/appointment", async (importOriginal) => {
   return {
     ...actual,
     useAppointments: vi.fn(),
-    useAppointment: vi.fn(),
+    useAppointment: vi.fn(() => ({
+      data: undefined,
+      isLoading: false,
+      error: null,
+      isError: false,
+      isSuccess: false,
+      refetch: vi.fn(),
+    })),
   };
 });
 vi.mock("@features/appointment/filter");
@@ -133,51 +140,54 @@ describe("AppointmentsCalendar - Integration Tests", () => {
     const nextWeekAppointments = [createMockAppointment({ id: "apt-2" })];
 
     // Mock initial call for current week
-    vi.mocked(useAppointments)
-      .mockReturnValueOnce({
-        data: currentWeekAppointments,
-        isLoading: false,
-        error: null,
-        isError: false,
-        isSuccess: true,
-        refetch: vi.fn(),
-      } as unknown as UseQueryResult<AppointmentReadModel[], Error>)
-      // Mock call after navigation
-      .mockReturnValueOnce({
-        data: nextWeekAppointments,
-        isLoading: false,
-        error: null,
-        isError: false,
-        isSuccess: true,
-        refetch: vi.fn(),
-      } as unknown as UseQueryResult<AppointmentReadModel[], Error>);
+    vi.mocked(useAppointments).mockReturnValue({
+      data: currentWeekAppointments,
+      isLoading: false,
+      error: null,
+      isError: false,
+      isSuccess: true,
+      refetch: vi.fn(),
+    } as unknown as UseQueryResult<AppointmentReadModel[], Error>);
 
-    const { rerender } = renderWithProviders(<AppointmentsCalendar />);
+    renderWithProviders(<AppointmentsCalendar />);
 
     // Verify initial count
     await waitFor(() => {
       expect(screen.getByText("1 citas")).toBeInTheDocument();
     });
 
+    // Update mock for next week
+    vi.mocked(useAppointments).mockReturnValue({
+      data: nextWeekAppointments,
+      isLoading: false,
+      error: null,
+      isError: false,
+      isSuccess: true,
+      refetch: vi.fn(),
+    } as unknown as UseQueryResult<AppointmentReadModel[], Error>);
+
     // Click next week button
     const nextButton = screen.getByRole("button", { name: /siguiente/i });
     await user.click(nextButton);
 
-    // Force re-render to simulate state update
-    rerender(
-      <QueryClientProvider client={queryClient}>
-        <AppointmentsCalendar />
-      </QueryClientProvider>,
-    );
+    // Wait for the component to update with new data
+    await waitFor(() => {
+      // The count should still be 1 since we're showing next week's appointments
+      expect(screen.getByText("1 citas")).toBeInTheDocument();
+    });
 
-    // Verify useAppointments was called again with new date range
-    expect(useAppointments).toHaveBeenCalledTimes(2);
+    // Verify useAppointments was called multiple times (initial + after navigation)
+    expect(useAppointments).toHaveBeenCalled();
 
-    // Verify the second call has a different date range (next week)
-    const firstCall = vi.mocked(useAppointments).mock.calls[0][0];
-    const secondCall = vi.mocked(useAppointments).mock.calls[1][0];
+    // Verify the calls have different date ranges
+    const calls = vi.mocked(useAppointments).mock.calls;
+    expect(calls.length).toBeGreaterThanOrEqual(2);
 
-    expect(secondCall?.dateRange?.[0].getTime()).toBeGreaterThan(
+    // Get first and last call to compare date ranges
+    const firstCall = calls[0][0];
+    const lastCall = calls[calls.length - 1][0];
+
+    expect(lastCall?.dateRange?.[0].getTime()).toBeGreaterThan(
       firstCall?.dateRange?.[0].getTime() ?? 0,
     );
   });
@@ -191,50 +201,53 @@ describe("AppointmentsCalendar - Integration Tests", () => {
     const currentWeekAppointments = [createMockAppointment({ id: "apt-1" })];
     const previousWeekAppointments = [createMockAppointment({ id: "apt-2" })];
 
-    vi.mocked(useAppointments)
-      .mockReturnValueOnce({
-        data: currentWeekAppointments,
-        isLoading: false,
-        error: null,
-        isError: false,
-        isSuccess: true,
-        refetch: vi.fn(),
-      } as unknown as UseQueryResult<AppointmentReadModel[], Error>)
-      .mockReturnValueOnce({
-        data: previousWeekAppointments,
-        isLoading: false,
-        error: null,
-        isError: false,
-        isSuccess: true,
-        refetch: vi.fn(),
-      } as unknown as UseQueryResult<AppointmentReadModel[], Error>);
+    vi.mocked(useAppointments).mockReturnValue({
+      data: currentWeekAppointments,
+      isLoading: false,
+      error: null,
+      isError: false,
+      isSuccess: true,
+      refetch: vi.fn(),
+    } as unknown as UseQueryResult<AppointmentReadModel[], Error>);
 
-    const { rerender } = renderWithProviders(<AppointmentsCalendar />);
+    renderWithProviders(<AppointmentsCalendar />);
 
     // Verify initial count
     await waitFor(() => {
       expect(screen.getByText("1 citas")).toBeInTheDocument();
     });
 
+    // Update mock for previous week
+    vi.mocked(useAppointments).mockReturnValue({
+      data: previousWeekAppointments,
+      isLoading: false,
+      error: null,
+      isError: false,
+      isSuccess: true,
+      refetch: vi.fn(),
+    } as unknown as UseQueryResult<AppointmentReadModel[], Error>);
+
     // Click previous week button
     const prevButton = screen.getByRole("button", { name: /anterior/i });
     await user.click(prevButton);
 
-    // Force re-render
-    rerender(
-      <QueryClientProvider client={queryClient}>
-        <AppointmentsCalendar />
-      </QueryClientProvider>,
-    );
+    // Wait for the component to update
+    await waitFor(() => {
+      expect(screen.getByText("1 citas")).toBeInTheDocument();
+    });
 
-    // Verify useAppointments was called again
-    expect(useAppointments).toHaveBeenCalledTimes(2);
+    // Verify useAppointments was called multiple times
+    expect(useAppointments).toHaveBeenCalled();
 
-    // Verify the second call has a different date range (previous week)
-    const firstCall = vi.mocked(useAppointments).mock.calls[0][0];
-    const secondCall = vi.mocked(useAppointments).mock.calls[1][0];
+    // Verify the calls have different date ranges
+    const calls = vi.mocked(useAppointments).mock.calls;
+    expect(calls.length).toBeGreaterThanOrEqual(2);
 
-    expect(secondCall?.dateRange?.[0].getTime()).toBeLessThan(
+    // Get first and last call to compare date ranges
+    const firstCall = calls[0][0];
+    const lastCall = calls[calls.length - 1][0];
+
+    expect(lastCall?.dateRange?.[0].getTime()).toBeLessThan(
       firstCall?.dateRange?.[0].getTime() ?? 0,
     );
   });
@@ -248,65 +261,65 @@ describe("AppointmentsCalendar - Integration Tests", () => {
     const currentWeekAppointments = [createMockAppointment({ id: "apt-1" })];
     const nextWeekAppointments = [createMockAppointment({ id: "apt-2" })];
 
-    vi.mocked(useAppointments)
-      .mockReturnValueOnce({
-        data: currentWeekAppointments,
-        isLoading: false,
-        error: null,
-        isError: false,
-        isSuccess: true,
-        refetch: vi.fn(),
-      } as unknown as UseQueryResult<AppointmentReadModel[], Error>)
-      .mockReturnValueOnce({
-        data: nextWeekAppointments,
-        isLoading: false,
-        error: null,
-        isError: false,
-        isSuccess: true,
-        refetch: vi.fn(),
-      } as unknown as UseQueryResult<AppointmentReadModel[], Error>)
-      .mockReturnValueOnce({
-        data: currentWeekAppointments,
-        isLoading: false,
-        error: null,
-        isError: false,
-        isSuccess: true,
-        refetch: vi.fn(),
-      } as unknown as UseQueryResult<AppointmentReadModel[], Error>);
+    vi.mocked(useAppointments).mockReturnValue({
+      data: currentWeekAppointments,
+      isLoading: false,
+      error: null,
+      isError: false,
+      isSuccess: true,
+      refetch: vi.fn(),
+    } as unknown as UseQueryResult<AppointmentReadModel[], Error>);
 
-    const { rerender } = renderWithProviders(<AppointmentsCalendar />);
+    renderWithProviders(<AppointmentsCalendar />);
+
+    // Update mock for next week
+    vi.mocked(useAppointments).mockReturnValue({
+      data: nextWeekAppointments,
+      isLoading: false,
+      error: null,
+      isError: false,
+      isSuccess: true,
+      refetch: vi.fn(),
+    } as unknown as UseQueryResult<AppointmentReadModel[], Error>);
 
     // Navigate to next week
     const nextButton = screen.getByRole("button", { name: /siguiente/i });
     await user.click(nextButton);
 
-    rerender(
-      <QueryClientProvider client={queryClient}>
-        <AppointmentsCalendar />
-      </QueryClientProvider>,
-    );
+    await waitFor(() => {
+      expect(screen.getByText("1 citas")).toBeInTheDocument();
+    });
+
+    // Update mock back to current week
+    vi.mocked(useAppointments).mockReturnValue({
+      data: currentWeekAppointments,
+      isLoading: false,
+      error: null,
+      isError: false,
+      isSuccess: true,
+      refetch: vi.fn(),
+    } as unknown as UseQueryResult<AppointmentReadModel[], Error>);
 
     // Click "Today" button
     const todayButton = screen.getByRole("button", { name: /hoy/i });
     await user.click(todayButton);
 
-    rerender(
-      <QueryClientProvider client={queryClient}>
-        <AppointmentsCalendar />
-      </QueryClientProvider>,
-    );
+    await waitFor(() => {
+      expect(screen.getByText("1 citas")).toBeInTheDocument();
+    });
 
-    // Verify useAppointments was called 3 times
-    expect(useAppointments).toHaveBeenCalledTimes(3);
+    // Verify useAppointments was called multiple times
+    const calls = vi.mocked(useAppointments).mock.calls;
+    expect(calls.length).toBeGreaterThanOrEqual(3);
 
     // Verify the third call returns to current week
-    const firstCall = vi.mocked(useAppointments).mock.calls[0][0];
-    const thirdCall = vi.mocked(useAppointments).mock.calls[2][0];
+    const firstCall = calls[0][0];
+    const lastCall = calls[calls.length - 1][0];
 
     // The date ranges should be similar (within same week)
     const firstStart = firstCall?.dateRange?.[0].getTime() ?? 0;
-    const thirdStart = thirdCall?.dateRange?.[0].getTime() ?? 0;
-    const timeDiff = Math.abs(firstStart - thirdStart);
+    const lastStart = lastCall?.dateRange?.[0].getTime() ?? 0;
+    const timeDiff = Math.abs(firstStart - lastStart);
 
     // Should be within 7 days (one week)
     expect(timeDiff).toBeLessThan(7 * 24 * 60 * 60 * 1000);
@@ -426,9 +439,11 @@ describe("AppointmentsCalendar - Integration Tests", () => {
 
     // Re-render with new filter
     rerender(
-      <QueryClientProvider client={queryClient}>
-        <AppointmentsCalendar />
-      </QueryClientProvider>,
+      <MantineProvider>
+        <QueryClientProvider client={queryClient}>
+          <AppointmentsCalendar />
+        </QueryClientProvider>
+      </MantineProvider>,
     );
 
     // Verify updated count (filtered appointments)

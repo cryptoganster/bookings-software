@@ -128,13 +128,12 @@ describe("WeekView Component", () => {
   });
 
   it("should display loading state", () => {
-    const { container } = renderWeekView(mockWeekRange, { isLoading: true });
+    renderWeekView(mockWeekRange, { isLoading: true });
 
-    // LoadingOverlay is rendered - check for the Mantine class
-    const loadingOverlay = container.querySelector(
-      ".mantine-LoadingOverlay-root",
-    );
-    expect(loadingOverlay).toBeInTheDocument();
+    // WeekView now shows loading in each DayColumn instead of LoadingOverlay
+    // Check that 7 day columns are still rendered
+    const dayColumns = screen.getAllByTestId("day-column");
+    expect(dayColumns).toHaveLength(7);
   });
 
   it("should display error state", () => {
@@ -163,5 +162,61 @@ describe("WeekView Component", () => {
     // Check that SimpleGrid is rendered by looking for Mantine grid class
     const grid = container.querySelector('[class*="SimpleGrid"]');
     expect(grid).toBeInTheDocument();
+  });
+
+  describe("Error state with retry", () => {
+    it("should display retry button when error occurs and refetch is provided", () => {
+      const mockError = new Error("Failed to load appointments");
+      const mockRefetch = vi.fn();
+
+      renderWeekView(mockWeekRange, {
+        error: mockError,
+        refetch: mockRefetch,
+      });
+
+      expect(screen.getByText(/Error al cargar citas/i)).toBeInTheDocument();
+      expect(screen.getByText("Reintentar")).toBeInTheDocument();
+    });
+
+    it("should call refetch when retry button is clicked", async () => {
+      const mockError = new Error("Failed to load appointments");
+      const mockRefetch = vi.fn();
+
+      renderWeekView(mockWeekRange, {
+        error: mockError,
+        refetch: mockRefetch,
+      });
+
+      const retryButton = screen.getByText("Reintentar");
+      retryButton.click();
+
+      expect(mockRefetch).toHaveBeenCalledTimes(1);
+    });
+
+    it("should not display retry button when refetch is not provided", () => {
+      const mockError = new Error("Failed to load appointments");
+
+      renderWeekView(mockWeekRange, {
+        error: mockError,
+        refetch: undefined,
+      });
+
+      expect(screen.getByText(/Error al cargar citas/i)).toBeInTheDocument();
+      expect(screen.queryByText("Reintentar")).not.toBeInTheDocument();
+    });
+
+    it("should use IconInfoCircle in error alert", () => {
+      const mockError = new Error("Failed to load appointments");
+      const mockRefetch = vi.fn();
+
+      const { container } = renderWeekView(mockWeekRange, {
+        error: mockError,
+        refetch: mockRefetch,
+      });
+
+      // Check for the icon by looking for SVG with tabler-icon class
+      const icon = container.querySelector(".tabler-icon-info-circle");
+      expect(icon).toBeInTheDocument();
+    });
   });
 });

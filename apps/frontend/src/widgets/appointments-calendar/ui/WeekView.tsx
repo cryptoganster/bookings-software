@@ -1,5 +1,5 @@
-import { SimpleGrid, LoadingOverlay, Alert } from "@mantine/core";
-import { IconAlertCircle } from "@tabler/icons-react";
+import { SimpleGrid, Alert, Button } from "@mantine/core";
+import { IconInfoCircle } from "@tabler/icons-react";
 import { eachDayOfInterval, format } from "date-fns";
 import { DayColumn } from "./DayColumn";
 import type { WeekRange, DayAppointments } from "../model/types";
@@ -13,6 +13,8 @@ interface WeekViewProps {
   isLoading: boolean;
   /** Error state */
   error: Error | null;
+  /** Refetch function to retry on error */
+  refetch?: () => void;
 }
 
 /**
@@ -40,6 +42,7 @@ export function WeekView({
   appointmentsByDay,
   isLoading,
   error,
+  refetch,
 }: WeekViewProps) {
   const [startDate, endDate] = weekRange;
 
@@ -49,22 +52,51 @@ export function WeekView({
     end: endDate,
   });
 
-  // Loading state
+  // Loading state - show loading in each column
   if (isLoading) {
-    return <LoadingOverlay visible />;
+    return (
+      <SimpleGrid
+        cols={{ base: 1, sm: 3, md: 5, lg: 7 }}
+        spacing="md"
+        style={{ alignItems: "stretch" }}
+      >
+        {daysInWeek.map((day) => {
+          const dayKey = format(day, "yyyy-MM-dd");
+          return (
+            <DayColumn
+              key={dayKey}
+              date={day}
+              appointments={[]}
+              isLoading={true}
+            />
+          );
+        })}
+      </SimpleGrid>
+    );
   }
 
   // Error state
   if (error) {
     return (
       <Alert
-        icon={<IconAlertCircle size={16} />}
+        icon={<IconInfoCircle size={16} />}
         title="Error al cargar citas"
         color="red"
       >
         {error instanceof Error
           ? error.message
           : "Ocurrió un error al cargar las citas"}
+        {refetch && (
+          <Button
+            variant="light"
+            color="red"
+            size="sm"
+            mt="md"
+            onClick={refetch}
+          >
+            Reintentar
+          </Button>
+        )}
       </Alert>
     );
   }

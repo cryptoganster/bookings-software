@@ -10,8 +10,9 @@
  * - Muestra todos los detalles de la cita
  * - Incluye botón de cancelar solo para citas CONFIRMED
  * - Cierra el modal después de cancelar exitosamente
+ * - Todas las fechas se muestran en la zona horaria del negocio
  *
- * Validates: Requirements 5.1, 5.2, 5.3, 5.4, 5.5, 5.6
+ * Validates: Requirements 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 9.1, 9.2
  */
 
 import {
@@ -28,6 +29,7 @@ import {
   formatAppointmentDateTime,
 } from "@entities/appointment";
 import { CancelAppointmentButton } from "@features/appointment/cancel";
+import { useAuthStore } from "@app/store/auth.store";
 
 interface AppointmentDetailsModalProps {
   /**
@@ -63,6 +65,8 @@ export function AppointmentDetailsModal({
   opened,
   onClose,
 }: AppointmentDetailsModalProps) {
+  const businessTimezone = useAuthStore((state) => state.businessTimezone);
+
   // Solo cargar datos cuando el modal está abierto
   const {
     data: appointment,
@@ -124,7 +128,10 @@ export function AppointmentDetailsModal({
                 Fecha y Hora:
               </Text>
               <Text size="sm">
-                {formatAppointmentDateTime(appointment.dateTime)}
+                {formatAppointmentDateTime(
+                  appointment.dateTime,
+                  businessTimezone || undefined,
+                )}
               </Text>
             </Group>
 
@@ -133,7 +140,10 @@ export function AppointmentDetailsModal({
                 Creada:
               </Text>
               <Text size="sm">
-                {formatAppointmentDateTime(appointment.createdAt)}
+                {formatAppointmentDateTime(
+                  appointment.createdAt,
+                  businessTimezone || undefined,
+                )}
               </Text>
             </Group>
           </Stack>

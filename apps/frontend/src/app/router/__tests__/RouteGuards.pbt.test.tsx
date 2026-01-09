@@ -90,8 +90,10 @@ describe("Route Guards - Property-Based Tests", () => {
             user: null,
             token: null,
             businessId: null,
+            businessTimezone: null,
             login: vi.fn(),
             updateBusinessId: vi.fn(),
+            updateBusinessTimezone: vi.fn(),
             logout: vi.fn(),
           };
           return selector(state);
@@ -132,7 +134,9 @@ describe("Route Guards - Property-Based Tests", () => {
             user: mockUser,
             token: "test-token",
             businessId: "test-business-id",
+            businessTimezone: null,
             login: vi.fn(),
+            updateBusinessTimezone: vi.fn(),
             updateBusinessId: vi.fn(),
             logout: vi.fn(),
           };
@@ -165,7 +169,9 @@ describe("Route Guards - Property-Based Tests", () => {
           user: null,
           token: null,
           businessId: null,
+          businessTimezone: null,
           login: vi.fn(),
+          updateBusinessTimezone: vi.fn(),
           updateBusinessId: vi.fn(),
           logout: vi.fn(),
         };
@@ -201,7 +207,9 @@ describe("Route Guards - Property-Based Tests", () => {
             user: mockUser,
             token: "test-token",
             businessId: "test-business-id",
+            businessTimezone: null,
             login: vi.fn(),
+            updateBusinessTimezone: vi.fn(),
             updateBusinessId: vi.fn(),
             logout: vi.fn(),
           };
@@ -244,7 +252,9 @@ describe("Route Guards - Property-Based Tests", () => {
             user: mockUser,
             token: "test-token",
             businessId: "test-business-id",
+            businessTimezone: null,
             login: vi.fn(),
+            updateBusinessTimezone: vi.fn(),
             updateBusinessId: vi.fn(),
             logout: vi.fn(),
           };
@@ -283,7 +293,9 @@ describe("Route Guards - Property-Based Tests", () => {
           user: mockUser,
           token: "test-token",
           businessId: "test-business-id",
+          businessTimezone: null,
           login: vi.fn(),
+          updateBusinessTimezone: vi.fn(),
           updateBusinessId: vi.fn(),
           logout: vi.fn(),
         };
@@ -313,7 +325,9 @@ describe("Route Guards - Property-Based Tests", () => {
           user: mockUser,
           token: "test-token",
           businessId: null,
+          businessTimezone: null,
           login: vi.fn(),
+          updateBusinessTimezone: vi.fn(),
           updateBusinessId: vi.fn(),
           logout: vi.fn(),
         };
@@ -343,7 +357,9 @@ describe("Route Guards - Property-Based Tests", () => {
           user: mockUser,
           token: "test-token",
           businessId: null,
+          businessTimezone: null,
           login: vi.fn(),
+          updateBusinessTimezone: vi.fn(),
           updateBusinessId: vi.fn(),
           logout: vi.fn(),
         };
@@ -374,7 +390,9 @@ describe("Route Guards - Property-Based Tests", () => {
           user: null,
           token: null,
           businessId: null,
+          businessTimezone: null,
           login: vi.fn(),
+          updateBusinessTimezone: vi.fn(),
           updateBusinessId: vi.fn(),
           logout: vi.fn(),
         };
@@ -402,7 +420,9 @@ describe("Route Guards - Property-Based Tests", () => {
           user: null,
           token: null,
           businessId: null,
+          businessTimezone: null,
           login: vi.fn(),
+          updateBusinessTimezone: vi.fn(),
           updateBusinessId: vi.fn(),
           logout: vi.fn(),
         };
