@@ -5,6 +5,7 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { LoggerModule } from 'nestjs-pino';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { ConfigValidationService } from '@config/config-validation.service';
 import { SharedModule } from '@shared/shared.module';
 import { WebSocketModule } from '@shared/infra/websocket/websocket.module';
 import { AccountModule } from '@account/account.module';
@@ -100,6 +101,6 @@ import { OfferingModule } from '@offering/offering.module';
     }),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, ConfigValidationService],
 })
 export class AppModule {}

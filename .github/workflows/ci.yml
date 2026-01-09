@@ -6,10 +6,6 @@ on:
       - main
       - master
       - develop
-      - 'feature/**'
-      - 'feat/**'
-      - 'fix/**'
-      - 'refactor/**'
   pull_request:
     branches:
       - main

@@ -144,11 +144,13 @@ describe("Property 4: Chronological Appointment Ordering", () => {
         </TestWrapper>,
       );
 
-      // Get sorted appointments by dateTime
-      const sorted = [...appointments].sort(
-        (a, b) =>
-          new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime(),
-      );
+      // Get sorted appointments by dateTime, then by id for deterministic ordering
+      const sorted = [...appointments].sort((a, b) => {
+        const timeDiff =
+          new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime();
+        // If times are equal, sort by id to ensure deterministic ordering
+        return timeDiff !== 0 ? timeDiff : a.id.localeCompare(b.id);
+      });
 
       // Extract all offering names in the order they appear
       // Offering names are in Text elements with fw={500}

@@ -39,9 +39,12 @@ const DayColumnComponent = ({
 }: DayColumnProps) => {
   const isCurrentDay = isToday(date);
 
-  // Sort appointments chronologically by dateTime
+  // Sort appointments chronologically by dateTime, then by id for deterministic ordering
   const sortedAppointments = [...appointments].sort((a, b) => {
-    return new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime();
+    const timeDiff =
+      new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime();
+    // If times are equal, sort by id to ensure deterministic ordering
+    return timeDiff !== 0 ? timeDiff : a.id.localeCompare(b.id);
   });
 
   // Format day name (uppercase) and date
