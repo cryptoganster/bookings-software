@@ -5,8 +5,10 @@ import type { ReactNode } from "react";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutos
-      retry: 1,
+      staleTime: 1000 * 30, // 30 seconds - data is fresh for 30s
+      gcTime: 1000 * 60 * 5, // 5 minutes - cache time (formerly cacheTime)
+      retry: 3, // 3 retries with exponential backoff
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff: 1s, 2s, 4s (max 30s)
       refetchOnWindowFocus: false,
     },
     mutations: {

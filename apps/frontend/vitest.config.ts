@@ -21,6 +21,7 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./src/test/setup.ts"],
     css: true,
+    testTimeout: 30000, // 30 seconds for PBT tests (10 iterations * ~2s each)
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],

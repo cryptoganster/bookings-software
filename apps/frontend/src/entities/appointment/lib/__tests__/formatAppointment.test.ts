@@ -25,27 +25,56 @@ describe("formatAppointment", () => {
   };
 
   describe("formatAppointmentDateTime", () => {
-    it("should format date and time correctly", () => {
-      const result = formatAppointmentDateTime(mockAppointment.dateTime);
+    it("should format date and time correctly in business timezone", () => {
+      const result = formatAppointmentDateTime(
+        mockAppointment.dateTime,
+        "America/Santo_Domingo",
+      );
       // Should include day, date, and time
+      expect(result).toMatch(/\d{2}\/\d{2}/); // Date format
+      expect(result).toMatch(/\d{1,2}:\d{2}/); // Time format
+    });
+
+    it("should fallback to local timezone when timezone not provided", () => {
+      const result = formatAppointmentDateTime(mockAppointment.dateTime);
+      // Should still format correctly
       expect(result).toMatch(/\d{2}\/\d{2}/); // Date format
       expect(result).toMatch(/\d{1,2}:\d{2}/); // Time format
     });
   });
 
   describe("formatAppointmentDate", () => {
-    it("should format date correctly", () => {
-      const result = formatAppointmentDate(mockAppointment.dateTime);
+    it("should format date correctly in business timezone", () => {
+      const result = formatAppointmentDate(
+        mockAppointment.dateTime,
+        "America/Santo_Domingo",
+      );
       // Should include day name and month
+      expect(result).toContain("de");
+      expect(result).toMatch(/\d{2}/); // Day number
+    });
+
+    it("should fallback to local timezone when timezone not provided", () => {
+      const result = formatAppointmentDate(mockAppointment.dateTime);
+      // Should still format correctly
       expect(result).toContain("de");
       expect(result).toMatch(/\d{2}/); // Day number
     });
   });
 
   describe("formatAppointmentTime", () => {
-    it("should format time correctly", () => {
-      const result = formatAppointmentTime(mockAppointment.dateTime);
+    it("should format time correctly in business timezone", () => {
+      const result = formatAppointmentTime(
+        mockAppointment.dateTime,
+        "America/Santo_Domingo",
+      );
       // Should be in format "h:mm a"
+      expect(result).toMatch(/\d{1,2}:\d{2} [AP]M/);
+    });
+
+    it("should fallback to local timezone when timezone not provided", () => {
+      const result = formatAppointmentTime(mockAppointment.dateTime);
+      // Should still format correctly
       expect(result).toMatch(/\d{1,2}:\d{2} [AP]M/);
     });
   });
@@ -84,8 +113,11 @@ describe("formatAppointment", () => {
   });
 
   describe("formatAppointmentSummary", () => {
-    it("should format all appointment fields correctly", () => {
-      const result = formatAppointmentSummary(mockAppointment);
+    it("should format all appointment fields correctly with timezone", () => {
+      const result = formatAppointmentSummary(
+        mockAppointment,
+        "America/Santo_Domingo",
+      );
 
       expect(result.id).toBe(mockAppointment.id);
       expect(result.customerName).toBe("Juan Pérez");
@@ -102,9 +134,21 @@ describe("formatAppointment", () => {
         ...mockAppointment,
         customerName: null,
       };
-      const result = formatAppointmentSummary(appointmentWithoutName);
+      const result = formatAppointmentSummary(
+        appointmentWithoutName,
+        "America/Santo_Domingo",
+      );
 
       expect(result.customerName).toBe("+18095551234");
+    });
+
+    it("should work without timezone parameter", () => {
+      const result = formatAppointmentSummary(mockAppointment);
+
+      expect(result.id).toBe(mockAppointment.id);
+      expect(result.dateTime).toBeTruthy();
+      expect(result.date).toBeTruthy();
+      expect(result.time).toBeTruthy();
     });
   });
 });

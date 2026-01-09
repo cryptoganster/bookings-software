@@ -5,7 +5,7 @@ import type { UserDto } from "@packages/shared-types";
 /**
  * Auth Store State
  *
- * Manages authentication state including user data, JWT token, businessId, and auth status.
+ * Manages authentication state including user data, JWT token, businessId, timezone, and auth status.
  * Uses Zustand persist middleware to save state to localStorage.
  *
  * Note: isAuthenticated is computed from token presence.
@@ -16,11 +16,18 @@ interface AuthState {
   user: UserDto | null;
   token: string | null;
   businessId: string | null;
+  businessTimezone: string | null; // IANA timezone (e.g., "America/Santo_Domingo")
   isAuthenticated: boolean;
 
   // Actions
-  login: (user: UserDto, token: string, businessId?: string | null) => void;
+  login: (
+    user: UserDto,
+    token: string,
+    businessId?: string | null,
+    businessTimezone?: string | null,
+  ) => void;
   updateBusinessId: (businessId: string) => void;
+  updateBusinessTimezone: (timezone: string) => void;
   logout: () => void;
 }
 
@@ -52,14 +59,16 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       token: null,
       businessId: null,
+      businessTimezone: null,
       isAuthenticated: false,
 
-      // Login action - updates token, businessId, and derives isAuthenticated
-      login: (user, token, businessId = null) =>
+      // Login action - updates token, businessId, timezone, and derives isAuthenticated
+      login: (user, token, businessId = null, businessTimezone = null) =>
         set({
           user,
           token,
           businessId,
+          businessTimezone,
           isAuthenticated: !!token,
         }),
 
@@ -69,12 +78,19 @@ export const useAuthStore = create<AuthState>()(
           businessId,
         }),
 
+      // Update businessTimezone action - used when business timezone changes
+      updateBusinessTimezone: (timezone) =>
+        set({
+          businessTimezone: timezone,
+        }),
+
       // Logout action - clears all auth state
       logout: () =>
         set({
           user: null,
           token: null,
           businessId: null,
+          businessTimezone: null,
           isAuthenticated: false,
         }),
     }),
@@ -84,7 +100,8 @@ export const useAuthStore = create<AuthState>()(
         token: state.token,
         user: state.user,
         businessId: state.businessId,
-      }), // Persist token, user, and businessId - isAuthenticated is computed on hydration
+        businessTimezone: state.businessTimezone,
+      }), // Persist token, user, businessId, and timezone - isAuthenticated is computed on hydration
       onRehydrateStorage: () => (state) => {
         // After rehydration, compute isAuthenticated from token
         if (state) {

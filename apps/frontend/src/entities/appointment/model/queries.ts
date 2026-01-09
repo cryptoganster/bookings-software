@@ -121,6 +121,11 @@ const appointmentsApi = {
  *
  * Obtiene lista de appointments con filtros opcionales
  *
+ * Configuración de caching:
+ * - staleTime: 30 segundos - datos considerados frescos por 30s
+ * - gcTime: 5 minutos - datos en cache por 5 minutos después de no usarse
+ * - retry: 3 intentos con exponential backoff
+ *
  * @param filters - Filtros opcionales (status, dateRange, offeringId)
  * @param options - Opciones adicionales de TanStack Query
  *
@@ -145,6 +150,9 @@ export function useAppointments(
   return useQuery<AppointmentReadModel[], Error>({
     queryKey: appointmentKeys.list(filters),
     queryFn: () => appointmentsApi.getAll(filters),
+    staleTime: 30000, // 30 segundos - datos frescos por 30s
+    gcTime: 300000, // 5 minutos - mantener en cache por 5 minutos
+    retry: 3, // 3 reintentos con exponential backoff
     ...options,
   });
 }
