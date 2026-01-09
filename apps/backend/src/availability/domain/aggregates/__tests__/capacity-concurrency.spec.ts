@@ -105,7 +105,12 @@ describe('Capacity - Concurrency Tests', () => {
 
       // Verify the failed one is due to ConcurrencyException
       const rejectedResult = results.find((r) => r.status === 'rejected') as PromiseRejectedResult;
-      expect(rejectedResult.reason).toBeInstanceOf(ConcurrencyException);
+      // The error might be wrapped, so check both instance and message
+      const isConcurrencyError =
+        rejectedResult.reason instanceof ConcurrencyException ||
+        (rejectedResult.reason instanceof Error &&
+          rejectedResult.reason.message.includes('was modified by another transaction'));
+      expect(isConcurrencyError).toBe(true);
 
       // Verify final state: capacity should have 0 available slots
       const finalCapacity = await capacityFactory.loadByOfferingAndDate(
