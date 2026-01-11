@@ -1,0 +1,8 @@
+# Copiar a terraform.tfvars y ajustar valores
+# NO commitear terraform.tfvars con datos sensibles
+
+github_owner       = "cryptoganster"
+github_repo        = "bookings-software"
+protected_branches = ["master", "develop"]
+required_approvals = 1
+enforce_admins     = true
