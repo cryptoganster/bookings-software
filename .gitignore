@@ -47,11 +47,8 @@ ormconfig.json
 test-results/
 .migrations-complete
 
-# Kiro IDE settings (contains secrets)
-.kiro/settings/
-.kiro/*
-!.kiro/specs/
-!.kiro/steering/
+# Kiro IDE - exclude from repository (keep only local)
+.kiro/
 
 # Backup files from refactoring
 *.backup
