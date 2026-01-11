@@ -1,0 +1,157 @@
+name: Auto Merge PRs
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  check_suite:
+    types: [completed]
+  status: {}
+
+env:
+  # Lista de usuarios autorizados para auto-merge (separados por coma)
+  AUTHORIZED_AUTHORS: "cryptoganster"
+
+jobs:
+  auto-merge:
+    name: Auto Merge & Squash
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Get PR Info
+        id: pr-info
+        uses: actions/github-script@v7
+        with:
+          script: |
+            let pr;
+            if (context.payload.pull_request) {
+              pr = context.payload.pull_request;
+            } else if (context.payload.check_suite?.pull_requests?.[0]) {
+              const prNumber = context.payload.check_suite.pull_requests[0].number;
+              const { data } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber
+              });
+              pr = data;
+            } else {
+              core.setOutput('should_merge', 'false');
+              return;
+            }
+            
+            const authorizedAuthors = process.env.AUTHORIZED_AUTHORS.split(',').map(a => a.trim().toLowerCase());
+            const prAuthor = pr.user.login.toLowerCase();
+            const isAuthorized = authorizedAuthors.includes(prAuthor);
+            
+            core.setOutput('pr_number', pr.number);
+            core.setOutput('pr_author', pr.user.login);
+            core.setOutput('is_authorized', isAuthorized.toString());
+            core.setOutput('should_merge', isAuthorized.toString());
+            
+            console.log(`PR #${pr.number} by ${pr.user.login}`);
+            console.log(`Authorized: ${isAuthorized}`);
+
+      - name: Wait for CI to complete
+        if: steps.pr-info.outputs.should_merge == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = ${{ steps.pr-info.outputs.pr_number }};
+            const maxAttempts = 60; // 10 minutos máximo
+            const delaySeconds = 10;
+            
+            for (let attempt = 0; attempt < maxAttempts; attempt++) {
+              const { data: pr } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber
+              });
+              
+              // Verificar si es mergeable
+              if (pr.mergeable === null) {
+                console.log(`Attempt ${attempt + 1}: Mergeability unknown, waiting...`);
+                await new Promise(r => setTimeout(r, delaySeconds * 1000));
+                continue;
+              }
+              
+              if (!pr.mergeable) {
+                core.setFailed('PR has conflicts and cannot be merged');
+                return;
+              }
+              
+              // Verificar status checks
+              const { data: checks } = await github.rest.checks.listForRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: pr.head.sha
+              });
+              
+              const pendingChecks = checks.check_runs.filter(
+                c => c.status !== 'completed' && c.name !== 'Auto Merge & Squash'
+              );
+              
+              if (pendingChecks.length > 0) {
+                console.log(`Attempt ${attempt + 1}: ${pendingChecks.length} checks pending...`);
+                pendingChecks.forEach(c => console.log(`  - ${c.name}: ${c.status}`));
+                await new Promise(r => setTimeout(r, delaySeconds * 1000));
+                continue;
+              }
+              
+              // Verificar que todos los checks pasaron
+              const failedChecks = checks.check_runs.filter(
+                c => c.conclusion === 'failure' && c.name !== 'Auto Merge & Squash'
+              );
+              
+              if (failedChecks.length > 0) {
+                core.setFailed(`${failedChecks.length} checks failed`);
+                failedChecks.forEach(c => console.log(`  - ${c.name}: ${c.conclusion}`));
+                return;
+              }
+              
+              console.log('All checks passed!');
+              return;
+            }
+            
+            core.setFailed('Timeout waiting for checks to complete');
+
+      - name: Squash and Merge
+        if: steps.pr-info.outputs.should_merge == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = ${{ steps.pr-info.outputs.pr_number }};
+            
+            try {
+              const { data: pr } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber
+              });
+              
+              await github.rest.pulls.merge({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+                merge_method: 'squash',
+                commit_title: pr.title,
+                commit_message: pr.body || ''
+              });
+              
+              console.log(`✅ PR #${prNumber} merged successfully!`);
+            } catch (error) {
+              if (error.status === 405) {
+                console.log('PR cannot be merged yet (checks pending or conflicts)');
+              } else {
+                core.setFailed(`Failed to merge: ${error.message}`);
+              }
+            }
+
+      - name: Skip - Not Authorized
+        if: steps.pr-info.outputs.should_merge == 'false' && steps.pr-info.outputs.pr_author != ''
+        run: |
+          echo "⏭️ Skipping auto-merge for PR by ${{ steps.pr-info.outputs.pr_author }}"
+          echo "Only authorized authors can auto-merge: ${{ env.AUTHORIZED_AUTHORS }}"
