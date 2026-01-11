@@ -21,7 +21,12 @@
 
 import { Flex, ScrollArea, Text } from "@mantine/core";
 import { Link, useLocation } from "react-router-dom";
-import { IconHome2, IconCalendar, IconUsers, IconBriefcase } from "@tabler/icons-react";
+import {
+  IconHome2,
+  IconCalendar,
+  IconUsers,
+  IconBriefcase,
+} from "@tabler/icons-react";
 import classes from "./Navbar.module.css";
 
 interface NavLink {
