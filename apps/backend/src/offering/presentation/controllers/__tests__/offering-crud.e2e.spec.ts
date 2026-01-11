@@ -81,7 +81,7 @@ describe('Offering CRUD Controller E2E', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           name: 'Haircut',
-          durationMinutes: 30,
+          duration: 30,
           maxCapacityPerSlot: 1,
           maxDailyCapacity: 10,
         });
@@ -97,7 +97,7 @@ describe('Offering CRUD Controller E2E', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           name: 'Haircut',
-          durationMinutes: 30,
+          duration: 30,
           maxCapacityPerSlot: 1,
         });
 
@@ -111,7 +111,7 @@ describe('Offering CRUD Controller E2E', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           name: 'Quick Service',
-          durationMinutes: 10,
+          duration: 10,
           maxCapacityPerSlot: 1,
         })
         .expect(400);
@@ -123,7 +123,7 @@ describe('Offering CRUD Controller E2E', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           name: 'Service',
-          durationMinutes: 30,
+          duration: 30,
           maxCapacityPerSlot: 0,
         })
         .expect(400);
@@ -135,7 +135,7 @@ describe('Offering CRUD Controller E2E', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           name: 'Service',
-          // Missing durationMinutes and maxCapacityPerSlot
+          // Missing duration and maxCapacityPerSlot
         })
         .expect(400);
     });
@@ -146,7 +146,7 @@ describe('Offering CRUD Controller E2E', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           name: '',
-          durationMinutes: 30,
+          duration: 30,
           maxCapacityPerSlot: 1,
         })
         .expect(400);
@@ -158,7 +158,7 @@ describe('Offering CRUD Controller E2E', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           name: 'Service',
-          durationMinutes: 30.5,
+          duration: 30.5,
           maxCapacityPerSlot: 1,
         })
         .expect(400);
@@ -176,7 +176,7 @@ describe('Offering CRUD Controller E2E', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           name: 'Haircut',
-          durationMinutes: 30,
+          duration: 30,
           maxCapacityPerSlot: 1,
         });
 
@@ -187,7 +187,7 @@ describe('Offering CRUD Controller E2E', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           name: 'Hair Wash',
-          durationMinutes: 15,
+          duration: 15,
           maxCapacityPerSlot: 2,
         });
 
@@ -231,7 +231,7 @@ describe('Offering CRUD Controller E2E', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           name: 'Active Service',
-          durationMinutes: 30,
+          duration: 30,
           maxCapacityPerSlot: 1,
         });
 
@@ -243,7 +243,7 @@ describe('Offering CRUD Controller E2E', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           name: 'Inactive Service',
-          durationMinutes: 30,
+          duration: 30,
           maxCapacityPerSlot: 1,
         });
 
@@ -279,7 +279,7 @@ describe('Offering CRUD Controller E2E', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           name: 'Get Test Offering',
-          durationMinutes: 45,
+          duration: 45,
           maxCapacityPerSlot: 2,
           maxDailyCapacity: 20,
         });
@@ -317,7 +317,7 @@ describe('Offering CRUD Controller E2E', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           name: 'Update Test Offering',
-          durationMinutes: 30,
+          duration: 30,
           maxCapacityPerSlot: 1,
         });
 
@@ -330,7 +330,7 @@ describe('Offering CRUD Controller E2E', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           name: 'Updated Offering',
-          durationMinutes: 60,
+          duration: 60,
           maxCapacityPerSlot: 2,
           maxDailyCapacity: 15,
         })
@@ -353,7 +353,7 @@ describe('Offering CRUD Controller E2E', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           name: 'Updated Offering',
-          durationMinutes: 10, // Invalid: less than 15
+          duration: 10, // Invalid: less than 15
           maxCapacityPerSlot: 1,
         })
         .expect(400);
@@ -365,7 +365,7 @@ describe('Offering CRUD Controller E2E', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           name: 'Updated Offering',
-          durationMinutes: 30,
+          duration: 30,
           maxCapacityPerSlot: 0, // Invalid: less than 1
         })
         .expect(400);
@@ -377,7 +377,7 @@ describe('Offering CRUD Controller E2E', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           name: 'Updated',
-          durationMinutes: 30,
+          duration: 30,
           maxCapacityPerSlot: 1,
         })
         .expect(404);
@@ -393,7 +393,7 @@ describe('Offering CRUD Controller E2E', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           name: 'Delete Test Offering',
-          durationMinutes: 30,
+          duration: 30,
           maxCapacityPerSlot: 1,
         });
 
@@ -445,7 +445,7 @@ describe('Offering CRUD Controller E2E', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           name: 'Toggle Test Offering',
-          durationMinutes: 30,
+          duration: 30,
           maxCapacityPerSlot: 1,
         });
 
@@ -532,7 +532,7 @@ describe('Offering CRUD Controller E2E', () => {
         .post('/api/offerings')
         .send({
           name: 'Service',
-          durationMinutes: 30,
+          duration: 30,
           maxCapacityPerSlot: 1,
         })
         .expect(401);
@@ -544,7 +544,7 @@ describe('Offering CRUD Controller E2E', () => {
         .set('Authorization', 'Bearer invalid-token')
         .send({
           name: 'Service',
-          durationMinutes: 30,
+          duration: 30,
           maxCapacityPerSlot: 1,
         })
         .expect(401);
@@ -566,7 +566,7 @@ describe('Offering CRUD Controller E2E', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           name: 'Service',
-          durationMinutes: 30,
+          duration: 30,
           maxCapacityPerSlot: 1,
           extraField: 'should be rejected',
         })
@@ -579,7 +579,7 @@ describe('Offering CRUD Controller E2E', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           name: 'Service',
-          durationMinutes: 'thirty',
+          duration: 'thirty',
           maxCapacityPerSlot: 1,
         })
         .expect(400);
@@ -591,7 +591,7 @@ describe('Offering CRUD Controller E2E', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           name: 'Service',
-          durationMinutes: 30,
+          duration: 30,
           maxCapacityPerSlot: 'one',
         })
         .expect(400);
