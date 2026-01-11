@@ -21,7 +21,9 @@ import {
   Button,
   Group,
   Loader,
+  useMantineTheme,
 } from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
 import type { OfferingDto } from "@packages/shared-types";
 import {
   offeringFormSchema,
@@ -65,6 +67,11 @@ export function OfferingForm({
         maxDailyCapacity: offering.maxDailyCapacity,
       }
     : defaultOfferingValues;
+
+  // Responsive behavior
+  // Requirements: 8.4, 8.5
+  const theme = useMantineTheme();
+  const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
 
   // Configurar React Hook Form con Zod
   const {
@@ -169,13 +176,20 @@ export function OfferingForm({
         />
 
         {/* Botones de acción */}
-        <Group justify="flex-end" mt="md">
+        {/* Requirements: 8.5 - Mobile: apilados full-width, Desktop: en fila ancho automático */}
+        <Group
+          justify={isMobile ? "stretch" : "flex-end"}
+          mt="md"
+          gap="sm"
+          style={isMobile ? { flexDirection: "column" } : undefined}
+        >
           <Button
             variant="subtle"
             onClick={onCancel}
             disabled={isLoading}
             type="button"
             aria-label="Cancelar y cerrar formulario"
+            fullWidth={isMobile}
           >
             Cancelar
           </Button>
@@ -184,6 +198,7 @@ export function OfferingForm({
             disabled={isLoading}
             leftSection={isLoading ? <Loader size="xs" /> : undefined}
             aria-label={isLoading ? "Guardando servicio" : "Guardar servicio"}
+            fullWidth={isMobile}
           >
             {isLoading ? "Guardando..." : "Guardar"}
           </Button>

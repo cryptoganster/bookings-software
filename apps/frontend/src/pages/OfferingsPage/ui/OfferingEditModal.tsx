@@ -130,6 +130,9 @@ export function OfferingEditModal({
       // Requirements: 7.1, 7.2, 7.3, 7.4
       trapFocus
       returnFocus
+      // Responsive behavior
+      // Requirements: 8.1, 8.2, 8.3
+      fullScreen
     >
       <OfferingForm
         offering={offering}
