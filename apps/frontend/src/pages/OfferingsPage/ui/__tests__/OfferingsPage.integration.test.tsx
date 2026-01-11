@@ -176,10 +176,13 @@ describe("OfferingsPage Integration Tests", () => {
       });
       await user.click(createButton);
 
-      // Modal should be open - wait for it to appear
-      await waitFor(() => {
-        expect(screen.getByText("Crear Servicio")).toBeInTheDocument();
-      });
+      // Modal should be open - wait for it to appear (lazy loaded)
+      await waitFor(
+        () => {
+          expect(screen.getByText("Crear Servicio")).toBeInTheDocument();
+        },
+        { timeout: 5000 },
+      );
 
       expect(
         screen.getByPlaceholderText("Ej: Corte de pelo"),
