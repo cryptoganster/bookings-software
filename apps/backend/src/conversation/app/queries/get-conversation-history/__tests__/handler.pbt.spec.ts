@@ -79,20 +79,42 @@ describe('GetConversationHistoryHandler - Property-Based Tests', () => {
   });
 
   afterAll(async () => {
-    // Clean up test data
-    await messageRepository.createQueryBuilder().delete().execute();
+    // Clean up test data in correct order (respecting foreign keys)
+    // 1. Delete messages first
+    await messageRepository
+      .createQueryBuilder()
+      .delete()
+      .where('1=1') // Delete all messages
+      .execute();
+
+    // 2. Delete conversations
     await conversationRepository.delete({ businessId });
+
+    // 3. Delete customers
     await customerRepository.delete({ business_id: businessId });
+
+    // 4. Delete business and user data
     await dataSource.query('DELETE FROM businesses WHERE id = $1', [businessId]);
     await dataSource.query('DELETE FROM business_owners WHERE user_id = $1', [userId]);
     await dataSource.query('DELETE FROM users WHERE id = $1', [userId]);
+
+    // 5. Close module
     await module.close();
   });
 
   beforeEach(async () => {
-    // Clean up before each test
-    await messageRepository.createQueryBuilder().delete().execute();
+    // Clean up before each test - delete in correct order (respecting foreign keys)
+    // 1. Delete messages first (has FK to conversations)
+    await messageRepository
+      .createQueryBuilder()
+      .delete()
+      .where('1=1') // Delete all messages
+      .execute();
+
+    // 2. Delete conversations (has FK to customers and businesses)
     await conversationRepository.delete({ businessId });
+
+    // 3. Delete customers (has FK to businesses)
     await customerRepository.delete({ business_id: businessId });
   });
 
