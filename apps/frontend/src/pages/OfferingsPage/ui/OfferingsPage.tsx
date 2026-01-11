@@ -9,6 +9,7 @@
  * Uses TanStack Query for server state management.
  */
 
+import { useState } from "react";
 import {
   Container,
   Stack,
@@ -24,6 +25,7 @@ import {
   ActionIcon,
   Menu,
 } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import {
   IconAlertCircle,
   IconPlus,
@@ -39,20 +41,146 @@ import {
   useDeleteOffering,
   useToggleOfferingActive,
 } from "@entities/offering";
+import type { OfferingDto } from "@packages/shared-types";
+import { OfferingCreateModal } from "./OfferingCreateModal";
+import { OfferingEditModal } from "./OfferingEditModal";
 
 export function OfferingsPage() {
+  // Estado para modales
+  // Requirements: 1.1, 2.1
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedOffering, setSelectedOffering] = useState<OfferingDto | null>(
+    null,
+  );
+
   const { data: offerings, isLoading, isError, error } = useOfferings();
   const deleteOffering = useDeleteOffering();
   const toggleActive = useToggleOfferingActive();
 
+  /**
+   * Abrir modal de creación
+   * Requirements: 1.1
+   */
+  const handleOpenCreateModal = () => {
+    setIsCreateModalOpen(true);
+  };
+
+  /**
+   * Cerrar modal de creación
+   * Requirements: 1.3
+   */
+  const handleCloseCreateModal = () => {
+    setIsCreateModalOpen(false);
+  };
+
+  /**
+   * Abrir modal de edición
+   * Requirements: 2.1
+   */
+  const handleOpenEditModal = (offering: OfferingDto) => {
+    setSelectedOffering(offering);
+    setIsEditModalOpen(true);
+  };
+
+  /**
+   * Cerrar modal de edición
+   * Requirements: 2.6
+   */
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setSelectedOffering(null);
+  };
+
+  /**
+   * Eliminar offering con confirmación
+   * Requirements: 5.3
+   */
   const handleDelete = async (id: string) => {
-    if (window.confirm("¿Estás seguro de eliminar este servicio?")) {
-      await deleteOffering.mutateAsync(id);
+    // Mostrar diálogo de confirmación con mensaje claro
+    const confirmed = window.confirm(
+      "¿Estás seguro de que deseas eliminar este servicio? Esta acción no se puede deshacer.",
+    );
+
+    if (confirmed) {
+      try {
+        await deleteOffering.mutateAsync(id);
+        // Mostrar notificación de éxito
+        // Requirements: 4.3, 4.6
+        notifications.show({
+          title: "Éxito",
+          message: "Servicio eliminado exitosamente",
+          color: "green",
+          autoClose: 3000,
+        });
+      } catch (error: unknown) {
+        // Mostrar notificación de error
+        // Requirements: 4.5, 4.7
+        let errorMessage = "Ocurrió un error al eliminar el servicio";
+
+        const apiError = error as {
+          response?: { status?: number; data?: { message?: string } };
+          message?: string;
+        };
+
+        if (apiError?.response?.status === 403) {
+          errorMessage = "No tienes permisos para realizar esta acción";
+        } else if (apiError?.response?.status === 404) {
+          errorMessage = "El servicio no fue encontrado";
+        } else if (apiError?.response?.data?.message) {
+          errorMessage = apiError.response.data.message;
+        } else if (apiError?.message) {
+          errorMessage = apiError.message;
+        }
+
+        notifications.show({
+          title: "Error",
+          message: errorMessage,
+          color: "red",
+          autoClose: 5000,
+        });
+      }
     }
   };
 
   const handleToggleActive = async (id: string, currentStatus: boolean) => {
-    await toggleActive.mutateAsync({ id, isActive: !currentStatus });
+    try {
+      await toggleActive.mutateAsync({ id, isActive: !currentStatus });
+      // Mostrar notificación de éxito
+      // Requirements: 4.4, 4.6
+      notifications.show({
+        title: "Éxito",
+        message: `Servicio ${currentStatus ? "desactivado" : "activado"} exitosamente`,
+        color: "green",
+        autoClose: 3000,
+      });
+    } catch (error: unknown) {
+      // Mostrar notificación de error
+      // Requirements: 4.5, 4.7
+      let errorMessage = "Ocurrió un error al cambiar el estado del servicio";
+
+      const apiError = error as {
+        response?: { status?: number; data?: { message?: string } };
+        message?: string;
+      };
+
+      if (apiError?.response?.status === 403) {
+        errorMessage = "No tienes permisos para realizar esta acción";
+      } else if (apiError?.response?.status === 404) {
+        errorMessage = "El servicio no fue encontrado";
+      } else if (apiError?.response?.data?.message) {
+        errorMessage = apiError.response.data.message;
+      } else if (apiError?.message) {
+        errorMessage = apiError.message;
+      }
+
+      notifications.show({
+        title: "Error",
+        message: errorMessage,
+        color: "red",
+        autoClose: 5000,
+      });
+    }
   };
 
   return (
@@ -63,9 +191,8 @@ export function OfferingsPage() {
           <Button
             leftSection={<IconPlus size={16} />}
             radius="xl"
-            onClick={() => {
-              /* TODO: Open create modal */
-            }}
+            onClick={handleOpenCreateModal}
+            aria-label="Crear nuevo servicio"
           >
             Nuevo Servicio
           </Button>
@@ -122,16 +249,19 @@ export function OfferingsPage() {
                       </Text>
                       <Menu shadow="md" width={200}>
                         <Menu.Target>
-                          <ActionIcon variant="subtle" color="gray">
+                          <ActionIcon
+                            variant="subtle"
+                            color="gray"
+                            aria-label={`Acciones para ${offering.name}`}
+                          >
                             <IconDots size={16} />
                           </ActionIcon>
                         </Menu.Target>
                         <Menu.Dropdown>
                           <Menu.Item
                             leftSection={<IconEdit size={14} />}
-                            onClick={() => {
-                              /* TODO: Open edit modal */
-                            }}
+                            onClick={() => handleOpenEditModal(offering)}
+                            aria-label={`Editar ${offering.name}`}
                           >
                             Editar
                           </Menu.Item>
@@ -146,6 +276,11 @@ export function OfferingsPage() {
                             onClick={() =>
                               handleToggleActive(offering.id, offering.isActive)
                             }
+                            aria-label={
+                              offering.isActive
+                                ? `Desactivar ${offering.name}`
+                                : `Activar ${offering.name}`
+                            }
                           >
                             {offering.isActive ? "Desactivar" : "Activar"}
                           </Menu.Item>
@@ -154,6 +289,7 @@ export function OfferingsPage() {
                             color="red"
                             leftSection={<IconTrash size={14} />}
                             onClick={() => handleDelete(offering.id)}
+                            aria-label={`Eliminar ${offering.name}`}
                           >
                             Eliminar
                           </Menu.Item>
@@ -206,6 +342,23 @@ export function OfferingsPage() {
           </Grid>
         )}
       </Stack>
+
+      {/* Modal de creación */}
+      {/* Requirements: 1.1 */}
+      <OfferingCreateModal
+        opened={isCreateModalOpen}
+        onClose={handleCloseCreateModal}
+      />
+
+      {/* Modal de edición */}
+      {/* Requirements: 2.1 */}
+      {selectedOffering && (
+        <OfferingEditModal
+          opened={isEditModalOpen}
+          onClose={handleCloseEditModal}
+          offering={selectedOffering}
+        />
+      )}
     </Container>
   );
 }

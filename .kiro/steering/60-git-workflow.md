@@ -161,6 +161,42 @@ git merge origin/master  # O: git rebase origin/master (historia más limpia)
 node_modules/, dist/, build/, *.tsbuildinfo, .env*, .vscode/, .idea/, .DS_Store, logs/, coverage/, test-results/
 ```
 
+## Git Hooks
+
+Este proyecto usa **Husky** para ejecutar validaciones automáticas en commits y pushes.
+
+**Hooks configurados:**
+
+- **pre-commit:** Ejecuta lint-staged (ESLint, Prettier, TypeScript) en archivos staged
+- **pre-push:** Ejecuta tests del backend y frontend antes de push
+- **commit-msg:** Valida formato de mensaje de commit (Conventional Commits)
+
+**⚠️ REGLA CRÍTICA: NUNCA usar `--no-verify`**
+
+```bash
+# ❌ PROHIBIDO - Salta los hooks de validación
+git commit --no-verify -m "mensaje"
+git push --no-verify origin feature/mi-rama
+
+# ✅ CORRECTO - Deja que los hooks validen
+git commit -m "feat: nueva funcionalidad"
+git push origin feature/mi-rama
+```
+
+**¿Por qué está prohibido `--no-verify`?**
+
+1. **Rompe la cadena de calidad** - Los hooks existen para prevenir código malo
+2. **Introduce errores** - Código sin validar puede romper CI o producción
+3. **Afecta al equipo** - Otros desarrolladores heredan problemas
+4. **Falsa velocidad** - Ahorra segundos pero cuesta horas en debugging
+
+**¿Qué hacer si los hooks fallan?**
+
+1. **Leer el error** - El mensaje indica qué está mal
+2. **Corregir el problema** - No saltarlo
+3. **Si es un error preexistente** - Crear un fix commit separado primero
+4. **Si el hook está roto** - Reportar y arreglar el hook, no saltarlo
+
 ## Buenas Prácticas
 
 **✅ Hacer:**
@@ -172,6 +208,8 @@ node_modules/, dist/, build/, *.tsbuildinfo, .env*, .vscode/, .idea/, .DS_Store,
 - Validar localmente antes de push
 - Crear PRs descriptivos con contexto
 - Mergear desde GitHub UI (preserva historial)
+- **Dejar que los hooks de Git validen el código**
+- **Corregir errores de hooks antes de continuar**
 
 **❌ Evitar:**
 
@@ -182,6 +220,7 @@ node_modules/, dist/, build/, *.tsbuildinfo, .env*, .vscode/, .idea/, .DS_Store,
 - Push sin validar localmente
 - Mergear sin que CI pase
 - Dejar branches remotas huérfanas
+- **`--no-verify` en commits o pushes (PROHIBIDO)**
 
 ## Flujo Completo Paso a Paso
 
@@ -286,5 +325,5 @@ git config --global alias.feature 'checkout -b'
 
 ---
 
-**Last Updated:** January 9, 2026  
+**Last Updated:** January 11, 2026  
 **Status:** Active

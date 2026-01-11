@@ -15,7 +15,8 @@
     "test": "vitest --run",
     "test:watch": "vitest",
     "test:coverage": "vitest --run --coverage",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "ci": "pnpm run format && pnpm run lint:fix && pnpm run lint && pnpm run typecheck && pnpm run test"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -45,6 +46,7 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.1",
     "@testing-library/user-event": "^14.6.1",
+    "@types/jest-axe": "^3.5.9",
     "@types/node": "^25.0.3",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
@@ -55,11 +57,13 @@
     "eslint-plugin-react-refresh": "^0.4.26",
     "fast-check": "^4.5.3",
     "globals": "^17.0.0",
+    "jest-axe": "^10.0.0",
     "jsdom": "^27.4.0",
     "msw": "^2.12.7",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.51.0",
     "vite": "^7.3.0",
-    "vitest": "^4.0.16"
+    "vitest": "^4.0.16",
+    "vitest-axe": "^0.1.0"
   }
 }

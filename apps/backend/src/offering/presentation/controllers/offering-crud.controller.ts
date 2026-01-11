@@ -96,7 +96,7 @@ export class OfferingCrudController {
       new CreateOfferingCommand(
         user.businessId,
         dto.name,
-        dto.durationMinutes,
+        dto.duration, // Changed from dto.durationMinutes
         dto.maxCapacityPerSlot,
         dto.maxDailyCapacity ?? null,
       ),
@@ -122,7 +122,7 @@ export class OfferingCrudController {
         id,
         user.businessId,
         dto.name,
-        dto.durationMinutes,
+        dto.duration, // Changed from dto.durationMinutes
         dto.maxCapacityPerSlot,
         dto.maxDailyCapacity ?? null,
       ),
