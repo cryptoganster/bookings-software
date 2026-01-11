@@ -9,7 +9,7 @@ export class UpdateOfferingDto {
   @IsInt()
   @Min(15)
   @Max(480)
-  durationMinutes!: number;
+  duration!: number; // Changed from durationMinutes to match API contract
 
   @IsInt()
   @Min(1)

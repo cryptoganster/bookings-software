@@ -6,29 +6,29 @@ Este plan de implementación completa la funcionalidad CRUD de offerings en el f
 
 ## Tasks
 
-- [ ] 1. Configurar dependencias y estructura base
+- [x] 1. Configurar dependencias y estructura base
   - Instalar dependencias necesarias (react-hook-form, zod, @hookform/resolvers, fast-check)
   - Crear estructura de carpetas para nuevos componentes
   - Configurar exports en index.ts
   - _Requirements: 1.1, 2.1, 3.1_
 
-- [ ] 2. Implementar validación de formulario
-  - [ ] 2.1 Crear schema de validación con Zod
+- [x] 2. Implementar validación de formulario
+  - [x] 2.1 Crear schema de validación con Zod
     - Definir offeringFormSchema con todas las reglas de validación
     - Exportar tipo OfferingFormData
     - Definir valores por defecto del formulario
     - Crear archivo apps/frontend/src/entities/offering/lib/validation.ts
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7_
 
-  - [ ] 2.2 Escribir property test para validación
+  - [x] 2.2 Escribir property test para validación
     - **Property 6: Validación previene envío inválido**
     - **Validates: Requirements 3.8**
     - Generar datos inválidos aleatorios con fast-check
     - Verificar que el schema rechaza datos inválidos
     - Verificar que se muestran todos los mensajes de error apropiados
 
-- [ ] 3. Implementar componente OfferingForm
-  - [ ] 3.1 Crear componente base con React Hook Form
+- [x] 3. Implementar componente OfferingForm
+  - [x] 3.1 Crear componente base con React Hook Form
     - Definir interface OfferingFormProps
     - Configurar useForm con zodResolver
     - Implementar campos: name, durationMinutes, maxCapacityPerSlot, maxDailyCapacity
@@ -36,33 +36,33 @@ Este plan de implementación completa la funcionalidad CRUD de offerings en el f
     - Crear archivo apps/frontend/src/pages/OfferingsPage/ui/OfferingForm.tsx
     - _Requirements: 1.2, 2.2, 3.1-3.7_
 
-  - [ ] 3.2 Implementar manejo de errores de validación
+  - [x] 3.2 Implementar manejo de errores de validación
     - Mostrar mensajes de error debajo de cada campo
     - Aplicar estilos de error (borde rojo)
     - Asociar errores con campos usando aria-describedby
     - _Requirements: 3.1-3.7, 7.5_
 
-  - [ ] 3.3 Implementar estados de carga
+  - [x] 3.3 Implementar estados de carga
     - Deshabilitar campos durante loading
     - Mostrar spinner en botón de guardar
     - Prevenir envío múltiple
     - _Requirements: 5.1, 5.2_
 
-  - [ ] 3.4 Escribir unit tests para OfferingForm
+  - [x] 3.4 Escribir unit tests para OfferingForm
     - Test: Renderiza todos los campos correctamente
     - Test: Muestra errores de validación
     - Test: Llama onSubmit con datos válidos
     - Test: Llama onCancel al hacer clic en cancelar
     - Test: Deshabilita campos durante loading
 
-  - [ ] 3.5 Escribir property test para precarga de datos
+  - [x] 3.5 Escribir property test para precarga de datos
     - **Property 4: Edición precarga datos correctamente**
     - **Validates: Requirements 2.2**
     - Generar offerings aleatorios con fast-check
     - Verificar que todos los campos contienen los valores correctos
 
-- [ ] 4. Implementar OfferingCreateModal
-  - [ ] 4.1 Crear componente modal de creación
+- [x] 4. Implementar OfferingCreateModal
+  - [x] 4.1 Crear componente modal de creación
     - Definir interface OfferingCreateModalProps
     - Usar Mantine Modal component
     - Integrar OfferingForm
@@ -70,49 +70,49 @@ Este plan de implementación completa la funcionalidad CRUD de offerings en el f
     - Crear archivo apps/frontend/src/pages/OfferingsPage/ui/OfferingCreateModal.tsx
     - _Requirements: 1.1, 1.2, 1.3, 1.4_
 
-  - [ ] 4.2 Implementar manejo de éxito
+  - [x] 4.2 Implementar manejo de éxito
     - Mostrar notificación toast verde
     - Cerrar modal automáticamente
     - Invalidar queries de TanStack Query
     - Reset del formulario
     - _Requirements: 1.5, 4.1, 4.6, 6.5_
 
-  - [ ] 4.3 Implementar manejo de errores
+  - [x] 4.3 Implementar manejo de errores
     - Mostrar notificación toast roja
     - Mantener modal abierto
     - Preservar datos del formulario
     - Manejar errores específicos (409, 403)
     - _Requirements: 1.6, 4.5, 4.7, 6.6, 6.7_
 
-  - [ ] 4.4 Implementar accesibilidad
+  - [x] 4.4 Implementar accesibilidad
     - Establecer role="dialog" y aria-modal="true"
     - Auto-focus en primer campo
     - Cerrar con tecla Escape
     - Implementar focus trap
     - _Requirements: 7.1, 7.2, 7.3, 7.4_
 
-  - [ ] 4.5 Escribir unit tests para OfferingCreateModal
+  - [x] 4.5 Escribir unit tests para OfferingCreateModal
     - Test: Abre y cierra correctamente
     - Test: Crea offering exitosamente
     - Test: Muestra notificación de éxito
     - Test: Maneja errores apropiadamente
     - Test: Cierra con Escape
 
-  - [ ] 4.6 Escribir property test para creación
+  - [x] 4.6 Escribir property test para creación
     - **Property 2: Creación exitosa actualiza la lista**
     - **Validates: Requirements 1.4, 1.5**
     - Generar datos válidos aleatorios
     - Verificar que se crea el offering
     - Verificar que la lista se actualiza
 
-  - [ ] 4.7 Escribir property test para API call
+  - [x] 4.7 Escribir property test para API call
     - **Property 13: API calls son correctas**
     - **Validates: Requirements 6.1**
     - Verificar que se envía POST a /api/offerings
     - Verificar que el payload contiene los datos correctos
 
-- [ ] 5. Implementar OfferingEditModal
-  - [ ] 5.1 Crear componente modal de edición
+- [x] 5. Implementar OfferingEditModal
+  - [x] 5.1 Crear componente modal de edición
     - Definir interface OfferingEditModalProps
     - Usar Mantine Modal component
     - Integrar OfferingForm con datos precargados
@@ -120,88 +120,88 @@ Este plan de implementación completa la funcionalidad CRUD de offerings en el f
     - Crear archivo apps/frontend/src/pages/OfferingsPage/ui/OfferingEditModal.tsx
     - _Requirements: 2.1, 2.2, 2.3, 2.6_
 
-  - [ ] 5.2 Implementar manejo de éxito
+  - [x] 5.2 Implementar manejo de éxito
     - Mostrar notificación toast verde
     - Cerrar modal automáticamente
     - Actualizar caché de TanStack Query
     - _Requirements: 2.4, 4.2, 4.6, 6.5_
 
-  - [ ] 5.3 Implementar manejo de errores
+  - [x] 5.3 Implementar manejo de errores
     - Mostrar notificación toast roja
     - Mantener modal abierto
     - Preservar datos del formulario
     - Manejar errores específicos (409, 403, 404)
     - _Requirements: 2.5, 4.5, 4.7, 6.6, 6.7_
 
-  - [ ] 5.4 Implementar accesibilidad
+  - [x] 5.4 Implementar accesibilidad
     - Establecer role="dialog" y aria-modal="true"
     - Auto-focus en primer campo
     - Cerrar con tecla Escape
     - Implementar focus trap
     - _Requirements: 7.1, 7.2, 7.3, 7.4_
 
-  - [ ] 5.5 Escribir unit tests para OfferingEditModal
+  - [x] 5.5 Escribir unit tests para OfferingEditModal
     - Test: Abre con datos precargados
     - Test: Actualiza offering exitosamente
     - Test: Muestra notificación de éxito
     - Test: Maneja errores apropiadamente
     - Test: Cierra con Escape
 
-  - [ ] 5.6 Escribir property test para actualización
+  - [x] 5.6 Escribir property test para actualización
     - **Property 5: Actualización exitosa refleja cambios**
     - **Validates: Requirements 2.3, 2.4**
     - Generar modificaciones válidas aleatorias
     - Verificar que se actualiza el offering
     - Verificar que la tarjeta refleja los cambios
 
-  - [ ] 5.7 Escribir property test para API call
+  - [x] 5.7 Escribir property test para API call
     - **Property 13: API calls son correctas**
     - **Validates: Requirements 6.2**
     - Verificar que se envía PUT a /api/offerings/:id
     - Verificar que el payload contiene los datos correctos
 
-- [ ] 6. Actualizar OfferingsPage
-  - [ ] 6.1 Agregar estado para modales
+- [x] 6. Actualizar OfferingsPage
+  - [x] 6.1 Agregar estado para modales
     - Agregar useState para isCreateModalOpen
     - Agregar useState para isEditModalOpen
     - Agregar useState para selectedOffering
     - _Requirements: 1.1, 2.1_
 
-  - [ ] 6.2 Conectar botón "Nuevo Servicio"
+  - [x] 6.2 Conectar botón "Nuevo Servicio"
     - Implementar onClick para abrir modal de creación
     - _Requirements: 1.1_
 
-  - [ ] 6.3 Conectar opción "Editar"
+  - [x] 6.3 Conectar opción "Editar"
     - Implementar onClick para abrir modal de edición
     - Pasar offering seleccionado al modal
     - _Requirements: 2.1_
 
-  - [ ] 6.4 Mejorar confirmación de eliminación
+  - [x] 6.4 Mejorar confirmación de eliminación
     - Usar window.confirm con mensaje claro
     - Implementar manejo de confirmación
     - _Requirements: 5.3_
 
-  - [ ] 6.5 Renderizar modales
+  - [x] 6.5 Renderizar modales
     - Agregar OfferingCreateModal al final del componente
     - Agregar OfferingEditModal al final del componente
     - Pasar props apropiadas
     - _Requirements: 1.1, 2.1_
 
-  - [ ] 6.6 Escribir integration tests para flujos completos
+  - [x] 6.6 Escribir integration tests para flujos completos
     - Test: Flujo completo de creación
     - Test: Flujo completo de edición
     - Test: Flujo completo de eliminación
     - Test: Manejo de errores de API
 
-- [ ] 7. Implementar sistema de notificaciones
-  - [ ] 7.1 Crear helper para notificaciones
+- [x] 7. Implementar sistema de notificaciones
+  - [x] 7.1 Crear helper para notificaciones
     - Función showSuccessNotification
     - Función showErrorNotification
     - Configurar duración automática (3s éxito, 5s error)
     - Configurar atributos ARIA (role="status", aria-live="polite")
     - _Requirements: 4.1-4.7, 7.6_
 
-  - [ ] 7.2 Escribir property tests para notificaciones
+  - [x] 7.2 Escribir property tests para notificaciones
     - **Property 7: Notificaciones de éxito son consistentes**
     - **Validates: Requirements 4.1, 4.2, 4.3, 4.4, 4.6**
     - Verificar color verde, mensaje correcto, duración 3s
@@ -209,7 +209,7 @@ Este plan de implementación completa la funcionalidad CRUD de offerings en el f
     - **Validates: Requirements 4.5, 4.7**
     - Verificar color rojo, mensaje de error, duración 5s
 
-- [ ] 8. Checkpoint - Verificar funcionalidad básica
+- [x] 8. Checkpoint - Verificar funcionalidad básica
   - Verificar que se pueden crear offerings
   - Verificar que se pueden editar offerings
   - Verificar que se pueden eliminar offerings
@@ -217,27 +217,27 @@ Este plan de implementación completa la funcionalidad CRUD de offerings en el f
   - Verificar que las notificaciones aparecen
   - Preguntar al usuario si hay problemas
 
-- [ ] 9. Implementar mejoras de accesibilidad
-  - [ ] 9.1 Agregar ARIA labels a botones
+- [x] 9. Implementar mejoras de accesibilidad
+  - [x] 9.1 Agregar ARIA labels a botones
     - Botón "Nuevo Servicio"
     - Botón "Guardar"
     - Botón "Cancelar"
     - Botones de menú de acciones
     - _Requirements: 7.1_
 
-  - [ ] 9.2 Implementar navegación por teclado
+  - [x] 9.2 Implementar navegación por teclado
     - Tab entre campos
     - Enter para enviar formulario
     - Escape para cerrar modal
     - _Requirements: 7.3_
 
-  - [ ] 9.3 Implementar focus management
+  - [x] 9.3 Implementar focus management
     - Auto-focus en primer campo al abrir modal
     - Focus trap dentro del modal
     - Restaurar focus al cerrar modal
     - _Requirements: 7.2, 7.4_
 
-  - [ ] 9.4 Escribir property tests para accesibilidad
+  - [x] 9.4 Escribir property tests para accesibilidad
     - **Property 15: Modales son accesibles**
     - **Validates: Requirements 7.1, 7.2, 7.3, 7.4**
     - Verificar atributos ARIA
@@ -250,7 +250,7 @@ Este plan de implementación completa la funcionalidad CRUD de offerings en el f
     - **Validates: Requirements 7.6**
     - Verificar role="status" y aria-live="polite"
 
-  - [ ] 9.5 Ejecutar auditoría de accesibilidad con jest-axe
+  - [x] 9.5 Ejecutar auditoría de accesibilidad con jest-axe
     - Test: OfferingForm no tiene violaciones de accesibilidad
     - Test: OfferingCreateModal no tiene violaciones
     - Test: OfferingEditModal no tiene violaciones

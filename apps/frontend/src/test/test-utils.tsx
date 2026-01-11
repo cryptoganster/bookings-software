@@ -1,7 +1,41 @@
 import type { ReactElement } from "react";
 import { render, type RenderOptions } from "@testing-library/react";
-import { MantineProvider } from "@mantine/core";
+import {
+  createTheme,
+  MantineProvider,
+  Modal,
+  Drawer,
+  Popover,
+  Menu,
+} from "@mantine/core";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+// Create test theme with disabled transitions
+// This prevents setTimeout issues in tests
+const testTheme = createTheme({
+  components: {
+    Modal: Modal.extend({
+      defaultProps: {
+        transitionProps: { duration: 0 },
+      },
+    }),
+    Drawer: Drawer.extend({
+      defaultProps: {
+        transitionProps: { duration: 0 },
+      },
+    }),
+    Popover: Popover.extend({
+      defaultProps: {
+        transitionProps: { duration: 0 },
+      },
+    }),
+    Menu: Menu.extend({
+      defaultProps: {
+        transitionProps: { duration: 0 },
+      },
+    }),
+  },
+});
 
 /**
  * Custom render function that wraps components with necessary providers
@@ -24,7 +58,7 @@ function customRender(
   function AllTheProviders({ children }: { children: React.ReactNode }) {
     return (
       <QueryClientProvider client={queryClient}>
-        <MantineProvider>{children}</MantineProvider>
+        <MantineProvider theme={testTheme}>{children}</MantineProvider>
       </QueryClientProvider>
     );
   }
