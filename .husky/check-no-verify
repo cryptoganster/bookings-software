@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+
+# Check if --no-verify flag is being used
+# This script is called from git aliases to prevent bypassing hooks
+
+# Get the command that was executed
+command_line="$@"
+
+# Check if --no-verify or -n flag is present
+if [[ "$command_line" == *"--no-verify"* ]] || [[ "$command_line" == *"-n "* ]]; then
+  echo ""
+  echo "❌ ERROR: --no-verify flag detected!"
+  echo ""
+  echo "🚫 BLOCKED OPERATION: git commit/push --no-verify"
+  echo ""
+  echo "Using --no-verify bypasses critical validations:"
+  echo "  • ESLint and Prettier checks"
+  echo "  • TypeScript compilation"
+  echo "  • Unit and integration tests"
+  echo "  • Secret scanning"
+  echo "  • File size limits"
+  echo ""
+  echo "This can introduce bugs, security issues, and break CI/CD."
+  echo ""
+  echo "✅ CORRECT APPROACH:"
+  echo "   1. Fix the validation errors shown by the hooks"
+  echo "   2. Run the checks manually:"
+  echo "      pnpm typecheck"
+  echo "      pnpm lint"
+  echo "      pnpm format"
+  echo "      pnpm test"
+  echo "   3. Commit/push without --no-verify"
+  echo ""
+  echo "If hooks are genuinely broken (rare):"
+  echo "   1. Report the issue to the team"
+  echo "   2. Fix the hook configuration"
+  echo "   3. Never use --no-verify as a workaround"
+  echo ""
+  exit 1
+fi
+
+exit 0
