@@ -120,6 +120,7 @@ jobs:
 
       - name: Squash and Merge
         if: steps.pr-info.outputs.should_merge == 'true'
+        id: merge
         uses: actions/github-script@v7
         with:
           script: |
@@ -142,12 +143,37 @@ jobs:
               });
               
               console.log(`✅ PR #${prNumber} merged successfully!`);
+              
+              // Store branch name for deletion
+              core.setOutput('branch_name', pr.head.ref);
+              core.setOutput('merge_success', 'true');
             } catch (error) {
+              core.setOutput('merge_success', 'false');
               if (error.status === 405) {
                 console.log('PR cannot be merged yet (checks pending or conflicts)');
               } else {
                 core.setFailed(`Failed to merge: ${error.message}`);
               }
+            }
+
+      - name: Delete merged branch
+        if: steps.pr-info.outputs.should_merge == 'true' && steps.merge.outputs.merge_success == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branchName = '${{ steps.merge.outputs.branch_name }}';
+            
+            try {
+              await github.rest.git.deleteRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `heads/${branchName}`
+              });
+              
+              console.log(`🗑️ Branch '${branchName}' deleted successfully!`);
+            } catch (error) {
+              console.log(`⚠️ Could not delete branch '${branchName}': ${error.message}`);
+              // Don't fail the workflow if branch deletion fails
             }
 
       - name: Skip - Not Authorized
