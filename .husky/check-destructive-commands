@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+
+# Hook: check-destructive-commands
+# Purpose: Warn about destructive file operations and ask for confirmation
+# Warns: rm -rf, rm -f on project files, git clean -fd
+
+# Colors for output
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+GREEN='\033[0;32m'
+NC='\033[0m' # No Color
+
+# Get the command being executed
+COMMAND="$@"
+
+# Function to ask for confirmation
+ask_confirmation() {
+    local message="$1"
+    local alternatives="$2"
+    
+    echo -e "${YELLOW}⚠️  WARNING: Potentially destructive operation detected!${NC}"
+    echo -e "${YELLOW}Command: $COMMAND${NC}"
+    echo ""
+    echo -e "${RED}$message${NC}"
+    echo ""
+    if [ -n "$alternatives" ]; then
+        echo -e "${GREEN}✅ Safe alternatives:${NC}"
+        echo -e "$alternatives"
+        echo ""
+    fi
+    
+    # Ask for confirmation
+    read -p "Are you sure you want to proceed? (y/N): " -n 1 -r
+    echo ""
+    
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo -e "${GREEN}✅ Operation cancelled. Your files are safe.${NC}"
+        exit 1
+    fi
+    
+    echo -e "${YELLOW}⚠️  Proceeding with destructive operation...${NC}"
+}
+
+# Check for dangerous rm commands on project files
+if [[ "$COMMAND" =~ rm[[:space:]]+-[rf]+ ]] || [[ "$COMMAND" =~ rm[[:space:]]+-[fr]+ ]]; then
+    # Check if it's targeting project files (not node_modules, dist, etc.)
+    if [[ ! "$COMMAND" =~ node_modules ]] && \
+       [[ ! "$COMMAND" =~ dist/ ]] && \
+       [[ ! "$COMMAND" =~ coverage/ ]] && \
+       [[ ! "$COMMAND" =~ .next/ ]] && \
+       [[ ! "$COMMAND" =~ build/ ]]; then
+        
+        alternatives="   1. Use 'git restore <file>' to discard changes in tracked files
+   2. Use 'git clean -n' to preview what would be deleted
+   3. Use 'git stash' to save changes temporarily
+   4. Commit or stash your changes before cleaning"
+        
+        ask_confirmation "This command will permanently delete files that may contain uncommitted work." "$alternatives"
+    fi
+fi
+
+# Check for git clean -fd (force delete untracked files)
+if [[ "$COMMAND" =~ git[[:space:]]+clean[[:space:]]+-[fd]+ ]] || \
+   [[ "$COMMAND" =~ git[[:space:]]+clean[[:space:]]+-[df]+ ]]; then
+    
+    alternatives="   1. Use 'git clean -n' to preview what would be deleted
+   2. Use 'git stash --include-untracked' to save untracked files
+   3. Review files with 'git status' first"
+    
+    ask_confirmation "'git clean -fd' will permanently delete all untracked files." "$alternatives"
+fi
+
+# Allow the command if it passed all checks or user confirmed
+exit 0

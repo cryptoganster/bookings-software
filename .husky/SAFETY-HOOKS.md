@@ -66,7 +66,44 @@ git push --force-with-lease origin feature/mi-rama
 
 ---
 
-### 3. `git commit --no-verify` (Salta validaciones críticas)
+### 3. `rm -rf` y comandos destructivos (Elimina archivos sin posibilidad de recuperación)
+
+**Hook:** `check-destructive-commands`
+
+**Por qué está bloqueado:**
+
+- Elimina permanentemente archivos sin posibilidad de recuperación
+- Puede borrar trabajo no commiteado (untracked files)
+- Git no puede recuperar archivos que nunca fueron trackeados
+- Errores humanos pueden causar pérdida de horas de trabajo
+
+**Alternativas correctas:**
+
+```bash
+# Para descartar cambios en archivos trackeados
+git restore <file>
+git restore .
+
+# Para guardar cambios temporalmente
+git stash
+git stash --include-untracked  # Incluye archivos untracked
+
+# Para limpiar archivos untracked (con preview primero)
+git clean -n  # Preview de lo que se eliminará
+git stash --include-untracked  # Guardar antes de limpiar
+git clean -fd  # Solo después de verificar con -n
+```
+
+**Qué hace el hook:**
+
+- Detecta comandos `rm -rf` o `rm -f` en archivos del proyecto
+- Detecta `git clean -fd` sin preview previo
+- Permite eliminar carpetas de build (node_modules, dist, coverage)
+- Bloquea eliminación de código fuente y archivos de configuración
+
+---
+
+### 4. `git commit --no-verify` (Salta validaciones críticas)
 
 **Hook:** `pre-commit` + documentación
 
@@ -111,16 +148,17 @@ git commit -m "feat: nueva funcionalidad"
 
 ## 📋 Hooks Instalados
 
-| Hook                      | Archivo                          | Propósito                                    |
-| ------------------------- | -------------------------------- | -------------------------------------------- |
-| `pre-commit`              | `.husky/pre-commit`              | Valida código antes de commit                |
-| `pre-commit-branch-check` | `.husky/pre-commit-branch-check` | Bloquea commits directos en master (NUEVO)   |
-| `pre-push`                | `.husky/pre-push`                | Ejecuta tests antes de push                  |
-| `pre-push-safety`         | `.husky/pre-push-safety`         | Bloquea `git push --force` y verifica rebase |
-| `pre-merge-commit`        | `.husky/pre-merge-commit`        | Bloquea `git pull origin master`             |
-| `pre-checkout`            | `.husky/pre-checkout`            | Bloquea checkout con cambios sin commitear   |
-| `post-checkout`           | `.husky/post-checkout`           | Advierte si master está desincronizado       |
-| `commit-msg`              | `.husky/commit-msg`              | Valida formato de mensajes (Conventional)    |
+| Hook                         | Archivo                             | Propósito                                    |
+| ---------------------------- | ----------------------------------- | -------------------------------------------- |
+| `pre-commit`                 | `.husky/pre-commit`                 | Valida código antes de commit                |
+| `pre-commit-branch-check`    | `.husky/pre-commit-branch-check`    | Bloquea commits directos en master (NUEVO)   |
+| `pre-push`                   | `.husky/pre-push`                   | Ejecuta tests antes de push                  |
+| `pre-push-safety`            | `.husky/pre-push-safety`            | Bloquea `git push --force` y verifica rebase |
+| `pre-merge-commit`           | `.husky/pre-merge-commit`           | Bloquea `git pull origin master`             |
+| `check-destructive-commands` | `.husky/check-destructive-commands` | Bloquea `rm -rf` y `git clean -fd` (NUEVO)   |
+| `pre-checkout`               | `.husky/pre-checkout`               | Bloquea checkout con cambios sin commitear   |
+| `post-checkout`              | `.husky/post-checkout`              | Advierte si master está desincronizado       |
+| `commit-msg`                 | `.husky/commit-msg`                 | Valida formato de mensajes (Conventional)    |
 
 ---
 
@@ -199,6 +237,28 @@ bash scripts/pre-commit-filesize.sh
 ---
 
 ## 🧪 Probar los Hooks
+
+### Probar bloqueo de `rm -rf` en archivos del proyecto
+
+```bash
+# Esto debería fallar
+rm -rf infra/github/ENFORCE-REBASE-ONLY.md
+
+# Salida esperada:
+# ❌ ERROR: Destructive file operation detected!
+# 🚫 BLOCKED OPERATION: rm -rf infra/github/ENFORCE-REBASE-ONLY.md
+```
+
+### Probar bloqueo de `git clean -fd`
+
+```bash
+# Esto debería fallar
+git clean -fd
+
+# Salida esperada:
+# ❌ ERROR: Destructive git clean detected!
+# 🚫 BLOCKED OPERATION: git clean -fd
+```
 
 ### Probar bloqueo de `git pull origin master`
 
