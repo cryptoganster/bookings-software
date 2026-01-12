@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+
+# Post-checkout hook - Verifica que master local está sincronizado después de checkout
+# Ayuda a prevenir crear feature branches desde master desactualizado
+
+# Arguments:
+# $1 = ref of previous HEAD
+# $2 = ref of new HEAD
+# $3 = flag indicating whether it was a branch checkout (1) or file checkout (0)
+
+prev_head="$1"
+new_head="$2"
+branch_checkout="$3"
+
+# Only run for branch checkouts
+if [ "$branch_checkout" != "1" ]; then
+  exit 0
+fi
+
+# Get current branch
+current_branch=$(git rev-parse --abbrev-ref HEAD)
+
+# Only check when checking out to master
+if [ "$current_branch" != "master" ]; then
+  exit 0
+fi
+
+# Fetch latest master silently
+echo "🔍 Checking if master is synchronized with origin/master..."
+git fetch origin master --quiet 2>/dev/null || {
+  echo "⚠️  Warning: Could not fetch from origin"
+  exit 0
+}
+
+# Compare local master with origin/master
+local_sha=$(git rev-parse master 2>/dev/null || echo "")
+remote_sha=$(git rev-parse origin/master 2>/dev/null || echo "")
+
+if [ -n "$local_sha" ] && [ -n "$remote_sha" ]; then
+  if [ "$local_sha" != "$remote_sha" ]; then
+    echo ""
+    echo "⚠️  WARNING: Your local master is out of sync with origin/master!"
+    echo ""
+    echo "Local master and remote master have diverged."
+    echo ""
+    echo "✅ RECOMMENDED ACTION:"
+    echo "   Synchronize your master with origin/master:"
+    echo ""
+    echo "   git fetch origin"
+    echo "   git reset --hard origin/master"
+    echo ""
+    echo "Current state:"
+    echo "  Local master:  $(git rev-parse --short $local_sha)"
+    echo "  Remote master: $(git rev-parse --short $remote_sha)"
+    echo ""
+    
+    # Check if local is ahead
+    if git merge-base --is-ancestor "$remote_sha" "$local_sha" 2>/dev/null; then
+      ahead=$(git rev-list --count origin/master..master)
+      echo "  Status: Local is $ahead commit(s) AHEAD of remote"
+      echo ""
+      echo "⚠️  This should not happen! Master should never have local-only commits."
+      echo "   All changes must go through Pull Requests."
+      echo ""
+    # Check if local is behind
+    elif git merge-base --is-ancestor "$local_sha" "$remote_sha" 2>/dev/null; then
+      behind=$(git rev-list --count master..origin/master)
+      echo "  Status: Local is $behind commit(s) BEHIND remote"
+      echo ""
+    else
+      echo "  Status: Local and remote have DIVERGED"
+      echo ""
+      echo "⚠️  This is a serious issue! Your master has commits that don't exist on remote."
+      echo ""
+    fi
+    
+    echo "Press Enter to continue or Ctrl+C to abort and fix..."
+    read -r
+  else
+    echo "✅ Master is synchronized with origin/master"
+  fi
+fi
+
+exit 0
