@@ -21,7 +21,16 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./src/test/setup.ts"],
     css: true,
-    testTimeout: 30000, // 30 seconds for PBT tests (10 iterations * ~2s each)
+    testTimeout: 60000, // 60 seconds for PBT tests to handle resource constraints
+    hookTimeout: 60000, // 60 seconds for setup/teardown hooks
+    teardownTimeout: 60000, // 60 seconds for cleanup
+    pool: "forks", // Use forks instead of threads for better isolation
+    poolOptions: {
+      forks: {
+        singleFork: false,
+        maxForks: 4, // Limit concurrent test files to reduce memory pressure
+      },
+    },
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],

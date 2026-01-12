@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+# Pre-merge-commit hook - Blocks dangerous merge operations
+# This hook prevents accidental merge commits from 'git pull'
+
+set -e
+
+# Get the current branch
+current_branch=$(git rev-parse --abbrev-ref HEAD)
+
+# Check if this is a merge commit
+if [ -f .git/MERGE_HEAD ]; then
+  # Get the branch being merged
+  merge_branch=$(git name-rev --name-only MERGE_HEAD 2>/dev/null || echo "unknown")
+  
+  # Block merge from origin/master (caused by 'git pull origin master')
+  if [[ "$merge_branch" == *"origin/master"* ]] || [[ "$merge_branch" == *"remotes/origin/master"* ]]; then
+    echo ""
+    echo "❌ ERROR: Merge commit from 'origin/master' detected!"
+    echo ""
+    echo "🚫 BLOCKED OPERATION: git pull origin master"
+    echo ""
+    echo "This creates unnecessary merge commits and pollutes the history."
+    echo ""
+    echo "✅ CORRECT WORKFLOW:"
+    echo "   git fetch origin"
+    echo "   git rebase origin/master"
+    echo ""
+    echo "Or to sync your master branch:"
+    echo "   git checkout master"
+    echo "   git fetch origin"
+    echo "   git reset --hard origin/master"
+    echo ""
+    echo "To abort this merge:"
+    echo "   git merge --abort"
+    echo ""
+    exit 1
+  fi
+fi
+
+exit 0
