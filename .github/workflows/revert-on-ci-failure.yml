@@ -44,7 +44,7 @@ jobs:
 
       - name: Get failed jobs
         id: failed-jobs
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const jobs = await github.rest.actions.listJobsForWorkflowRun({
@@ -94,7 +94,7 @@ jobs:
       - name: Create Revert PR
         if: steps.check-branch.outputs.exists == 'false'
         id: create-pr
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const commitInfo = {
@@ -246,7 +246,7 @@ jobs:
 
     steps:
       - name: Create issue for manual intervention
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const issue = await github.rest.issues.create({
