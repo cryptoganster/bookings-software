@@ -28,10 +28,11 @@
     "lint:fix": "pnpm --recursive run lint:fix",
     "lint:backend:fix": "pnpm --filter backend run lint:fix",
     "lint:frontend:fix": "pnpm --filter frontend run lint:fix",
-    "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md}\" --ignore-path .gitignore",
     "format:backend": "pnpm --filter backend run format",
     "format:frontend": "pnpm --filter frontend run format",
-    "format:check": "prettier --check \"**/*.{ts,tsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,json,md}\" --ignore-path .gitignore",
+    "ci": "pnpm --filter backend run format && pnpm --filter frontend run format && pnpm --filter backend run lint:fix && pnpm --filter frontend run lint:fix && pnpm --filter backend run lint && pnpm --filter frontend run lint && pnpm --filter backend run typecheck && pnpm --filter frontend run typecheck && pnpm --filter backend run test && pnpm --filter frontend run test",
     "clean": "pnpm --recursive run clean && rm -rf node_modules",
     "prepare": "husky"
   },

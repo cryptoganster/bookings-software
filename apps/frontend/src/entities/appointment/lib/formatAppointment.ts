@@ -80,15 +80,17 @@ export function formatAppointmentTime(
   if (!timezone) {
     // Fallback to local timezone if business timezone not available
     const date = parseISO(dateTime);
-    return format(date, "h:mm a");
+    return format(date, "h:mm a", { locale: undefined }); // Force English AM/PM
   }
 
   try {
-    return formatInTimeZone(dateTime, timezone, "h:mm a");
+    return formatInTimeZone(dateTime, timezone, "h:mm a", {
+      locale: undefined, // Force English AM/PM
+    });
   } catch {
     // Fallback to local timezone if timezone is invalid
     const date = parseISO(dateTime);
-    return format(date, "h:mm a");
+    return format(date, "h:mm a", { locale: undefined }); // Force English AM/PM
   }
 }
 
