@@ -22,8 +22,11 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'http://localhost:5173',
+      'http://localhost:5174',
       'http://127.0.0.1:5173',
+      'http://127.0.0.1:5174',
       'http://10.0.0.180:5173', // Network access for mobile devices
+      'http://10.0.0.184:5174', // Network access for mobile devices
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
