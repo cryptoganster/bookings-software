@@ -13,7 +13,7 @@ env:
 
 jobs:
   auto-merge:
-    name: Auto Merge & Squash
+    name: Auto Merge & Rebase
     runs-on: ubuntu-latest
     if: github.event.pull_request.draft == false
     
@@ -137,9 +137,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 pull_number: prNumber,
-                merge_method: 'squash',
-                commit_title: pr.title,
-                commit_message: pr.body || ''
+                merge_method: 'rebase'
               });
               
               console.log(`✅ PR #${prNumber} merged successfully!`);
