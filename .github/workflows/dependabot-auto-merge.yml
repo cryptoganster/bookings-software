@@ -42,12 +42,12 @@ jobs:
           ELAPSED=0
           
           while [ $ELAPSED -lt $MAX_WAIT ]; do
-            # Get check status
-            CHECK_STATUS=$(gh pr checks ${{ github.event.pull_request.number }} --json state,conclusion --jq '.')
+            # Get check status using statusCheckRollup (includes both status and conclusion)
+            CHECK_STATUS=$(gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup --jq '.statusCheckRollup')
             
             # Count checks
             TOTAL=$(echo "$CHECK_STATUS" | jq 'length')
-            PENDING=$(echo "$CHECK_STATUS" | jq '[.[] | select(.state == "PENDING" or .state == "QUEUED" or .state == "IN_PROGRESS")] | length')
+            PENDING=$(echo "$CHECK_STATUS" | jq '[.[] | select(.status == "PENDING" or .status == "QUEUED" or .status == "IN_PROGRESS")] | length')
             SUCCESS=$(echo "$CHECK_STATUS" | jq '[.[] | select(.conclusion == "SUCCESS")] | length')
             FAILED=$(echo "$CHECK_STATUS" | jq '[.[] | select(.conclusion == "FAILURE" or .conclusion == "CANCELLED" or .conclusion == "TIMED_OUT")] | length')
             
