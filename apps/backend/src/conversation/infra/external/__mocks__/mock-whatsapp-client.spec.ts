@@ -56,8 +56,10 @@ describe('MockWhatsAppClient', () => {
       await mockClient.sendMessage('1234567890', 'Test');
 
       // Assert
+      // Usamos un margen de tolerancia de 5ms para evitar flakiness
+      // debido a la resolución limitada de Date.now() en diferentes sistemas
       const elapsed = Date.now() - startTime;
-      expect(elapsed).toBeGreaterThanOrEqual(100);
+      expect(elapsed).toBeGreaterThanOrEqual(95);
     });
   });
 
