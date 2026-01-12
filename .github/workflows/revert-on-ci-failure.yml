@@ -1,0 +1,282 @@
+name: Revert on CI Failure
+
+on:
+  workflow_run:
+    workflows: ["CI Pipeline"]
+    types: [completed]
+    branches: [main, master]
+
+jobs:
+  check-and-revert:
+    name: Check CI Status and Revert if Failed
+    runs-on: ubuntu-latest
+    # Solo ejecutar si el CI falló Y fue un push (no PR)
+    if: >
+      github.event.workflow_run.conclusion == 'failure' &&
+      github.event.workflow_run.event == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get failed commit info
+        id: commit-info
+        run: |
+          COMMIT_SHA="${{ github.event.workflow_run.head_sha }}"
+          COMMIT_MSG=$(git log -1 --format=%s $COMMIT_SHA)
+          COMMIT_AUTHOR=$(git log -1 --format=%an $COMMIT_SHA)
+          
+          # Extraer PR number del mensaje de merge si existe
+          PR_NUMBER=$(echo "$COMMIT_MSG" | grep -oP '#\d+' | head -1 | tr -d '#' || echo "")
+          
+          echo "sha=$COMMIT_SHA" >> $GITHUB_OUTPUT
+          echo "short_sha=${COMMIT_SHA:0:7}" >> $GITHUB_OUTPUT
+          echo "message=$COMMIT_MSG" >> $GITHUB_OUTPUT
+          echo "author=$COMMIT_AUTHOR" >> $GITHUB_OUTPUT
+          echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
+          
+          # Crear nombre de branch seguro (solo alfanuméricos y guiones)
+          SAFE_MSG=$(echo "$COMMIT_MSG" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | cut -c1-40)
+          echo "branch_name=revert-${SAFE_MSG}-${COMMIT_SHA:0:7}" >> $GITHUB_OUTPUT
+
+      - name: Get failed jobs
+        id: failed-jobs
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const jobs = await github.rest.actions.listJobsForWorkflowRun({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: ${{ github.event.workflow_run.id }}
+            });
+            
+            const failedJobs = jobs.data.jobs
+              .filter(job => job.conclusion === 'failure')
+              .map(job => `- ❌ ${job.name}`)
+              .join('\n');
+            
+            core.setOutput('list', failedJobs || '- ❌ Unknown job');
+            core.setOutput('count', jobs.data.jobs.filter(job => job.conclusion === 'failure').length);
+
+      - name: Check if revert branch already exists
+        id: check-branch
+        run: |
+          if git ls-remote --heads origin ${{ steps.commit-info.outputs.branch_name }} | grep -q .; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "⚠️ Revert branch already exists, skipping..."
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create revert branch
+        if: steps.check-branch.outputs.exists == 'false'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Asegurar que estamos en la branch correcta
+          git checkout ${{ github.event.workflow_run.head_branch }}
+          
+          # Crear branch para el revert
+          git checkout -b ${{ steps.commit-info.outputs.branch_name }}
+          
+          # Revertir el commit problemático
+          git revert --no-edit ${{ steps.commit-info.outputs.sha }}
+          
+          # Push de la branch
+          git push origin ${{ steps.commit-info.outputs.branch_name }}
+          
+          echo "✅ Revert branch created and pushed"
+
+      - name: Create Revert PR
+        if: steps.check-branch.outputs.exists == 'false'
+        id: create-pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const commitInfo = {
+              sha: '${{ steps.commit-info.outputs.sha }}',
+              shortSha: '${{ steps.commit-info.outputs.short_sha }}',
+              message: `${{ steps.commit-info.outputs.message }}`,
+              author: '${{ steps.commit-info.outputs.author }}',
+              prNumber: '${{ steps.commit-info.outputs.pr_number }}'
+            };
+            
+            const failedJobs = `${{ steps.failed-jobs.outputs.list }}`;
+            const failedCount = ${{ steps.failed-jobs.outputs.count }};
+            const branchName = '${{ steps.commit-info.outputs.branch_name }}';
+            const baseBranch = '${{ github.event.workflow_run.head_branch }}';
+            const runId = ${{ github.event.workflow_run.id }};
+            
+            const prBody = `## ⚠️ CI Failed After Merge - Automatic Revert
+
+            The CI pipeline failed after merging to \`${baseBranch}\`.
+            This PR reverts the problematic commit to restore the branch to a working state.
+
+            ### 🔴 Failed Jobs (${failedCount})
+            ${failedJobs}
+
+            ### 📋 Original Commit Details
+            | Field | Value |
+            |-------|-------|
+            | **Commit** | \`${commitInfo.sha}\` |
+            | **Message** | ${commitInfo.message} |
+            | **Author** | ${commitInfo.author} |
+            ${commitInfo.prNumber ? `| **Original PR** | #${commitInfo.prNumber} |` : ''}
+
+            ### 🔗 Links
+            - [View failed CI run](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${runId})
+            - [Compare changes](https://github.com/${context.repo.owner}/${context.repo.repo}/commit/${commitInfo.sha})
+
+            ### ✅ Next Steps
+            1. **Review this PR** - Verify the revert is correct
+            2. **Merge this PR** - Restore \`${baseBranch}\` to a working state
+            3. **Investigate** - Check the CI failure using the link above
+            4. **Fix the issue** - Identify and fix the root cause
+            5. **Create a new PR** - Submit corrected changes
+
+            ### 🔍 Debugging Tips
+            - Check if this is a flaky test (intermittent failure)
+            - Review the test logs for specific error messages
+            - Ensure all dependencies are correctly installed
+            - Verify environment variables are set correctly
+
+            ---
+
+            > 🤖 This PR was created automatically by the CI failure detection workflow.
+            > If this revert is incorrect or unnecessary (e.g., flaky test), you can close this PR.
+            `;
+
+            // Crear el PR
+            const pr = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🔄 Revert: ${commitInfo.message}`,
+              head: branchName,
+              base: baseBranch,
+              body: prBody
+            });
+
+            console.log(`✅ Created revert PR #${pr.data.number}`);
+            core.setOutput('pr_number', pr.data.number);
+            core.setOutput('pr_url', pr.data.html_url);
+
+            // Agregar labels
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.data.number,
+              labels: ['revert', 'ci-failure', 'automated']
+            });
+
+            // Asignar al actor que hizo el push
+            try {
+              await github.rest.issues.addAssignees({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.data.number,
+                assignees: ['${{ github.event.workflow_run.actor.login }}']
+              });
+              console.log('✅ Assigned PR to original author');
+            } catch (e) {
+              console.log('⚠️ Could not assign user:', e.message);
+            }
+
+            // Comentar en el PR original si existe
+            if (commitInfo.prNumber) {
+              try {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: parseInt(commitInfo.prNumber),
+                  body: `## ⚠️ CI Failed After Merge
+
+            The CI pipeline failed after this PR was merged to \`${baseBranch}\`.
+
+            ### What happened?
+            ${failedJobs}
+
+            ### What's next?
+            A revert PR has been created automatically: #${pr.data.number}
+
+            Please:
+            1. Review and merge the revert PR to fix \`${baseBranch}\`
+            2. Investigate the CI failure
+            3. Submit a new PR with the corrected changes
+
+            [View failed CI run](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${runId})`
+                });
+                console.log(`✅ Commented on original PR #${commitInfo.prNumber}`);
+              } catch (e) {
+                console.log('⚠️ Could not comment on original PR:', e.message);
+              }
+            }
+
+      - name: Summary
+        if: steps.check-branch.outputs.exists == 'false'
+        run: |
+          echo "## 🔄 Revert PR Created" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Revert PR** | #${{ steps.create-pr.outputs.pr_number }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Failed Commit** | \`${{ steps.commit-info.outputs.short_sha }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Failed Jobs** | ${{ steps.failed-jobs.outputs.count }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Branch** | \`${{ github.event.workflow_run.head_branch }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "[View Revert PR](${{ steps.create-pr.outputs.pr_url }})" >> $GITHUB_STEP_SUMMARY
+
+      - name: Skip notification
+        if: steps.check-branch.outputs.exists == 'true'
+        run: |
+          echo "## ⏭️ Revert Already Exists" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "A revert branch for this commit already exists." >> $GITHUB_STEP_SUMMARY
+          echo "Branch: \`${{ steps.commit-info.outputs.branch_name }}\`" >> $GITHUB_STEP_SUMMARY
+
+  # Job para notificar si no se pudo crear el revert
+  notify-manual-intervention:
+    name: Notify Manual Intervention Needed
+    runs-on: ubuntu-latest
+    needs: check-and-revert
+    if: failure()
+
+    steps:
+      - name: Create issue for manual intervention
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🚨 Manual Intervention Required: CI Failed and Auto-Revert Failed',
+              body: `## ⚠️ Critical: Manual Intervention Required
+
+            The CI pipeline failed on \`${{ github.event.workflow_run.head_branch }}\` and the automatic revert also failed.
+
+            ### Details
+            - **Failed CI Run:** [View run](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${{ github.event.workflow_run.id }})
+            - **Commit:** \`${{ github.event.workflow_run.head_sha }}\`
+            - **Branch:** \`${{ github.event.workflow_run.head_branch }}\`
+
+            ### Required Actions
+            1. Manually investigate the CI failure
+            2. Either fix the issue or manually revert the commit
+            3. Ensure \`${{ github.event.workflow_run.head_branch }}\` is in a working state
+
+            ### Manual Revert Command
+            \`\`\`bash
+            git checkout ${{ github.event.workflow_run.head_branch }}
+            git revert ${{ github.event.workflow_run.head_sha }}
+            git push origin ${{ github.event.workflow_run.head_branch }}
+            \`\`\`
+
+            cc: @${{ github.event.workflow_run.actor.login }}
+            `,
+              labels: ['urgent', 'ci-failure', 'manual-intervention']
+            });
+
+            console.log(`Created issue #${issue.data.number} for manual intervention`);
