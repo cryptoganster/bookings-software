@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+# Pre-checkout hook - Verifica que no hay cambios sin commitear antes de cambiar de rama
+# Previene pérdida de trabajo y fuerza commits limpios
+
+# Get the branch we're checking out to
+new_branch="$3"
+
+# Only run if we're actually changing branches (not just checking out files)
+if [ "$3" = "1" ]; then
+  # Check for uncommitted changes
+  if ! git diff-index --quiet HEAD --; then
+    echo ""
+    echo "❌ ERROR: Uncommitted changes detected!"
+    echo ""
+    echo "🚫 BLOCKED: Cannot checkout to another branch with uncommitted changes"
+    echo ""
+    echo "You have uncommitted changes in your working directory."
+    echo ""
+    echo "✅ OPTIONS:"
+    echo "   1. Commit your changes:"
+    echo "      git add ."
+    echo "      git commit -m 'feat: your changes'"
+    echo ""
+    echo "   2. Stash your changes temporarily:"
+    echo "      git stash"
+    echo "      # ... switch branches ..."
+    echo "      git stash pop"
+    echo ""
+    echo "   3. Discard your changes (⚠️ IRREVERSIBLE):"
+    echo "      git checkout -- ."
+    echo ""
+    echo "Current changes:"
+    git status --short
+    echo ""
+    exit 1
+  fi
+fi
+
+exit 0

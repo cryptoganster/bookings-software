@@ -32,7 +32,10 @@ describe("Additional Property Tests", () => {
       const validFormDataArb = fc.record({
         name: fc
           .string({ minLength: 3, maxLength: 50 })
-          .filter((s) => !s.includes("{")),
+          .filter((s) => !s.includes("{"))
+          .filter((s) => !s.includes("[")) // Evitar corchetes que causan problemas con userEvent
+          .filter((s) => s.trim().length >= 3) // Evitar strings con solo espacios
+          .map((s) => s.trim()), // Eliminar espacios al inicio/final
         duration: fc.integer({ min: 15, max: 480 }),
       });
 
@@ -202,12 +205,13 @@ describe("Additional Property Tests", () => {
           );
 
           try {
-            const saveButtons = screen.getAllByRole("button", {
-              name: /guardar/i,
+            // Durante loading, el botón tiene aria-label "Guardando servicio"
+            const saveButton = screen.getByRole("button", {
+              name: /guardando servicio/i,
             });
 
             // Botón debe estar deshabilitado durante loading
-            expect(saveButtons[0]).toBeDisabled();
+            expect(saveButton).toBeDisabled();
           } finally {
             unmount();
           }
@@ -260,12 +264,13 @@ describe("Additional Property Tests", () => {
           );
 
           try {
-            const saveButtons = screen.getAllByRole("button", {
-              name: /guardar/i,
+            // Durante loading, el botón tiene aria-label "Guardando servicio"
+            const saveButton = screen.getByRole("button", {
+              name: /guardando servicio/i,
             });
 
             // Botón debe estar deshabilitado durante loading
-            expect(saveButtons[0]).toBeDisabled();
+            expect(saveButton).toBeDisabled();
           } finally {
             unmount();
           }
@@ -453,19 +458,9 @@ describe("Additional Property Tests", () => {
           );
 
           try {
-            // Verificar que el modal tiene la configuración correcta
-            const modal = container.querySelector(
-              '[data-modal-content="true"]',
-            );
-            expect(modal).toBeTruthy();
-
-            // El botón X debe estar deshabilitado durante loading
-            const closeButton = container.querySelector(
-              ".mantine-Modal-close",
-            ) as HTMLButtonElement;
-            if (closeButton) {
-              expect(closeButton).toBeDisabled();
-            }
+            // El botón X NO debe existir durante loading (withCloseButton={!isPending})
+            const closeButton = container.querySelector(".mantine-Modal-close");
+            expect(closeButton).toBeNull();
           } finally {
             unmount();
           }
