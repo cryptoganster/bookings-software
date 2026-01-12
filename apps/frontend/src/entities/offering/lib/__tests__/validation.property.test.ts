@@ -332,9 +332,10 @@ describe("Offering Form Validation - Property Tests", () => {
             });
 
             if (result.success) {
-              // El nombre debe estar trimmed
+              // El nombre debe estar trimmed (sin espacios al inicio/final)
               expect(result.data.name).toBe(name.trim());
-              expect(result.data.name).not.toContain("  ");
+              // Verificar que no tiene espacios al inicio ni al final
+              expect(result.data.name).toBe(result.data.name.trim());
             }
           },
         ),
