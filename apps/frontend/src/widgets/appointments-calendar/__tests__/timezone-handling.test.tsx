@@ -37,6 +37,10 @@ describe("Timezone Handling Integration Tests", () => {
     });
     vi.clearAllMocks();
 
+    // Mock system date to Wednesday, January 7, 2026 at 12:00 PM UTC
+    // This ensures the calendar shows the week of Jan 5-11, 2026
+    vi.setSystemTime(new Date("2026-01-07T12:00:00Z"));
+
     // Explicitly reset the auth store to ensure clean state
     act(() => {
       useAuthStore.setState({
@@ -47,6 +51,11 @@ describe("Timezone Handling Integration Tests", () => {
         isAuthenticated: false,
       });
     });
+  });
+
+  afterEach(() => {
+    // Restore real system time
+    vi.useRealTimers();
   });
 
   const mockAppointment: AppointmentReadModel = {

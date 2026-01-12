@@ -7,7 +7,7 @@
 
 import { format, parseISO } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
-import { es } from "date-fns/locale";
+import { es, enUS } from "date-fns/locale";
 import type { AppointmentReadModel } from "../model/types";
 
 /**
@@ -80,15 +80,17 @@ export function formatAppointmentTime(
   if (!timezone) {
     // Fallback to local timezone if business timezone not available
     const date = parseISO(dateTime);
-    return format(date, "h:mm a");
+    return format(date, "h:mm a", { locale: enUS }); // Explicitly use English locale
   }
 
   try {
-    return formatInTimeZone(dateTime, timezone, "h:mm a");
+    return formatInTimeZone(dateTime, timezone, "h:mm a", {
+      locale: enUS, // Explicitly use English locale
+    });
   } catch {
     // Fallback to local timezone if timezone is invalid
     const date = parseISO(dateTime);
-    return format(date, "h:mm a");
+    return format(date, "h:mm a", { locale: enUS }); // Explicitly use English locale
   }
 }
 
