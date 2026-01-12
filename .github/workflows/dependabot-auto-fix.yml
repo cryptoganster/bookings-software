@@ -1,0 +1,68 @@
+name: Dependabot Auto-Fix Lockfile
+
+on:
+  pull_request:
+    paths:
+      - '**/package.json'
+      - 'pnpm-lock.yaml'
+
+jobs:
+  fix-lockfile:
+    # Only run on Dependabot PRs
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Check if lockfile is out of sync
+        id: check
+        run: |
+          if ! pnpm install --lockfile-only --frozen-lockfile &>/dev/null; then
+            echo "needs_fix=true" >> $GITHUB_OUTPUT
+          else
+            echo "needs_fix=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update lockfile
+        if: steps.check.outputs.needs_fix == 'true'
+        run: |
+          pnpm install --lockfile-only
+          
+      - name: Commit updated lockfile
+        if: steps.check.outputs.needs_fix == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add pnpm-lock.yaml
+          git commit -m "chore: update pnpm-lock.yaml [dependabot skip]"
+          git push
+
+      - name: Comment on PR
+        if: steps.check.outputs.needs_fix == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '✅ Lockfile automatically updated by GitHub Actions'
+            })

@@ -19,6 +19,16 @@ updates:
     commit-message:
       prefix: "chore(deps)"
       include: "scope"
+    # Agrupar actualizaciones para reducir PRs y problemas de lockfile
+    groups:
+      nestjs:
+        patterns:
+          - "@nestjs/*"
+      testing:
+        patterns:
+          - "jest*"
+          - "@types/jest"
+          - "ts-jest"
 
   # Frontend dependencies
   - package-ecosystem: "npm"
@@ -36,6 +46,15 @@ updates:
     commit-message:
       prefix: "chore(deps)"
       include: "scope"
+    # Agrupar actualizaciones para reducir PRs
+    groups:
+      react:
+        patterns:
+          - "react*"
+          - "@types/react*"
+      mantine:
+        patterns:
+          - "@mantine/*"
 
   # Shared types package
   - package-ecosystem: "npm"
