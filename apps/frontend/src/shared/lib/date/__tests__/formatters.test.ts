@@ -78,7 +78,8 @@ describe("date formatters", () => {
 
   describe("formatRelativeDate", () => {
     it("should return 'ahora' for current time", () => {
-      const now = new Date();
+      // Use a fixed timestamp to avoid timing issues in CI
+      const now = Date.now();
       const result = formatRelativeDate(now);
       expect(result).toBe("ahora");
     });
