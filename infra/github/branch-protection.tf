@@ -7,25 +7,22 @@ resource "github_branch_protection" "protected_branches" {
   repository_id = data.github_repository.repo.node_id
   pattern       = each.value
 
-  # Requiere PR para mergear
+  # Requiere que la conversación esté resuelta
   require_conversation_resolution = true
-
-  # Requiere que el branch esté actualizado antes de mergear
-  requires_strict_status_checks = true
 
   # Status checks requeridos del CI
   required_status_checks {
     strict = true # Requiere branch actualizado con base
 
     contexts = [
-      "CI Pipeline Status",      # Job final que valida todo
-      "Test Backend",            # Tests de backend
-      "Test Frontend",           # Tests de frontend
-      "Lint Code",               # Linting
-      "TypeScript Type Check",   # Type checking
-      "Check Code Formatting",   # Formato de código
-      "Build Backend",           # Build de backend
-      "Build Frontend",          # Build de frontend
+      "CI Pipeline Status",
+      "Test Backend",
+      "Test Frontend",
+      "Lint Code",
+      "TypeScript Type Check",
+      "Check Code Formatting",
+      "Build Backend",
+      "Build Frontend",
       "Security Audit Dependencies",
       "Scan for Secrets",
     ]
@@ -42,9 +39,6 @@ resource "github_branch_protection" "protected_branches" {
     }
   }
 
-  # Restricciones de push directo
-  restricts_pushes = false # Permitir push a la branch (pero requiere PR para mergear)
-
   # Forzar reglas incluso para admins
   enforce_admins = var.enforce_admins
 
@@ -53,12 +47,6 @@ resource "github_branch_protection" "protected_branches" {
 
   # No permitir eliminar la branch
   allows_deletions = false
-
-  # Requiere commits firmados (opcional, descomentar si usan GPG)
-  # requires_commit_signatures = true
-
-  # Requiere historial lineal (opcional, para squash merges)
-  # required_linear_history = true
 }
 
 # Output para verificar configuración
