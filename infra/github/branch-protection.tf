@@ -25,6 +25,8 @@ resource "github_branch_protection" "protected_branches" {
       "Build Frontend",
       "Security Audit Dependencies",
       "Scan for Secrets",
+      # NOTE: "Auto Merge & Rebase" is NOT required to avoid deadlock
+      # (it needs to complete AFTER all other checks pass)
     ]
   }
 
