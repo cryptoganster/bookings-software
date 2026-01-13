@@ -1,12 +1,8 @@
 name: Auto Merge PRs
 
 on:
-  workflow_run:
-    workflows: ["CI Pipeline"]
-    types:
-      - completed
-    branches:
-      - '**'  # Run for all branches
+  check_suite:
+    types: [completed]
 
 env:
   # Lista de usuarios autorizados para auto-merge (separados por coma)
@@ -16,8 +12,10 @@ jobs:
   auto-merge:
     name: Auto Merge & Rebase
     runs-on: ubuntu-latest
-    # Only run if CI workflow succeeded
-    if: github.event.workflow_run.conclusion == 'success'
+    # Only run if check suite succeeded and is from CI Pipeline
+    if: |
+      github.event.check_suite.conclusion == 'success' &&
+      github.event.check_suite.app.slug == 'github-actions'
     
     permissions:
       contents: write
@@ -29,21 +27,21 @@ jobs:
         uses: actions/github-script@v8
         with:
           script: |
-            // Get PRs associated with the workflow run
-            const { data: pullRequests } = await github.rest.pulls.list({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: 'open',
-              head: `${context.repo.owner}:${context.payload.workflow_run.head_branch}`
-            });
+            // Get PRs associated with the check suite
+            const pullRequests = context.payload.check_suite.pull_requests;
             
-            if (pullRequests.length === 0) {
-              console.log('No open PRs found for this branch');
+            if (!pullRequests || pullRequests.length === 0) {
+              console.log('No PRs found for this check suite');
               core.setOutput('should_merge', 'false');
               return;
             }
             
-            const pr = pullRequests[0];
+            const prNumber = pullRequests[0].number;
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
             
             // Skip if PR is draft
             if (pr.draft) {
