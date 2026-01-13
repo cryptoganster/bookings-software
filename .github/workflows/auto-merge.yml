@@ -91,7 +91,9 @@ jobs:
               });
               
               const pendingChecks = checks.check_runs.filter(
-                c => c.status !== 'completed' && c.name !== 'Auto Merge & Squash'
+                c => c.status !== 'completed' && 
+                    c.name !== 'Auto Merge & Squash' && 
+                    c.name !== 'Auto Merge & Rebase'
               );
               
               if (pendingChecks.length > 0) {
@@ -103,7 +105,9 @@ jobs:
               
               // Verificar que todos los checks pasaron
               const failedChecks = checks.check_runs.filter(
-                c => c.conclusion === 'failure' && c.name !== 'Auto Merge & Squash'
+                c => c.conclusion === 'failure' && 
+                    c.name !== 'Auto Merge & Squash' && 
+                    c.name !== 'Auto Merge & Rebase'
               );
               
               if (failedChecks.length > 0) {
