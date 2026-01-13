@@ -211,6 +211,72 @@ git commit -m "feat: nueva funcionalidad"
 
 ---
 
+## 🛡️ Shell Wrapper (Protección Adicional)
+
+**Archivo:** `scripts/safe-shell-wrapper.sh`
+
+### ¿Qué protege?
+
+El shell wrapper intercepta comandos destructivos **antes** de que se ejecuten, incluso fuera de Git hooks:
+
+- ✅ `git restore` - Pide confirmación antes de descartar cambios
+- ✅ `git checkout --` - Pide confirmación (sintaxis antigua)
+- ✅ `git clean -fd` - Pide confirmación antes de borrar archivos
+- ✅ `rm -rf` - Pide confirmación en archivos del proyecto
+
+### Instalación (Opcional pero Recomendado)
+
+Agrega esto a tu `~/.zshrc` o `~/.bashrc`:
+
+```bash
+# Safe shell wrapper para bookings-bot
+source /path/to/bookings-bot/scripts/safe-shell-wrapper.sh
+```
+
+Luego recarga tu shell:
+
+```bash
+source ~/.zshrc  # o source ~/.bashrc
+```
+
+### Ejemplo de Uso
+
+```bash
+# Intentas descartar cambios
+$ git restore apps/backend/src/file.ts
+
+⚠️  WARNING: Potentially destructive operation!
+Command: git restore apps/backend/src/file.ts
+
+This will permanently discard uncommitted changes in tracked files.
+
+✅ Safe alternatives:
+   1. Use 'git stash' to save changes temporarily
+   2. Use 'git stash save "description"' with a description
+   3. Use 'git diff <file>' to review changes first
+   4. Use 'git commit' to save changes permanently
+
+Are you sure you want to proceed? (y/N):
+```
+
+### Comandos Protegidos
+
+| Comando                  | Protección                | Alternativa Sugerida                            |
+| ------------------------ | ------------------------- | ----------------------------------------------- |
+| `git restore <file>`     | Siempre pide confirmación | `git stash`, `git commit`                       |
+| `git checkout -- <file>` | Siempre pide confirmación | `git stash`, `git commit`                       |
+| `git clean -fd`          | Siempre pide confirmación | `git clean -n`, `git stash --include-untracked` |
+| `rm -rf <project-file>`  | Pide confirmación         | Borrar archivos específicos sin `-rf`           |
+
+### Ventajas del Shell Wrapper
+
+1. **Protección universal** - Funciona en cualquier directorio del proyecto
+2. **No depende de Git hooks** - Protege incluso comandos manuales
+3. **Educativo** - Muestra alternativas seguras cada vez
+4. **Opcional** - No interfiere si no lo instalas
+
+---
+
 ## 🚨 Casos de Emergencia
 
 ### "Necesito hacer push urgente y el hook falla"

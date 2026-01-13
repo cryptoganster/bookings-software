@@ -97,14 +97,62 @@ safe_git_clean() {
     command git clean "$@"
 }
 
-# Override git command to intercept git clean
-git() {
-    if [ "$1" = "clean" ]; then
-        shift
-        safe_git_clean "$@"
-    else
-        command git "$@"
+# Wrapper for git restore
+safe_git_restore() {
+    local full_command="git restore $@"
+    
+    # Always ask for confirmation for git restore (discards changes)
+    local alternatives="   1. Use 'git stash' to save changes temporarily
+   2. Use 'git stash save \"description\"' with a description
+   3. Use 'git diff <file>' to review changes first
+   4. Use 'git commit' to save changes permanently"
+    
+    if ask_confirmation "$full_command" "This will permanently discard uncommitted changes in tracked files." "$alternatives"; then
+        command git restore "$@"
     fi
+    return $?
+}
+
+# Wrapper for git checkout (old syntax for discarding changes)
+safe_git_checkout() {
+    local full_command="git checkout $@"
+    
+    # Check if using -- syntax (discard changes)
+    if [[ "$@" =~ -- ]]; then
+        local alternatives="   1. Use 'git stash' to save changes temporarily
+   2. Use 'git diff' to review changes first
+   3. Use 'git commit' to save changes permanently
+   4. Consider using 'git restore' instead (newer syntax)"
+        
+        if ask_confirmation "$full_command" "This will permanently discard uncommitted changes in tracked files." "$alternatives"; then
+            command git checkout "$@"
+        fi
+        return $?
+    fi
+    
+    # Execute normal git checkout for branch switching
+    command git checkout "$@"
+}
+
+# Override git command to intercept dangerous operations
+git() {
+    case "$1" in
+        clean)
+            shift
+            safe_git_clean "$@"
+            ;;
+        restore)
+            shift
+            safe_git_restore "$@"
+            ;;
+        checkout)
+            shift
+            safe_git_checkout "$@"
+            ;;
+        *)
+            command git "$@"
+            ;;
+    esac
 }
 
 # Create alias for rm
@@ -113,4 +161,6 @@ alias rm='safe_rm'
 echo -e "${GREEN}✅ Safe shell wrappers loaded!${NC}"
 echo -e "${YELLOW}   - 'rm -rf' will ask for confirmation on project files${NC}"
 echo -e "${YELLOW}   - 'git clean -fd' will ask for confirmation${NC}"
+echo -e "${YELLOW}   - 'git restore' will ask for confirmation${NC}"
+echo -e "${YELLOW}   - 'git checkout --' will ask for confirmation${NC}"
 echo ""

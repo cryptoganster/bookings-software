@@ -44,6 +44,33 @@
 source /path/to/bookings-bot/scripts/safe-shell-wrapper.sh
 ```
 
+## Shell Wrapper (Protección Adicional Opcional)
+
+**Archivo:** `scripts/safe-shell-wrapper.sh`
+
+Además de las reglas de AI y los hooks de Git, el proyecto incluye un **shell wrapper opcional** que intercepta comandos destructivos en la terminal:
+
+```bash
+# Instalar (agregar a ~/.zshrc o ~/.bashrc)
+source /path/to/bookings-bot/scripts/safe-shell-wrapper.sh
+```
+
+**Comandos protegidos:**
+- `git restore` - Pide confirmación antes de descartar cambios
+- `git checkout --` - Pide confirmación (sintaxis antigua)
+- `git clean -fd` - Pide confirmación antes de borrar archivos
+- `rm -rf` - Pide confirmación en archivos del proyecto
+
+**Ventajas:**
+- Protección universal en cualquier directorio
+- No depende de Git hooks
+- Muestra alternativas seguras
+- Completamente opcional
+
+Ver documentación completa en [.husky/SAFETY-HOOKS.md](../../.husky/SAFETY-HOOKS.md)
+
+---
+
 ## How It Works
 
 ### For AI Agents (Kiro)
