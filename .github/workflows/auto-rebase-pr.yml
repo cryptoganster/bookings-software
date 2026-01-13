@@ -1,0 +1,184 @@
+name: Auto Rebase PR
+
+on:
+  # Trigger when master is updated
+  push:
+    branches:
+      - master
+  
+  # Trigger when someone comments "/rebase" on a PR
+  issue_comment:
+    types: [created]
+  
+  # Manual trigger
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to rebase'
+        required: true
+        type: number
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-rebase:
+    name: Auto Rebase Open PRs
+    runs-on: ubuntu-latest
+    
+    # Only run on master push or /rebase comment
+    if: |
+      github.event_name == 'push' ||
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'issue_comment' && 
+       github.event.issue.pull_request &&
+       contains(github.event.comment.body, '/rebase'))
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get PRs to rebase
+        id: get-prs
+        uses: actions/github-script@v8
+        with:
+          script: |
+            let prsToRebase = [];
+            
+            if (context.eventName === 'workflow_dispatch') {
+              // Manual trigger - rebase specific PR
+              prsToRebase.push(context.payload.inputs.pr_number);
+            } else if (context.eventName === 'issue_comment') {
+              // Comment trigger - rebase the PR where comment was made
+              prsToRebase.push(context.payload.issue.number);
+            } else if (context.eventName === 'push') {
+              // Master push - rebase all open PRs
+              const { data: pullRequests } = await github.rest.pulls.list({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'open',
+                base: 'master'
+              });
+              
+              prsToRebase = pullRequests.map(pr => pr.number);
+              console.log(`Found ${prsToRebase.length} open PRs to rebase`);
+            }
+            
+            core.setOutput('pr_numbers', JSON.stringify(prsToRebase));
+            return prsToRebase;
+
+      - name: Rebase PRs
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const prNumbers = JSON.parse('${{ steps.get-prs.outputs.pr_numbers }}');
+            
+            if (prNumbers.length === 0) {
+              console.log('No PRs to rebase');
+              return;
+            }
+            
+            for (const prNumber of prNumbers) {
+              try {
+                console.log(`\n🔄 Processing PR #${prNumber}...`);
+                
+                // Get PR details
+                const { data: pr } = await github.rest.pulls.get({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: prNumber
+                });
+                
+                // Skip if PR is draft
+                if (pr.draft) {
+                  console.log(`⏭️  Skipping draft PR #${prNumber}`);
+                  continue;
+                }
+                
+                // Skip if PR has conflicts
+                if (pr.mergeable === false) {
+                  console.log(`⚠️  PR #${prNumber} has conflicts - skipping auto-rebase`);
+                  
+                  await github.rest.issues.createComment({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: prNumber,
+                    body: `⚠️ **Auto-rebase skipped**: This PR has conflicts with master.\n\nPlease rebase manually:\n\`\`\`bash\ngit fetch origin\ngit rebase origin/master\n# Resolve conflicts\ngit push --force-with-lease origin ${pr.head.ref}\n\`\`\``
+                  });
+                  continue;
+                }
+                
+                // Check if PR is behind master
+                const { data: comparison } = await github.rest.repos.compareCommits({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  base: pr.head.sha,
+                  head: 'master'
+                });
+                
+                if (comparison.behind_by === 0) {
+                  console.log(`✅ PR #${prNumber} is already up to date`);
+                  continue;
+                }
+                
+                console.log(`📊 PR #${prNumber} is ${comparison.behind_by} commits behind master`);
+                
+                // Update branch (GitHub's update branch API uses rebase by default)
+                try {
+                  await github.rest.pulls.updateBranch({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    pull_number: prNumber
+                  });
+                  
+                  console.log(`✅ Successfully rebased PR #${prNumber}`);
+                  
+                  // Comment on PR
+                  await github.rest.issues.createComment({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: prNumber,
+                    body: `🤖 **Auto-rebase successful!**\n\nThis PR has been automatically rebased on the latest \`master\` branch.\n\n- Commits behind: ${comparison.behind_by}\n- CI checks will run automatically\n\nIf you have local changes, pull the rebased branch:\n\`\`\`bash\ngit fetch origin\ngit reset --hard origin/${pr.head.ref}\n\`\`\``
+                  });
+                  
+                } catch (error) {
+                  if (error.status === 422) {
+                    console.log(`⚠️  PR #${prNumber} cannot be rebased automatically (conflicts)`);
+                    
+                    await github.rest.issues.createComment({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      issue_number: prNumber,
+                      body: `⚠️ **Auto-rebase failed**: Conflicts detected.\n\nPlease rebase manually:\n\`\`\`bash\ngit fetch origin\ngit rebase origin/master\n# Resolve conflicts\ngit add <resolved-files>\ngit rebase --continue\ngit push --force-with-lease origin ${pr.head.ref}\n\`\`\``
+                    });
+                  } else {
+                    throw error;
+                  }
+                }
+                
+              } catch (error) {
+                console.error(`❌ Error processing PR #${prNumber}:`, error.message);
+                
+                // Comment on PR about the error
+                try {
+                  await github.rest.issues.createComment({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: prNumber,
+                    body: `❌ **Auto-rebase error**: ${error.message}\n\nPlease rebase manually or contact a maintainer.`
+                  });
+                } catch (commentError) {
+                  console.error('Failed to comment on PR:', commentError.message);
+                }
+              }
+            }
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "✅ Auto-rebase workflow completed"
+          echo "Check PR comments for details on each rebase attempt"
