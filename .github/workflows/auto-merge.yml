@@ -1,11 +1,12 @@
 name: Auto Merge PRs
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
-  check_suite:
-    types: [completed]
-  status: {}
+  workflow_run:
+    workflows: ["CI Pipeline"]
+    types:
+      - completed
+    branches:
+      - '**'  # Run for all branches
 
 env:
   # Lista de usuarios autorizados para auto-merge (separados por coma)
@@ -15,7 +16,8 @@ jobs:
   auto-merge:
     name: Auto Merge & Rebase
     runs-on: ubuntu-latest
-    if: github.event.pull_request.draft == false
+    # Only run if CI workflow succeeded
+    if: github.event.workflow_run.conclusion == 'success'
     
     permissions:
       contents: write
@@ -27,18 +29,25 @@ jobs:
         uses: actions/github-script@v8
         with:
           script: |
-            let pr;
-            if (context.payload.pull_request) {
-              pr = context.payload.pull_request;
-            } else if (context.payload.check_suite?.pull_requests?.[0]) {
-              const prNumber = context.payload.check_suite.pull_requests[0].number;
-              const { data } = await github.rest.pulls.get({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: prNumber
-              });
-              pr = data;
-            } else {
+            // Get PRs associated with the workflow run
+            const { data: pullRequests } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              head: `${context.repo.owner}:${context.payload.workflow_run.head_branch}`
+            });
+            
+            if (pullRequests.length === 0) {
+              console.log('No open PRs found for this branch');
+              core.setOutput('should_merge', 'false');
+              return;
+            }
+            
+            const pr = pullRequests[0];
+            
+            // Skip if PR is draft
+            if (pr.draft) {
+              console.log('PR is draft, skipping auto-merge');
               core.setOutput('should_merge', 'false');
               return;
             }
@@ -55,74 +64,72 @@ jobs:
             console.log(`PR #${pr.number} by ${pr.user.login}`);
             console.log(`Authorized: ${isAuthorized}`);
 
-      - name: Wait for CI to complete
+      - name: Verify PR is Mergeable
         if: steps.pr-info.outputs.should_merge == 'true'
         uses: actions/github-script@v8
         with:
           script: |
             const prNumber = ${{ steps.pr-info.outputs.pr_number }};
-            const maxAttempts = 60; // 10 minutos máximo
-            const delaySeconds = 10;
             
-            for (let attempt = 0; attempt < maxAttempts; attempt++) {
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+            
+            // Wait a bit for GitHub to update mergeable status
+            if (pr.mergeable === null) {
+              console.log('Waiting for GitHub to compute mergeable status...');
+              await new Promise(r => setTimeout(r, 3000));
+              
+              const { data: updatedPr } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber
+              });
+              
+              if (!updatedPr.mergeable) {
+                core.setFailed('PR has conflicts and cannot be merged');
+                return;
+              }
+            } else if (!pr.mergeable) {
+              core.setFailed('PR has conflicts and cannot be merged');
+              return;
+            }
+            
+            console.log('✅ PR is mergeable!');
+
+      - name: Update Branch (Rebase)
+        if: steps.pr-info.outputs.should_merge == 'true'
+        id: update-branch
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const prNumber = ${{ steps.pr-info.outputs.pr_number }};
+            
+            try {
               const { data: pr } = await github.rest.pulls.get({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 pull_number: prNumber
               });
               
-              // Verificar si es mergeable
-              if (pr.mergeable === null) {
-                console.log(`Attempt ${attempt + 1}: Mergeability unknown, waiting...`);
-                await new Promise(r => setTimeout(r, delaySeconds * 1000));
-                continue;
+              // Check if branch is behind
+              if (pr.mergeable_state === 'behind') {
+                console.log('⚠️  Branch is behind base, but CI already passed');
+                console.log('Skipping update to avoid re-running CI');
+                console.log('Will attempt direct merge with rebase method');
+                core.setOutput('branch_updated', 'false');
+              } else {
+                console.log('✅ Branch is up-to-date');
+                core.setOutput('branch_updated', 'false');
               }
-              
-              if (!pr.mergeable) {
-                core.setFailed('PR has conflicts and cannot be merged');
-                return;
-              }
-              
-              // Verificar status checks
-              const { data: checks } = await github.rest.checks.listForRef({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                ref: pr.head.sha
-              });
-              
-              const pendingChecks = checks.check_runs.filter(
-                c => c.status !== 'completed' && 
-                    c.name !== 'Auto Merge & Squash' && 
-                    c.name !== 'Auto Merge & Rebase'
-              );
-              
-              if (pendingChecks.length > 0) {
-                console.log(`Attempt ${attempt + 1}: ${pendingChecks.length} checks pending...`);
-                pendingChecks.forEach(c => console.log(`  - ${c.name}: ${c.status}`));
-                await new Promise(r => setTimeout(r, delaySeconds * 1000));
-                continue;
-              }
-              
-              // Verificar que todos los checks pasaron
-              const failedChecks = checks.check_runs.filter(
-                c => c.conclusion === 'failure' && 
-                    c.name !== 'Auto Merge & Squash' && 
-                    c.name !== 'Auto Merge & Rebase'
-              );
-              
-              if (failedChecks.length > 0) {
-                core.setFailed(`${failedChecks.length} checks failed`);
-                failedChecks.forEach(c => console.log(`  - ${c.name}: ${c.conclusion}`));
-                return;
-              }
-              
-              console.log('All checks passed!');
-              return;
+            } catch (error) {
+              console.log(`⚠️ Error checking branch status: ${error.message}`);
+              core.setOutput('branch_updated', 'false');
             }
-            
-            core.setFailed('Timeout waiting for checks to complete');
 
-      - name: Squash and Merge
+      - name: Rebase and Merge
         if: steps.pr-info.outputs.should_merge == 'true'
         id: merge
         uses: actions/github-script@v8
