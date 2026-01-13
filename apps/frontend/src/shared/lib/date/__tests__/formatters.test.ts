@@ -2,7 +2,7 @@
  * Tests for Date Formatters
  */
 
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import {
   formatDate,
   formatTime,
@@ -77,63 +77,103 @@ describe("date formatters", () => {
   });
 
   describe("formatRelativeDate", () => {
+    beforeEach(() => {
+      // Use fake timers to control time in tests
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      // Restore real timers after each test
+      vi.useRealTimers();
+    });
+
     it("should return 'ahora' for current time", () => {
-      // Use a fixed timestamp to avoid timing issues in CI
-      const now = Date.now();
-      const result = formatRelativeDate(now);
+      // Set a fixed time
+      const fixedTime = new Date("2024-01-15T14:30:00Z");
+      vi.setSystemTime(fixedTime);
+
+      // Test with the same time
+      const result = formatRelativeDate(fixedTime);
       expect(result).toBe("ahora");
     });
 
     it("should format future minutes", () => {
-      const future = new Date(Date.now() + 5 * 60 * 1000);
+      const fixedTime = new Date("2024-01-15T14:30:00Z");
+      vi.setSystemTime(fixedTime);
+
+      const future = new Date(fixedTime.getTime() + 5 * 60 * 1000);
       const result = formatRelativeDate(future);
       expect(result).toMatch(/en \d+ minutos?/);
     });
 
     it("should format past minutes", () => {
-      const past = new Date(Date.now() - 5 * 60 * 1000);
+      const fixedTime = new Date("2024-01-15T14:30:00Z");
+      vi.setSystemTime(fixedTime);
+
+      const past = new Date(fixedTime.getTime() - 5 * 60 * 1000);
       const result = formatRelativeDate(past);
       expect(result).toMatch(/hace \d+ minutos?/);
     });
 
     it("should format future hours", () => {
-      const future = new Date(Date.now() + 2 * 60 * 60 * 1000);
+      const fixedTime = new Date("2024-01-15T14:30:00Z");
+      vi.setSystemTime(fixedTime);
+
+      const future = new Date(fixedTime.getTime() + 2 * 60 * 60 * 1000);
       const result = formatRelativeDate(future);
       expect(result).toMatch(/en \d+ horas?/);
     });
 
     it("should format past hours", () => {
-      const past = new Date(Date.now() - 2 * 60 * 60 * 1000);
+      const fixedTime = new Date("2024-01-15T14:30:00Z");
+      vi.setSystemTime(fixedTime);
+
+      const past = new Date(fixedTime.getTime() - 2 * 60 * 60 * 1000);
       const result = formatRelativeDate(past);
       expect(result).toMatch(/hace \d+ horas?/);
     });
 
     it("should format future days", () => {
-      const future = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+      const fixedTime = new Date("2024-01-15T14:30:00Z");
+      vi.setSystemTime(fixedTime);
+
+      const future = new Date(fixedTime.getTime() + 3 * 24 * 60 * 60 * 1000);
       const result = formatRelativeDate(future);
       expect(result).toMatch(/en \d+ días?/);
     });
 
     it("should format past days", () => {
-      const past = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+      const fixedTime = new Date("2024-01-15T14:30:00Z");
+      vi.setSystemTime(fixedTime);
+
+      const past = new Date(fixedTime.getTime() - 3 * 24 * 60 * 60 * 1000);
       const result = formatRelativeDate(past);
       expect(result).toMatch(/hace \d+ días?/);
     });
 
     it("should handle singular minute", () => {
-      const future = new Date(Date.now() + 1 * 60 * 1000);
+      const fixedTime = new Date("2024-01-15T14:30:00Z");
+      vi.setSystemTime(fixedTime);
+
+      const future = new Date(fixedTime.getTime() + 1 * 60 * 1000);
       const result = formatRelativeDate(future);
       expect(result).toBe("en 1 minuto");
     });
 
     it("should handle singular hour", () => {
-      const future = new Date(Date.now() + 1 * 60 * 60 * 1000);
+      const fixedTime = new Date("2024-01-15T14:30:00Z");
+      vi.setSystemTime(fixedTime);
+
+      const future = new Date(fixedTime.getTime() + 1 * 60 * 60 * 1000);
       const result = formatRelativeDate(future);
       expect(result).toBe("en 1 hora");
     });
 
     it("should handle singular day", () => {
-      const future = new Date(Date.now() + 1 * 24 * 60 * 60 * 1000);
+      const fixedTime = new Date("2024-01-15T14:30:00Z");
+      vi.setSystemTime(fixedTime);
+
+      const future = new Date(fixedTime.getTime() + 1 * 24 * 60 * 60 * 1000);
       const result = formatRelativeDate(future);
       expect(result).toBe("en 1 día");
     });
