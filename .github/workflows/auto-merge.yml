@@ -1,52 +1,42 @@
 name: Auto Merge PRs
 
+# This workflow enables GitHub's native auto-merge feature for PRs from authorized authors.
+# It runs when a PR is opened/reopened/synchronized and enables auto-merge if:
+# 1. Author is in AUTHORIZED_AUTHORS list
+# 2. PR is not a draft
+# 
+# GitHub will automatically merge the PR once all required status checks pass.
+# This avoids the circular dependency issue where a workflow waits for itself to complete.
+
 on:
-  check_suite:
-    types: [completed]
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
 
 env:
   # Lista de usuarios autorizados para auto-merge (separados por coma)
   AUTHORIZED_AUTHORS: "cryptoganster"
 
 jobs:
-  auto-merge:
-    name: Auto Merge & Rebase
+  enable-auto-merge:
+    name: Enable Auto-Merge
     runs-on: ubuntu-latest
-    # Only run if check suite succeeded and is from CI Pipeline
-    if: |
-      github.event.check_suite.conclusion == 'success' &&
-      github.event.check_suite.app.slug == 'github-actions'
     
     permissions:
       contents: write
       pull-requests: write
 
     steps:
-      - name: Get PR Info
-        id: pr-info
+      - name: Check Authorization
+        id: check-auth
         uses: actions/github-script@v8
         with:
           script: |
-            // Get PRs associated with the check suite
-            const pullRequests = context.payload.check_suite.pull_requests;
-            
-            if (!pullRequests || pullRequests.length === 0) {
-              console.log('No PRs found for this check suite');
-              core.setOutput('should_merge', 'false');
-              return;
-            }
-            
-            const prNumber = pullRequests[0].number;
-            const { data: pr } = await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: prNumber
-            });
+            const pr = context.payload.pull_request;
             
             // Skip if PR is draft
             if (pr.draft) {
-              console.log('PR is draft, skipping auto-merge');
-              core.setOutput('should_merge', 'false');
+              console.log('⏭️ PR is draft, skipping auto-merge');
+              core.setOutput('should_enable', 'false');
               return;
             }
             
@@ -57,134 +47,62 @@ jobs:
             core.setOutput('pr_number', pr.number);
             core.setOutput('pr_author', pr.user.login);
             core.setOutput('is_authorized', isAuthorized.toString());
-            core.setOutput('should_merge', isAuthorized.toString());
+            core.setOutput('should_enable', isAuthorized.toString());
             
             console.log(`PR #${pr.number} by ${pr.user.login}`);
             console.log(`Authorized: ${isAuthorized}`);
 
-      - name: Verify PR is Mergeable
-        if: steps.pr-info.outputs.should_merge == 'true'
+      - name: Enable Auto-Merge
+        if: steps.check-auth.outputs.should_enable == 'true'
         uses: actions/github-script@v8
         with:
           script: |
-            const prNumber = ${{ steps.pr-info.outputs.pr_number }};
-            
-            const { data: pr } = await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: prNumber
-            });
-            
-            // Wait a bit for GitHub to update mergeable status
-            if (pr.mergeable === null) {
-              console.log('Waiting for GitHub to compute mergeable status...');
-              await new Promise(r => setTimeout(r, 3000));
-              
-              const { data: updatedPr } = await github.rest.pulls.get({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: prNumber
-              });
-              
-              if (!updatedPr.mergeable) {
-                core.setFailed('PR has conflicts and cannot be merged');
-                return;
-              }
-            } else if (!pr.mergeable) {
-              core.setFailed('PR has conflicts and cannot be merged');
-              return;
-            }
-            
-            console.log('✅ PR is mergeable!');
-
-      - name: Update Branch (Rebase)
-        if: steps.pr-info.outputs.should_merge == 'true'
-        id: update-branch
-        uses: actions/github-script@v8
-        with:
-          script: |
-            const prNumber = ${{ steps.pr-info.outputs.pr_number }};
+            const prNumber = ${{ steps.check-auth.outputs.pr_number }};
             
             try {
+              // Get PR node ID for GraphQL
               const { data: pr } = await github.rest.pulls.get({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 pull_number: prNumber
               });
               
-              // Check if branch is behind
-              if (pr.mergeable_state === 'behind') {
-                console.log('⚠️  Branch is behind base, but CI already passed');
-                console.log('Skipping update to avoid re-running CI');
-                console.log('Will attempt direct merge with rebase method');
-                core.setOutput('branch_updated', 'false');
-              } else {
-                console.log('✅ Branch is up-to-date');
-                core.setOutput('branch_updated', 'false');
-              }
-            } catch (error) {
-              console.log(`⚠️ Error checking branch status: ${error.message}`);
-              core.setOutput('branch_updated', 'false');
-            }
-
-      - name: Rebase and Merge
-        if: steps.pr-info.outputs.should_merge == 'true'
-        id: merge
-        uses: actions/github-script@v8
-        with:
-          script: |
-            const prNumber = ${{ steps.pr-info.outputs.pr_number }};
-            
-            try {
-              const { data: pr } = await github.rest.pulls.get({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: prNumber
+              // Enable auto-merge using GraphQL API
+              const mutation = `
+                mutation($pullRequestId: ID!, $mergeMethod: PullRequestMergeMethod!) {
+                  enablePullRequestAutoMerge(input: {
+                    pullRequestId: $pullRequestId,
+                    mergeMethod: $mergeMethod
+                  }) {
+                    pullRequest {
+                      autoMergeRequest {
+                        enabledAt
+                        enabledBy {
+                          login
+                        }
+                      }
+                    }
+                  }
+                }
+              `;
+              
+              const result = await github.graphql(mutation, {
+                pullRequestId: pr.node_id,
+                mergeMethod: 'REBASE'
               });
               
-              await github.rest.pulls.merge({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: prNumber,
-                merge_method: 'rebase'
-              });
-              
-              console.log(`✅ PR #${prNumber} merged successfully!`);
-              
-              // Store branch name for deletion
-              core.setOutput('branch_name', pr.head.ref);
-              core.setOutput('merge_success', 'true');
+              console.log(`✅ Auto-merge enabled for PR #${prNumber}`);
+              console.log('GitHub will automatically merge once all required checks pass');
+              console.log(`Enabled at: ${result.enablePullRequestAutoMerge.pullRequest.autoMergeRequest.enabledAt}`);
             } catch (error) {
-              core.setOutput('merge_success', 'false');
-              if (error.status === 405) {
-                console.log('PR cannot be merged yet (checks pending or conflicts)');
-              } else {
-                core.setFailed(`Failed to merge: ${error.message}`);
-              }
-            }
-
-      - name: Delete merged branch
-        if: steps.pr-info.outputs.should_merge == 'true' && steps.merge.outputs.merge_success == 'true'
-        uses: actions/github-script@v8
-        with:
-          script: |
-            const branchName = '${{ steps.merge.outputs.branch_name }}';
-            
-            try {
-              await github.rest.git.deleteRef({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                ref: `heads/${branchName}`
-              });
-              
-              console.log(`🗑️ Branch '${branchName}' deleted successfully!`);
-            } catch (error) {
-              console.log(`⚠️ Could not delete branch '${branchName}': ${error.message}`);
-              // Don't fail the workflow if branch deletion fails
+              // If auto-merge fails, it might be because checks haven't passed yet
+              // or there are conflicts - this is expected
+              console.log(`ℹ️ Could not enable auto-merge: ${error.message}`);
+              console.log('This is normal if checks are still running or there are conflicts');
             }
 
       - name: Skip - Not Authorized
-        if: steps.pr-info.outputs.should_merge == 'false' && steps.pr-info.outputs.pr_author != ''
+        if: steps.check-auth.outputs.should_enable == 'false' && steps.check-auth.outputs.pr_author != ''
         run: |
-          echo "⏭️ Skipping auto-merge for PR by ${{ steps.pr-info.outputs.pr_author }}"
+          echo "⏭️ Skipping auto-merge for PR by ${{ steps.check-auth.outputs.pr_author }}"
           echo "Only authorized authors can auto-merge: ${{ env.AUTHORIZED_AUTHORS }}"
