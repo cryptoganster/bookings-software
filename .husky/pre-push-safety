@@ -20,6 +20,73 @@ if [ "$current_branch" = "master" ]; then
   exit 0
 fi
 
+# Check 0: Verify working directory is clean (NO uncommitted changes)
+echo "🔍 Checking for uncommitted changes..."
+
+# Check for uncommitted changes (staged or unstaged)
+if ! git diff-index --quiet HEAD --; then
+  echo ""
+  echo "❌ ERROR: You have uncommitted changes!"
+  echo ""
+  echo "🚫 BLOCKED: Cannot push with uncommitted changes"
+  echo ""
+  echo "For safety, you MUST commit all changes before pushing."
+  echo "This prevents accidental loss of work during rebase."
+  echo ""
+  echo "📋 Uncommitted changes:"
+  git status --short
+  echo ""
+  echo "✅ REQUIRED STEPS:"
+  echo "   1. Review your changes:"
+  echo "      git status"
+  echo "      git diff"
+  echo ""
+  echo "   2. Stage your changes:"
+  echo "      git add <files>"
+  echo "      # or stage all: git add ."
+  echo ""
+  echo "   3. Commit your changes:"
+  echo "      git commit -m 'feat: your description'"
+  echo ""
+  echo "   4. Then push again:"
+  echo "      git push origin $current_branch"
+  echo ""
+  echo "⚠️  IMPORTANT: Do NOT use 'git stash' or discard changes!"
+  echo "    All work must be committed to ensure it's not lost."
+  echo ""
+  exit 1
+fi
+
+# Check for untracked files
+untracked_files=$(git ls-files --others --exclude-standard)
+if [ -n "$untracked_files" ]; then
+  echo ""
+  echo "⚠️  WARNING: You have untracked files"
+  echo ""
+  echo "These files are not in Git and won't be pushed:"
+  echo "$untracked_files" | sed 's/^/  - /'
+  echo ""
+  echo "💡 If these files should be tracked:"
+  echo "   1. Add them: git add <files>"
+  echo "   2. Commit them: git commit -m 'feat: add new files'"
+  echo "   3. Push again: git push origin $current_branch"
+  echo ""
+  echo "💡 If these files should be ignored:"
+  echo "   1. Add them to .gitignore"
+  echo "   2. Commit .gitignore: git commit -m 'chore: update gitignore'"
+  echo ""
+  
+  # Ask user if they want to continue
+  read -p "Continue push without these files? (y/N): " -n 1 -r
+  echo ""
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo "Push cancelled. Please handle untracked files first."
+    exit 1
+  fi
+fi
+
+echo "✅ Working directory is clean"
+
 # Check 1: Verify pnpm-lock.yaml is in sync with package.json files
 echo "🔍 Checking if pnpm-lock.yaml is in sync..."
 
@@ -67,34 +134,83 @@ origin_master_sha=$(git rev-parse origin/master 2>/dev/null || echo "")
 
 if [ -n "$merge_base" ] && [ -n "$origin_master_sha" ]; then
   if [ "$merge_base" != "$origin_master_sha" ]; then
+    commits_behind=$(git rev-list --count $merge_base..origin/master)
+    
     echo ""
-    echo "❌ ERROR: Branch is not rebased on latest origin/master!"
-    echo ""
-    echo "🚫 BLOCKED: Your branch is behind origin/master"
-    echo ""
-    echo "Your branch needs to be rebased on the latest master before pushing."
-    echo ""
-    echo "✅ REQUIRED STEPS:"
-    echo "   1. Fetch latest master:"
-    echo "      git fetch origin"
-    echo ""
-    echo "   2. Rebase your branch:"
-    echo "      git rebase origin/master"
-    echo ""
-    echo "   3. Resolve conflicts if any:"
-    echo "      # Edit conflicted files"
-    echo "      git add <resolved-files>"
-    echo "      git rebase --continue"
-    echo ""
-    echo "   4. Push with force-with-lease:"
-    echo "      git push --force-with-lease origin $current_branch"
+    echo "❌ Branch is not rebased on latest origin/master!"
     echo ""
     echo "Current state:"
     echo "  Your branch base: $(git rev-parse --short $merge_base)"
     echo "  Latest master:    $(git rev-parse --short $origin_master_sha)"
-    echo "  Commits behind:   $(git rev-list --count $merge_base..origin/master)"
+    echo "  Commits behind:   $commits_behind"
     echo ""
-    exit 1
+    
+    # Offer auto-rebase
+    echo "🤖 AUTO-REBASE AVAILABLE"
+    echo ""
+    echo "I can automatically rebase your branch on origin/master."
+    echo ""
+    echo "⚠️  IMPORTANT:"
+    echo "  - Your working directory is clean (verified above)"
+    echo "  - If conflicts occur, you'll need to resolve them"
+    echo "  - After rebase, you'll need to force-push"
+    echo ""
+    read -p "Do you want to auto-rebase now? (y/N): " -n 1 -r
+    echo ""
+    
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+      echo ""
+      echo "🔄 Starting auto-rebase..."
+      echo ""
+      
+      # Perform rebase
+      if git rebase origin/master; then
+        echo ""
+        echo "✅ Rebase successful!"
+        echo ""
+        echo "📝 NEXT STEPS:"
+        echo "   Your branch has been rebased on origin/master."
+        echo "   Now you need to push with force-with-lease:"
+        echo ""
+        echo "   git push --force-with-lease origin $current_branch"
+        echo ""
+        echo "⚠️  Note: This push was cancelled to let you review the rebase."
+        echo "   Run the push command above when ready."
+        echo ""
+        exit 1
+      else
+        echo ""
+        echo "❌ Rebase failed with conflicts!"
+        echo ""
+        echo "🔧 CONFLICT RESOLUTION STEPS:"
+        echo "   1. Open conflicted files and resolve conflicts"
+        echo "   2. Stage resolved files: git add <files>"
+        echo "   3. Continue rebase: git rebase --continue"
+        echo "   4. If you want to abort: git rebase --abort"
+        echo ""
+        echo "After resolving conflicts, push with:"
+        echo "   git push --force-with-lease origin $current_branch"
+        echo ""
+        exit 1
+      fi
+    else
+      echo ""
+      echo "🚫 BLOCKED: Manual rebase required"
+      echo ""
+      echo "✅ MANUAL REBASE STEPS:"
+      echo "   1. Rebase your branch:"
+      echo "      git rebase origin/master"
+      echo ""
+      echo "   2. If conflicts occur:"
+      echo "      # Edit conflicted files"
+      echo "      git add <resolved-files>"
+      echo "      git rebase --continue"
+      echo ""
+      echo "   3. Push with force-with-lease:"
+      echo "      git push --force-with-lease origin $current_branch"
+      echo ""
+      exit 1
+    fi
   fi
 fi
 
