@@ -8,27 +8,48 @@ new_branch="$3"
 
 # Only run if we're actually changing branches (not just checking out files)
 if [ "$3" = "1" ]; then
-  # Check for uncommitted changes
+  # Check for uncommitted changes (tracked files)
+  has_tracked_changes=false
   if ! git diff-index --quiet HEAD --; then
+    has_tracked_changes=true
+  fi
+  
+  # Check for untracked files (excluding ignored files)
+  has_untracked_files=false
+  if [ -n "$(git ls-files --others --exclude-standard)" ]; then
+    has_untracked_files=true
+  fi
+  
+  # If either tracked changes or untracked files exist, block checkout
+  if [ "$has_tracked_changes" = true ] || [ "$has_untracked_files" = true ]; then
     echo ""
     echo "❌ ERROR: Uncommitted changes detected!"
     echo ""
     echo "🚫 BLOCKED: Cannot checkout to another branch with uncommitted changes"
     echo ""
-    echo "You have uncommitted changes in your working directory."
+    
+    if [ "$has_tracked_changes" = true ]; then
+      echo "You have uncommitted changes in tracked files."
+    fi
+    
+    if [ "$has_untracked_files" = true ]; then
+      echo "You have untracked files that are not committed."
+    fi
+    
     echo ""
     echo "✅ OPTIONS:"
     echo "   1. Commit your changes:"
     echo "      git add ."
     echo "      git commit -m 'feat: your changes'"
     echo ""
-    echo "   2. Stash your changes temporarily:"
-    echo "      git stash"
+    echo "   2. Stash your changes temporarily (includes untracked):"
+    echo "      git stash --include-untracked"
     echo "      # ... switch branches ..."
     echo "      git stash pop"
     echo ""
     echo "   3. Discard your changes (⚠️ IRREVERSIBLE):"
-    echo "      git checkout -- ."
+    echo "      git checkout -- .  # Discard tracked changes"
+    echo "      git clean -fd      # Remove untracked files"
     echo ""
     echo "Current changes:"
     git status --short
