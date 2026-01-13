@@ -15,41 +15,87 @@ Los hooks ahora incluyen:
 
 ### 0. **Cambios sin commit** (Nuevo - Protección contra pérdida de trabajo)
 
-**Hook:** `pre-push-safety`
+**Hooks:** `pre-checkout`, `pre-rebase`, `pre-push-safety`
 
 **Por qué está bloqueado:**
 
-- Previene pérdida accidental de trabajo durante rebase
+- Previene pérdida accidental de trabajo durante operaciones de Git
 - Asegura que todo el trabajo esté en el historial de Git
 - Evita que cambios importantes se pierdan
+- **Ahora detecta archivos untracked (nuevos archivos sin agregar a Git)** ✨
+
+**Qué detecta:**
+
+1. **Archivos tracked modificados** - Archivos que Git ya conoce y fueron modificados
+2. **Archivos untracked** - Archivos nuevos que nunca se agregaron a Git (excepto los ignorados en `.gitignore`)
 
 **Qué hace el hook:**
 
 ```bash
-# Verifica que no haya cambios sin commit
+# Verifica cambios en archivos tracked
 git diff-index --quiet HEAD --
 
-# Si hay cambios, bloquea el push y muestra:
-❌ ERROR: You have uncommitted changes!
+# Verifica archivos untracked (nuevos)
+git ls-files --others --exclude-standard
 
-📋 Uncommitted changes:
- M apps/backend/src/file.ts
- M apps/frontend/src/component.tsx
+# Si hay cambios, bloquea la operación y muestra:
+❌ ERROR: Uncommitted changes detected!
 
-✅ REQUIRED STEPS:
-   1. git add <files>
-   2. git commit -m 'feat: your description'
-   3. git push origin your-branch
+� BLOCKED: Cannot checkout/rebase with uncommitted changes
 
-⚠️  IMPORTANT: Do NOT use 'git stash' or discard changes!
+You have uncommitted changes in tracked files.
+You have untracked files that are not committed.
+
+📋 Current changes:
+ M apps/backend/src/file.ts          # Tracked file modified
+?? apps/frontend/src/new-file.tsx    # Untracked file (NEW!)
+
+✅ OPTIONS:
+   1. Commit your changes:
+      git add .
+      git commit -m 'feat: your description'
+
+   2. Stash your changes temporarily (includes untracked):
+      git stash --include-untracked
+      # ... perform operation ...
+      git stash pop
+
+   3. Discard your changes (⚠️ IRREVERSIBLE):
+      git checkout -- .  # Discard tracked changes
+      git clean -fd      # Remove untracked files
 ```
 
 **Características:**
 
 - ✅ Detecta cambios staged y unstaged
-- ✅ Detecta archivos sin trackear
-- ✅ Pregunta si quieres continuar con archivos sin trackear
-- ✅ **NO permite descartar cambios** - obliga a commitear
+- ✅ **Detecta archivos untracked (nuevos archivos)** ✨
+- ✅ Respeta `.gitignore` (no detecta archivos ignorados)
+- ✅ **NO permite descartar cambios** - obliga a commitear o stash
+- ✅ Aplica en `git checkout`, `git rebase`, y `git push`
+
+**Ejemplo de archivo untracked detectado:**
+
+```bash
+# Creas un archivo nuevo sin agregarlo a Git
+echo "console.log('test')" > apps/frontend/src/test.ts
+
+# Intentas cambiar de rama
+git checkout master
+
+# Output:
+❌ ERROR: Uncommitted changes detected!
+🚫 BLOCKED: Cannot checkout to another branch with uncommitted changes
+
+You have untracked files that are not committed.
+
+Current changes:
+?? apps/frontend/src/test.ts
+
+✅ OPTIONS:
+   1. Commit your changes:
+      git add .
+      git commit -m 'feat: add test file'
+```
 
 ---
 
@@ -197,17 +243,20 @@ git commit -m "feat: nueva funcionalidad"
 
 ## 📋 Hooks Instalados
 
-| Hook                         | Archivo                             | Propósito                                    |
-| ---------------------------- | ----------------------------------- | -------------------------------------------- |
-| `pre-commit`                 | `.husky/pre-commit`                 | Valida código antes de commit                |
-| `pre-commit-branch-check`    | `.husky/pre-commit-branch-check`    | Bloquea commits directos en master (NUEVO)   |
-| `pre-push`                   | `.husky/pre-push`                   | Ejecuta tests antes de push                  |
-| `pre-push-safety`            | `.husky/pre-push-safety`            | Bloquea `git push --force` y verifica rebase |
-| `pre-merge-commit`           | `.husky/pre-merge-commit`           | Bloquea `git pull origin master`             |
-| `check-destructive-commands` | `.husky/check-destructive-commands` | Bloquea `rm -rf` y `git clean -fd` (NUEVO)   |
-| `pre-checkout`               | `.husky/pre-checkout`               | Bloquea checkout con cambios sin commitear   |
-| `post-checkout`              | `.husky/post-checkout`              | Advierte si master está desincronizado       |
-| `commit-msg`                 | `.husky/commit-msg`                 | Valida formato de mensajes (Conventional)    |
+| Hook                         | Archivo                             | Propósito                                                           |
+| ---------------------------- | ----------------------------------- | ------------------------------------------------------------------- |
+| `pre-commit`                 | `.husky/pre-commit`                 | Valida código antes de commit                                       |
+| `pre-commit-branch-check`    | `.husky/pre-commit-branch-check`    | Bloquea commits directos en master                                  |
+| `pre-push`                   | `.husky/pre-push`                   | Ejecuta tests antes de push                                         |
+| `pre-push-safety`            | `.husky/pre-push-safety`            | Bloquea `git push --force` y verifica rebase                        |
+| `pre-merge-commit`           | `.husky/pre-merge-commit`           | Bloquea `git pull origin master`                                    |
+| `check-destructive-commands` | `.husky/check-destructive-commands` | Bloquea `rm -rf` y `git clean -fd`                                  |
+| `pre-checkout`               | `.husky/pre-checkout`               | Bloquea checkout con cambios sin commitear (tracked + untracked) ✨ |
+| `pre-rebase`                 | `.husky/pre-rebase`                 | Bloquea rebase con cambios sin commitear (tracked + untracked) ✨   |
+| `post-checkout`              | `.husky/post-checkout`              | Advierte si master está desincronizado                              |
+| `commit-msg`                 | `.husky/commit-msg`                 | Valida formato de mensajes (Conventional)                           |
+
+✨ = Actualizado para detectar archivos untracked
 
 ---
 

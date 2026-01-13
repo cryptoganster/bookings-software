@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+
+# Pre-rebase hook - Verifica que no hay cambios sin commitear antes de rebase
+# Previene pérdida de trabajo durante rebase
+
+# Arguments:
+# $1 = upstream branch (e.g., origin/master)
+# $2 = rebased branch (optional, current branch if not specified)
+
+upstream="$1"
+branch="${2:-$(git rev-parse --abbrev-ref HEAD)}"
+
+echo "🔍 Checking for uncommitted changes before rebase..."
+
+# Check for uncommitted changes (tracked files)
+has_tracked_changes=false
+if ! git diff-index --quiet HEAD --; then
+  has_tracked_changes=true
+fi
+
+# Check for untracked files (excluding ignored files)
+has_untracked_files=false
+if [ -n "$(git ls-files --others --exclude-standard)" ]; then
+  has_untracked_files=true
+fi
+
+# If either tracked changes or untracked files exist, block rebase
+if [ "$has_tracked_changes" = true ] || [ "$has_untracked_files" = true ]; then
+  echo ""
+  echo "❌ ERROR: Uncommitted changes detected!"
+  echo ""
+  echo "🚫 BLOCKED: Cannot rebase with uncommitted changes"
+  echo ""
+  
+  if [ "$has_tracked_changes" = true ]; then
+    echo "You have uncommitted changes in tracked files."
+  fi
+  
+  if [ "$has_untracked_files" = true ]; then
+    echo "You have untracked files that are not committed."
+  fi
+  
+  echo ""
+  echo "Rebasing: $branch onto $upstream"
+  echo ""
+  echo "✅ OPTIONS:"
+  echo "   1. Commit your changes first:"
+  echo "      git add ."
+  echo "      git commit -m 'wip: save work before rebase'"
+  echo "      git rebase $upstream"
+  echo ""
+  echo "   2. Stash your changes temporarily (includes untracked):"
+  echo "      git stash --include-untracked"
+  echo "      git rebase $upstream"
+  echo "      git stash pop"
+  echo ""
+  echo "   3. Discard your changes (⚠️ IRREVERSIBLE):"
+  echo "      git checkout -- .  # Discard tracked changes"
+  echo "      git clean -fd      # Remove untracked files"
+  echo "      git rebase $upstream"
+  echo ""
+  echo "Current changes:"
+  git status --short
+  echo ""
+  exit 1
+fi
+
+echo "✅ No uncommitted changes detected. Proceeding with rebase..."
+exit 0
