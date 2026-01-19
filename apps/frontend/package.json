@@ -27,7 +27,7 @@
     "@mantine/notifications": "^8.3.12",
     "@packages/shared-types": "workspace:*",
     "@tabler/icons-react": "^3.36.1",
-    "@tanstack/react-query": "^5.90.15",
+    "@tanstack/react-query": "^5.90.19",
     "@tanstack/react-query-devtools": "^5.91.2",
     "axios": "^1.13.2",
     "date-fns": "^4.1.0",
