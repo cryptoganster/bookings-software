@@ -235,7 +235,7 @@ jobs:
 
       - name: Upload audit report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: audit-report
           path: audit-report.json
@@ -290,7 +290,7 @@ jobs:
 
       - name: Upload license report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: license-report
           path: license-report.json
@@ -332,7 +332,7 @@ jobs:
 
       - name: Upload secret scan report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: secret-scan-report
           path: trufflehog-report.json
@@ -395,7 +395,7 @@ jobs:
           NODE_ENV: test
 
       - name: Upload Backend Coverage
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: backend-coverage
           path: apps/backend/coverage
@@ -427,7 +427,7 @@ jobs:
         run: pnpm --filter frontend test:coverage
 
       - name: Upload Frontend Coverage
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frontend-coverage
           path: apps/frontend/coverage
